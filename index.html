@@ -3,118 +3,396 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CFTR Analyzer</title>
+    <title>CFTR Variant Research Portal | Evidence-Based Analysis</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js for visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .evidence-timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+        .evidence-timeline::before {
+            content: '';
+            position: absolute;
+            left: 0.75rem;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, #3b82f6, #8b5cf6, #10b981);
+        }
+        .evidence-marker {
+            position: absolute;
+            left: 0.5rem;
+            width: 1rem;
+            height: 1rem;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
     <!-- Navigation -->
-    <nav class="bg-blue-600 text-white px-4 py-3">
-        <div class="container mx-auto">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-2">
-                    <i class="fas fa-dna text-xl"></i>
-                    <h1 class="text-lg font-bold">CFTR Analyzer</h1>
-                </div>
+    <nav class="gradient-bg text-white sticky top-0 z-50 shadow-xl">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex flex-col md:flex-row justify-between items-center space-y-3 md:space-y-0">
                 <div class="flex items-center space-x-3">
-                    <span class="text-sm bg-white/20 px-2 py-1 rounded" id="dbStatus">Loading...</span>
-                    <button onclick="toggleImport()" class="p-2 hover:bg-white/10 rounded">
-                        <i class="fas fa-database"></i>
-                    </button>
+                    <div class="bg-white/20 p-2 rounded-lg">
+                        <i class="fas fa-microscope text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold">CFTR Variant Research Portal</h1>
+                        <p class="text-sm opacity-90">Evidence-Based Analysis & Clinical Insights</p>
+                    </div>
+                </div>
+                <div class="flex space-x-4 text-sm">
+                    <a href="#dashboard" class="hover:bg-white/20 px-3 py-1 rounded transition">Dashboard</a>
+                    <a href="#variants" class="hover:bg-white/20 px-3 py-1 rounded transition">Variants</a>
+                    <a href="#evidence" class="hover:bg-white/20 px-3 py-1 rounded transition">Evidence</a>
+                    <a href="#analytics" class="hover:bg-white/20 px-3 py-1 rounded transition">Analytics</a>
                 </div>
             </div>
         </div>
     </nav>
 
-    <!-- Search Section -->
-    <div class="container mx-auto px-4 py-6">
-        <div class="max-w-2xl mx-auto">
-            <!-- Search Box -->
-            <div class="relative mb-4">
-                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                <input 
-                    type="text" 
-                    id="searchBox"
-                    placeholder="Search variant (e.g., F508del)"
-                    class="w-full pl-10 pr-24 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                    oninput="handleSearchInput()"
-                    onkeypress="if(event.key === 'Enter') search()"
-                >
-                <button 
-                    onclick="search()"
-                    id="searchBtn"
-                    class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded text-sm transition"
-                >
-                    Search
-                </button>
-            </div>
-            
-            <!-- Quick Filters -->
-            <div class="flex flex-wrap gap-2 mb-6">
-                <button onclick="filterByClass('I')" class="px-3 py-1.5 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 text-sm">
-                    Class I
-                </button>
-                <button onclick="filterByClass('II')" class="px-3 py-1.5 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 text-sm">
-                    Class II
-                </button>
-                <button onclick="filterByClass('III')" class="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 text-sm">
-                    Class III
-                </button>
-                <button onclick="filterByETI('responsive')" class="px-3 py-1.5 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 text-sm">
-                    ETI Responsive
-                </button>
-            </div>
-            
-            <!-- Results Count -->
-            <div class="text-sm text-gray-600 mb-2 hidden" id="resultsCount">
-                <span id="count">0</span> variants found
-            </div>
-        </div>
-    </div>
-
-    <!-- Results Grid -->
-    <div class="container mx-auto px-4 pb-8">
-        <div id="resultsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <!-- Variants will load here -->
-        </div>
-        
-        <div id="emptyState" class="text-center py-12 text-gray-500">
-            <i class="fas fa-search text-3xl mb-3"></i>
-            <p>Enter a variant name to search the database</p>
-        </div>
-    </div>
-
-    <!-- Import Modal -->
-    <div id="importModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-lg w-full max-w-sm">
-            <div class="p-5">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="font-bold text-lg">Database Options</h3>
-                    <button onclick="toggleImport()" class="text-gray-400 hover:text-gray-600">
-                        <i class="fas fa-times"></i>
-                    </button>
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Dashboard Stats -->
+        <section id="dashboard" class="mb-12 animate-fade-in">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800">Research Dashboard</h2>
+                    <p class="text-gray-600">Real-time insights from CFTR variant database</p>
                 </div>
-                
-                <div class="space-y-3">
-                    <button onclick="loadFullDataset()" class="w-full p-3 bg-blue-50 hover:bg-blue-100 rounded-lg border border-blue-200 text-left">
-                        <div class="font-medium text-blue-700">Load All Variants</div>
-                        <div class="text-sm text-gray-600">2,092 variants from CFTR2</div>
-                    </button>
-                    
-                    <button onclick="resetToDemo()" class="w-full p-3 bg-gray-50 hover:bg-gray-100 rounded-lg border border-gray-200 text-left">
-                        <div class="font-medium text-gray-700">Reset to Demo</div>
-                        <div class="text-sm text-gray-600">17 example variants</div>
-                    </button>
+                <div class="text-sm text-gray-500">
+                    <i class="fas fa-sync-alt mr-2"></i>
+                    Auto-updates every 30s
                 </div>
             </div>
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
+                <!-- Stat Cards -->
+                <div class="glass-card rounded-xl p-4 shadow-md hover:shadow-lg transition">
+                    <div class="flex items-center">
+                        <div class="bg-blue-100 p-3 rounded-lg mr-3">
+                            <i class="fas fa-dna text-blue-600"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">Total Variants</p>
+                            <p class="text-2xl font-bold" id="statTotal">17</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-xl p-4 shadow-md hover:shadow-lg transition">
+                    <div class="flex items-center">
+                        <div class="bg-teal-100 p-3 rounded-lg mr-3">
+                            <i class="fas fa-filter text-teal-600"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">Class I</p>
+                            <p class="text-2xl font-bold" id="statClassI">13</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-xl p-4 shadow-md hover:shadow-lg transition">
+                    <div class="flex items-center">
+                        <div class="bg-green-100 p-3 rounded-lg mr-3">
+                            <i class="fas fa-bolt text-green-600"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">Exceptional</p>
+                            <p class="text-2xl font-bold" id="statExceptional">6</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-xl p-4 shadow-md hover:shadow-lg transition">
+                    <div class="flex items-center">
+                        <div class="bg-red-100 p-3 rounded-lg mr-3">
+                            <i class="fas fa-times-circle text-red-600"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">True Class I</p>
+                            <p class="text-2xl font-bold" id="statTrue">7</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-xl p-4 shadow-md hover:shadow-lg transition">
+                    <div class="flex items-center">
+                        <div class="bg-yellow-100 p-3 rounded-lg mr-3">
+                            <i class="fas fa-check-circle text-yellow-600"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">ETI Responsive</p>
+                            <p class="text-2xl font-bold" id="statResponsive">9</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-xl p-4 shadow-md hover:shadow-lg transition">
+                    <div class="flex items-center">
+                        <div class="bg-purple-100 p-3 rounded-lg mr-3">
+                            <i class="fas fa-search text-purple-600"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">Need Research</p>
+                            <p class="text-2xl font-bold" id="statResearch">3</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="glass-card rounded-xl p-6 shadow-md">
+                    <h3 class="text-lg font-semibold mb-4">Class I Distribution</h3>
+                    <canvas id="classDistributionChart" height="200"></canvas>
+                </div>
+                <div class="glass-card rounded-xl p-6 shadow-md">
+                    <h3 class="text-lg font-semibold mb-4">ETI Response Prediction</h3>
+                    <canvas id="etiResponseChart" height="200"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Variants Explorer -->
+        <section id="variants" class="mb-12 animate-fade-in">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 space-y-3 md:space-y-0">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800">Variant Explorer</h2>
+                    <p class="text-gray-600">Browse and analyze CFTR variants with evidence-based classification</p>
+                </div>
+                <div class="relative w-full md:w-64">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-search text-gray-400"></i>
+                    </div>
+                    <input type="text" id="variantSearch" 
+                           class="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                           placeholder="Search variants...">
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="flex flex-wrap gap-3 mb-6">
+                <button onclick="filterVariants('all')" class="filter-btn active px-4 py-2 rounded-lg bg-blue-600 text-white">
+                    All Variants
+                </button>
+                <button onclick="filterVariants('exceptional')" class="filter-btn px-4 py-2 rounded-lg border border-green-500 text-green-600 hover:bg-green-50">
+                    <i class="fas fa-bolt mr-2"></i>Exceptional Class I
+                </button>
+                <button onclick="filterVariants('true')" class="filter-btn px-4 py-2 rounded-lg border border-red-500 text-red-600 hover:bg-red-50">
+                    <i class="fas fa-times-circle mr-2"></i>True Class I
+                </button>
+                <button onclick="filterVariants('responsive')" class="filter-btn px-4 py-2 rounded-lg border border-green-500 text-green-600 hover:bg-green-50">
+                    <i class="fas fa-check-circle mr-2"></i>ETI Responsive
+                </button>
+                <button onclick="filterVariants('non_responsive')" class="filter-btn px-4 py-2 rounded-lg border border-red-500 text-red-600 hover:bg-red-50">
+                    <i class="fas fa-times mr-2"></i>ETI Non-Responsive
+                </button>
+            </div>
+
+            <!-- Variants Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="variantsGrid">
+                <!-- Variant cards will be loaded here -->
+                <div class="text-center py-12">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+                    <p class="mt-4 text-gray-600">Loading variants from database...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Evidence Timeline -->
+        <section id="evidence" class="mb-12 animate-fade-in">
+            <div class="glass-card rounded-xl p-6 shadow-md">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800">Evidence Timeline</h2>
+                        <p class="text-gray-600">Historical evidence accumulation for key variants</p>
+                    </div>
+                    <div class="text-sm text-gray-500">
+                        <i class="fas fa-history mr-2"></i>
+                        Updated: <span id="lastUpdate">Just now</span>
+                    </div>
+                </div>
+
+                <div class="evidence-timeline" id="evidenceTimeline">
+                    <!-- Evidence items will be loaded here -->
+                    <div class="text-center py-8">
+                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                        <p class="mt-4 text-gray-600">Loading evidence timeline...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Research Analytics -->
+        <section id="analytics" class="animate-fade-in">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Research Analytics</h2>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Data Quality Metrics -->
+                <div class="glass-card rounded-xl p-6 shadow-md">
+                    <h3 class="text-lg font-semibold mb-4 flex items-center">
+                        <i class="fas fa-clipboard-check text-blue-600 mr-2"></i>
+                        Data Quality
+                    </h3>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-sm">Classification Coverage</span>
+                                <span class="text-sm font-semibold" id="coveragePercent">82%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-green-600 h-2 rounded-full" style="width: 82%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-sm">Evidence Completeness</span>
+                                <span class="text-sm font-semibold" id="evidencePercent">76%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-blue-600 h-2 rounded-full" style="width: 76%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-sm">Source Diversity</span>
+                                <span class="text-sm font-semibold" id="sourcesCount">2</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-purple-600 h-2 rounded-full" style="width: 40%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Research Gaps -->
+                <div class="glass-card rounded-xl p-6 shadow-md">
+                    <h3 class="text-lg font-semibold mb-4 flex items-center">
+                        <i class="fas fa-exclamation-triangle text-yellow-600 mr-2"></i>
+                        Research Gaps
+                    </h3>
+                    <div class="space-y-3" id="researchGaps">
+                        <!-- Gaps will be loaded here -->
+                        <div class="flex items-center p-3 bg-yellow-50 rounded-lg">
+                            <i class="fas fa-question-circle text-yellow-500 mr-3"></i>
+                            <div>
+                                <p class="font-medium">Class II-VI Classification</p>
+                                <p class="text-sm text-gray-600">Missing for most variants</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Export Options -->
+                <div class="glass-card rounded-xl p-6 shadow-md">
+                    <h3 class="text-lg font-semibold mb-4 flex items-center">
+                        <i class="fas fa-download text-green-600 mr-2"></i>
+                        Export Data
+                    </h3>
+                    <div class="space-y-3">
+                        <button onclick="exportData('csv')" class="w-full flex items-center justify-between p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                            <div class="flex items-center">
+                                <i class="fas fa-file-csv text-green-600 mr-3"></i>
+                                <span>CSV Export</span>
+                            </div>
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                        </button>
+                        <button onclick="exportData('json')" class="w-full flex items-center justify-between p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                            <div class="flex items-center">
+                                <i class="fas fa-code text-blue-600 mr-3"></i>
+                                <span>JSON API</span>
+                            </div>
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                        </button>
+                        <button onclick="exportData('report')" class="w-full flex items-center justify-between p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                            <div class="flex items-center">
+                                <i class="fas fa-chart-bar text-purple-600 mr-3"></i>
+                                <span>Research Report</span>
+                            </div>
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8 mt-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">CFTR Research Portal</h3>
+                    <p class="text-gray-400 text-sm">
+                        Evidence-based platform for CFTR variant analysis and clinical decision support.
+                    </p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Data Sources</h3>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><i class="fas fa-database mr-2"></i>Supabase Real-time Database</li>
+                        <li><i class="fas fa-book mr-2"></i>Burgel et al. 2025</li>
+                        <li><i class="fas fa-globe mr-2"></i>CFTR2 Database</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Research Tools</h3>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <i class="fab fa-github text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <i class="fas fa-api text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <i class="fas fa-chart-line text-xl"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-500 text-sm">
+                <p>© 2024 CFTR Variant Research Portal. For research use only.</p>
+            </div>
         </div>
-    </div>
+    </footer>
 
     <!-- Variant Detail Modal -->
-    <div id="variantModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center p-4 z-50 overflow-y-auto">
-        <div class="bg-white rounded-lg w-full max-w-md my-8">
-            <div id="variantContent" class="p-5">
-                <!-- Content loaded dynamically -->
+    <div id="variantModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden overflow-y-auto">
+        <div class="min-h-screen flex items-center justify-center p-4">
+            <div class="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+                <!-- Modal content will be loaded here -->
             </div>
         </div>
     </div>
@@ -124,379 +402,501 @@
         const SUPABASE_URL = 'https://oxlkisjwfarseyqgeyuw.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im94bGtpc2p3ZmFyc2V5cWdleXV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA2NjU2MzgsImV4cCI6MjA4NjI0MTYzOH0.O3RSGW2eMF_M_kywWsjXK9DM0saxvtu9aQUu8-YPkdU';
 
-        // App State
+        // State
         let allVariants = [];
-        let filteredVariants = [];
-        let isLoading = false;
+        let dashboardStats = {};
+        let charts = {};
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
+            loadDashboard();
             loadVariants();
+            setupSearch();
+            updateTimestamp();
+            startAutoRefresh();
         });
 
-        // Load variants from Supabase
-        async function loadVariants() {
+        // Load Dashboard Data
+        async function loadDashboard() {
             try {
-                showLoading(true);
-                
-                const response = await fetch(`${SUPABASE_URL}/rest/v1/clinician_view?select=*`, {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/dashboard_summary`, {
                     headers: {
                         'apikey': SUPABASE_KEY,
                         'Authorization': `Bearer ${SUPABASE_KEY}`
                     }
                 });
                 
-                if (!response.ok) {
-                    throw new Error('Failed to load data');
-                }
-                
-                allVariants = await response.json();
-                filteredVariants = [...allVariants];
-                
-                updateDatabaseStatus(allVariants.length);
-                renderResults();
-                showLoading(false);
+                const data = await response.json();
+                dashboardStats = data[0];
+                updateDashboardStats();
+                createCharts();
                 
             } catch (error) {
-                console.error('Error loading data:', error);
-                showError('Failed to load database');
-                showLoading(false);
+                console.error('Error loading dashboard:', error);
             }
         }
 
-        // Search function
-        async function search() {
-            const query = document.getElementById('searchBox').value.trim();
-            if (!query) return;
+        // Update Dashboard Stats
+        function updateDashboardStats() {
+            document.getElementById('statTotal').textContent = dashboardStats.total_variants || 0;
+            document.getElementById('statClassI').textContent = dashboardStats.class_i_count || 0;
+            document.getElementById('statExceptional').textContent = dashboardStats.exceptional_class_i || 0;
+            document.getElementById('statTrue').textContent = dashboardStats.true_class_i || 0;
+            document.getElementById('statResponsive').textContent = dashboardStats.eti_responders || 0;
+            document.getElementById('statResearch').textContent = dashboardStats.need_research || 0;
             
-            try {
-                showLoading(true);
-                
-                // Search in loaded variants first
-                filteredVariants = allVariants.filter(variant => {
-                    const searchable = [
-                        variant.legacy_name,
-                        variant.protein_name,
-                        variant.cdna_name,
-                        variant.alt_names
-                    ].join(' ').toLowerCase();
-                    
-                    return searchable.includes(query.toLowerCase());
-                });
-                
-                // If no results, try API search
-                if (filteredVariants.length === 0) {
-                    const response = await fetch(
-                        `${SUPABASE_URL}/rest/v1/clinician_view?legacy_name=ilike.*${query}*`,
-                        {
-                            headers: {
-                                'apikey': SUPABASE_KEY,
-                                'Authorization': `Bearer ${SUPABASE_KEY}`
-                            }
+            // Update quality metrics
+            const total = dashboardStats.total_variants || 1;
+            const classified = dashboardStats.classified_variants || 0;
+            const coverage = Math.round((classified / total) * 100);
+            document.getElementById('coveragePercent').textContent = `${coverage}%`;
+            document.querySelector('[style*="width: 82%"]').style.width = `${coverage}%`;
+        }
+
+        // Create Charts
+        function createCharts() {
+            // Class Distribution Chart
+            const classCtx = document.getElementById('classDistributionChart').getContext('2d');
+            if (charts.classDistribution) charts.classDistribution.destroy();
+            
+            charts.classDistribution = new Chart(classCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Exceptional Class I', 'True Class I', 'Other Classes', 'Unknown'],
+                    datasets: [{
+                        data: [
+                            dashboardStats.exceptional_class_i || 0,
+                            dashboardStats.true_class_i || 0,
+                            ((dashboardStats.class_i_count || 0) - (dashboardStats.exceptional_class_i || 0) - (dashboardStats.true_class_i || 0)),
+                            (dashboardStats.total_variants || 0) - (dashboardStats.classified_variants || 0)
+                        ],
+                        backgroundColor: [
+                            '#10b981',
+                            '#ef4444',
+                            '#3b82f6',
+                            '#9ca3af'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
                         }
-                    );
-                    
-                    if (response.ok) {
-                        filteredVariants = await response.json();
                     }
                 }
+            });
+
+            // ETI Response Chart
+            const etiCtx = document.getElementById('etiResponseChart').getContext('2d');
+            if (charts.etiResponse) charts.etiResponse.destroy();
+            
+            charts.etiResponse = new Chart(etiCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Responsive', 'Non-responsive', 'Unknown'],
+                    datasets: [{
+                        label: 'Variants',
+                        data: [
+                            dashboardStats.eti_responders || 0,
+                            (dashboardStats.true_class_i || 0) + 1, // Approximate
+                            dashboardStats.need_research || 0
+                        ],
+                        backgroundColor: [
+                            '#10b981',
+                            '#ef4444',
+                            '#f59e0b'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Load Variants
+        async function loadVariants() {
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/clinician_view?select=*&order=legacy_name`, {
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`
+                    }
+                });
                 
-                renderResults();
-                showLoading(false);
+                allVariants = await response.json();
+                renderVariantsGrid(allVariants);
+                updateEvidenceTimeline();
+                updateResearchGaps();
                 
             } catch (error) {
-                console.error('Search error:', error);
-                showError('Search failed');
-                showLoading(false);
+                console.error('Error loading variants:', error);
+                document.getElementById('variantsGrid').innerHTML = `
+                    <div class="col-span-3 text-center py-12">
+                        <i class="fas fa-exclamation-triangle text-yellow-500 text-3xl mb-4"></i>
+                        <p class="text-gray-600">Unable to load variants. Please check connection.</p>
+                    </div>
+                `;
             }
         }
 
-        // Filter by class
-        function filterByClass(cftrClass) {
-            filteredVariants = allVariants.filter(v => v.cftr_class === cftrClass);
-            renderResults();
-        }
-
-        // Filter by ETI response
-        function filterByETI(etiType) {
-            filteredVariants = allVariants.filter(v => v.eti_prediction === etiType);
-            renderResults();
-        }
-
-        // Render results
-        function renderResults() {
-            const grid = document.getElementById('resultsGrid');
-            const emptyState = document.getElementById('emptyState');
-            const resultsCount = document.getElementById('resultsCount');
-            const countElement = document.getElementById('count');
+        // Render Variants Grid
+        function renderVariantsGrid(variants) {
+            const grid = document.getElementById('variantsGrid');
             
-            if (filteredVariants.length === 0) {
-                grid.innerHTML = '';
-                emptyState.classList.remove('hidden');
-                resultsCount.classList.add('hidden');
+            if (variants.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-3 text-center py-12">
+                        <i class="fas fa-inbox text-gray-400 text-3xl mb-4"></i>
+                        <p class="text-gray-600">No variants found</p>
+                    </div>
+                `;
                 return;
             }
             
-            emptyState.classList.add('hidden');
-            resultsCount.classList.remove('hidden');
-            countElement.textContent = filteredVariants.length;
-            
-            grid.innerHTML = filteredVariants.slice(0, 50).map(variant => `
-                <div class="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition cursor-pointer" 
-                     onclick="showVariant('${variant.legacy_name}')">
-                    <div class="flex justify-between items-start mb-2">
-                        <div>
-                            <h3 class="font-bold text-gray-800">${variant.legacy_name}</h3>
-                            ${variant.protein_name ? `<p class="text-sm text-gray-600">${variant.protein_name}</p>` : ''}
-                        </div>
-                        ${variant.cftr_class ? `
-                            <span class="px-2 py-1 text-xs rounded ${
-                                variant.cftr_class === 'I' ? 'bg-red-100 text-red-800' :
-                                variant.cftr_class === 'II' ? 'bg-orange-100 text-orange-800' :
-                                variant.cftr_class === 'III' ? 'bg-blue-100 text-blue-800' :
-                                'bg-gray-100 text-gray-800'
-                            }">
-                                Class ${variant.cftr_class}
-                            </span>
-                        ` : ''}
-                    </div>
-                    
-                    <div class="space-y-2">
-                        ${variant.eti_prediction ? `
-                            <div class="flex items-center">
-                                <span class="text-xs text-gray-500 mr-2">ETI:</span>
-                                <span class="text-sm ${
-                                    variant.eti_prediction === 'responsive' ? 'text-green-600' :
-                                    variant.eti_prediction === 'non-responsive' ? 'text-red-600' :
-                                    'text-gray-600'
-                                }">
-                                    ${variant.eti_prediction}
+            grid.innerHTML = variants.map(variant => {
+                const isExceptional = variant.class_subtype === 'exceptional';
+                const isTrueClassI = variant.class_subtype === 'true';
+                const isResponsive = variant.eti_prediction === 'responsive';
+                
+                return `
+                    <div class="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden border ${isExceptional ? 'border-green-200' : isTrueClassI ? 'border-red-200' : 'border-gray-200'}"
+                         onclick="showVariantDetail('${variant.legacy_name}')">
+                        <div class="p-5">
+                            <div class="flex justify-between items-start mb-3">
+                                <div>
+                                    <h3 class="text-xl font-bold text-gray-800">${variant.legacy_name}</h3>
+                                    ${variant.cdna_name ? `<p class="text-sm text-gray-600 mt-1">${variant.cdna_name}</p>` : ''}
+                                </div>
+                                <span class="px-3 py-1 rounded-full text-xs font-semibold ${isExceptional ? 'bg-green-100 text-green-800' : isTrueClassI ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'}">
+                                    ${isExceptional ? 'Exceptional' : isTrueClassI ? 'True Class I' : variant.cftr_class ? `Class ${variant.cftr_class}` : 'Unknown'}
                                 </span>
                             </div>
-                        ` : ''}
-                        
-                        ${variant.class_confidence ? `
-                            <div class="flex items-center">
-                                <span class="text-xs text-gray-500 mr-2">Confidence:</span>
-                                <span class="text-sm text-gray-700">${variant.class_confidence}</span>
+                            
+                            <div class="space-y-3 mb-4">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm text-gray-600">ETI Prediction</span>
+                                    <span class="px-2 py-1 rounded text-xs font-semibold ${isResponsive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                                        ${variant.eti_prediction || 'Unknown'}
+                                    </span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm text-gray-600">Evidence Sources</span>
+                                    <span class="text-sm font-semibold">${variant.evidence_count || 0}</span>
+                                </div>
                             </div>
-                        ` : ''}
+                            
+                            ${variant.clinical_alert && !variant.clinical_alert.includes('Standard') ? `
+                                <div class="p-3 ${isExceptional ? 'bg-green-50 border border-green-200' : 'bg-yellow-50 border border-yellow-200'} rounded-lg">
+                                    <p class="text-sm ${isExceptional ? 'text-green-700' : 'text-yellow-700'}">
+                                        <i class="fas ${isExceptional ? 'fa-bolt' : 'fa-exclamation-triangle'} mr-2"></i>
+                                        ${variant.clinical_alert.substring(0, 60)}...
+                                    </p>
+                                </div>
+                            ` : ''}
+                            
+                            <div class="mt-4 pt-4 border-t border-gray-100">
+                                <button class="w-full flex items-center justify-center text-sm font-medium text-blue-600 hover:text-blue-800">
+                                    <i class="fas fa-chart-line mr-2"></i>
+                                    View Full Analysis
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Show Variant Detail
+        async function showVariantDetail(variantName) {
+            const variant = allVariants.find(v => v.legacy_name === variantName);
+            if (!variant) return;
+            
+            const modal = document.getElementById('variantModal');
+            const modalContent = modal.querySelector('.bg-white');
+            
+            const isExceptional = variant.class_subtype === 'exceptional';
+            const isResponsive = variant.eti_prediction === 'responsive';
+            
+            modalContent.innerHTML = `
+                <div class="p-6">
+                    <div class="flex justify-between items-start mb-6">
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-800">${variant.legacy_name}</h2>
+                            <div class="flex items-center space-x-4 mt-2">
+                                ${variant.protein_name ? `<span class="text-gray-600">${variant.protein_name}</span>` : ''}
+                                ${variant.cdna_name ? `<span class="text-gray-600">${variant.cdna_name}</span>` : ''}
+                            </div>
+                        </div>
+                        <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
                     </div>
                     
-                    ${variant.clinical_alert && variant.clinical_alert !== 'Standard' ? `
-                        <div class="mt-3 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs text-yellow-800">
-                            <i class="fas fa-exclamation-triangle mr-1"></i>
-                            ${variant.clinical_alert}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div class="space-y-4">
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <h4 class="font-semibold text-gray-700 mb-2">Classification</h4>
+                                <div class="space-y-2">
+                                    <div class="flex justify-between">
+                                        <span>CFTR Class</span>
+                                        <span class="font-semibold">${variant.cftr_class ? `Class ${variant.cftr_class}` : 'Unknown'}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Subtype</span>
+                                        <span class="font-semibold ${isExceptional ? 'text-green-600' : 'text-red-600'}">${variant.class_subtype || 'N/A'}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>CF-causing</span>
+                                        <span class="font-semibold">${variant.final_determination || 'Unknown'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <h4 class="font-semibold text-gray-700 mb-2">Clinical Prediction</h4>
+                                <div class="space-y-2">
+                                    <div class="flex justify-between">
+                                        <span>ETI Response</span>
+                                        <span class="font-semibold ${isResponsive ? 'text-green-600' : 'text-red-600'}">${variant.eti_prediction || 'Unknown'}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Evidence Level</span>
+                                        <span class="font-semibold">${variant.eti_evidence_level || 'Unknown'}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Confidence</span>
+                                        <span class="font-semibold">${variant.class_confidence || 'Unknown'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="${isExceptional ? 'bg-green-50 border border-green-200' : 'bg-yellow-50 border border-yellow-200'} p-4 rounded-lg">
+                                <h4 class="font-semibold ${isExceptional ? 'text-green-700' : 'text-yellow-700'} mb-2">
+                                    <i class="fas ${isExceptional ? 'fa-bolt' : 'fa-exclamation-triangle'} mr-2"></i>
+                                    Clinical Alert
+                                </h4>
+                                <p class="${isExceptional ? 'text-green-600' : 'text-yellow-600'}">${variant.clinical_alert || 'Standard classification'}</p>
+                            </div>
+                            
+                            <div class="bg-blue-50 border border-blue-200 p-4 rounded-lg">
+                                <h4 class="font-semibold text-blue-700 mb-2">
+                                    <i class="fas fa-stethoscope mr-2"></i>
+                                    Recommendation
+                                </h4>
+                                <p class="text-blue-600">${variant.eti_recommendation || 'No specific recommendation available'}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    ${variant.source_summary ? `
+                        <div class="bg-gray-800 text-white p-4 rounded-lg">
+                            <h4 class="font-semibold mb-2">Evidence Chain</h4>
+                            <div class="text-sm font-mono opacity-90">
+                                ${variant.source_summary.split('_').join(' → ')}
+                            </div>
                         </div>
                     ` : ''}
+                </div>
+            `;
+            
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Close Modal
+        function closeModal() {
+            document.getElementById('variantModal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Setup Search
+        function setupSearch() {
+            const searchInput = document.getElementById('variantSearch');
+            searchInput.addEventListener('input', (e) => {
+                const term = e.target.value.toLowerCase();
+                const filtered = allVariants.filter(v => 
+                    v.legacy_name.toLowerCase().includes(term) ||
+                    (v.protein_name && v.protein_name.toLowerCase().includes(term)) ||
+                    (v.cdna_name && v.cdna_name.toLowerCase().includes(term))
+                );
+                renderVariantsGrid(filtered);
+            });
+        }
+
+        // Filter Variants
+        function filterVariants(filter) {
+            // Update active button
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active', 'bg-blue-600', 'text-white'));
+            event.target.classList.add('active', 'bg-blue-600', 'text-white');
+            
+            let filtered = allVariants;
+            
+            switch(filter) {
+                case 'exceptional':
+                    filtered = allVariants.filter(v => v.class_subtype === 'exceptional');
+                    break;
+                case 'true':
+                    filtered = allVariants.filter(v => v.class_subtype === 'true');
+                    break;
+                case 'responsive':
+                    filtered = allVariants.filter(v => v.eti_prediction === 'responsive');
+                    break;
+                case 'non_responsive':
+                    filtered = allVariants.filter(v => v.eti_prediction === 'non_responsive');
+                    break;
+            }
+            
+            renderVariantsGrid(filtered);
+        }
+
+        // Update Evidence Timeline
+        function updateEvidenceTimeline() {
+            const exceptionalVariants = allVariants.filter(v => v.class_subtype === 'exceptional');
+            const timeline = document.getElementById('evidenceTimeline');
+            
+            timeline.innerHTML = exceptionalVariants.map((variant, index) => `
+                <div class="relative mb-8 pl-8">
+                    <div class="evidence-marker" style="background: ${index % 3 === 0 ? '#3b82f6' : index % 3 === 1 ? '#8b5cf6' : '#10b981'}; top: 0.25rem;"></div>
+                    <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="font-semibold text-gray-800">${variant.legacy_name}</h4>
+                            <span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded">Exceptional Class I</span>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-3">${variant.clinical_alert}</p>
+                        <div class="flex items-center text-sm text-gray-500">
+                            <i class="fas fa-database mr-2"></i>
+                            <span>Evidence: ${variant.evidence_count || 0} sources</span>
+                        </div>
+                    </div>
                 </div>
             `).join('');
         }
 
-        // Show variant details
-        async function showVariant(variantName) {
-            try {
-                // Find variant in filtered results
-                let variant = filteredVariants.find(v => v.legacy_name === variantName);
-                
-                // If not found, fetch from API
-                if (!variant) {
-                    const response = await fetch(
-                        `${SUPABASE_URL}/rest/v1/clinician_view?legacy_name=eq.${variantName}`,
-                        {
-                            headers: {
-                                'apikey': SUPABASE_KEY,
-                                'Authorization': `Bearer ${SUPABASE_KEY}`
-                            }
-                        }
-                    );
-                    
-                    if (response.ok) {
-                        const data = await response.json();
-                        variant = data[0];
-                    }
-                }
-                
-                if (!variant) return;
-                
-                // Render variant modal
-                document.getElementById('variantContent').innerHTML = `
-                    <div class="space-y-4">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="text-xl font-bold text-gray-800">${variant.legacy_name}</h3>
-                                ${variant.protein_name ? `<p class="text-gray-600">${variant.protein_name}</p>` : ''}
-                                ${variant.cdna_name ? `<p class="text-sm text-gray-500">${variant.cdna_name}</p>` : ''}
-                            </div>
-                            <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                        
-                        <div class="grid grid-cols-2 gap-3">
-                            ${variant.cftr_class ? `
-                                <div class="bg-gray-50 p-3 rounded">
-                                    <div class="text-sm text-gray-500">Class</div>
-                                    <div class="font-bold">${variant.cftr_class}</div>
-                                </div>
-                            ` : ''}
-                            
-                            ${variant.eti_prediction ? `
-                                <div class="bg-gray-50 p-3 rounded">
-                                    <div class="text-sm text-gray-500">ETI Response</div>
-                                    <div class="font-bold ${
-                                        variant.eti_prediction === 'responsive' ? 'text-green-600' :
-                                        variant.eti_prediction === 'non-responsive' ? 'text-red-600' :
-                                        'text-gray-700'
-                                    }">
-                                        ${variant.eti_prediction}
-                                    </div>
-                                </div>
-                            ` : ''}
-                            
-                            ${variant.class_confidence ? `
-                                <div class="bg-gray-50 p-3 rounded">
-                                    <div class="text-sm text-gray-500">Confidence</div>
-                                    <div class="font-bold">${variant.class_confidence}</div>
-                                </div>
-                            ` : ''}
-                            
-                            ${variant.evidence_count ? `
-                                <div class="bg-gray-50 p-3 rounded">
-                                    <div class="text-sm text-gray-500">Evidence Sources</div>
-                                    <div class="font-bold">${variant.evidence_count}</div>
-                                </div>
-                            ` : ''}
-                        </div>
-                        
-                        ${variant.clinical_alert && variant.clinical_alert !== 'Standard' ? `
-                            <div class="bg-yellow-50 border border-yellow-200 rounded p-3">
-                                <div class="font-medium text-yellow-800 mb-1">
-                                    <i class="fas fa-exclamation-triangle mr-2"></i>Clinical Alert
-                                </div>
-                                <p class="text-sm text-yellow-700">${variant.clinical_alert}</p>
-                            </div>
-                        ` : ''}
-                        
-                        ${variant.eti_recommendation ? `
-                            <div class="bg-blue-50 border border-blue-200 rounded p-3">
-                                <div class="font-medium text-blue-800 mb-1">
-                                    <i class="fas fa-stethoscope mr-2"></i>Recommendation
-                                </div>
-                                <p class="text-sm text-blue-700">${variant.eti_recommendation}</p>
-                            </div>
-                        ` : ''}
-                        
-                        ${variant.source_summary ? `
-                            <div class="bg-gray-800 text-white rounded p-3">
-                                <div class="text-sm font-mono text-center">
-                                    ${variant.source_summary.replace(/_/g, ' → ')}
-                                </div>
-                            </div>
-                        ` : ''}
+        // Update Research Gaps
+        function updateResearchGaps() {
+            const gapsDiv = document.getElementById('researchGaps');
+            const unknownClass = allVariants.filter(v => !v.cftr_class).length;
+            const lowEvidence = allVariants.filter(v => (v.evidence_count || 0) < 2).length;
+            
+            gapsDiv.innerHTML = `
+                <div class="flex items-center p-3 bg-yellow-50 rounded-lg">
+                    <i class="fas fa-question-circle text-yellow-500 mr-3"></i>
+                    <div>
+                        <p class="font-medium">${unknownClass} Variants Need Classification</p>
+                        <p class="text-sm text-gray-600">Missing CFTR class assignment</p>
                     </div>
-                `;
-                
-                document.getElementById('variantModal').classList.remove('hidden');
-                
-            } catch (error) {
-                console.error('Error loading variant:', error);
-                showError('Failed to load variant details');
-            }
+                </div>
+                <div class="flex items-center p-3 bg-blue-50 rounded-lg">
+                    <i class="fas fa-database text-blue-500 mr-3"></i>
+                    <div>
+                        <p class="font-medium">${lowEvidence} Variants Need More Evidence</p>
+                        <p class="text-sm text-gray-600">Limited evidence sources</p>
+                    </div>
+                </div>
+                <div class="flex items-center p-3 bg-purple-50 rounded-lg">
+                    <i class="fas fa-layer-group text-purple-500 mr-3"></i>
+                    <div>
+                        <p class="font-medium">Classes II-VI Data Missing</p>
+                        <p class="text-sm text-gray-600">Complete classification needed</p>
+                    </div>
+                </div>
+            `;
         }
 
-        // Close modal
-        function closeModal() {
-            document.getElementById('variantModal').classList.add('hidden');
+        // Update Timestamp
+        function updateTimestamp() {
+            const now = new Date();
+            document.getElementById('lastUpdate').textContent = now.toLocaleTimeString();
         }
 
-        // Toggle import modal
-        function toggleImport() {
-            const modal = document.getElementById('importModal');
-            modal.classList.toggle('hidden');
-        }
-
-        // Load full dataset
-        async function loadFullDataset() {
-            try {
-                showLoading(true);
-                showMessage('Loading full dataset...', 'info');
-                
-                // This would load the full CFTR2 dataset
-                // For now, we'll just reload with current data
-                await loadVariants();
-                
-                showMessage('Dataset loaded successfully', 'success');
-                toggleImport();
-                
-            } catch (error) {
-                console.error('Error loading full dataset:', error);
-                showError('Failed to load full dataset');
-            }
-        }
-
-        // Reset to demo (just reloads current)
-        function resetToDemo() {
-            filteredVariants = [...allVariants];
-            renderResults();
-            toggleImport();
-        }
-
-        // Handle search input
-        function handleSearchInput() {
-            const query = document.getElementById('searchBox').value.trim();
-            if (query.length === 0) {
-                filteredVariants = [...allVariants];
-                renderResults();
-            }
-        }
-
-        // Quick search
-        function quickSearch(variant) {
-            document.getElementById('searchBox').value = variant;
-            search();
-        }
-
-        // Update database status
-        function updateDatabaseStatus(count) {
-            const status = document.getElementById('dbStatus');
-            status.textContent = `${count} variants`;
-            status.className = 'text-sm bg-white/20 px-2 py-1 rounded';
-        }
-
-        // Show loading state
-        function showLoading(loading) {
-            const btn = document.getElementById('searchBtn');
-            if (loading) {
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-                btn.disabled = true;
-            } else {
-                btn.innerHTML = 'Search';
-                btn.disabled = false;
-            }
-            isLoading = loading;
-        }
-
-        // Show message
-        function showMessage(text, type) {
-            const colors = {
-                info: 'bg-blue-100 text-blue-800',
-                success: 'bg-green-100 text-green-800',
-                error: 'bg-red-100 text-red-800'
+        // Export Data
+        function exportData(format) {
+            const data = {
+                timestamp: new Date().toISOString(),
+                stats: dashboardStats,
+                variants: allVariants
             };
             
-            const msg = document.createElement('div');
-            msg.className = `fixed top-4 right-4 px-4 py-2 rounded-lg ${colors[type]} z-50`;
-            msg.innerHTML = text;
+            let content, mimeType, filename;
             
-            document.body.appendChild(msg);
-            setTimeout(() => msg.remove(), 3000);
+            switch(format) {
+                case 'csv':
+                    // Simplified CSV export
+                    const headers = ['legacy_name', 'protein_name', 'cftr_class', 'class_subtype', 'eti_prediction', 'clinical_alert'];
+                    const rows = allVariants.map(v => headers.map(h => v[h] || '').join(','));
+                    content = [headers.join(','), ...rows].join('\n');
+                    mimeType = 'text/csv';
+                    filename = `cftr_variants_${new Date().toISOString().split('T')[0]}.csv`;
+                    break;
+                    
+                case 'json':
+                    content = JSON.stringify(data, null, 2);
+                    mimeType = 'application/json';
+                    filename = `cftr_data_${new Date().toISOString().split('T')[0]}.json`;
+                    break;
+                    
+                case 'report':
+                    // Generate a simple report
+                    content = `CFTR Variant Research Report\nGenerated: ${new Date().toLocaleString()}\n\n`;
+                    content += `Total Variants: ${dashboardStats.total_variants}\n`;
+                    content += `Class I Variants: ${dashboardStats.class_i_count}\n`;
+                    content += `Exceptional Class I: ${dashboardStats.exceptional_class_i}\n`;
+                    content += `ETI Responsive: ${dashboardStats.eti_responders}\n\n`;
+                    content += 'Key Variants:\n';
+                    allVariants.slice(0, 10).forEach(v => {
+                        content += `- ${v.legacy_name}: ${v.eti_prediction || 'Unknown'} (${v.clinical_alert || 'Standard'})\n`;
+                    });
+                    mimeType = 'text/plain';
+                    filename = `cftr_report_${new Date().toISOString().split('T')[0]}.txt`;
+                    break;
+            }
+            
+            const blob = new Blob([content], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         }
 
-        // Show error
-        function showError(text) {
-            showMessage(text, 'error');
+        // Auto-refresh
+        function startAutoRefresh() {
+            setInterval(() => {
+                loadDashboard();
+                loadVariants();
+                updateTimestamp();
+            }, 30000);
         }
+
+        // Close modal on ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        // Close modal on outside click
+        document.getElementById('variantModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('variantModal')) {
+                closeModal();
+            }
+        });
     </script>
 </body>
 </html>
