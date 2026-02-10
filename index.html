@@ -1987,6 +1987,15 @@
             importResults.innerHTML = '';
         }
     }
+        // ============================================
+// UTILITY FUNCTIONS - ADD THIS FUNCTION
+// ============================================
+function updateVariantCount() {
+    const element = document.getElementById('variantCount');
+    if (element) {
+        element.textContent = STATE.filteredVariants.length.toLocaleString();
+    }
+}
 
     function validateImport() {
         const jsonInput = document.getElementById('jsonInput');
