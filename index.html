@@ -5,33 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Project Delta Helix | CFTR Clinical Intelligence</title>
     
+    <!-- External Dependencies -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
+    <!-- Custom Styles -->
     <style>
+        /* Color Variables - Delta Helix Design System */
         :root {
             --helix-blue: #0f4c81;
             --helix-teal: #00a8b5;
             --helix-amber: #ff9a3c;
             --helix-red: #e63946;
             --helix-green: #2a9d8f;
+            --helix-purple: #6d28d9;
             --helix-gray: #2d3748;
+            --helix-light-gray: #f7fafc;
         }
 
+        /* Base Styles */
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            min-height: 100vh;
         }
 
-        /* Professional Sticky Header */
+        /* Professional Header */
         .professional-header {
             background: linear-gradient(135deg, var(--helix-blue) 0%, #0a3a66 100%);
             border-bottom: 3px solid var(--helix-teal);
             box-shadow: 0 4px 20px rgba(15, 76, 129, 0.2);
             position: sticky;
             top: 0;
-            z-index: 100;
+            z-index: 1000;
         }
 
         .header-text {
@@ -39,54 +46,7 @@
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
-        /* Annotation Badge */
-        .annotation-badge {
-            position: absolute;
-            top: -6px;
-            right: -6px;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: var(--helix-amber);
-            color: white;
-            font-size: 0.7rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            border: 2px solid white;
-            transition: all 0.2s;
-            z-index: 10;
-        }
-
-        .annotation-badge:hover {
-            transform: scale(1.2);
-            background: var(--helix-red);
-        }
-
-        .annotation-badge i {
-            font-size: 0.6rem;
-        }
-
-        .data-point-annotatable {
-            position: relative;
-            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-            padding: 1.5rem;
-            border-radius: 12px;
-            border: 1px solid rgba(15, 76, 129, 0.1);
-        }
-
-        .data-point-annotatable.missing {
-            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-            border-color: rgba(255, 154, 60, 0.3);
-            animation: pulse-missing 2s infinite;
-        }
-
-        @keyframes pulse-missing {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.9; }
-        }
-
+        /* Delta Helix Card Design */
         .helix-card {
             background: white;
             border-radius: 16px;
@@ -100,6 +60,7 @@
             transform: translateY(-2px);
         }
 
+        /* Badge System */
         .helix-badge {
             padding: 0.375rem 0.875rem;
             border-radius: 9999px;
@@ -129,6 +90,82 @@
             border-color: rgba(42, 157, 143, 0.2);
         }
 
+        /* Annotation System */
+        .annotation-badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--helix-amber);
+            color: white;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 2px solid white;
+            transition: all 0.2s;
+            z-index: 10;
+        }
+
+        .annotation-badge:hover {
+            transform: scale(1.2);
+            background: var(--helix-red);
+        }
+
+        .missing-count-badge {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--helix-amber);
+            color: white;
+            font-size: 0.7rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 0.5rem;
+        }
+
+        /* Data Point Design */
+        .data-point-annotatable {
+            position: relative;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid rgba(15, 76, 129, 0.1);
+        }
+
+        .data-point-annotatable.missing {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-color: rgba(255, 154, 60, 0.3);
+            animation: pulse-missing 2s infinite;
+        }
+
+        @keyframes pulse-missing {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.9; }
+        }
+
+        /* Variant List Items */
+        .variant-cell {
+            padding: 1.25rem;
+            border-bottom: 1px solid rgba(15, 76, 129, 0.1);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .variant-cell:hover {
+            background: rgba(15, 76, 129, 0.03);
+        }
+
+        .variant-cell.selected {
+            background: rgba(15, 76, 129, 0.05);
+            border-left: 4px solid var(--helix-teal);
+        }
+
+        /* Form Controls */
         .helix-input {
             background: white;
             border: 1px solid rgba(15, 76, 129, 0.2);
@@ -144,6 +181,7 @@
             outline: none;
         }
 
+        /* Alert System */
         .helix-alert {
             padding: 1.25rem;
             border-radius: 12px;
@@ -165,13 +203,7 @@
             border-left-color: var(--helix-teal);
         }
 
-        .helix-data-point {
-            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-            padding: 1.5rem;
-            border-radius: 12px;
-            border: 1px solid rgba(15, 76, 129, 0.1);
-        }
-
+        /* Data Display */
         .helix-data-label {
             font-size: 0.75rem;
             color: var(--helix-gray);
@@ -188,76 +220,7 @@
             font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
         }
 
-        .variant-cell {
-            padding: 1.25rem;
-            border-bottom: 1px solid rgba(15, 76, 129, 0.1);
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .variant-cell:hover {
-            background: rgba(15, 76, 129, 0.03);
-        }
-
-        .variant-cell.selected {
-            background: rgba(15, 76, 129, 0.05);
-            border-left: 4px solid var(--helix-teal);
-        }
-
-        .missing-count-badge {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: var(--helix-amber);
-            color: white;
-            font-size: 0.7rem;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            margin-left: 0.5rem;
-        }
-
-        @keyframes helix-fade-in {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .helix-fade-in {
-            animation: helix-fade-in 0.4s ease-out;
-        }
-
-        .empty-state {
-            padding: 4rem 2rem;
-            text-align: center;
-            color: #718096;
-        }
-
-        .empty-state-icon {
-            font-size: 3rem;
-            opacity: 0.5;
-            margin-bottom: 1rem;
-        }
-
-        .pagination-btn {
-            padding: 0.5rem 1rem;
-            border: 1px solid rgba(15, 76, 129, 0.2);
-            border-radius: 8px;
-            background: white;
-            color: var(--helix-blue);
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-
-        .pagination-btn:hover:not(:disabled) {
-            background: rgba(15, 76, 129, 0.05);
-            border-color: var(--helix-teal);
-        }
-
-        .pagination-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
+        /* Buttons */
         .action-button {
             padding: 0.625rem 1.25rem;
             border-radius: 8px;
@@ -280,6 +243,27 @@
             box-shadow: 0 4px 12px rgba(0, 168, 181, 0.2);
         }
 
+        .pagination-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(15, 76, 129, 0.2);
+            border-radius: 8px;
+            background: white;
+            color: var(--helix-blue);
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .pagination-btn:hover:not(:disabled) {
+            background: rgba(15, 76, 129, 0.05);
+            border-color: var(--helix-teal);
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Modal System */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -287,7 +271,7 @@
             right: 0;
             bottom: 0;
             background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
+            z-index: 2000;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -302,23 +286,50 @@
             max-height: 90vh;
             overflow-y: auto;
         }
+
+        /* Animations */
+        @keyframes helix-fade-in {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .helix-fade-in {
+            animation: helix-fade-in 0.4s ease-out;
+        }
+
+        /* Empty States */
+        .empty-state {
+            padding: 4rem 2rem;
+            text-align: center;
+            color: #718096;
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            opacity: 0.5;
+            margin-bottom: 1rem;
+        }
     </style>
 </head>
 <body class="min-h-screen">
-    <!-- Professional Sticky Header -->
+    <!-- ============================================
+         HEADER SECTION
+         ============================================ -->
     <header class="professional-header">
         <div class="container mx-auto px-6 py-4">
             <div class="flex items-center justify-between">
+                <!-- Logo and Title -->
                 <div class="flex items-center space-x-4">
                     <div class="p-2 bg-white/20 rounded-lg">
                         <i class="fas fa-dna text-white text-xl"></i>
                     </div>
                     <div>
                         <h1 class="text-xl font-bold header-text">Project Delta Helix</h1>
-                        <p class="text-sm header-text opacity-90">CFTR ClASSES MAPPING</p>
+                        <p class="text-sm header-text opacity-90">CFTR Clinical Intelligence Platform</p>
                     </div>
                 </div>
                 
+                <!-- Action Buttons -->
                 <div class="flex items-center space-x-3">
                     <button onclick="showDashboard()" class="action-button" style="background: rgba(255, 255, 255, 0.2); color: white;">
                         <i class="fas fa-chart-bar"></i>
@@ -333,9 +344,11 @@
         </div>
     </header>
 
-    <!-- Main Content -->
+    <!-- ============================================
+         MAIN CONTENT
+         ============================================ -->
     <main class="container mx-auto px-6 py-8">
-        <!-- Quick Stats Bar -->
+        <!-- Quick Stats Dashboard -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             <div class="helix-card p-4">
                 <div class="text-2xl font-bold text-helix-blue" id="statTotal">-</div>
@@ -355,11 +368,36 @@
             </div>
         </div>
 
+        <!-- Data View Toggle Banner -->
+        <div id="dataViewBanner" class="mb-6 helix-card p-4 bg-gradient-to-r from-blue-50 to-teal-50 border border-blue-100">
+            <div class="flex flex-col sm:flex-row items-center justify-between">
+                <div class="flex items-center mb-3 sm:mb-0">
+                    <i class="fas fa-info-circle text-helix-teal mr-2"></i>
+                    <span class="text-sm text-gray-700">
+                        Currently viewing 
+                        <span id="viewModeText" class="font-semibold text-helix-blue">complete clinical data only</span>
+                    </span>
+                </div>
+                <button onclick="toggleDataView()" 
+                        class="px-4 py-2 bg-white border border-helix-teal text-helix-teal rounded-lg hover:bg-helix-teal hover:text-white transition-colors text-sm font-medium">
+                    <i class="fas fa-exchange-alt mr-2"></i>
+                    <span id="toggleButtonText">Show All Variants</span>
+                </button>
+            </div>
+            <div class="mt-2 text-xs text-gray-500">
+                <i class="fas fa-database mr-1"></i>
+                Database contains 2,102 total variants (1,002 with complete clinical data)
+            </div>
+        </div>
+
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
-            <!-- Left Panel - Variant Explorer -->
+            <!-- ============================================
+                 LEFT PANEL - Variant Explorer
+                 ============================================ -->
             <div class="lg:col-span-1">
                 <div class="helix-card mb-6">
                     <div class="p-6 border-b border-gray-100">
+                        <!-- Search Bar -->
                         <div class="relative mb-4">
                             <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                             <input 
@@ -371,6 +409,7 @@
                             >
                         </div>
                         
+                        <!-- Filter Buttons -->
                         <div class="flex space-x-2 mb-4">
                             <button onclick="filterVariants('all')" 
                                     class="flex-1 px-3 py-2 text-sm font-medium rounded-lg border border-gray-300 hover:border-helix-teal hover:text-helix-teal transition"
@@ -384,21 +423,27 @@
                             </button>
                         </div>
 
-                        <div class="text-xs text-gray-500 mb-2">
-                            <i class="fas fa-info-circle mr-1"></i>
-                            Showing <span id="variantCount">0</span> variants
+                        <!-- Variant Count and View Info -->
+                        <div class="text-xs text-gray-500 mb-2 flex items-center justify-between">
+                            <div>
+                                <i class="fas fa-info-circle mr-1"></i>
+                                Showing <span id="variantCount">0</span> variants
+                                <span id="viewModeBadge" class="ml-2 px-2 py-1 bg-helix-teal text-white rounded-full text-xs">
+                                    Complete Data
+                                </span>
+                            </div>
                         </div>
                     </div>
 
+                    <!-- Variant List Container -->
                     <div id="variantList" class="max-h-[500px] overflow-y-auto">
-                        <!-- Variants will load here -->
                         <div class="empty-state">
                             <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-helix-teal mx-auto"></div>
                             <p class="mt-4">Loading variants...</p>
                         </div>
                     </div>
 
-                    <!-- Pagination -->
+                    <!-- Pagination Controls -->
                     <div class="p-4 border-t border-gray-100 flex justify-between items-center" id="paginationControls" style="display: none;">
                         <button onclick="previousPage()" class="pagination-btn" id="prevBtn">
                             <i class="fas fa-chevron-left mr-2"></i> Prev
@@ -413,9 +458,11 @@
                 </div>
             </div>
 
-            <!-- Right Panel - Variant Detail -->
+            <!-- ============================================
+                 RIGHT PANEL - Variant Detail
+                 ============================================ -->
             <div class="lg:col-span-3">
-                <!-- Variant Header -->
+                <!-- Variant Header Card -->
                 <div id="variantHeader" class="helix-card mb-6 hidden helix-fade-in">
                     <div class="p-8" style="background: linear-gradient(135deg, rgba(15, 76, 129, 0.02), rgba(0, 168, 181, 0.02))">
                         <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
@@ -425,7 +472,7 @@
                                     <span id="dataCompleteness" class="text-sm"></span>
                                 </div>
                                 <div id="variantBadges" class="flex flex-wrap gap-2">
-                                    <!-- Badges load here -->
+                                    <!-- Badges load dynamically -->
                                 </div>
                             </div>
                             
@@ -438,7 +485,7 @@
                     </div>
                 </div>
 
-                <!-- Variant Content -->
+                <!-- Variant Content Sections -->
                 <div id="variantContent" class="hidden helix-fade-in">
                     <!-- Nomenclature Section -->
                     <div class="helix-card mb-6 p-6">
@@ -448,13 +495,13 @@
                             <span id="nomenclatureMissing" class="ml-2 missing-count-badge hidden"></span>
                         </h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="nomenclatureGrid">
-                            <!-- Filled dynamically -->
+                            <!-- Data points load dynamically -->
                         </div>
                     </div>
 
                     <!-- Clinical Decision Grid -->
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-                        <!-- Clinical Impact -->
+                        <!-- Clinical Impact Card -->
                         <div class="helix-card p-6">
                             <h3 class="font-semibold text-gray-800 mb-4 flex items-center">
                                 <i class="fas fa-stethoscope mr-2 text-helix-red"></i>
@@ -462,11 +509,11 @@
                                 <span id="classificationMissing" class="ml-2 missing-count-badge hidden"></span>
                             </h3>
                             <div id="clinicalImpact" class="space-y-4">
-                                <!-- Filled dynamically -->
+                                <!-- Data points load dynamically -->
                             </div>
                         </div>
 
-                        <!-- Therapeutic Prediction -->
+                        <!-- Therapeutic Prediction Card -->
                         <div class="helix-card p-6">
                             <h3 class="font-semibold text-gray-800 mb-4 flex items-center">
                                 <i class="fas fa-prescription-bottle-alt mr-2 text-helix-green"></i>
@@ -474,11 +521,11 @@
                                 <span id="therapyMissing" class="ml-2 missing-count-badge hidden"></span>
                             </h3>
                             <div id="therapeuticPrediction" class="space-y-4">
-                                <!-- Filled dynamically -->
+                                <!-- Data points load dynamically -->
                             </div>
                         </div>
 
-                        <!-- Evidence Quality -->
+                        <!-- Evidence Quality Card -->
                         <div class="helix-card p-6">
                             <h3 class="font-semibold text-gray-800 mb-4 flex items-center">
                                 <i class="fas fa-chart-line mr-2 text-helix-purple"></i>
@@ -486,15 +533,15 @@
                                 <span id="evidenceMissing" class="ml-2 missing-count-badge hidden"></span>
                             </h3>
                             <div id="evidenceQuality" class="space-y-4">
-                                <!-- Filled dynamically -->
+                                <!-- Data points load dynamically -->
                             </div>
                         </div>
                     </div>
 
-                    <!-- Clinical Alert -->
+                    <!-- Clinical Alert Panel -->
                     <div id="clinicalAlertPanel" class="helix-alert mb-6 hidden">
                         <div id="alertContent" class="flex items-start">
-                            <!-- Alert loads here -->
+                            <!-- Alert content loads dynamically -->
                         </div>
                     </div>
 
@@ -505,7 +552,7 @@
                             Evidence Chain
                         </h3>
                         <div id="evidenceChain" class="font-mono text-sm text-gray-600">
-                            <!-- Evidence loads here -->
+                            <!-- Evidence loads dynamically -->
                         </div>
                     </div>
                 </div>
@@ -538,7 +585,11 @@
         </div>
     </main>
 
-    <!-- Import Modal -->
+    <!-- ============================================
+         MODALS
+         ============================================ -->
+
+    <!-- Import Data Modal -->
     <div id="importModal" class="modal-overlay hidden">
         <div class="modal-content">
             <div class="p-6">
@@ -616,7 +667,7 @@
         </div>
     </div>
 
-    <!-- Dashboard Modal -->
+    <!-- Dashboard Analytics Modal -->
     <div id="dashboardModal" class="modal-overlay hidden">
         <div class="modal-content" style="max-width: 800px;">
             <div class="p-6">
@@ -649,1538 +700,1340 @@
         </div>
     </div>
 
-    <!-- JavaScript Application -->
-   <script>
-// Configuration
-const CONFIG = {
-    SUPABASE_URL: 'https://oxlkisjwfarseyqgeyuw.supabase.co',
-    SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im94bGtpc2p3ZmFyc2V5cWdleXV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA2NjU2MzgsImV4cCI6MjA4NjI0MTYzOH0.O3RSGW2eMF_M_kywWsjXK9DM0saxvtu9aQUu8-YPkdU',
-    ITEMS_PER_PAGE: 15,
-    VERSION: 'Δ2.0.0'
-};
+    <!-- ============================================
+         JAVASCRIPT APPLICATION
+         ============================================ -->
+    <script>
+    // ============================================
+    // CONFIGURATION
+    // ============================================
+    const CONFIG = {
+        SUPABASE_URL: 'https://oxlkisjwfarseyqgeyuw.supabase.co',
+        SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im94bGtpc2p3ZmFyc2V5cWdleXV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA2NjU2MzgsImV4cCI6MjA4NjI0MTYzOH0.O3RSGW2eMF_M_kywWsjXK9DM0saxvtu9aQUu8-YPkdU',
+        ITEMS_PER_PAGE: 15,
+        VERSION: 'Δ2.1.0',
+        COMPLETE_DATA_FILTERS: {
+            cftr_class: 'not.is.null',
+            eti_prediction: 'not.is.null',
+            class_confidence: 'not.is.null'
+        }
+    };
 
-// CLINICAL DISPLAY MAPPING SYSTEM
-const CLINICAL_DISPLAY = {
-    // Field label mapping (DB field → Clinician-friendly label)
-    fieldLabels: {
-        // Nomenclature
-        'legacy_name': 'Variant Identifier',
-        'protein_name': 'Protein Change',
-        'cdna_name': 'DNA Change',
-        'alt_names': 'Alternative Names',
-        
-        // Clinical Classification
-        'cftr_class': 'CFTR Functional Class',
-        'class_subtype': 'Classification Subtype',
-        'final_determination': 'Clinical Significance',
-        'class_confidence': 'Classification Confidence',
-        
-        // Therapeutic Information
-        'eti_prediction': 'ETI Response Prediction',
-        'eti_recommendation': 'Treatment Recommendation',
-        'therapy_responsive': 'Clinical Response Status',
-        'eti_evidence_level': 'Evidence Strength',
-        
-        // Evidence & Source
-        'last_evidence_update': 'Last Evidence Review',
-        'changed_prev': 'Data Status',
-        'source_summary': 'Evidence Sources'
-    },
-    
-    // Value display mapping (DB value → Clinician-friendly display)
-    valueMapping: {
-        // CFTR Classes
-        'I': 'Class I - Minimal Function',
-        'II': 'Class II - Processing Defect',
-        'III': 'Class III - Gating Defect',
-        'IV': 'Class IV - Conductance Defect',
-        'V': 'Class V - Reduced Quantity',
-        
-        // Subtypes
-        'true': 'True Class I',
-        'exceptional': 'Exceptional Class I',
-        
-        // Clinical Significance
-        'CF-causing': 'CF-Causing Variant',
-        'Non CF-causing': 'Non CF-Causing',
-        'Varying clinical consequence': 'Variable Clinical Impact',
-        'Unknown significance': 'Unknown Significance',
-        
-        // ETI Predictions
-        'responsive': 'Likely Responsive',
-        'non_responsive': 'Likely Non-responsive',
-        'unknown': 'Response Unknown',
-        
-        // Evidence Levels
-        'clinical_trial': 'Clinical Trial Evidence',
-        'real_world': 'Real-World Evidence',
-        'in_vitro': 'In Vitro Evidence',
-        'preclinical': 'Preclinical Evidence',
-        
-        // Confidence Levels
-        'high': 'High Confidence',
-        'medium': 'Medium Confidence',
-        'low': 'Low Confidence',
-        'very_low': 'Very Low Confidence',
-        
-        // Therapy Response
-        'true': 'Responsive in Clinical Reports',
-        'false': 'Non-responsive in Clinical Reports',
-        
-        // Data Status
-        'Yes, new variant added': 'Newly Added Variant',
-        'No': 'Established Data',
-        'Updated': 'Recently Updated'
-    },
-    
-    // Recommendation display mapping
-    recommendationMapping: {
-        'True Class I - ETI not responsive': 'Not Recommended - True Class I Variant',
-        'Exceptional Class I - Consider ETI treatment': 'Consider ETI Treatment - Exceptional Class I',
-        'ETI not recommended': 'Not Recommended',
-        'Consider ETI treatment': 'Consider Treatment',
-        'Standard therapy': 'Standard CFTR Modulator Therapy'
-    },
-    
-    // Get display label for field
-    getFieldLabel: function(field) {
-        return this.fieldLabels[field] || field.replace(/_/g, ' ');
-    },
-    
-    // Get display value
-    getDisplayValue: function(field, value) {
-        if (!value || value === 'null' || value === 'undefined' || value === '') {
-            return 'Not Specified';
-        }
-        
-        // Handle boolean values
-        if (field === 'therapy_responsive') {
-            return value === true || value === 'true' ? 
-                'Responsive in Clinical Reports' : 
-                'Non-responsive in Clinical Reports';
-        }
-        
-        // Handle dates
-        if (field.includes('date') || field.includes('update')) {
-            try {
-                return new Date(value).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                });
-            } catch {
-                return value;
-            }
-        }
-        
-        // Apply mapping
-        return this.valueMapping[value] || this.recommendationMapping[value] || value;
-    },
-    
-    // Get badge styling based on value
-    getBadgeStyle: function(field, value) {
-        const styles = {
-            'cftr_class': {
-                'I': 'class-i',
-                'II': 'class-ii',
-                'III': 'class-iii',
-                'IV': 'class-iv',
-                'V': 'class-v'
-            },
-            'class_subtype': {
-                'true': 'class-i-true',
-                'exceptional': 'class-i-exceptional'
-            },
-            'eti_prediction': {
-                'responsive': 'responsive',
-                'non_responsive': 'non-responsive'
-            },
-            'final_determination': {
-                'CF-causing': 'cf-causing',
-                'Non CF-causing': 'non-cf-causing'
-            }
-        };
-        
-        const styleMap = styles[field] || {};
-        return styleMap[value] || 'default';
+    // ============================================
+    // APPLICATION STATE
+    // ============================================
+    const STATE = {
+        variants: [],               // All variants loaded from database
+        filteredVariants: [],       // Variants after search/filter
+        selectedVariant: null,      // Currently selected variant
+        activeFilter: 'all',        // Current filter ('all' or 'missing')
+        currentPage: 1,             // Current pagination page
+        searchQuery: '',            // Current search query
+        annotationContext: null,    // Context for annotation modal
+        charts: {},                 // Chart.js instances
+        showAllVariants: false      // Data view mode (false = complete data only)
+    };
+
+    // ============================================
+    // INITIALIZATION
+    // ============================================
+    document.addEventListener('DOMContentLoaded', () => {
+        initializeApp();
+    });
+
+    /**
+     * Initialize the entire application
+     */
+    async function initializeApp() {
+        console.log('Initializing Delta Helix v' + CONFIG.VERSION);
+        await loadDashboardStats();
+        await loadVariants();
+        setupEventListeners();
+        setupSearch();
+        updateViewToggleUI();
     }
-};
 
-// Badge styling configuration
-const BADGE_STYLES = {
-    'class-i': {
-        bg: 'rgba(230, 57, 70, 0.1)',
-        color: '#b91c1c',
-        border: 'rgba(220, 38, 38, 0.2)',
-        icon: 'fa-dna'
-    },
-    'class-ii': {
-        bg: 'rgba(15, 76, 129, 0.1)',
-        color: '#0f4c81',
-        border: 'rgba(15, 76, 129, 0.2)',
-        icon: 'fa-dna'
-    },
-    'class-iii': {
-        bg: 'rgba(255, 154, 60, 0.1)',
-        color: '#d97706',
-        border: 'rgba(245, 158, 11, 0.2)',
-        icon: 'fa-dna'
-    },
-    'class-iv': {
-        bg: 'rgba(42, 157, 143, 0.1)',
-        color: '#047857',
-        border: 'rgba(5, 150, 105, 0.2)',
-        icon: 'fa-dna'
-    },
-    'class-v': {
-        bg: 'rgba(147, 51, 234, 0.1)',
-        color: '#7c3aed',
-        border: 'rgba(147, 51, 234, 0.2)',
-        icon: 'fa-dna'
-    },
-    'class-i-exceptional': {
-        bg: 'rgba(255, 154, 60, 0.1)',
-        color: '#d97706',
-        border: 'rgba(245, 158, 11, 0.2)',
-        icon: 'fa-bolt'
-    },
-    'class-i-true': {
-        bg: 'rgba(220, 38, 38, 0.1)',
-        color: '#b91c1c',
-        border: 'rgba(220, 38, 38, 0.2)',
-        icon: 'fa-ban'
-    },
-    'responsive': {
-        bg: 'rgba(42, 157, 143, 0.1)',
-        color: '#047857',
-        border: 'rgba(5, 150, 105, 0.2)',
-        icon: 'fa-check'
-    },
-    'non-responsive': {
-        bg: 'rgba(220, 38, 38, 0.1)',
-        color: '#b91c1c',
-        border: 'rgba(220, 38, 38, 0.2)',
-        icon: 'fa-times'
-    },
-    'cf-causing': {
-        bg: 'rgba(220, 38, 38, 0.1)',
-        color: '#b91c1c',
-        border: 'rgba(220, 38, 38, 0.2)',
-        icon: 'fa-exclamation-triangle'
-    },
-    'non-cf-causing': {
-        bg: 'rgba(156, 163, 175, 0.1)',
-        color: '#6b7280',
-        border: 'rgba(107, 114, 128, 0.2)',
-        icon: 'fa-check-circle'
-    },
-    'default': {
-        bg: 'rgba(15, 76, 129, 0.1)',
-        color: '#0f4c81',
-        border: 'rgba(15, 76, 129, 0.2)',
-        icon: 'fa-info-circle'
-    }
-};
+    // ============================================
+    // DATA LOADING FUNCTIONS
+    // ============================================
 
-// Application State
-const STATE = {
-    variants: [],
-    filteredVariants: [],
-    selectedVariant: null,
-    activeFilter: 'all',
-    currentPage: 1,
-    searchQuery: '',
-    annotationContext: null,
-    charts: {}
-};
-
-// Initialize Application
-document.addEventListener('DOMContentLoaded', () => {
-    initializeApp();
-});
-
-// Initialize Application
-async function initializeApp() {
-    await loadDashboardStats();
-    await loadVariants();
-    setupEventListeners();
-    setupSearch();
-}
-
-// Load Dashboard Stats
-async function loadDashboardStats() {
-    try {
-        const response = await fetch(`${CONFIG.SUPABASE_URL}/rest/v1/variants?select=id,cftr_class,class_subtype,eti_prediction`, {
-            headers: {
-                'apikey': CONFIG.SUPABASE_KEY,
-                'Authorization': `Bearer ${CONFIG.SUPABASE_KEY}`
+    /**
+     * Load dashboard statistics
+     * Automatically applies complete data filter when showAllVariants is false
+     */
+    async function loadDashboardStats() {
+        try {
+            // Build URL with optional filters
+            let url = `${CONFIG.SUPABASE_URL}/rest/v1/variants?select=id,cftr_class,class_subtype,eti_prediction`;
+            
+            // Add complete data filters if not showing all variants
+            if (!STATE.showAllVariants) {
+                const filters = Object.entries(CONFIG.COMPLETE_DATA_FILTERS)
+                    .map(([key, value]) => `${key}=${value}`)
+                    .join('&');
+                url += `&${filters}`;
             }
-        });
-        
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        
-        const variants = await response.json();
-        updateDashboardStats(variants);
-        
-    } catch (error) {
-        console.error('Dashboard error:', error);
-        showNotification('Failed to load dashboard stats', 'error');
-    }
-}
-
-// Update Dashboard Stats with Clinical Display
-function updateDashboardStats(variants) {
-    const total = variants.length;
-    const classICount = variants.filter(v => v.cftr_class === 'I').length;
-    const exceptionalCount = variants.filter(v => v.class_subtype === 'exceptional').length;
-    const responsiveCount = variants.filter(v => v.eti_prediction === 'responsive').length;
-    
-    document.getElementById('statTotal').textContent = total;
-    document.getElementById('statClassI').textContent = classICount;
-    document.getElementById('statExceptional').textContent = exceptionalCount;
-    document.getElementById('statResponsive').textContent = responsiveCount;
-}
-
-// Load Variants with Clinical Display Mapping
-async function loadVariants() {
-    try {
-        const response = await fetch(`${CONFIG.SUPABASE_URL}/rest/v1/variants?select=*&order=legacy_name`, {
-            headers: {
-                'apikey': CONFIG.SUPABASE_KEY,
-                'Authorization': `Bearer ${CONFIG.SUPABASE_KEY}`,
-                'Content-Type': 'application/json'
-            }
-        });
-        
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        
-        STATE.variants = await response.json();
-        
-        // Apply clinical display mapping to all variants
-        STATE.variants.forEach(variant => {
-            variant._display = {};
-            for (const [field, value] of Object.entries(variant)) {
-                if (value !== null && value !== undefined) {
-                    variant._display[field] = {
-                        label: CLINICAL_DISPLAY.getFieldLabel(field),
-                        value: CLINICAL_DISPLAY.getDisplayValue(field, value),
-                        raw: value
-                    };
+            
+            const response = await fetch(url, {
+                headers: {
+                    'apikey': CONFIG.SUPABASE_KEY,
+                    'Authorization': `Bearer ${CONFIG.SUPABASE_KEY}`
                 }
-            }
-        });
-        
-        filterAndRenderVariants();
-        updateVariantCount();
-        updateDashboardStats(STATE.variants);
-        
-    } catch (error) {
-        console.error('Load error:', error);
-        showNotification(`Failed to load variants: ${error.message}`, 'error');
-        
-        document.getElementById('variantList').innerHTML = `
-            <div class="empty-state">
-                <i class="fas fa-exclamation-triangle empty-state-icon text-red-500"></i>
-                <p class="text-red-600 font-medium">Connection Error</p>
-                <p class="text-sm text-gray-500 mt-2">${error.message}</p>
-                <button onclick="loadVariants()" class="mt-4 px-4 py-2 bg-helix-teal text-white rounded-lg hover:bg-opacity-90">
-                    <i class="fas fa-redo mr-2"></i>
-                    Retry Connection
-                </button>
-            </div>
-        `;
-    }
-}
-
-// Create Clinical Badge Component
-function createClinicalBadge(field, value, variant) {
-    const styleKey = CLINICAL_DISPLAY.getBadgeStyle(field, value);
-    const style = BADGE_STYLES[styleKey] || BADGE_STYLES.default;
-    const displayValue = CLINICAL_DISPLAY.getDisplayValue(field, value);
-    
-    return `
-        <span class="clinical-badge" 
-              style="background: ${style.bg}; color: ${style.color}; border-color: ${style.border}">
-            <i class="fas ${style.icon} mr-2"></i>
-            ${displayValue}
-        </span>
-    `;
-}
-
-// Check if variant has missing data
-function hasMissingData(variant) {
-    const criticalFields = ['cftr_class', 'eti_prediction', 'class_confidence'];
-    return criticalFields.some(field => !variant[field] || variant[field] === 'null' || variant[field] === 'undefined');
-}
-
-// Count missing data points in section
-function countMissingInSection(variant, fields) {
-    return fields.filter(field => !variant[field] || variant[field] === 'null' || variant[field] === 'undefined').length;
-}
-
-// Filter and Render Variants
-function filterAndRenderVariants() {
-    let filtered = STATE.variants;
-    
-    // Apply search filter
-    if (STATE.searchQuery) {
-        filtered = filtered.filter(v => 
-            v.legacy_name?.toLowerCase().includes(STATE.searchQuery) ||
-            v.protein_name?.toLowerCase().includes(STATE.searchQuery) ||
-            v.cdna_name?.toLowerCase().includes(STATE.searchQuery)
-        );
-    }
-    
-    // Apply type filter
-    if (STATE.activeFilter === 'missing') {
-        filtered = filtered.filter(v => hasMissingData(v));
-    }
-    
-    STATE.filteredVariants = filtered;
-    STATE.currentPage = 1;
-    renderVariantList();
-    updatePagination();
-    updateFilterButtons();
-}
-
-// Render Variant List with Clinical Display
-function renderVariantList() {
-    const list = document.getElementById('variantList');
-    const startIdx = (STATE.currentPage - 1) * CONFIG.ITEMS_PER_PAGE;
-    const endIdx = startIdx + CONFIG.ITEMS_PER_PAGE;
-    const pageVariants = STATE.filteredVariants.slice(startIdx, endIdx);
-    
-    if (pageVariants.length === 0) {
-        list.innerHTML = `
-            <div class="empty-state">
-                <i class="fas fa-search empty-state-icon"></i>
-                <p>No variants found</p>
-                ${STATE.searchQuery ? '<p class="text-sm mt-2">Try a different search</p>' : ''}
-            </div>
-        `;
-        return;
-    }
-    
-    list.innerHTML = pageVariants.map(variant => {
-        const isSelected = STATE.selectedVariant?.id === variant.id;
-        const missingCount = countMissingInSection(variant, ['cftr_class', 'eti_prediction', 'class_confidence', 'eti_evidence_level']);
-        const hasMissing = missingCount > 0;
-        
-        return `
-            <div class="variant-cell ${isSelected ? 'selected' : ''}" 
-                 onclick="selectVariant('${variant.legacy_name}')">
-                <div class="flex justify-between items-start mb-2">
-                    <h4 class="font-semibold text-gray-800">${variant.legacy_name}</h4>
-                    ${variant.cftr_class ? createClinicalBadge('cftr_class', variant.cftr_class, variant) : ''}
-                </div>
-                
-                ${variant.protein_name ? `
-                    <div class="text-sm text-gray-600 mb-1">
-                        <strong>Protein:</strong> ${variant._display?.protein_name?.value || variant.protein_name}
-                    </div>
-                ` : ''}
-                
-                <div class="flex justify-between items-center text-xs text-gray-500">
-                    <span>${variant._display?.final_determination?.value || 'Clinical impact unknown'}</span>
-                    ${hasMissing ? `
-                        <span class="missing-count-badge" title="${missingCount} missing data points">
-                            ${missingCount}
-                        </span>
-                    ` : ''}
-                </div>
-                
-                ${variant.eti_prediction ? `
-                    <div class="text-xs mt-2">
-                        ${createClinicalBadge('eti_prediction', variant.eti_prediction, variant)}
-                    </div>
-                ` : ''}
-            </div>
-        `;
-    }).join('');
-}
-
-// Select Variant
-function selectVariant(variantName) {
-    const variant = STATE.variants.find(v => v.legacy_name === variantName);
-    if (!variant) return;
-    
-    STATE.selectedVariant = variant;
-    renderVariantDetail(variant);
-    renderVariantList();
-}
-
-// Get icon for section
-function getSectionIcon(section) {
-    const icons = {
-        'nomenclature': 'fa-tag',
-        'classification': 'fa-stethoscope',
-        'therapy': 'fa-prescription-bottle-alt',
-        'evidence': 'fa-chart-line'
-    };
-    return icons[section] || 'fa-info-circle';
-}
-
-// Create Clinical Data Point with Annotation Badge
-function createClinicalDataPoint(field, variant, section) {
-    const display = variant._display[field];
-    const isMissing = !display || !display.raw || display.raw === 'null' || display.raw === 'undefined';
-    const label = CLINICAL_DISPLAY.getFieldLabel(field);
-    const value = display ? display.value : 'Not Specified';
-    
-    return `
-        <div class="clinical-data-point ${isMissing ? 'missing' : ''}">
-            <div class="annotation-badge" 
-                 onclick="showAnnotationModal('${variant.legacy_name}', '${field}', '${display?.raw || ''}')">
-                <i class="fas ${isMissing ? 'fa-plus' : 'fa-pencil-alt'}"></i>
-            </div>
+            });
             
-            <div class="clinical-data-label">
-                <i class="fas ${getSectionIcon(section)} mr-2 text-gray-400"></i>
-                ${label}
-            </div>
-            <div class="clinical-data-value ${isMissing ? 'text-helix-amber' : ''}">
-                ${value}
-            </div>
-            
-            ${!isMissing && display.raw !== value ? `
-                <div class="clinical-data-raw text-xs text-gray-500 mt-1">
-                    <i class="fas fa-database mr-1"></i>
-                    DB value: ${display.raw}
-                </div>
-            ` : ''}
-        </div>
-    `;
-}
-
-// Update Missing Counts
-function updateMissingCounts(variant) {
-    const sections = {
-        'nomenclature': ['protein_name', 'cdna_name'],
-        'classification': ['cftr_class', 'class_subtype', 'final_determination', 'class_confidence'],
-        'therapy': ['eti_prediction', 'eti_recommendation', 'therapy_responsive'],
-        'evidence': ['eti_evidence_level', 'last_evidence_update']
-    };
-    
-    for (const [sectionId, fields] of Object.entries(sections)) {
-        const missingCount = fields.filter(field => {
-            const value = variant[field];
-            return !value || value === 'null' || value === 'undefined';
-        }).length;
-        
-        const badge = document.getElementById(`${sectionId}Missing`);
-        if (badge) {
-            if (missingCount > 0) {
-                badge.textContent = missingCount;
-                badge.classList.remove('hidden');
-            } else {
-                badge.classList.add('hidden');
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
+            
+            const variants = await response.json();
+            updateDashboardStats(variants);
+            
+        } catch (error) {
+            console.error('Dashboard error:', error);
+            showNotification('Failed to load dashboard stats', 'error');
         }
     }
-}
 
-// Render Variant Detail with Clinical Display
-function renderVariantDetail(variant) {
-    // Show content
-    document.getElementById('variantHeader').classList.remove('hidden');
-    document.getElementById('variantContent').classList.remove('hidden');
-    document.getElementById('emptyState').classList.add('hidden');
-    document.getElementById('clinicalAlertPanel').classList.add('hidden');
-    
-    const display = variant._display;
-    const missingCount = countMissingInSection(variant, ['cftr_class', 'eti_prediction', 'class_confidence', 'eti_evidence_level']);
-    
-    // Header
-    document.getElementById('variantName').textContent = variant.legacy_name;
-    
-    document.getElementById('variantClass').textContent = display.cftr_class?.value || '-';
-    document.getElementById('variantClass').className = `text-5xl font-bold ${
-        variant.class_subtype === 'exceptional' ? 'text-helix-amber' : 
-        variant.class_subtype === 'true' ? 'text-helix-red' :
-        variant.cftr_class ? 'text-helix-blue' : 'text-gray-600'
-    }`;
-    
-    document.getElementById('variantSubtype').textContent = display.class_subtype?.value || 'Standard';
-    
-    // Data completeness badge
-    document.getElementById('dataCompleteness').innerHTML = missingCount > 0 ? `
-        <span class="px-2 py-1 bg-helix-amber text-white text-xs rounded-full">
-            ${missingCount} clinical assessments needed
-        </span>
-    ` : `
-        <span class="px-2 py-1 bg-helix-green text-white text-xs rounded-full">
-            Complete clinical assessment
-        </span>
-    `;
-    
-    // Create clinical badges
-    const badges = [];
-    if (variant.cftr_class) {
-        badges.push(createClinicalBadge('cftr_class', variant.cftr_class, variant));
-    }
-    
-    if (variant.final_determination === 'CF-causing') {
-        badges.push(createClinicalBadge('final_determination', variant.final_determination, variant));
-    }
-    
-    if (variant.eti_prediction) {
-        badges.push(createClinicalBadge('eti_prediction', variant.eti_prediction, variant));
-    }
-    
-    document.getElementById('variantBadges').innerHTML = badges.join('');
-    
-    // Nomenclature Section
-    document.getElementById('nomenclatureGrid').innerHTML = [
-        createClinicalDataPoint('legacy_name', variant, 'nomenclature'),
-        createClinicalDataPoint('protein_name', variant, 'nomenclature'),
-        createClinicalDataPoint('cdna_name', variant, 'nomenclature')
-    ].join('');
-    
-    // Clinical Classification Section
-    document.getElementById('clinicalImpact').innerHTML = [
-        createClinicalDataPoint('cftr_class', variant, 'classification'),
-        createClinicalDataPoint('class_subtype', variant, 'classification'),
-        createClinicalDataPoint('final_determination', variant, 'classification'),
-        createClinicalDataPoint('class_confidence', variant, 'classification')
-    ].join('');
-    
-    // Therapeutic Prediction Section
-    document.getElementById('therapeuticPrediction').innerHTML = [
-        createClinicalDataPoint('eti_prediction', variant, 'therapy'),
-        createClinicalDataPoint('eti_recommendation', variant, 'therapy'),
-        createClinicalDataPoint('therapy_responsive', variant, 'therapy')
-    ].join('');
-    
-    // Evidence Quality Section
-    document.getElementById('evidenceQuality').innerHTML = [
-        createClinicalDataPoint('eti_evidence_level', variant, 'evidence'),
-        createClinicalDataPoint('last_evidence_update', variant, 'evidence'),
-        createClinicalDataPoint('changed_prev', variant, 'evidence')
-    ].join('');
-    
-    // Update missing counts
-    updateMissingCounts(variant);
-    
-    // Clinical Alert
-    if (variant.clinical_alert && !variant.clinical_alert.includes('Standard')) {
-        const alertType = variant.class_subtype === 'exceptional' ? 'warning' : 
-                        variant.class_subtype === 'true' ? 'critical' : 'info';
-        
-        document.getElementById('clinicalAlertPanel').classList.remove('hidden');
-        document.getElementById('clinicalAlertPanel').className = `helix-alert helix-alert-${alertType} mb-6`;
-        
-        document.getElementById('alertContent').innerHTML = `
-            <i class="fas ${variant.class_subtype === 'exceptional' ? 'fa-bolt' : 'fa-exclamation-triangle'} mt-1 mr-4 
-               ${variant.class_subtype === 'exceptional' ? 'text-helix-amber' : 'text-helix-red'} text-xl"></i>
-            <div>
-                <div class="font-bold text-lg mb-2">Clinical Alert</div>
-                <div class="text-gray-800 mb-3">${variant.clinical_alert}</div>
-                ${variant.eti_recommendation ? `
-                    <div class="font-medium text-gray-700">
-                        <i class="fas fa-lightbulb mr-2"></i>
-                        ${display.eti_recommendation?.value || variant.eti_recommendation}
-                    </div>
-                ` : ''}
-            </div>
-        `;
-    }
-    
-    // Evidence Chain with Clinical Display
-    if (variant.source_summary) {
-        const sourceParts = variant.source_summary.split('_').filter(p => p && !p.match(/^\d/));
-        const displaySources = sourceParts.map(part => {
-            const cleanPart = part
-                .replace(/CFTR2/g, 'CFTR2 Database')
-                .replace(/Burgel/g, 'Burgel et al.')
-                .replace(/true/g, 'True Class I')
-                .replace(/exceptional/g, 'Exceptional Class I')
-                .replace(/responsive/g, 'ETI Responsive')
-                .replace(/non_responsive/g, 'ETI Non-responsive')
-                .replace(/(\d{4})/g, '$1');
-            return `<span class="source-badge">${cleanPart}</span>`;
-        }).join('<i class="fas fa-arrow-right text-gray-300 mx-2"></i>');
-        
-        document.getElementById('evidenceChain').innerHTML = `
-            <div class="flex items-center flex-wrap">
-                ${displaySources}
-            </div>
-        `;
-    }
-}
-
-// Create Select Input
-function createSelectInput(field, currentValue, options) {
-    return `
-        <select id="annotationValue" class="clinical-select">
-            <option value="">Select clinical assessment...</option>
-            ${options.map(opt => `
-                <option value="${opt.value}" ${currentValue === opt.value ? 'selected' : ''}>
-                    ${opt.label}
-                </option>
-            `).join('')}
-        </select>
-    `;
-}
-
-// Show Annotation Modal with Clinical Context
-function showAnnotationModal(variantName, field, currentValue) {
-    const variant = STATE.variants.find(v => v.legacy_name === variantName);
-    if (!variant) return;
-    
-    STATE.annotationContext = { variant, field, currentValue };
-    
-    const fieldLabel = CLINICAL_DISPLAY.getFieldLabel(field);
-    const displayValue = CLINICAL_DISPLAY.getDisplayValue(field, currentValue);
-    
-    // Create field-specific input options
-    let inputHtml = '';
-    if (field === 'cftr_class') {
-        inputHtml = createSelectInput(field, currentValue, [
-            { value: 'I', label: 'Class I - Minimal Function' },
-            { value: 'II', label: 'Class II - Processing Defect' },
-            { value: 'III', label: 'Class III - Gating Defect' },
-            { value: 'IV', label: 'Class IV - Conductance Defect' },
-            { value: 'V', label: 'Class V - Reduced Quantity' }
-        ]);
-    } else if (field === 'eti_prediction') {
-        inputHtml = createSelectInput(field, currentValue, [
-            { value: 'responsive', label: 'Likely Responsive' },
-            { value: 'non_responsive', label: 'Likely Non-responsive' },
-            { value: 'unknown', label: 'Response Unknown' }
-        ]);
-    } else if (field === 'therapy_responsive') {
-        inputHtml = createSelectInput(field, currentValue, [
-            { value: 'true', label: 'Responsive in Clinical Reports' },
-            { value: 'false', label: 'Non-responsive in Clinical Reports' }
-        ]);
-    } else if (field === 'eti_evidence_level') {
-        inputHtml = createSelectInput(field, currentValue, [
-            { value: 'clinical_trial', label: 'Clinical Trial Evidence' },
-            { value: 'real_world', label: 'Real-World Evidence' },
-            { value: 'in_vitro', label: 'In Vitro Evidence' },
-            { value: 'preclinical', label: 'Preclinical Evidence' }
-        ]);
-    } else if (field === 'class_confidence') {
-        inputHtml = createSelectInput(field, currentValue, [
-            { value: 'high', label: 'High Confidence' },
-            { value: 'medium', label: 'Medium Confidence' },
-            { value: 'low', label: 'Low Confidence' },
-            { value: 'very_low', label: 'Very Low Confidence' }
-        ]);
-    } else if (field === 'class_subtype') {
-        inputHtml = createSelectInput(field, currentValue, [
-            { value: 'true', label: 'True Class I' },
-            { value: 'exceptional', label: 'Exceptional Class I' }
-        ]);
-    } else {
-        inputHtml = `
-            <textarea id="annotationValue" 
-                      class="clinical-input"
-                      rows="3"
-                      placeholder="Enter ${fieldLabel.toLowerCase()}...">${currentValue || ''}</textarea>
-        `;
-    }
-    
-    document.getElementById('annotationTitle').textContent = `Annotate Clinical Data`;
-    document.getElementById('annotationField').textContent = `${variantName} - ${fieldLabel}`;
-    
-    document.getElementById('annotationContent').innerHTML = `
-        <div class="clinical-context">
-            <div class="context-header">
-                <i class="fas fa-clipboard-check text-helix-teal"></i>
-                <span>Clinical Annotation</span>
-            </div>
-            <div class="current-value-display">
-                <label>Current Clinical Assessment:</label>
-                <div class="value-box">${displayValue || '<em>Not yet assessed</em>'}</div>
-            </div>
-        </div>
-        
-        <div class="annotation-input-section">
-            <label class="input-label">
-                <i class="fas fa-edit text-helix-amber mr-2"></i>
-                Update Clinical Assessment:
-            </label>
-            ${inputHtml}
+    /**
+     * Load variants from database
+     * Applies complete data filter when showAllVariants is false
+     */
+    async function loadVariants() {
+        try {
+            // Build query based on current view mode
+            let url = `${CONFIG.SUPABASE_URL}/rest/v1/variants?select=*&order=legacy_name`;
             
-            ${field === 'cftr_class' ? `
-                <div class="clinical-guidance mt-3">
-                    <i class="fas fa-info-circle text-blue-500 mr-2"></i>
-                    <span class="text-sm text-gray-600">
-                        Class I: Minimal CFTR function. Class II: Trafficking defect. 
-                        Class III: Gating defect. Class IV: Conductance defect. Class V: Reduced synthesis.
-                    </span>
-                </div>
-            ` : ''}
-        </div>
-    `;
-    
-    document.getElementById('annotationModal').classList.remove('hidden');
-}
-
-// Save Annotation
-async function saveAnnotation() {
-    if (!STATE.annotationContext) return;
-    
-    const { variant, field } = STATE.annotationContext;
-    const newValue = document.getElementById('annotationValue').value;
-    
-    try {
-        // Update in Supabase
-        const response = await fetch(
-            `${CONFIG.SUPABASE_URL}/rest/v1/variants?id=eq.${variant.id}`,
-            {
-                method: 'PATCH',
+            // Add complete data filters if not showing all variants
+            if (!STATE.showAllVariants) {
+                const filters = Object.entries(CONFIG.COMPLETE_DATA_FILTERS)
+                    .map(([key, value]) => `${key}=${value}`)
+                    .join('&');
+                url += `&${filters}`;
+            }
+            
+            const response = await fetch(url, {
                 headers: {
                     'apikey': CONFIG.SUPABASE_KEY,
                     'Authorization': `Bearer ${CONFIG.SUPABASE_KEY}`,
                     'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    [field]: newValue,
-                    updated_at: new Date().toISOString()
-                })
-            }
-        );
-        
-        if (!response.ok) {
-            throw new Error(`Update failed: ${response.status}`);
-        }
-        
-        // Update local state
-        STATE.variants = STATE.variants.map(v => 
-            v.id === variant.id ? {...v, [field]: newValue} : v
-        );
-        
-        // Update display mapping for this variant
-        const updatedVariant = STATE.variants.find(v => v.id === variant.id);
-        if (updatedVariant) {
-            updatedVariant._display[field] = {
-                label: CLINICAL_DISPLAY.getFieldLabel(field),
-                value: CLINICAL_DISPLAY.getDisplayValue(field, newValue),
-                raw: newValue
-            };
-        }
-        
-        if (STATE.selectedVariant?.id === variant.id) {
-            STATE.selectedVariant = updatedVariant;
-            renderVariantDetail(updatedVariant);
-        }
-        
-        closeAnnotationModal();
-        showNotification('Clinical assessment saved successfully', 'success');
-        filterAndRenderVariants();
-        updateDashboardStats(STATE.variants);
-        
-    } catch (error) {
-        console.error('Save error:', error);
-        showNotification('Failed to save clinical assessment', 'error');
-    }
-}
-
-// Close Annotation Modal
-function closeAnnotationModal() {
-    document.getElementById('annotationModal').classList.add('hidden');
-    STATE.annotationContext = null;
-}
-
-// Search and Filter
-function setupSearch() {
-    const searchInput = document.getElementById('searchInput');
-    let timeout;
-    
-    searchInput.addEventListener('input', () => {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => {
-            STATE.searchQuery = searchInput.value.toLowerCase();
-            filterAndRenderVariants();
-        }, 300);
-    });
-}
-
-function filterVariants(filter) {
-    STATE.activeFilter = filter;
-    filterAndRenderVariants();
-}
-
-function updateFilterButtons() {
-    const buttons = ['all', 'missing'];
-    buttons.forEach(btn => {
-        const element = document.getElementById(`filter${btn.charAt(0).toUpperCase() + btn.slice(1)}`);
-        if (element) {
-            if (btn === STATE.activeFilter) {
-                element.style.borderColor = btn === 'missing' ? '#ff9a3c' : '#00a8b5';
-                element.style.color = btn === 'missing' ? '#ff9a3c' : '#00a8b5';
-                element.style.fontWeight = '600';
-            } else {
-                element.style.borderColor = '';
-                element.style.color = '';
-                element.style.fontWeight = '';
-            }
-        }
-    });
-}
-
-// Pagination
-function updatePagination() {
-    const totalPages = Math.ceil(STATE.filteredVariants.length / CONFIG.ITEMS_PER_PAGE);
-    const pagination = document.getElementById('paginationControls');
-    
-    if (totalPages > 1) {
-        pagination.style.display = 'flex';
-        document.getElementById('currentPage').textContent = STATE.currentPage;
-        document.getElementById('totalPages').textContent = totalPages;
-        document.getElementById('prevBtn').disabled = STATE.currentPage === 1;
-        document.getElementById('nextBtn').disabled = STATE.currentPage === totalPages;
-    } else {
-        pagination.style.display = 'none';
-    }
-}
-
-function nextPage() {
-    const totalPages = Math.ceil(STATE.filteredVariants.length / CONFIG.ITEMS_PER_PAGE);
-    if (STATE.currentPage < totalPages) {
-        STATE.currentPage++;
-        renderVariantList();
-        updatePagination();
-    }
-}
-
-function previousPage() {
-    if (STATE.currentPage > 1) {
-        STATE.currentPage--;
-        renderVariantList();
-        updatePagination();
-    }
-}
-
-// Update Count
-function updateVariantCount() {
-    document.getElementById('variantCount').textContent = STATE.filteredVariants.length;
-}
-
-// Quick Search
-function quickSearch(variantName) {
-    document.getElementById('searchInput').value = variantName;
-    STATE.searchQuery = variantName.toLowerCase();
-    filterAndRenderVariants();
-    
-    setTimeout(() => {
-        const variant = STATE.variants.find(v => v.legacy_name === variantName);
-        if (variant) selectVariant(variantName);
-    }, 100);
-}
-
-// IMPORT FUNCTIONS
-function showImportModal() {
-    document.getElementById('importModal').classList.remove('hidden');
-}
-
-function closeImportModal() {
-    document.getElementById('importModal').classList.add('hidden');
-    document.getElementById('jsonInput').value = '';
-    document.getElementById('importResults').innerHTML = '';
-}
-
-// Validate Import
-async function validateImport() {
-    const jsonInput = document.getElementById('jsonInput').value;
-    const resultsDiv = document.getElementById('importResults');
-    
-    resultsDiv.innerHTML = `
-        <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <div class="flex items-center">
-                <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-3"></div>
-                <p class="text-blue-800">Validating clinical data...</p>
-            </div>
-        </div>
-    `;
-    
-    try {
-        const data = JSON.parse(jsonInput);
-        const items = Array.isArray(data) ? data : [data];
-        
-        const firstItem = items[0];
-        if (!firstItem.variant_legacy_name) {
-            throw new Error('Missing required field: variant_legacy_name');
-        }
-        
-        resultsDiv.innerHTML = `
-            <div class="p-4 bg-green-50 border border-green-200 rounded-lg">
-                <div class="flex items-center">
-                    <i class="fas fa-check-circle text-green-600 mr-3"></i>
-                    <div>
-                        <p class="font-medium text-green-800">✓ Clinical Data Validated</p>
-                        <p class="text-sm text-green-600">
-                            ${items.length} variant${items.length !== 1 ? 's' : ''} ready for import
-                        </p>
-                    </div>
-                </div>
-            </div>
+                }
+            });
             
-            <div class="mt-4">
-                <button onclick="executeImport(${JSON.stringify(items).replace(/"/g, '&quot;')})" 
-                        class="w-full action-button action-button-primary">
-                    <i class="fas fa-cloud-upload-alt mr-2"></i>
-                    Import ${items.length} Clinical Variant${items.length !== 1 ? 's' : ''}
-                </button>
-            </div>
-        `;
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            STATE.variants = await response.json();
+            console.log(`Loaded ${STATE.variants.length} variants ` + 
+                       `(${STATE.showAllVariants ? 'all variants' : 'complete data only'})`);
+            
+            filterAndRenderVariants();
+            updateVariantCount();
+            updateDashboardStats(STATE.variants);
+            
+        } catch (error) {
+            console.error('Load error:', error);
+            showNotification(`Failed to load variants: ${error.message}`, 'error');
+            
+            // Show error state
+            document.getElementById('variantList').innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-exclamation-triangle empty-state-icon text-red-500"></i>
+                    <p class="text-red-600 font-medium">Connection Error</p>
+                    <p class="text-sm text-gray-500 mt-2">${error.message}</p>
+                    <button onclick="loadVariants()" class="mt-4 px-4 py-2 bg-helix-teal text-white rounded-lg hover:bg-opacity-90">
+                        <i class="fas fa-redo mr-2"></i>
+                        Retry Connection
+                    </button>
+                </div>
+            `;
+        }
+    }
+
+    // ============================================
+    // DASHBOARD STATS FUNCTIONS
+    // ============================================
+
+    /**
+     * Update dashboard statistics display
+     */
+    function updateDashboardStats(variants) {
+        const total = variants.length;
+        const classICount = variants.filter(v => v.cftr_class === 'I').length;
+        const exceptionalCount = variants.filter(v => v.class_subtype === 'exceptional').length;
+        const responsiveCount = variants.filter(v => v.eti_prediction === 'responsive').length;
         
-    } catch (error) {
-        resultsDiv.innerHTML = `
-            <div class="p-4 bg-red-50 border border-red-200 rounded-lg">
-                <div class="flex items-center">
-                    <i class="fas fa-exclamation-circle text-red-600 mr-3"></i>
-                    <div>
-                        <p class="font-medium text-red-800">✗ Validation Failed</p>
-                        <p class="text-sm text-red-600">${error.message}</p>
+        document.getElementById('statTotal').textContent = total;
+        document.getElementById('statClassI').textContent = classICount;
+        document.getElementById('statExceptional').textContent = exceptionalCount;
+        document.getElementById('statResponsive').textContent = responsiveCount;
+        
+        // Add tooltip with context
+        const totalElement = document.getElementById('statTotal');
+        if (STATE.showAllVariants) {
+            totalElement.title = 'All 2,102 variants in database';
+        } else {
+            totalElement.title = '1,002 variants with complete clinical data (of 2,102 total)';
+        }
+    }
+
+    // ============================================
+    // DATA VIEW TOGGLE SYSTEM
+    // ============================================
+
+    /**
+     * Toggle between showing all variants vs complete data only
+     */
+    function toggleDataView() {
+        STATE.showAllVariants = !STATE.showAllVariants;
+        
+        // Update UI immediately for better UX
+        updateViewToggleUI();
+        
+        showNotification(
+            STATE.showAllVariants ? 
+            'Now showing all 2,102 variants in database' : 
+            'Now showing 1,002 variants with complete clinical data', 
+            'info'
+        );
+        
+        // Reload data with new filter settings
+        loadVariants();
+        loadDashboardStats();
+    }
+
+    /**
+     * Update the view toggle UI elements
+     */
+    function updateViewToggleUI() {
+        const banner = document.getElementById('dataViewBanner');
+        const viewModeText = document.getElementById('viewModeText');
+        const toggleButtonText = document.getElementById('toggleButtonText');
+        const viewModeBadge = document.getElementById('viewModeBadge');
+        
+        if (STATE.showAllVariants) {
+            // All variants view
+            banner.className = 'mb-6 helix-card p-4 bg-gradient-to-r from-gray-50 to-blue-50 border border-gray-200';
+            viewModeText.textContent = 'all variants in database';
+            viewModeText.className = 'font-semibold text-gray-700';
+            toggleButtonText.textContent = 'Show Complete Data Only';
+            viewModeBadge.textContent = 'All Variants';
+            viewModeBadge.className = 'ml-2 px-2 py-1 bg-gray-500 text-white rounded-full text-xs';
+        } else {
+            // Complete data view
+            banner.className = 'mb-6 helix-card p-4 bg-gradient-to-r from-blue-50 to-teal-50 border border-blue-100';
+            viewModeText.textContent = 'complete clinical data only';
+            viewModeText.className = 'font-semibold text-helix-blue';
+            toggleButtonText.textContent = 'Show All Variants';
+            viewModeBadge.textContent = 'Complete Data';
+            viewModeBadge.className = 'ml-2 px-2 py-1 bg-helix-teal text-white rounded-full text-xs';
+        }
+    }
+
+    // ============================================
+    // VARIANT LIST MANAGEMENT
+    // ============================================
+
+    /**
+     * Check if a variant has missing critical data
+     */
+    function hasMissingData(variant) {
+        const criticalFields = ['cftr_class', 'eti_prediction', 'class_confidence'];
+        return criticalFields.some(field => !variant[field] || variant[field] === 'null' || variant[field] === 'undefined');
+    }
+
+    /**
+     * Count missing data points in a section
+     */
+    function countMissingInSection(variant, fields) {
+        return fields.filter(field => !variant[field] || variant[field] === 'null' || variant[field] === 'undefined').length;
+    }
+
+    /**
+     * Filter and render variants based on current state
+     */
+    function filterAndRenderVariants() {
+        let filtered = STATE.variants;
+        
+        // Apply search filter
+        if (STATE.searchQuery) {
+            filtered = filtered.filter(v => 
+                v.legacy_name?.toLowerCase().includes(STATE.searchQuery) ||
+                v.protein_name?.toLowerCase().includes(STATE.searchQuery) ||
+                v.cdna_name?.toLowerCase().includes(STATE.searchQuery)
+            );
+        }
+        
+        // Apply type filter
+        if (STATE.activeFilter === 'missing') {
+            filtered = filtered.filter(v => hasMissingData(v));
+        }
+        
+        STATE.filteredVariants = filtered;
+        STATE.currentPage = 1;
+        renderVariantList();
+        updatePagination();
+        updateFilterButtons();
+        updateViewToggleUI();
+    }
+
+    /**
+     * Render the variant list
+     */
+    function renderVariantList() {
+        const list = document.getElementById('variantList');
+        const startIdx = (STATE.currentPage - 1) * CONFIG.ITEMS_PER_PAGE;
+        const endIdx = startIdx + CONFIG.ITEMS_PER_PAGE;
+        const pageVariants = STATE.filteredVariants.slice(startIdx, endIdx);
+        
+        if (pageVariants.length === 0) {
+            list.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-search empty-state-icon"></i>
+                    <p>No variants found</p>
+                    ${STATE.searchQuery ? '<p class="text-sm mt-2">Try a different search</p>' : ''}
+                </div>
+            `;
+            return;
+        }
+        
+        list.innerHTML = pageVariants.map(variant => {
+            const isSelected = STATE.selectedVariant?.id === variant.id;
+            const missingCount = countMissingInSection(variant, ['cftr_class', 'eti_prediction', 'class_confidence', 'eti_evidence_level']);
+            const hasMissing = missingCount > 0;
+            
+            return `
+                <div class="variant-cell ${isSelected ? 'selected' : ''}" 
+                     onclick="selectVariant('${variant.legacy_name}')">
+                    <div class="flex justify-between items-start mb-2">
+                        <h4 class="font-semibold text-gray-800">${variant.legacy_name}</h4>
+                        ${variant.cftr_class ? `
+                            <span class="helix-badge helix-badge-class-i">
+                                Class ${variant.cftr_class}
+                            </span>
+                        ` : ''}
                     </div>
+                    
+                    ${variant.protein_name ? `
+                        <div class="text-sm text-gray-600 mb-1 font-mono">${variant.protein_name}</div>
+                    ` : ''}
+                    
+                    <div class="flex justify-between items-center text-xs text-gray-500">
+                        <span>${variant.final_determination || 'Clinical impact unknown'}</span>
+                        ${hasMissing ? `
+                            <span class="missing-count-badge" title="${missingCount} missing data points">
+                                ${missingCount}
+                            </span>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // ============================================
+    // VARIANT DETAIL MANAGEMENT
+    // ============================================
+
+    /**
+     * Select a variant and display its details
+     */
+    function selectVariant(variantName) {
+        const variant = STATE.variants.find(v => v.legacy_name === variantName);
+        if (!variant) return;
+        
+        STATE.selectedVariant = variant;
+        renderVariantDetail(variant);
+        renderVariantList();
+    }
+
+    /**
+     * Create an annotatable data point component
+     */
+    function createAnnotatableDataPoint(label, value, field, variant, section) {
+        const isMissing = !value || value === 'null' || value === 'undefined';
+        
+        let displayValue = value;
+        if (isMissing) {
+            displayValue = 'Not specified';
+        }
+        
+        return `
+            <div class="data-point-annotatable ${isMissing ? 'missing' : ''}">
+                <div class="annotation-badge" onclick="showAnnotationModal('${variant.legacy_name}', '${field}', '${value || ''}')">
+                    <i class="fas ${isMissing ? 'fa-plus' : 'fa-pencil-alt'}"></i>
+                </div>
+                
+                <div class="helix-data-label">${label}</div>
+                <div class="helix-data-value ${isMissing ? 'text-helix-amber' : ''}">
+                    ${displayValue}
                 </div>
             </div>
         `;
     }
-}
 
-// Execute Import
-async function executeImport(data) {
-    const resultsDiv = document.getElementById('importResults');
-    
-    let successCount = 0;
-    let updateCount = 0;
-    let skipCount = 0;
-    let errorCount = 0;
-    
-    resultsDiv.innerHTML = `
-        <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <div class="flex items-center">
-                <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-3"></div>
+    /**
+     * Render variant detail view
+     */
+    function renderVariantDetail(variant) {
+        // Show content sections
+        document.getElementById('variantHeader').classList.remove('hidden');
+        document.getElementById('variantContent').classList.remove('hidden');
+        document.getElementById('emptyState').classList.add('hidden');
+        document.getElementById('clinicalAlertPanel').classList.add('hidden');
+        
+        const isExceptional = variant.class_subtype === 'exceptional';
+        const isResponsive = variant.eti_prediction === 'responsive';
+        const missingCount = countMissingInSection(variant, ['cftr_class', 'eti_prediction', 'class_confidence', 'eti_evidence_level']);
+        
+        // Update header
+        document.getElementById('variantName').textContent = variant.legacy_name;
+        
+        const displayClass = variant.cftr_class || 
+            (variant.class_subtype === 'exceptional' || variant.class_subtype === 'true' ? 'I' : '-');
+        
+        document.getElementById('variantClass').textContent = displayClass;
+        document.getElementById('variantClass').className = `text-5xl font-bold ${
+            isExceptional ? 'text-helix-amber' : 
+            variant.class_subtype === 'true' ? 'text-helix-red' :
+            variant.cftr_class ? 'text-helix-blue' : 'text-gray-600'
+        }`;
+        
+        document.getElementById('variantSubtype').textContent = 
+            variant.class_subtype || (variant.cftr_class ? 'Standard' : 'Unknown');
+        
+        // Data completeness badge
+        document.getElementById('dataCompleteness').innerHTML = missingCount > 0 ? `
+            <span class="px-2 py-1 bg-helix-amber text-white text-xs rounded-full">
+                ${missingCount} data points need annotation
+            </span>
+        ` : `
+            <span class="px-2 py-1 bg-helix-green text-white text-xs rounded-full">
+                Complete clinical data
+            </span>
+        `;
+        
+        // Render badges
+        const badges = [];
+        if (displayClass !== '-') {
+            badges.push(`
+                <span class="helix-badge ${isExceptional ? 'helix-badge-exceptional' : 'helix-badge-class-i'}">
+                    <i class="fas ${isExceptional ? 'fa-bolt' : 'fa-dna'}"></i>
+                    Class ${displayClass}
+                </span>
+            `);
+        }
+        
+        if (variant.final_determination === 'CF-causing') {
+            badges.push(`
+                <span class="helix-badge" style="background: rgba(220, 38, 38, 0.1); color: #b91c1c; border-color: rgba(220, 38, 38, 0.2);">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    CF-causing
+                </span>
+            `);
+        }
+        
+        if (variant.eti_prediction) {
+            badges.push(`
+                <span class="helix-badge ${isResponsive ? 'helix-badge-responsive' : ''}" 
+                      style="${!isResponsive ? 'background: rgba(220, 38, 38, 0.1); color: #b91c1c; border-color: rgba(220, 38, 38, 0.2);' : ''}">
+                    <i class="fas ${isResponsive ? 'fa-check' : 'fa-times'}"></i>
+                    ETI ${variant.eti_prediction}
+                </span>
+            `);
+        }
+        
+        document.getElementById('variantBadges').innerHTML = badges.join('');
+        
+        // Nomenclature Section
+        const nomenclaturePoints = [
+            createAnnotatableDataPoint('Legacy Name', variant.legacy_name, 'legacy_name', variant, 'nomenclature'),
+            createAnnotatableDataPoint('Protein Notation', variant.protein_name, 'protein_name', variant, 'nomenclature'),
+            createAnnotatableDataPoint('cDNA Notation', variant.cdna_name, 'cdna_name', variant, 'nomenclature')
+        ];
+        
+        document.getElementById('nomenclatureGrid').innerHTML = nomenclaturePoints.join('');
+        
+        // Update missing count for nomenclature
+        const nomenclatureMissing = nomenclaturePoints.filter(p => p.includes('missing')).length;
+        const nomenclatureBadge = document.getElementById('nomenclatureMissing');
+        if (nomenclatureMissing > 0) {
+            nomenclatureBadge.textContent = nomenclatureMissing;
+            nomenclatureBadge.classList.remove('hidden');
+        } else {
+            nomenclatureBadge.classList.add('hidden');
+        }
+        
+        // Clinical Classification Section
+        const classificationPoints = [
+            createAnnotatableDataPoint('CFTR Class', variant.cftr_class, 'cftr_class', variant, 'classification'),
+            createAnnotatableDataPoint('Classification Subtype', variant.class_subtype, 'class_subtype', variant, 'classification'),
+            createAnnotatableDataPoint('Clinical Impact', variant.final_determination, 'final_determination', variant, 'classification'),
+            createAnnotatableDataPoint('Confidence Level', variant.class_confidence, 'class_confidence', variant, 'classification')
+        ];
+        
+        document.getElementById('clinicalImpact').innerHTML = classificationPoints.join('');
+        
+        // Update missing count for classification
+        const classificationMissing = classificationPoints.filter(p => p.includes('missing')).length;
+        const classificationBadge = document.getElementById('classificationMissing');
+        if (classificationMissing > 0) {
+            classificationBadge.textContent = classificationMissing;
+            classificationBadge.classList.remove('hidden');
+        } else {
+            classificationBadge.classList.add('hidden');
+        }
+        
+        // Therapeutic Prediction Section
+        const therapyPoints = [
+            createAnnotatableDataPoint('ETI Response', variant.eti_prediction, 'eti_prediction', variant, 'therapy'),
+            createAnnotatableDataPoint('Therapy Recommendation', variant.eti_recommendation, 'eti_recommendation', variant, 'therapy'),
+            createAnnotatableDataPoint('Therapy Responsive', variant.therapy_responsive !== null ? (variant.therapy_responsive ? 'Yes' : 'No') : null, 'therapy_responsive', variant, 'therapy')
+        ];
+        
+        document.getElementById('therapeuticPrediction').innerHTML = therapyPoints.join('');
+        
+        // Update missing count for therapy
+        const therapyMissing = therapyPoints.filter(p => p.includes('missing')).length;
+        const therapyBadge = document.getElementById('therapyMissing');
+        if (therapyMissing > 0) {
+            therapyBadge.textContent = therapyMissing;
+            therapyBadge.classList.remove('hidden');
+        } else {
+            therapyBadge.classList.add('hidden');
+        }
+        
+        // Evidence Quality Section
+        const evidencePoints = [
+            createAnnotatableDataPoint('Evidence Level', variant.eti_evidence_level, 'eti_evidence_level', variant, 'evidence'),
+            createAnnotatableDataPoint('Last Evidence Update', variant.last_evidence_update ? new Date(variant.last_evidence_update).toLocaleDateString() : null, 'last_evidence_update', variant, 'evidence'),
+            createAnnotatableDataPoint('Data Status', variant.changed_prev, 'changed_prev', variant, 'evidence')
+        ];
+        
+        document.getElementById('evidenceQuality').innerHTML = evidencePoints.join('');
+        
+        // Update missing count for evidence
+        const evidenceMissing = evidencePoints.filter(p => p.includes('missing')).length;
+        const evidenceBadge = document.getElementById('evidenceMissing');
+        if (evidenceMissing > 0) {
+            evidenceBadge.textContent = evidenceMissing;
+            evidenceBadge.classList.remove('hidden');
+        } else {
+            evidenceBadge.classList.add('hidden');
+        }
+        
+        // Clinical Alert
+        if (variant.clinical_alert && !variant.clinical_alert.includes('Standard')) {
+            const alertType = isExceptional ? 'warning' : 
+                            variant.class_subtype === 'true' ? 'critical' : 'info';
+            
+            document.getElementById('clinicalAlertPanel').classList.remove('hidden');
+            document.getElementById('clinicalAlertPanel').className = `helix-alert helix-alert-${alertType} mb-6`;
+            
+            document.getElementById('alertContent').innerHTML = `
+                <i class="fas ${isExceptional ? 'fa-bolt' : 'fa-exclamation-triangle'} mt-1 mr-4 
+                   ${isExceptional ? 'text-helix-amber' : 'text-helix-red'} text-xl"></i>
                 <div>
-                    <p class="font-medium text-blue-800">Importing ${data.length} clinical variants...</p>
-                    <div class="text-xs text-blue-600 mt-1">
-                        Processing clinical data...
-                    </div>
+                    <div class="font-bold text-lg mb-2">Clinical Alert</div>
+                    <div class="text-gray-800 mb-3">${variant.clinical_alert}</div>
+                    ${variant.eti_recommendation ? `
+                        <div class="font-medium text-gray-700">
+                            <i class="fas fa-lightbulb mr-2"></i>
+                            ${variant.eti_recommendation}
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+        
+        // Evidence Chain
+        if (variant.source_summary) {
+            document.getElementById('evidenceChain').innerHTML = `
+                <div class="flex flex-wrap items-center gap-2">
+                    ${variant.source_summary.split('_').map((part, i) => `
+                        <span class="px-3 py-1 bg-gray-100 rounded-lg text-sm">${part}</span>
+                        ${i < variant.source_summary.split('_').length - 1 ? '<i class="fas fa-arrow-right text-gray-300"></i>' : ''}
+                    `).join('')}
+                </div>
+            `;
+        }
+    }
+
+    // ============================================
+    // ANNOTATION SYSTEM
+    // ============================================
+
+    /**
+     * Show annotation modal for a specific field
+     */
+    function showAnnotationModal(variantName, field, currentValue) {
+        const variant = STATE.variants.find(v => v.legacy_name === variantName);
+        if (!variant) return;
+        
+        STATE.annotationContext = { variant, field, currentValue };
+        
+        // Field display names mapping
+        const fieldNames = {
+            'legacy_name': 'Legacy Name',
+            'protein_name': 'Protein Notation',
+            'cdna_name': 'cDNA Notation',
+            'final_determination': 'Clinical Impact',
+            'cftr_class': 'CFTR Class',
+            'class_subtype': 'Classification Subtype',
+            'class_confidence': 'Confidence Level',
+            'eti_prediction': 'ETI Response',
+            'eti_recommendation': 'Therapy Recommendation',
+            'therapy_responsive': 'Therapy Responsive',
+            'eti_evidence_level': 'Evidence Level',
+            'last_evidence_update': 'Last Evidence Update',
+            'changed_prev': 'Data Status'
+        };
+        
+        // Field-specific input options
+        let options = '';
+        const fieldDisplay = fieldNames[field] || field.replace(/_/g, ' ');
+        
+        if (field === 'cftr_class') {
+            options = `
+                <select id="annotationValue" class="w-full p-2 border border-gray-300 rounded-lg">
+                    <option value="">Select Class</option>
+                    <option value="I" ${currentValue === 'I' ? 'selected' : ''}>Class I</option>
+                    <option value="II" ${currentValue === 'II' ? 'selected' : ''}>Class II</option>
+                    <option value="III" ${currentValue === 'III' ? 'selected' : ''}>Class III</option>
+                    <option value="IV" ${currentValue === 'IV' ? 'selected' : ''}>Class IV</option>
+                    <option value="V" ${currentValue === 'V' ? 'selected' : ''}>Class V</option>
+                </select>
+            `;
+        } else if (field === 'eti_prediction') {
+            options = `
+                <select id="annotationValue" class="w-full p-2 border border-gray-300 rounded-lg">
+                    <option value="">Select Response</option>
+                    <option value="responsive" ${currentValue === 'responsive' ? 'selected' : ''}>Responsive</option>
+                    <option value="non_responsive" ${currentValue === 'non_responsive' ? 'selected' : ''}>Non-responsive</option>
+                    <option value="unknown" ${currentValue === 'unknown' ? 'selected' : ''}>Unknown</option>
+                </select>
+            `;
+        } else if (field === 'therapy_responsive') {
+            options = `
+                <select id="annotationValue" class="w-full p-2 border border-gray-300 rounded-lg">
+                    <option value="">Select</option>
+                    <option value="true" ${currentValue === 'true' ? 'selected' : ''}>Yes</option>
+                    <option value="false" ${currentValue === 'false' ? 'selected' : ''}>No</option>
+                </select>
+            `;
+        } else {
+            options = `
+                <textarea id="annotationValue" class="w-full p-3 border border-gray-300 rounded-lg" rows="3">${currentValue || ''}</textarea>
+            `;
+        }
+        
+        document.getElementById('annotationTitle').textContent = `Annotate ${variantName}`;
+        document.getElementById('annotationField').textContent = fieldDisplay;
+        
+        document.getElementById('annotationContent').innerHTML = `
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Current Value:
+                </label>
+                <div class="p-3 bg-gray-50 rounded-lg">
+                    ${currentValue || '<span class="text-gray-400 italic">Not specified</span>'}
                 </div>
             </div>
-        </div>
-    `;
-    
-    for (let i = 0; i < data.length; i++) {
-        const item = data[i];
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    New Value:
+                </label>
+                ${options}
+            </div>
+        `;
+        
+        document.getElementById('annotationModal').classList.remove('hidden');
+    }
+
+    /**
+     * Save annotation to database
+     */
+    async function saveAnnotation() {
+        if (!STATE.annotationContext) return;
+        
+        const { variant, field } = STATE.annotationContext;
+        const newValue = document.getElementById('annotationValue').value;
         
         try {
-            // Normalize data with clinical display mapping
-            const normalizedData = {
-                legacy_name: item.variant_legacy_name,
-                protein_name: item.variant_protein_name || null,
-                cdna_name: item.variant_cDNA_name || null,
-                alt_names: item.variant_alternative_names || null,
-                final_determination: item.variant_final_determination || null,
-                changed_prev: item.change_from_previous || 'No',
-                source_summary: `CFTR2_Clinical_Import_${new Date().toISOString().split('T')[0]}`,
-                updated_at: new Date().toISOString()
-            };
-            
-            // Check if variant exists
-            const checkResponse = await fetch(
-                `${CONFIG.SUPABASE_URL}/rest/v1/variants?legacy_name=eq.${encodeURIComponent(normalizedData.legacy_name)}`,
+            // Update in Supabase
+            const response = await fetch(
+                `${CONFIG.SUPABASE_URL}/rest/v1/variants?id=eq.${variant.id}`,
                 {
+                    method: 'PATCH',
                     headers: {
                         'apikey': CONFIG.SUPABASE_KEY,
-                        'Authorization': `Bearer ${CONFIG.SUPABASE_KEY}`
-                    }
+                        'Authorization': `Bearer ${CONFIG.SUPABASE_KEY}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        [field]: newValue,
+                        updated_at: new Date().toISOString()
+                    })
                 }
             );
             
-            if (!checkResponse.ok) {
-                errorCount++;
-                continue;
+            if (!response.ok) {
+                throw new Error(`Update failed: ${response.status}`);
             }
             
-            const existing = await checkResponse.json();
+            // Update local state
+            STATE.variants = STATE.variants.map(v => 
+                v.id === variant.id ? {...v, [field]: newValue} : v
+            );
             
-            if (existing.length > 0) {
-                // Update existing
-                const updateResponse = await fetch(
-                    `${CONFIG.SUPABASE_URL}/rest/v1/variants?id=eq.${existing[0].id}`,
-                    {
-                        method: 'PATCH',
-                        headers: {
-                            'apikey': CONFIG.SUPABASE_KEY,
-                            'Authorization': `Bearer ${CONFIG.SUPABASE_KEY}`,
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(normalizedData)
-                    }
-                );
-                
-                if (updateResponse.ok) {
-                    updateCount++;
-                } else {
-                    errorCount++;
-                }
-            } else {
-                // Create new
-                const createResponse = await fetch(
-                    `${CONFIG.SUPABASE_URL}/rest/v1/variants`,
-                    {
-                        method: 'POST',
-                        headers: {
-                            'apikey': CONFIG.SUPABASE_KEY,
-                            'Authorization': `Bearer ${CONFIG.SUPABASE_KEY}`,
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            ...normalizedData,
-                            created_at: new Date().toISOString()
-                        })
-                    }
-                );
-                
-                if (createResponse.ok) {
-                    successCount++;
-                } else {
-                    errorCount++;
-                }
+            // Update selected variant if it's the one being annotated
+            if (STATE.selectedVariant?.id === variant.id) {
+                STATE.selectedVariant = {...STATE.selectedVariant, [field]: newValue};
+                renderVariantDetail(STATE.selectedVariant);
             }
             
-            // Update progress
-            if ((i + 1) % 5 === 0 || i === data.length - 1) {
-                updateImportProgress(i + 1, data.length, successCount, updateCount, skipCount, errorCount);
-            }
+            closeAnnotationModal();
+            showNotification('Annotation saved successfully', 'success');
+            filterAndRenderVariants();
+            updateDashboardStats(STATE.variants);
             
         } catch (error) {
-            console.error('Import error:', error);
-            errorCount++;
+            console.error('Save error:', error);
+            showNotification('Failed to save annotation', 'error');
         }
     }
-    
-    // Final results
-    resultsDiv.innerHTML += `
-        <div class="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-            <div class="flex items-center">
-                <i class="fas fa-check-circle text-green-600 mr-3 text-xl"></i>
-                <div>
-                    <p class="font-medium text-green-800 text-lg">✓ Clinical Import Complete</p>
-                    <div class="mt-2 space-y-1 text-sm text-green-700">
-                        <div>✅ Created: ${successCount} new clinical variants</div>
-                        <div>🔄 Updated: ${updateCount} existing clinical variants</div>
-                        <div>⏭️ Skipped: ${skipCount} variants</div>
-                        <div>❌ Errors: ${errorCount} variants</div>
+
+    /**
+     * Close annotation modal
+     */
+    function closeAnnotationModal() {
+        document.getElementById('annotationModal').classList.add('hidden');
+        STATE.annotationContext = null;
+    }
+
+    // ============================================
+    // SEARCH AND FILTER SYSTEM
+    // ============================================
+
+    /**
+     * Setup search functionality with debouncing
+     */
+    function setupSearch() {
+        const searchInput = document.getElementById('searchInput');
+        let timeout;
+        
+        searchInput.addEventListener('input', () => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                STATE.searchQuery = searchInput.value.toLowerCase();
+                filterAndRenderVariants();
+            }, 300);
+        });
+    }
+
+    /**
+     * Filter variants by type
+     */
+    function filterVariants(filter) {
+        STATE.activeFilter = filter;
+        filterAndRenderVariants();
+    }
+
+    /**
+     * Update filter button states
+     */
+    function updateFilterButtons() {
+        const buttons = ['all', 'missing'];
+        buttons.forEach(btn => {
+            const element = document.getElementById(`filter${btn.charAt(0).toUpperCase() + btn.slice(1)}`);
+            if (element) {
+                if (btn === STATE.activeFilter) {
+                    element.style.borderColor = btn === 'missing' ? '#ff9a3c' : '#00a8b5';
+                    element.style.color = btn === 'missing' ? '#ff9a3c' : '#00a8b5';
+                    element.style.fontWeight = '600';
+                } else {
+                    element.style.borderColor = '';
+                    element.style.color = '';
+                    element.style.fontWeight = '';
+                }
+            }
+        });
+    }
+
+    // ============================================
+    // PAGINATION SYSTEM
+    // ============================================
+
+    /**
+     * Update pagination controls
+     */
+    function updatePagination() {
+        const totalPages = Math.ceil(STATE.filteredVariants.length / CONFIG.ITEMS_PER_PAGE);
+        const pagination = document.getElementById('paginationControls');
+        
+        if (totalPages > 1) {
+            pagination.style.display = 'flex';
+            document.getElementById('currentPage').textContent = STATE.currentPage;
+            document.getElementById('totalPages').textContent = totalPages;
+            document.getElementById('prevBtn').disabled = STATE.currentPage === 1;
+            document.getElementById('nextBtn').disabled = STATE.currentPage === totalPages;
+        } else {
+            pagination.style.display = 'none';
+        }
+    }
+
+    /**
+     * Go to next page
+     */
+    function nextPage() {
+        const totalPages = Math.ceil(STATE.filteredVariants.length / CONFIG.ITEMS_PER_PAGE);
+        if (STATE.currentPage < totalPages) {
+            STATE.currentPage++;
+            renderVariantList();
+            updatePagination();
+        }
+    }
+
+    /**
+     * Go to previous page
+     */
+    function previousPage() {
+        if (STATE.currentPage > 1) {
+            STATE.currentPage--;
+            renderVariantList();
+            updatePagination();
+        }
+    }
+
+    /**
+     * Update variant count display
+     */
+    function updateVariantCount() {
+        document.getElementById('variantCount').textContent = STATE.filteredVariants.length;
+    }
+
+    // ============================================
+    // QUICK SEARCH FUNCTIONS
+    // ============================================
+
+    /**
+     * Quick search for common variants
+     */
+    function quickSearch(variantName) {
+        document.getElementById('searchInput').value = variantName;
+        STATE.searchQuery = variantName.toLowerCase();
+        filterAndRenderVariants();
+        
+        setTimeout(() => {
+            const variant = STATE.variants.find(v => v.legacy_name === variantName);
+            if (variant) selectVariant(variantName);
+        }, 100);
+    }
+
+    // ============================================
+    // IMPORT DATA FUNCTIONS
+    // ============================================
+
+    /**
+     * Show import modal
+     */
+    function showImportModal() {
+        document.getElementById('importModal').classList.remove('hidden');
+    }
+
+    /**
+     * Close import modal
+     */
+    function closeImportModal() {
+        document.getElementById('importModal').classList.add('hidden');
+        document.getElementById('jsonInput').value = '';
+        document.getElementById('importResults').innerHTML = '';
+    }
+
+    /**
+     * Validate imported JSON data
+     */
+    async function validateImport() {
+        const jsonInput = document.getElementById('jsonInput').value;
+        const resultsDiv = document.getElementById('importResults');
+        
+        resultsDiv.innerHTML = `
+            <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div class="flex items-center">
+                    <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-3"></div>
+                    <p class="text-blue-800">Validating data...</p>
+                </div>
+            </div>
+        `;
+        
+        try {
+            const data = JSON.parse(jsonInput);
+            
+            // Handle both single object and array
+            const items = Array.isArray(data) ? data : [data];
+            
+            // Validate structure
+            const firstItem = items[0];
+            if (!firstItem.variant_legacy_name) {
+                throw new Error('Missing required field: variant_legacy_name');
+            }
+            
+            resultsDiv.innerHTML = `
+                <div class="p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <div class="flex items-center">
+                        <i class="fas fa-check-circle text-green-600 mr-3"></i>
+                        <div>
+                            <p class="font-medium text-green-800">✓ Data Validated</p>
+                            <p class="text-sm text-green-600">
+                                ${items.length} variant${items.length !== 1 ? 's' : ''} ready for import
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <button onclick="executeImport(${JSON.stringify(items).replace(/"/g, '&quot;')})" 
+                            class="w-full action-button action-button-primary">
+                        <i class="fas fa-cloud-upload-alt mr-2"></i>
+                        Import ${items.length} Variant${items.length !== 1 ? 's' : ''}
+                    </button>
+                </div>
+            `;
+            
+        } catch (error) {
+            resultsDiv.innerHTML = `
+                <div class="p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <div class="flex items-center">
+                        <i class="fas fa-exclamation-circle text-red-600 mr-3"></i>
+                        <div>
+                            <p class="font-medium text-red-800">✗ Validation Failed</p>
+                            <p class="text-sm text-red-600">${error.message}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    /**
+     * Execute data import
+     */
+    async function executeImport(data) {
+        const resultsDiv = document.getElementById('importResults');
+        
+        let successCount = 0;
+        let updateCount = 0;
+        let skipCount = 0;
+        let errorCount = 0;
+        
+        resultsDiv.innerHTML = `
+            <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div class="flex items-center">
+                    <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-3"></div>
+                    <div>
+                        <p class="font-medium text-blue-800">Importing ${data.length} variants...</p>
+                        <div class="text-xs text-blue-600 mt-1">
+                            Connecting to database...
+                        </div>
                     </div>
                 </div>
             </div>
+        `;
+        
+        for (let i = 0; i < data.length; i++) {
+            const item = data[i];
             
-            <div class="mt-4 pt-4 border-t border-green-200">
-                <button onclick="refreshAfterImport()" 
-                        class="w-full action-button action-button-primary">
-                    <i class="fas fa-sync-alt mr-2"></i>
-                    Refresh Clinical Data & View Results
-                </button>
-            </div>
-        </div>
-    `;
-}
-
-// Update Import Progress
-function updateImportProgress(current, total, success, updated, skipped, errors) {
-    const resultsDiv = document.getElementById('importResults');
-    const progressPercent = Math.round((current / total) * 100);
-    
-    resultsDiv.innerHTML = `
-        <div class="mb-4">
-            <div class="flex justify-between text-sm text-gray-600 mb-1">
-                <span>Clinical Import Progress</span>
-                <span>${current} / ${total} (${progressPercent}%)</span>
-            </div>
-            <div class="w-full bg-gray-200 rounded-full h-2">
-                <div class="bg-helix-teal h-2 rounded-full" style="width: ${progressPercent}%"></div>
-            </div>
-        </div>
+            try {
+                // Normalize data
+                const normalizedData = {
+                    legacy_name: item.variant_legacy_name,
+                    protein_name: item.variant_protein_name || null,
+                    cdna_name: item.variant_cDNA_name || null,
+                    alt_names: item.variant_alternative_names || null,
+                    final_determination: item.variant_final_determination || null,
+                    changed_prev: item.change_from_previous || 'No',
+                    source_summary: `CFTR2_Import_${new Date().toISOString().split('T')[0]}`,
+                    updated_at: new Date().toISOString()
+                };
+                
+                // Check if variant exists
+                const checkResponse = await fetch(
+                    `${CONFIG.SUPABASE_URL}/rest/v1/variants?legacy_name=eq.${encodeURIComponent(normalizedData.legacy_name)}`,
+                    {
+                        headers: {
+                            'apikey': CONFIG.SUPABASE_KEY,
+                            'Authorization': `Bearer ${CONFIG.SUPABASE_KEY}`
+                        }
+                    }
+                );
+                
+                if (!checkResponse.ok) {
+                    errorCount++;
+                    continue;
+                }
+                
+                const existing = await checkResponse.json();
+                
+                if (existing.length > 0) {
+                    // Update existing
+                    const updateResponse = await fetch(
+                        `${CONFIG.SUPABASE_URL}/rest/v1/variants?id=eq.${existing[0].id}`,
+                        {
+                            method: 'PATCH',
+                            headers: {
+                                'apikey': CONFIG.SUPABASE_KEY,
+                                'Authorization': `Bearer ${CONFIG.SUPABASE_KEY}`,
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(normalizedData)
+                        }
+                    );
+                    
+                    if (updateResponse.ok) {
+                        updateCount++;
+                    } else {
+                        errorCount++;
+                    }
+                } else {
+                    // Create new
+                    const createResponse = await fetch(
+                        `${CONFIG.SUPABASE_URL}/rest/v1/variants`,
+                        {
+                            method: 'POST',
+                            headers: {
+                                'apikey': CONFIG.SUPABASE_KEY,
+                                'Authorization': `Bearer ${CONFIG.SUPABASE_KEY}`,
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                ...normalizedData,
+                                created_at: new Date().toISOString()
+                            })
+                        }
+                    );
+                    
+                    if (createResponse.ok) {
+                        successCount++;
+                    } else {
+                        errorCount++;
+                    }
+                }
+                
+                // Update progress
+                if ((i + 1) % 5 === 0 || i === data.length - 1) {
+                    updateImportProgress(i + 1, data.length, successCount, updateCount, skipCount, errorCount);
+                }
+                
+            } catch (error) {
+                console.error('Import error:', error);
+                errorCount++;
+            }
+        }
         
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
-            <div class="text-center p-3 bg-green-50 rounded-lg">
-                <div class="text-lg font-bold text-green-600">${success}</div>
-                <div class="text-xs text-green-700">Created</div>
+        // Final results
+        resultsDiv.innerHTML += `
+            <div class="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                <div class="flex items-center">
+                    <i class="fas fa-check-circle text-green-600 mr-3 text-xl"></i>
+                    <div>
+                        <p class="font-medium text-green-800 text-lg">✓ Import Complete</p>
+                        <div class="mt-2 space-y-1 text-sm text-green-700">
+                            <div>✅ Created: ${successCount} new variants</div>
+                            <div>🔄 Updated: ${updateCount} existing variants</div>
+                            <div>⏭️ Skipped: ${skipCount} variants</div>
+                            <div>❌ Errors: ${errorCount} variants</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4 pt-4 border-t border-green-200">
+                    <button onclick="refreshAfterImport()" 
+                            class="w-full action-button action-button-primary">
+                        <i class="fas fa-sync-alt mr-2"></i>
+                        Refresh Data & View Results
+                    </button>
+                </div>
             </div>
-            <div class="text-center p-3 bg-blue-50 rounded-lg">
-                <div class="text-lg font-bold text-blue-600">${updated}</div>
-                <div class="text-xs text-blue-700">Updated</div>
-            </div>
-            <div class="text-center p-3 bg-yellow-50 rounded-lg">
-                <div class="text-lg font-bold text-yellow-600">${skipped}</div>
-                <div class="text-xs text-yellow-700">Skipped</div>
-            </div>
-            <div class="text-center p-3 bg-red-50 rounded-lg">
-                <div class="text-lg font-bold text-red-600">${errors}</div>
-                <div class="text-xs text-red-700">Errors</div>
-            </div>
-        </div>
-    `;
-}
+        `;
+    }
 
-// Refresh After Import
-async function refreshAfterImport() {
-    closeImportModal();
-    showNotification('Refreshing clinical data from database...', 'info');
-    
-    await loadVariants();
-    
-    if (STATE.selectedVariant) {
-        const variantName = STATE.selectedVariant.legacy_name;
-        const updatedVariant = STATE.variants.find(v => v.legacy_name === variantName);
-        if (updatedVariant) {
-            selectVariant(variantName);
+    /**
+     * Update import progress display
+     */
+    function updateImportProgress(current, total, success, updated, skipped, errors) {
+        const resultsDiv = document.getElementById('importResults');
+        const progressPercent = Math.round((current / total) * 100);
+        
+        resultsDiv.innerHTML = `
+            <div class="mb-4">
+                <div class="flex justify-between text-sm text-gray-600 mb-1">
+                    <span>Import Progress</span>
+                    <span>${current} / ${total} (${progressPercent}%)</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div class="bg-helix-teal h-2 rounded-full" style="width: ${progressPercent}%"></div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
+                <div class="text-center p-3 bg-green-50 rounded-lg">
+                    <div class="text-lg font-bold text-green-600">${success}</div>
+                    <div class="text-xs text-green-700">Created</div>
+                </div>
+                <div class="text-center p-3 bg-blue-50 rounded-lg">
+                    <div class="text-lg font-bold text-blue-600">${updated}</div>
+                    <div class="text-xs text-blue-700">Updated</div>
+                </div>
+                <div class="text-center p-3 bg-yellow-50 rounded-lg">
+                    <div class="text-lg font-bold text-yellow-600">${skipped}</div>
+                    <div class="text-xs text-yellow-700">Skipped</div>
+                </div>
+                <div class="text-center p-3 bg-red-50 rounded-lg">
+                    <div class="text-lg font-bold text-red-600">${errors}</div>
+                    <div class="text-xs text-red-700">Errors</div>
+                </div>
+            </div>
+        `;
+    }
+
+    /**
+     * Refresh data after import
+     */
+    async function refreshAfterImport() {
+        closeImportModal();
+        showNotification('Refreshing data from database...', 'info');
+        
+        // Reload everything
+        await loadVariants();
+        
+        // If there's a selected variant, refresh its view
+        if (STATE.selectedVariant) {
+            const variantName = STATE.selectedVariant.legacy_name;
+            const updatedVariant = STATE.variants.find(v => v.legacy_name === variantName);
+            if (updatedVariant) {
+                selectVariant(variantName);
+            }
+        }
+        
+        showNotification('Data refreshed successfully', 'success');
+    }
+
+    // ============================================
+    // DASHBOARD FUNCTIONS
+    // ============================================
+
+    /**
+     * Show analytics dashboard
+     */
+    function showDashboard() {
+        document.getElementById('dashboardModal').classList.remove('hidden');
+        createDashboardCharts();
+    }
+
+    /**
+     * Close dashboard
+     */
+    function closeDashboard() {
+        document.getElementById('dashboardModal').classList.add('hidden');
+    }
+
+    /**
+     * Create dashboard charts
+     */
+    function createDashboardCharts() {
+        // Clear previous charts
+        if (STATE.charts.classChart) {
+            STATE.charts.classChart.destroy();
+        }
+        if (STATE.charts.responseChart) {
+            STATE.charts.responseChart.destroy();
+        }
+        
+        // Class Distribution Chart
+        const classCtx = document.getElementById('classChart');
+        if (classCtx) {
+            const classData = {
+                labels: ['Class I', 'Exceptional', 'True', 'Other Classes'],
+                datasets: [{
+                    data: [
+                        STATE.variants.filter(v => v.cftr_class === 'I').length,
+                        STATE.variants.filter(v => v.class_subtype === 'exceptional').length,
+                        STATE.variants.filter(v => v.class_subtype === 'true').length,
+                        STATE.variants.filter(v => v.cftr_class && v.cftr_class !== 'I').length
+                    ],
+                    backgroundColor: ['#0f4c81', '#ff9a3c', '#e63946', '#00a8b5']
+                }]
+            };
+            
+            STATE.charts.classChart = new Chart(classCtx.getContext('2d'), {
+                type: 'doughnut',
+                data: classData,
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        }
+        
+        // Response Chart
+        const responseCtx = document.getElementById('responseChart');
+        if (responseCtx) {
+            const responseData = {
+                labels: ['ETI Responsive', 'ETI Non-responsive', 'Unknown'],
+                datasets: [{
+                    data: [
+                        STATE.variants.filter(v => v.eti_prediction === 'responsive').length,
+                        STATE.variants.filter(v => v.eti_prediction === 'non_responsive').length,
+                        STATE.variants.filter(v => !v.eti_prediction).length
+                    ],
+                    backgroundColor: ['#2a9d8f', '#e63946', '#718096']
+                }]
+            };
+            
+            STATE.charts.responseChart = new Chart(responseCtx.getContext('2d'), {
+                type: 'bar',
+                data: responseData,
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
         }
     }
-    
-    showNotification('Clinical data refreshed successfully', 'success');
-}
 
-// Dashboard Functions
-function showDashboard() {
-    document.getElementById('dashboardModal').classList.remove('hidden');
-    createDashboardCharts();
-}
-
-function closeDashboard() {
-    document.getElementById('dashboardModal').classList.add('hidden');
-}
-
-// Dashboard Charts with Clinical Display
-function createDashboardCharts() {
-    // Clear previous charts
-    if (STATE.charts.classChart) STATE.charts.classChart.destroy();
-    if (STATE.charts.responseChart) STATE.charts.responseChart.destroy();
-    
-    // Class Distribution
-    const classCtx = document.getElementById('classChart');
-    if (classCtx) {
-        const classData = {
-            labels: ['Class I - Minimal Function', 'Exceptional Class I', 'True Class I', 'Other Classes'],
-            datasets: [{
-                data: [
-                    STATE.variants.filter(v => v.cftr_class === 'I').length,
-                    STATE.variants.filter(v => v.class_subtype === 'exceptional').length,
-                    STATE.variants.filter(v => v.class_subtype === 'true').length,
-                    STATE.variants.filter(v => v.cftr_class && v.cftr_class !== 'I').length
-                ],
-                backgroundColor: ['#0f4c81', '#ff9a3c', '#e63946', '#00a8b5']
-            }]
+    /**
+     * Export analytics report
+     */
+    function exportReport() {
+        const data = {
+            timestamp: new Date().toISOString(),
+            version: CONFIG.VERSION,
+            view_mode: STATE.showAllVariants ? 'all_variants' : 'complete_data_only',
+            stats: {
+                total_variants: STATE.variants.length,
+                class_i_count: STATE.variants.filter(v => v.cftr_class === 'I').length,
+                exceptional_count: STATE.variants.filter(v => v.class_subtype === 'exceptional').length,
+                responsive_count: STATE.variants.filter(v => v.eti_prediction === 'responsive').length
+            },
+            variants_with_missing_data: STATE.variants.filter(v => hasMissingData(v)).map(v => v.legacy_name),
+            selected_variant: STATE.selectedVariant
         };
         
-        STATE.charts.classChart = new Chart(classCtx.getContext('2d'), {
-            type: 'doughnut',
-            data: classData,
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: { position: 'bottom' }
-                }
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `delta-helix-report-${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    // ============================================
+    // UTILITY FUNCTIONS
+    // ============================================
+
+    /**
+     * Setup global event listeners
+     */
+    function setupEventListeners() {
+        // Close modals on ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeImportModal();
+                closeDashboard();
+                closeAnnotationModal();
             }
         });
     }
-    
-    // Response Chart
-    const responseCtx = document.getElementById('responseChart');
-    if (responseCtx) {
-        const responseData = {
-            labels: ['Likely ETI Responsive', 'Likely ETI Non-responsive', 'Response Unknown'],
-            datasets: [{
-                data: [
-                    STATE.variants.filter(v => v.eti_prediction === 'responsive').length,
-                    STATE.variants.filter(v => v.eti_prediction === 'non_responsive').length,
-                    STATE.variants.filter(v => !v.eti_prediction).length
-                ],
-                backgroundColor: ['#2a9d8f', '#e63946', '#718096']
-            }]
-        };
+
+    /**
+     * Show notification toast
+     */
+    function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `fixed bottom-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg border animate-fade-in ${
+            type === 'success' ? 'bg-green-50 border-green-200 text-green-800' :
+            type === 'error' ? 'bg-red-50 border-red-200 text-red-800' :
+            'bg-blue-50 border-blue-200 text-blue-800'
+        }`;
+        notification.innerHTML = `
+            <div class="flex items-center">
+                <i class="fas ${
+                    type === 'success' ? 'fa-check-circle' :
+                    type === 'error' ? 'fa-exclamation-circle' :
+                    'fa-info-circle'
+                } mr-2"></i>
+                <span>${message}</span>
+            </div>
+        `;
         
-        STATE.charts.responseChart = new Chart(responseCtx.getContext('2d'), {
-            type: 'bar',
-            data: responseData,
-            options: {
-                responsive: true,
-                scales: {
-                    y: { beginAtZero: true }
-                }
-            }
-        });
+        document.body.appendChild(notification);
+        
+        // Remove after 3 seconds
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
     }
-}
 
-// Export Report
-function exportReport() {
-    const data = {
-        timestamp: new Date().toISOString(),
-        version: CONFIG.VERSION,
-        stats: {
-            total_variants: STATE.variants.length,
-            class_i_count: STATE.variants.filter(v => v.cftr_class === 'I').length,
-            exceptional_count: STATE.variants.filter(v => v.class_subtype === 'exceptional').length,
-            responsive_count: STATE.variants.filter(v => v.eti_prediction === 'responsive').length
-        },
-        variants_with_missing_data: STATE.variants.filter(v => hasMissingData(v)).map(v => v.legacy_name),
-        selected_variant: STATE.selectedVariant
-    };
-    
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `delta-helix-clinical-report-${new Date().toISOString().split('T')[0]}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-}
-
-// Utility Functions
-function setupEventListeners() {
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            closeImportModal();
-            closeDashboard();
-            closeAnnotationModal();
-        }
-    });
-}
-
-function showNotification(message, type = 'info') {
-    const notification = document.createElement('div');
-    notification.className = `fixed bottom-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg border animate-fade-in ${
-        type === 'success' ? 'bg-green-50 border-green-200 text-green-800' :
-        type === 'error' ? 'bg-red-50 border-red-200 text-red-800' :
-        'bg-blue-50 border-blue-200 text-blue-800'
-    }`;
-    notification.innerHTML = `
-        <div class="flex items-center">
-            <i class="fas ${
-                type === 'success' ? 'fa-check-circle' :
-                type === 'error' ? 'fa-exclamation-circle' :
-                'fa-info-circle'
-            } mr-2"></i>
-            <span>${message}</span>
-        </div>
-    `;
-    
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-        notification.remove();
-    }, 3000);
-}
-
-// Test Connection Function
-async function testConnection() {
-    try {
-        const response = await fetch(`${CONFIG.SUPABASE_URL}/rest/v1/variants?select=count`, {
-            headers: {
-                'apikey': CONFIG.SUPABASE_KEY,
-                'Authorization': `Bearer ${CONFIG.SUPABASE_KEY}`
+    /**
+     * Test database connection
+     */
+    async function testConnection() {
+        try {
+            const response = await fetch(`${CONFIG.SUPABASE_URL}/rest/v1/variants?select=count`, {
+                headers: {
+                    'apikey': CONFIG.SUPABASE_KEY,
+                    'Authorization': `Bearer ${CONFIG.SUPABASE_KEY}`
+                }
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Supabase connection successful! Variant count:', data[0].count);
+                return true;
+            } else {
+                console.error('Connection failed:', response.status);
+                return false;
             }
-        });
-        
-        if (response.ok) {
-            const data = await response.json();
-            console.log('Clinical database connection successful! Variant count:', data[0].count);
-            return true;
-        } else {
-            console.error('Connection failed:', response.status);
+        } catch (error) {
+            console.error('Connection error:', error);
             return false;
         }
-    } catch (error) {
-        console.error('Connection error:', error);
-        return false;
     }
-}
 
-// Add Clinical Display CSS
-const clinicalStyles = `
-    <style>
-        .clinical-badge {
-            padding: 0.375rem 0.875rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            border: 1px solid;
-            transition: all 0.2s;
-            cursor: default;
+    // Test connection on load
+    testConnection().then(success => {
+        if (!success) {
+            showNotification('Please check your Supabase API key configuration', 'error');
         }
-        
-        .clinical-badge:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        
-        .clinical-data-point {
-            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-            padding: 1.25rem;
-            border-radius: 12px;
-            border: 1px solid rgba(15, 76, 129, 0.1);
-            position: relative;
-            transition: all 0.2s;
-        }
-        
-        .clinical-data-point:hover {
-            border-color: var(--helix-teal);
-            background: white;
-        }
-        
-        .clinical-data-point.missing {
-            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-            border-color: rgba(255, 154, 60, 0.3);
-        }
-        
-        .clinical-data-label {
-            font-size: 0.75rem;
-            color: var(--helix-gray);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-        }
-        
-        .clinical-data-value {
-            font-size: 1.125rem;
-            font-weight: 600;
-            color: var(--helix-blue);
-        }
-        
-        .clinical-data-raw {
-            font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
-            opacity: 0.7;
-            font-size: 0.75rem;
-        }
-        
-        .clinical-context {
-            background: rgba(15, 76, 129, 0.03);
-            border-radius: 10px;
-            padding: 1rem;
-            margin-bottom: 1.5rem;
-        }
-        
-        .context-header {
-            display: flex;
-            align-items: center;
-            font-weight: 600;
-            color: var(--helix-blue);
-            margin-bottom: 0.75rem;
-        }
-        
-        .context-header i {
-            font-size: 1.1rem;
-            margin-right: 0.5rem;
-        }
-        
-        .current-value-display label {
-            font-size: 0.875rem;
-            color: #6b7280;
-            margin-bottom: 0.25rem;
-            display: block;
-        }
-        
-        .value-box {
-            background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            padding: 0.75rem;
-            font-weight: 500;
-            min-height: 2.5rem;
-            display: flex;
-            align-items: center;
-        }
-        
-        .annotation-input-section {
-            margin-top: 1.5rem;
-        }
-        
-        .input-label {
-            display: flex;
-            align-items: center;
-            font-weight: 600;
-            color: var(--helix-gray);
-            margin-bottom: 0.5rem;
-        }
-        
-        .clinical-input,
-        .clinical-select {
-            width: 100%;
-            padding: 0.875rem;
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: all 0.2s;
-            background: white;
-        }
-        
-        .clinical-input:focus,
-        .clinical-select:focus {
-            border-color: var(--helix-teal);
-            box-shadow: 0 0 0 3px rgba(0, 168, 181, 0.1);
-            outline: none;
-        }
-        
-        .clinical-guidance {
-            background: rgba(59, 130, 246, 0.05);
-            border: 1px solid rgba(59, 130, 246, 0.1);
-            border-radius: 6px;
-            padding: 0.75rem;
-            display: flex;
-            align-items: flex-start;
-        }
-        
-        .clinical-guidance i {
-            margin-top: 0.125rem;
-        }
-        
-        .source-badge {
-            background: rgba(15, 76, 129, 0.08);
-            color: var(--helix-blue);
-            padding: 0.375rem 0.75rem;
-            border-radius: 6px;
-            font-size: 0.875rem;
-            font-weight: 500;
-            white-space: nowrap;
-        }
-    </style>
-`;
+    });
 
-// Inject clinical styles
-document.head.insertAdjacentHTML('beforeend', clinicalStyles);
-
-// Initialize test connection
-testConnection().then(success => {
-    if (!success) {
-        showNotification('Please check your clinical database connection', 'error');
-    }
-});
-
-// Expose functions to window
-window.selectVariant = selectVariant;
-window.filterVariants = filterVariants;
-window.quickSearch = quickSearch;
-window.showImportModal = showImportModal;
-window.closeImportModal = closeImportModal;
-window.validateImport = validateImport;
-window.executeImport = executeImport;
-window.refreshAfterImport = refreshAfterImport;
-window.showDashboard = showDashboard;
-window.closeDashboard = closeDashboard;
-window.exportReport = exportReport;
-window.previousPage = previousPage;
-window.nextPage = nextPage;
-window.showAnnotationModal = showAnnotationModal;
-window.closeAnnotationModal = closeAnnotationModal;
-window.saveAnnotation = saveAnnotation;
+    // ============================================
+    // EXPORT FUNCTIONS TO WINDOW
+    // ============================================
+    window.selectVariant = selectVariant;
+    window.filterVariants = filterVariants;
+    window.quickSearch = quickSearch;
+    window.showImportModal = showImportModal;
+    window.closeImportModal = closeImportModal;
+    window.validateImport = validateImport;
+    window.executeImport = executeImport;
+    window.refreshAfterImport = refreshAfterImport;
+    window.showDashboard = showDashboard;
+    window.closeDashboard = closeDashboard;
+    window.exportReport = exportReport;
+    window.previousPage = previousPage;
+    window.nextPage = nextPage;
+    window.showAnnotationModal = showAnnotationModal;
+    window.closeAnnotationModal = closeAnnotationModal;
+    window.saveAnnotation = saveAnnotation;
+    window.toggleDataView = toggleDataView;
 </script>
-   </body>
+</body>
 </html>
