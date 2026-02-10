@@ -3,53 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CFTR Precision Intelligence</title>
+    <title>Project Delta Helix | CFTR Clinical Intelligence</title>
     
-    <!-- Production CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-    <!-- Custom Clinical Design -->
     <style>
         :root {
-            --primary-blue: #1e40af;
-            --primary-red: #dc2626;
-            --primary-green: #059669;
-            --primary-amber: #d97706;
-            --primary-purple: #7c3aed;
-            --text-primary: #1f2937;
-            --text-secondary: #6b7280;
-            --border-light: #e5e7eb;
-            --bg-light: #f9fafb;
+            --helix-blue: #0f4c81;
+            --helix-teal: #00a8b5;
+            --helix-amber: #ff9a3c;
+            --helix-red: #e63946;
+            --helix-green: #2a9d8f;
+            --helix-gray: #2d3748;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
-            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-            color: var(--text-primary);
-            min-height: 100vh;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
         }
 
-        .clinical-card {
+        .helix-gradient {
+            background: linear-gradient(135deg, var(--helix-blue) 0%, var(--helix-teal) 100%);
+        }
+
+        .helix-card {
             background: white;
             border-radius: 16px;
-            border: 1px solid var(--border-light);
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-            transition: all 0.2s ease;
+            border: 1px solid rgba(15, 76, 129, 0.1);
+            box-shadow: 0 8px 32px rgba(15, 76, 129, 0.08);
+            transition: all 0.3s ease;
         }
 
-        .clinical-card:hover {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        .helix-card:hover {
+            box-shadow: 0 12px 48px rgba(15, 76, 129, 0.12);
+            transform: translateY(-2px);
         }
 
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .badge-clinical {
-            padding: 0.375rem 0.75rem;
+        .helix-badge {
+            padding: 0.375rem 0.875rem;
             border-radius: 9999px;
             font-size: 0.75rem;
             font-weight: 600;
@@ -59,150 +52,112 @@
             border: 1px solid;
         }
 
-        .badge-class-i {
-            background: rgba(220, 38, 38, 0.1);
-            color: #b91c1c;
-            border-color: rgba(220, 38, 38, 0.2);
+        .helix-badge-class-i {
+            background: rgba(230, 57, 70, 0.1);
+            color: var(--helix-red);
+            border-color: rgba(230, 57, 70, 0.2);
         }
 
-        .badge-exceptional {
-            background: rgba(217, 119, 6, 0.1);
-            color: #b45309;
-            border-color: rgba(217, 119, 6, 0.2);
+        .helix-badge-exceptional {
+            background: rgba(255, 154, 60, 0.1);
+            color: var(--helix-amber);
+            border-color: rgba(255, 154, 60, 0.2);
         }
 
-        .badge-responsive {
-            background: rgba(5, 150, 105, 0.1);
-            color: #047857;
-            border-color: rgba(5, 150, 105, 0.2);
+        .helix-badge-responsive {
+            background: rgba(42, 157, 143, 0.1);
+            color: var(--helix-green);
+            border-color: rgba(42, 157, 143, 0.2);
         }
 
-        .badge-non-responsive {
-            background: rgba(220, 38, 38, 0.1);
-            color: #b91c1c;
-            border-color: rgba(220, 38, 38, 0.2);
-        }
-
-        .search-input {
-            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-            border: 1px solid var(--border-light);
+        .helix-input {
+            background: white;
+            border: 1px solid rgba(15, 76, 129, 0.2);
             border-radius: 12px;
             padding: 1rem 1rem 1rem 3rem;
             font-size: 1rem;
             transition: all 0.2s;
         }
 
-        .search-input:focus {
-            border-color: var(--primary-blue);
-            box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+        .helix-input:focus {
+            border-color: var(--helix-teal);
+            box-shadow: 0 0 0 3px rgba(0, 168, 181, 0.1);
             outline: none;
+        }
+
+        .helix-alert {
+            padding: 1.25rem;
+            border-radius: 12px;
+            border-left: 4px solid;
+        }
+
+        .helix-alert-critical {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            border-left-color: var(--helix-red);
+        }
+
+        .helix-alert-warning {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-left-color: var(--helix-amber);
+        }
+
+        .helix-alert-info {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            border-left-color: var(--helix-teal);
+        }
+
+        .helix-data-point {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid rgba(15, 76, 129, 0.1);
+        }
+
+        .helix-data-label {
+            font-size: 0.75rem;
+            color: var(--helix-gray);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .helix-data-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--helix-blue);
+            font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
         }
 
         .variant-cell {
             padding: 1.25rem;
-            border-bottom: 1px solid var(--border-light);
+            border-bottom: 1px solid rgba(15, 76, 129, 0.1);
             cursor: pointer;
             transition: all 0.2s;
         }
 
         .variant-cell:hover {
-            background: #f8fafc;
+            background: rgba(15, 76, 129, 0.03);
         }
 
         .variant-cell.selected {
-            background: #eff6ff;
-            border-left: 4px solid var(--primary-blue);
+            background: rgba(15, 76, 129, 0.05);
+            border-left: 4px solid var(--helix-teal);
         }
 
-        .data-point {
-            background: #f8fafc;
-            padding: 1.25rem;
-            border-radius: 12px;
-            border: 1px solid var(--border-light);
-        }
-
-        .data-label {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 0.5rem;
-        }
-
-        .data-value {
-            font-size: 1.125rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
-        }
-
-        .alert-critical {
-            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-            border-left: 4px solid #dc2626;
-        }
-
-        .alert-warning {
-            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-            border-left: 4px solid #d97706;
-        }
-
-        .alert-info {
-            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-            border-left: 4px solid #3b82f6;
-        }
-
-        .alert-success {
-            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-            border-left: 4px solid #10b981;
-        }
-
-        .pill-button {
-            padding: 0.625rem 1.25rem;
-            border-radius: 9999px;
-            font-weight: 500;
-            transition: all 0.2s;
-            border: 1px solid;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .pill-button-primary {
-            background: var(--primary-blue);
-            color: white;
-            border-color: var(--primary-blue);
-        }
-
-        .pill-button-primary:hover {
-            background: #1e3a8a;
-            transform: translateY(-1px);
-        }
-
-        .pill-button-outline {
-            background: transparent;
-            color: var(--text-secondary);
-            border-color: var(--border-light);
-        }
-
-        .pill-button-outline:hover {
-            border-color: var(--primary-blue);
-            color: var(--primary-blue);
-            background: rgba(30, 64, 175, 0.05);
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+        @keyframes helix-fade-in {
+            from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .animate-fade-in {
-            animation: fadeIn 0.3s ease-out;
+        .helix-fade-in {
+            animation: helix-fade-in 0.4s ease-out;
         }
 
         .empty-state {
             padding: 4rem 2rem;
             text-align: center;
-            color: var(--text-secondary);
+            color: #718096;
         }
 
         .empty-state-icon {
@@ -210,31 +165,51 @@
             opacity: 0.5;
             margin-bottom: 1rem;
         }
+
+        .pagination-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(15, 76, 129, 0.2);
+            border-radius: 8px;
+            background: white;
+            color: var(--helix-blue);
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .pagination-btn:hover:not(:disabled) {
+            background: rgba(15, 76, 129, 0.05);
+            border-color: var(--helix-teal);
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
     </style>
 </head>
-<body>
+<body class="min-h-screen">
     <!-- Navigation -->
-    <nav class="glass-panel sticky top-0 z-50 border-b">
+    <nav class="helix-gradient text-white sticky top-0 z-50 shadow-2xl">
         <div class="container mx-auto px-6 py-4">
             <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-3">
-                    <div class="p-2 bg-blue-100 rounded-lg">
-                        <i class="fas fa-dna text-blue-600"></i>
+                <div class="flex items-center space-x-4">
+                    <div class="p-2 bg-white/20 rounded-xl">
+                        <i class="fas fa-dna text-xl"></i>
                     </div>
                     <div>
-                        <h1 class="text-xl font-bold">CFTR Precision Intelligence</h1>
-                        <p class="text-sm text-gray-600">Clinical Decision Support System</p>
+                        <h1 class="text-xl font-bold">Project Delta Helix</h1>
+                        <p class="text-sm opacity-90">CFTR Clinical Intelligence Platform</p>
                     </div>
                 </div>
                 
-                <div class="flex items-center space-x-3">
-                    <button onclick="toggleDataPanel()" class="pill-button pill-button-outline">
-                        <i class="fas fa-database"></i>
-                        <span class="hidden md:inline">Database</span>
+                <div class="flex items-center space-x-4">
+                    <button onclick="showDashboard()" class="px-4 py-2 bg-white/20 rounded-lg hover:bg-white/30 transition">
+                        <i class="fas fa-chart-line mr-2"></i>
+                        Dashboard
                     </button>
-                    <button onclick="showImportModal()" class="pill-button pill-button-primary">
-                        <i class="fas fa-cloud-upload-alt"></i>
-                        <span class="hidden md:inline">Import Data</span>
+                    <button onclick="showDataImport()" class="px-4 py-2 bg-white text-helix-blue rounded-lg font-semibold hover:bg-opacity-90 transition">
+                        <i class="fas fa-cloud-upload-alt mr-2"></i>
+                        Import Data
                     </button>
                 </div>
             </div>
@@ -243,43 +218,85 @@
 
     <!-- Main Content -->
     <main class="container mx-auto px-6 py-8">
+        <!-- Quick Stats Bar -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div class="helix-card p-4">
+                <div class="text-2xl font-bold text-helix-blue" id="statTotal">-</div>
+                <div class="text-sm text-gray-600">Total Variants</div>
+            </div>
+            <div class="helix-card p-4">
+                <div class="text-2xl font-bold text-helix-red" id="statClassI">-</div>
+                <div class="text-sm text-gray-600">Class I Variants</div>
+            </div>
+            <div class="helix-card p-4">
+                <div class="text-2xl font-bold text-helix-amber" id="statExceptional">-</div>
+                <div class="text-sm text-gray-600">Exceptional Cases</div>
+            </div>
+            <div class="helix-card p-4">
+                <div class="text-2xl font-bold text-helix-green" id="statResponsive">-</div>
+                <div class="text-sm text-gray-600">ETI Responsive</div>
+            </div>
+        </div>
+
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
-            <!-- Left Panel - Variant List -->
+            <!-- Left Panel - Variant Explorer -->
             <div class="lg:col-span-1">
-                <div class="clinical-card mb-6">
-                    <div class="p-6 border-b">
-                        <div class="relative">
-                            <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                <div class="helix-card mb-6">
+                    <div class="p-6 border-b border-gray-100">
+                        <div class="relative mb-4">
+                            <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                             <input 
                                 type="text" 
                                 id="searchInput"
-                                class="search-input w-full"
+                                class="helix-input w-full"
                                 placeholder="Search variants..."
-                                onkeyup="searchVariants()"
+                                autocomplete="off"
                             >
                         </div>
                         
-                        <div class="flex space-x-2 mt-4">
-                            <button onclick="filterVariants('all')" class="pill-button pill-button-outline flex-1 text-sm">
+                        <div class="flex space-x-2 mb-4">
+                            <button onclick="filterVariants('all')" 
+                                    class="flex-1 px-3 py-2 text-sm font-medium rounded-lg border border-gray-300 hover:border-helix-teal hover:text-helix-teal transition"
+                                    id="filterAll">
                                 All
                             </button>
-                            <button onclick="filterVariants('exceptional')" class="pill-button pill-button-outline flex-1 text-sm">
-                                <i class="fas fa-bolt text-amber-500"></i>
+                            <button onclick="filterVariants('exceptional')" 
+                                    class="flex-1 px-3 py-2 text-sm font-medium rounded-lg border border-gray-300 hover:border-helix-amber hover:text-helix-amber transition"
+                                    id="filterExceptional">
                                 Exceptional
                             </button>
-                            <button onclick="filterVariants('responsive')" class="pill-button pill-button-outline flex-1 text-sm">
-                                <i class="fas fa-check text-green-500"></i>
+                            <button onclick="filterVariants('responsive')" 
+                                    class="flex-1 px-3 py-2 text-sm font-medium rounded-lg border border-gray-300 hover:border-helix-green hover:text-helix-green transition"
+                                    id="filterResponsive">
                                 Responsive
                             </button>
                         </div>
+
+                        <div class="text-xs text-gray-500 mb-2">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            Showing <span id="variantCount">0</span> variants
+                        </div>
                     </div>
 
-                    <div id="variantList" class="max-h-[calc(100vh-300px)] overflow-y-auto">
-                        <!-- Variants load here -->
+                    <div id="variantList" class="max-h-[500px] overflow-y-auto">
+                        <!-- Variants will load here -->
                         <div class="empty-state">
-                            <i class="fas fa-spinner fa-spin empty-state-icon"></i>
-                            <p>Loading variants...</p>
+                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-helix-teal mx-auto"></div>
+                            <p class="mt-4">Loading variants...</p>
                         </div>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="p-4 border-t border-gray-100 flex justify-between items-center" id="paginationControls" style="display: none;">
+                        <button onclick="previousPage()" class="pagination-btn" id="prevBtn">
+                            <i class="fas fa-chevron-left mr-2"></i> Prev
+                        </button>
+                        <span class="text-sm text-gray-600">
+                            Page <span id="currentPage">1</span> of <span id="totalPages">1</span>
+                        </span>
+                        <button onclick="nextPage()" class="pagination-btn" id="nextBtn">
+                            Next <i class="fas fa-chevron-right ml-2"></i>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -287,47 +304,50 @@
             <!-- Right Panel - Variant Detail -->
             <div class="lg:col-span-3">
                 <!-- Variant Header -->
-                <div id="variantHeader" class="clinical-card mb-6 p-8 hidden animate-fade-in">
-                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-                        <div>
-                            <div class="flex items-center gap-3 mb-3">
-                                <h2 id="variantName" class="text-3xl font-bold">Select a variant</h2>
-                                <span id="sourceBadge" class="badge-clinical bg-blue-100 text-blue-700 border-blue-200 hidden">
-                                    <i class="fas fa-upload"></i>
-                                    Uploaded
-                                </span>
+                <div id="variantHeader" class="helix-card mb-6 hidden helix-fade-in">
+                    <div class="p-8" style="background: linear-gradient(135deg, rgba(15, 76, 129, 0.02), rgba(0, 168, 181, 0.02))">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
+                            <div>
+                                <div class="flex items-center gap-3 mb-4">
+                                    <h2 id="variantName" class="text-3xl font-bold text-gray-800">Select Variant</h2>
+                                    <span id="dataSourceBadge" class="helix-badge bg-blue-100 text-blue-700 border-blue-200 hidden">
+                                        <i class="fas fa-upload"></i>
+                                        Uploaded
+                                    </span>
+                                </div>
+                                <div id="variantBadges" class="flex flex-wrap gap-2">
+                                    <!-- Badges load here -->
+                                </div>
                             </div>
-                            <div id="variantBadges" class="flex flex-wrap gap-2">
-                                <!-- Badges load here -->
+                            
+                            <div class="mt-4 md:mt-0 text-center md:text-right">
+                                <div class="text-sm text-gray-500 mb-1">Classification</div>
+                                <div id="variantClass" class="text-5xl font-bold text-helix-blue">-</div>
+                                <div id="variantSubtype" class="text-gray-600">Select a variant</div>
                             </div>
-                        </div>
-                        
-                        <div class="mt-4 md:mt-0 text-center md:text-right">
-                            <div class="text-sm text-gray-500 mb-1">Classification</div>
-                            <div id="variantClass" class="text-4xl font-bold text-gray-800">-</div>
-                            <div id="variantSubtype" class="text-gray-600">Select a variant</div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Variant Content -->
-                <div id="variantContent" class="hidden animate-fade-in">
-                    <!-- Nomenclature -->
-                    <div class="clinical-card mb-6 p-6">
-                        <h3 class="font-semibold text-gray-700 mb-4 flex items-center">
-                            <i class="fas fa-tag mr-2 text-blue-500"></i>
-                            Nomenclature
+                <div id="variantContent" class="hidden helix-fade-in">
+                    <!-- Nomenclature Section -->
+                    <div class="helix-card mb-6 p-6">
+                        <h3 class="font-semibold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-tag mr-2 text-helix-teal"></i>
+                            Genetic Nomenclature
                         </h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="nomenclatureGrid">
                             <!-- Filled dynamically -->
                         </div>
                     </div>
 
-                    <!-- Clinical Decision -->
+                    <!-- Clinical Decision Grid -->
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-                        <div class="clinical-card p-6">
-                            <h3 class="font-semibold text-gray-700 mb-4 flex items-center">
-                                <i class="fas fa-stethoscope mr-2 text-red-500"></i>
+                        <!-- Clinical Impact -->
+                        <div class="helix-card p-6">
+                            <h3 class="font-semibold text-gray-800 mb-4 flex items-center">
+                                <i class="fas fa-stethoscope mr-2 text-helix-red"></i>
                                 Clinical Impact
                             </h3>
                             <div id="clinicalImpact" class="space-y-4">
@@ -335,9 +355,10 @@
                             </div>
                         </div>
 
-                        <div class="clinical-card p-6">
-                            <h3 class="font-semibold text-gray-700 mb-4 flex items-center">
-                                <i class="fas fa-prescription-bottle-alt mr-2 text-green-500"></i>
+                        <!-- Therapeutic Prediction -->
+                        <div class="helix-card p-6">
+                            <h3 class="font-semibold text-gray-800 mb-4 flex items-center">
+                                <i class="fas fa-prescription-bottle-alt mr-2 text-helix-green"></i>
                                 Therapeutic Prediction
                             </h3>
                             <div id="therapeuticPrediction" class="space-y-4">
@@ -345,9 +366,10 @@
                             </div>
                         </div>
 
-                        <div class="clinical-card p-6">
-                            <h3 class="font-semibold text-gray-700 mb-4 flex items-center">
-                                <i class="fas fa-chart-line mr-2 text-purple-500"></i>
+                        <!-- Evidence Quality -->
+                        <div class="helix-card p-6">
+                            <h3 class="font-semibold text-gray-800 mb-4 flex items-center">
+                                <i class="fas fa-chart-line mr-2 text-helix-purple"></i>
                                 Evidence Quality
                             </h3>
                             <div id="evidenceQuality" class="space-y-4">
@@ -357,35 +379,45 @@
                     </div>
 
                     <!-- Clinical Alert -->
-                    <div id="clinicalAlertPanel" class="clinical-card p-6 mb-6 hidden">
+                    <div id="clinicalAlertPanel" class="helix-alert mb-6 hidden">
                         <div id="alertContent" class="flex items-start">
                             <!-- Alert loads here -->
                         </div>
                     </div>
 
-                    <!-- Evidence Chain -->
-                    <div class="clinical-card p-6">
-                        <h3 class="font-semibold text-gray-700 mb-4 flex items-center">
+                    <!-- Evidence Sources -->
+                    <div class="helix-card p-6">
+                        <h3 class="font-semibold text-gray-800 mb-4 flex items-center">
                             <i class="fas fa-microscope mr-2 text-gray-500"></i>
-                            Evidence Sources
+                            Evidence Chain
                         </h3>
-                        <div id="evidenceChain" class="text-sm">
+                        <div id="evidenceChain" class="font-mono text-sm text-gray-600">
                             <!-- Evidence loads here -->
                         </div>
                     </div>
                 </div>
 
                 <!-- Empty State -->
-                <div id="emptyState" class="clinical-card p-12 text-center">
-                    <i class="fas fa-search text-gray-300 text-5xl mb-4"></i>
+                <div id="emptyState" class="helix-card p-12 text-center">
+                    <i class="fas fa-search empty-state-icon text-gray-300"></i>
                     <h3 class="text-xl font-semibold text-gray-700 mb-2">No Variant Selected</h3>
-                    <p class="text-gray-500">Select a variant from the list to view clinical details</p>
-                    <div class="mt-6">
-                        <button onclick="searchVariant('G542X')" class="pill-button pill-button-outline mr-3">
-                            Try G542X
+                    <p class="text-gray-500 mb-6">Select a variant from the list to view clinical intelligence</p>
+                    <div class="flex flex-wrap justify-center gap-3">
+                        <button onclick="quickSearch('G542X')" class="px-4 py-2 bg-helix-red text-white rounded-lg hover:bg-opacity-90 transition">
+                            <i class="fas fa-ban mr-2"></i>
+                            G542X
                         </button>
-                        <button onclick="searchVariant('F508del')" class="pill-button pill-button-outline">
-                            Try F508del
+                        <button onclick="quickSearch('F508del')" class="px-4 py-2 bg-helix-blue text-white rounded-lg hover:bg-opacity-90 transition">
+                            <i class="fas fa-cog mr-2"></i>
+                            F508del
+                        </button>
+                        <button onclick="quickSearch('G551D')" class="px-4 py-2 bg-helix-green text-white rounded-lg hover:bg-opacity-90 transition">
+                            <i class="fas fa-door-open mr-2"></i>
+                            G551D
+                        </button>
+                        <button onclick="quickSearch('R334W')" class="px-4 py-2 bg-helix-amber text-white rounded-lg hover:bg-opacity-90 transition">
+                            <i class="fas fa-bolt mr-2"></i>
+                            R334W
                         </button>
                     </div>
                 </div>
@@ -394,28 +426,95 @@
     </main>
 
     <!-- Import Modal -->
-    <div id="importModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+    <div id="importModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden overflow-y-auto">
         <div class="min-h-screen flex items-center justify-center p-4">
-            <div class="bg-white rounded-xl w-full max-w-md">
+            <div class="helix-card w-full max-w-2xl max-h-[90vh] overflow-hidden">
                 <div class="p-6">
                     <div class="flex justify-between items-center mb-6">
-                        <h3 class="text-lg font-semibold">Import Data</h3>
+                        <h3 class="text-xl font-bold text-gray-800">Import Data to Delta Helix</h3>
                         <button onclick="closeImportModal()" class="text-gray-400 hover:text-gray-600">
-                            <i class="fas fa-times"></i>
+                            <i class="fas fa-times text-xl"></i>
                         </button>
                     </div>
                     
-                    <textarea id="jsonInput" 
-                              class="w-full h-48 font-mono text-sm p-4 border rounded-lg mb-4"
-                              placeholder='Paste JSON data...'></textarea>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <h4 class="font-semibold text-gray-700 mb-2 flex items-center">
+                                <i class="fas fa-file-code text-helix-teal mr-2"></i>
+                                JSON Format
+                            </h4>
+                            <pre class="text-xs bg-gray-50 p-3 rounded overflow-auto h-32">
+[
+  {
+    "legacy_name": "R334W",
+    "cftr_class": "I",
+    "class_subtype": "exceptional",
+    "eti_prediction": "responsive"
+  }
+]</pre>
+                        </div>
+                        
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <h4 class="font-semibold text-gray-700 mb-2 flex items-center">
+                                <i class="fas fa-table text-helix-green mr-2"></i>
+                                CSV Format
+                            </h4>
+                            <pre class="text-xs bg-gray-50 p-3 rounded overflow-auto h-32">
+legacy_name,cftr_class,eti_prediction
+G542X,I,non_responsive
+F508del,II,responsive</pre>
+                        </div>
+                    </div>
                     
-                    <div class="flex justify-end space-x-3">
-                        <button onclick="closeImportModal()" class="pill-button pill-button-outline">
+                    <textarea id="jsonInput" 
+                              class="w-full h-48 font-mono text-sm p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-helix-teal focus:border-helix-teal"
+                              placeholder='Paste your data here...'
+                              spellcheck="false"></textarea>
+                    
+                    <div class="flex justify-end space-x-3 mt-6">
+                        <button onclick="closeImportModal()" class="px-4 py-2 text-gray-600 hover:text-gray-800">
                             Cancel
                         </button>
-                        <button onclick="importJSON()" class="pill-button pill-button-primary">
-                            <i class="fas fa-upload mr-2"></i>
-                            Import
+                        <button onclick="validateAndImport()" class="px-4 py-2 bg-helix-teal text-white rounded-lg hover:bg-opacity-90">
+                            <i class="fas fa-cloud-upload-alt mr-2"></i>
+                            Import Data
+                        </button>
+                    </div>
+                    
+                    <div id="importResults" class="mt-4 space-y-2"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Modal -->
+    <div id="dashboardModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden overflow-y-auto">
+        <div class="min-h-screen flex items-center justify-center p-4">
+            <div class="helix-card w-full max-w-4xl max-h-[90vh] overflow-hidden">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold text-gray-800">Delta Helix Analytics Dashboard</h3>
+                        <button onclick="closeDashboard()" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="helix-card p-4">
+                            <h4 class="font-semibold text-gray-700 mb-3">Classification Distribution</h4>
+                            <canvas id="classChart" height="200"></canvas>
+                        </div>
+                        
+                        <div class="helix-card p-4">
+                            <h4 class="font-semibold text-gray-700 mb-3">ETI Response Prediction</h4>
+                            <canvas id="responseChart" height="200"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6">
+                        <button onclick="exportReport()" class="px-4 py-2 bg-helix-blue text-white rounded-lg hover:bg-opacity-90">
+                            <i class="fas fa-download mr-2"></i>
+                            Export Analytics Report
                         </button>
                     </div>
                 </div>
@@ -423,43 +522,65 @@
         </div>
     </div>
 
-    <!-- Database Stats Panel -->
-    <div id="dataPanel" class="fixed right-0 top-0 h-full w-80 bg-white shadow-xl z-40 transform translate-x-full transition-transform">
-        <div class="p-6">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="font-semibold">Database Analytics</h3>
-                <button onclick="toggleDataPanel()" class="text-gray-400 hover:text-gray-600">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            
-            <div id="databaseStats">
-                <!-- Stats load here -->
-            </div>
-        </div>
-    </div>
-
-    <!-- JavaScript -->
+    <!-- JavaScript Application -->
     <script>
         // Configuration
         const CONFIG = {
             SUPABASE_URL: 'https://oxlkisjwfarseyqgeyuw.supabase.co',
-            SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im94bGtpc2p3ZmFyc2V5cWdleXV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA2NjU2MzgsImV4cCI6MjA4NjI0MTYzOH0.O3RSGW2eMF_M_kywWsjXK9DM0saxvtu9aQUu8-YPkdU'
+            SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im94bGtpc2p3ZmFyc2V5cWdleXV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA2NjU2MzgsImV4cCI6MjA4NjI0MTYzOH0.O3RSGW2eMF_M_kywWsjXK9DM0saxvtu9aQUu8-YPkdU',
+            ITEMS_PER_PAGE: 15,
+            VERSION: 'Δ1.0.0'
         };
 
-        // State
-        let STATE = {
+        // Application State
+        const STATE = {
             variants: [],
             filteredVariants: [],
             selectedVariant: null,
-            activeFilter: 'all'
+            activeFilter: 'all',
+            currentPage: 1,
+            searchQuery: '',
+            charts: {}
         };
 
-        // Initialize
+        // Initialize Application
         document.addEventListener('DOMContentLoaded', () => {
-            loadVariants();
-            setupSearch();
+            initializeApp();
         });
+
+        // Initialize Application
+        async function initializeApp() {
+            await loadDashboardStats();
+            await loadVariants();
+            setupEventListeners();
+            setupSearch();
+        }
+
+        // Load Dashboard Stats
+        async function loadDashboardStats() {
+            try {
+                const response = await fetch(`${CONFIG.SUPABASE_URL}/rest/v1/dashboard_summary`, {
+                    headers: {
+                        'apikey': CONFIG.SUPABASE_KEY,
+                        'Authorization': `Bearer ${CONFIG.SUPABASE_KEY}`
+                    }
+                });
+                
+                const data = await response.json();
+                updateDashboardStats(data[0]);
+                
+            } catch (error) {
+                console.error('Dashboard error:', error);
+            }
+        }
+
+        // Update Dashboard Stats
+        function updateDashboardStats(stats) {
+            document.getElementById('statTotal').textContent = stats.total_variants || 0;
+            document.getElementById('statClassI').textContent = stats.class_i_count || 0;
+            document.getElementById('statExceptional').textContent = stats.exceptional_class_i || 0;
+            document.getElementById('statResponsive').textContent = stats.eti_responders || 0;
+        }
 
         // Load Variants
         async function loadVariants() {
@@ -472,30 +593,64 @@
                 });
                 
                 STATE.variants = await response.json();
-                STATE.filteredVariants = [...STATE.variants];
-                renderVariantList();
+                filterAndRenderVariants();
+                updateVariantCount();
                 
             } catch (error) {
                 console.error('Load error:', error);
-                showError('Failed to load variants');
+                showNotification('Failed to load variants', 'error');
             }
+        }
+
+        // Filter and Render Variants
+        function filterAndRenderVariants() {
+            let filtered = STATE.variants;
+            
+            // Apply search filter
+            if (STATE.searchQuery) {
+                filtered = filtered.filter(v => 
+                    v.legacy_name?.toLowerCase().includes(STATE.searchQuery) ||
+                    v.protein_name?.toLowerCase().includes(STATE.searchQuery) ||
+                    v.cdna_name?.toLowerCase().includes(STATE.searchQuery)
+                );
+            }
+            
+            // Apply type filter
+            switch(STATE.activeFilter) {
+                case 'exceptional':
+                    filtered = filtered.filter(v => v.class_subtype === 'exceptional');
+                    break;
+                case 'responsive':
+                    filtered = filtered.filter(v => v.eti_prediction === 'responsive');
+                    break;
+            }
+            
+            STATE.filteredVariants = filtered;
+            STATE.currentPage = 1;
+            renderVariantList();
+            updatePagination();
+            updateFilterButtons();
         }
 
         // Render Variant List
         function renderVariantList() {
             const list = document.getElementById('variantList');
+            const startIdx = (STATE.currentPage - 1) * CONFIG.ITEMS_PER_PAGE;
+            const endIdx = startIdx + CONFIG.ITEMS_PER_PAGE;
+            const pageVariants = STATE.filteredVariants.slice(startIdx, endIdx);
             
-            if (STATE.filteredVariants.length === 0) {
+            if (pageVariants.length === 0) {
                 list.innerHTML = `
                     <div class="empty-state">
                         <i class="fas fa-search empty-state-icon"></i>
                         <p>No variants found</p>
+                        ${STATE.searchQuery ? '<p class="text-sm mt-2">Try a different search</p>' : ''}
                     </div>
                 `;
                 return;
             }
             
-            list.innerHTML = STATE.filteredVariants.map(variant => {
+            list.innerHTML = pageVariants.map(variant => {
                 const isSelected = STATE.selectedVariant?.id === variant.id;
                 const isExceptional = variant.class_subtype === 'exceptional';
                 const isResponsive = variant.eti_prediction === 'responsive';
@@ -504,22 +659,23 @@
                     <div class="variant-cell ${isSelected ? 'selected' : ''}" 
                          onclick="selectVariant('${variant.legacy_name}')">
                         <div class="flex justify-between items-start mb-2">
-                            <h4 class="font-semibold">${variant.legacy_name}</h4>
+                            <h4 class="font-semibold text-gray-800">${variant.legacy_name}</h4>
                             ${variant.cftr_class ? `
-                                <span class="badge-clinical ${isExceptional ? 'badge-exceptional' : 'badge-class-i'}">
+                                <span class="helix-badge ${isExceptional ? 'helix-badge-exceptional' : 'helix-badge-class-i'}">
                                     Class ${variant.cftr_class}
                                 </span>
                             ` : ''}
                         </div>
                         
                         ${variant.protein_name ? `
-                            <div class="text-sm text-gray-600 mb-1">${variant.protein_name}</div>
+                            <div class="text-sm text-gray-600 mb-1 font-mono">${variant.protein_name}</div>
                         ` : ''}
                         
                         <div class="flex justify-between text-xs text-gray-500">
                             <span>${variant.final_determination || 'Unknown'}</span>
                             ${variant.eti_prediction ? `
-                                <span class="${isResponsive ? 'text-green-600' : 'text-red-600'}">
+                                <span class="${isResponsive ? 'text-green-600 font-medium' : 'text-red-600 font-medium'}">
+                                    <i class="fas ${isResponsive ? 'fa-check-circle' : 'fa-times-circle'} mr-1"></i>
                                     ETI ${variant.eti_prediction}
                                 </span>
                             ` : ''}
@@ -541,48 +697,59 @@
 
         // Render Variant Detail
         function renderVariantDetail(variant) {
-            // Show content, hide empty state
+            // Show content
             document.getElementById('variantHeader').classList.remove('hidden');
             document.getElementById('variantContent').classList.remove('hidden');
             document.getElementById('emptyState').classList.add('hidden');
             document.getElementById('clinicalAlertPanel').classList.add('hidden');
             
             const isExceptional = variant.class_subtype === 'exceptional';
-            const isTrueClassI = variant.class_subtype === 'true';
             const isResponsive = variant.eti_prediction === 'responsive';
             
             // Header
             document.getElementById('variantName').textContent = variant.legacy_name;
-            document.getElementById('variantClass').textContent = variant.cftr_class || '-';
-            document.getElementById('variantClass').className = `text-4xl font-bold ${
-                isExceptional ? 'text-amber-600' : 
-                isTrueClassI ? 'text-red-600' : 
-                variant.cftr_class ? 'text-blue-600' : 'text-gray-600'
+            
+            const displayClass = variant.cftr_class || 
+                (variant.class_subtype === 'exceptional' || variant.class_subtype === 'true' ? 'I' : '-');
+            
+            document.getElementById('variantClass').textContent = displayClass;
+            document.getElementById('variantClass').className = `text-5xl font-bold ${
+                isExceptional ? 'text-helix-amber' : 
+                variant.class_subtype === 'true' ? 'text-helix-red' :
+                variant.cftr_class ? 'text-helix-blue' : 'text-gray-600'
             }`;
+            
             document.getElementById('variantSubtype').textContent = 
                 variant.class_subtype || (variant.cftr_class ? 'Standard' : 'Unknown');
             
             // Badges
             const badges = [];
-            if (variant.cftr_class) {
-                badges.push(`<span class="badge-clinical ${isExceptional ? 'badge-exceptional' : 'badge-class-i'}">
-                    <i class="fas ${isExceptional ? 'fa-bolt' : 'fa-dna'}"></i>
-                    Class ${variant.cftr_class}
-                </span>`);
+            if (displayClass !== '-') {
+                badges.push(`
+                    <span class="helix-badge ${isExceptional ? 'helix-badge-exceptional' : 'helix-badge-class-i'}">
+                        <i class="fas ${isExceptional ? 'fa-bolt' : 'fa-dna'}"></i>
+                        Class ${displayClass}
+                    </span>
+                `);
             }
             
             if (variant.final_determination === 'CF-causing') {
-                badges.push(`<span class="badge-clinical badge-non-responsive">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    CF-causing
-                </span>`);
+                badges.push(`
+                    <span class="helix-badge" style="background: rgba(220, 38, 38, 0.1); color: #b91c1c; border-color: rgba(220, 38, 38, 0.2);">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        CF-causing
+                    </span>
+                `);
             }
             
             if (variant.eti_prediction) {
-                badges.push(`<span class="badge-clinical ${isResponsive ? 'badge-responsive' : 'badge-non-responsive'}">
-                    <i class="fas ${isResponsive ? 'fa-check' : 'fa-times'}"></i>
-                    ETI ${variant.eti_prediction}
-                </span>`);
+                badges.push(`
+                    <span class="helix-badge ${isResponsive ? 'helix-badge-responsive' : ''}" 
+                          style="${!isResponsive ? 'background: rgba(220, 38, 38, 0.1); color: #b91c1c; border-color: rgba(220, 38, 38, 0.2);' : ''}">
+                        <i class="fas ${isResponsive ? 'fa-check' : 'fa-times'}"></i>
+                        ETI ${variant.eti_prediction}
+                    </span>
+                `);
             }
             
             document.getElementById('variantBadges').innerHTML = badges.join('');
@@ -591,27 +758,27 @@
             const nomenclature = [];
             if (variant.protein_name) {
                 nomenclature.push(`
-                    <div class="data-point">
-                        <div class="data-label">Protein Notation</div>
-                        <div class="data-value">${variant.protein_name}</div>
+                    <div class="helix-data-point">
+                        <div class="helix-data-label">Protein Notation</div>
+                        <div class="helix-data-value">${variant.protein_name}</div>
                     </div>
                 `);
             }
             
             if (variant.cdna_name) {
                 nomenclature.push(`
-                    <div class="data-point">
-                        <div class="data-label">cDNA Notation</div>
-                        <div class="data-value">${variant.cdna_name}</div>
+                    <div class="helix-data-point">
+                        <div class="helix-data-label">cDNA Notation</div>
+                        <div class="helix-data-value">${variant.cdna_name}</div>
                     </div>
                 `);
             }
             
             if (variant.alt_names && variant.alt_names !== 'NA') {
                 nomenclature.push(`
-                    <div class="data-point">
-                        <div class="data-label">Alternative Names</div>
-                        <div class="data-value">${variant.alt_names}</div>
+                    <div class="helix-data-point">
+                        <div class="helix-data-label">Alternative Names</div>
+                        <div class="helix-data-value text-sm">${variant.alt_names}</div>
                     </div>
                 `);
             }
@@ -620,20 +787,20 @@
             
             // Clinical Impact
             document.getElementById('clinicalImpact').innerHTML = `
-                <div class="data-point">
-                    <div class="data-label">Clinical Impact</div>
-                    <div class="data-value ${variant.final_determination === 'CF-causing' ? 'text-red-600' : 'text-amber-600'}">
+                <div class="helix-data-point">
+                    <div class="helix-data-label">Clinical Impact</div>
+                    <div class="helix-data-value ${variant.final_determination === 'CF-causing' ? 'text-red-600' : 'text-amber-600'}">
                         ${variant.final_determination || 'Unknown'}
                     </div>
                 </div>
-                <div class="data-point">
-                    <div class="data-label">Classification</div>
-                    <div class="data-value">${variant.cftr_class ? `Class ${variant.cftr_class}` : 'Unknown'}</div>
+                <div class="helix-data-point">
+                    <div class="helix-data-label">CFTR Class</div>
+                    <div class="helix-data-value">${displayClass !== '-' ? `Class ${displayClass}` : 'Unknown'}</div>
                 </div>
                 ${variant.class_subtype ? `
-                    <div class="data-point">
-                        <div class="data-label">Subtype</div>
-                        <div class="data-value ${isExceptional ? 'text-amber-600' : 'text-red-600'}">
+                    <div class="helix-data-point">
+                        <div class="helix-data-label">Classification Subtype</div>
+                        <div class="helix-data-value ${isExceptional ? 'text-helix-amber' : 'text-helix-red'} capitalize">
                             ${variant.class_subtype}
                         </div>
                     </div>
@@ -643,24 +810,24 @@
             // Therapeutic Prediction
             document.getElementById('therapeuticPrediction').innerHTML = `
                 ${variant.eti_prediction ? `
-                    <div class="data-point">
-                        <div class="data-label">ETI Response</div>
-                        <div class="data-value ${isResponsive ? 'text-green-600' : 'text-red-600'}">
+                    <div class="helix-data-point">
+                        <div class="helix-data-label">ETI Response</div>
+                        <div class="helix-data-value ${isResponsive ? 'text-green-600' : 'text-red-600'} capitalize">
                             ${variant.eti_prediction}
                         </div>
                     </div>
                 ` : ''}
                 ${variant.class_confidence ? `
-                    <div class="data-point">
-                        <div class="data-label">Confidence</div>
-                        <div class="data-value capitalize">${variant.class_confidence}</div>
+                    <div class="helix-data-point">
+                        <div class="helix-data-label">Confidence Level</div>
+                        <div class="helix-data-value capitalize">${variant.class_confidence}</div>
                     </div>
                 ` : ''}
                 ${variant.therapy_responsive !== null ? `
-                    <div class="data-point">
-                        <div class="data-label">Therapy Ready</div>
-                        <div class="data-value ${variant.therapy_responsive ? 'text-green-600' : 'text-red-600'}">
-                            ${variant.therapy_responsive ? 'Yes' : 'No'}
+                    <div class="helix-data-point">
+                        <div class="helix-data-label">Therapy Recommendation</div>
+                        <div class="helix-data-value ${variant.therapy_responsive ? 'text-green-600' : 'text-red-600'}">
+                            ${variant.therapy_responsive ? 'Consider ETI' : 'ETI not recommended'}
                         </div>
                     </div>
                 ` : ''}
@@ -669,53 +836,55 @@
             // Evidence Quality
             document.getElementById('evidenceQuality').innerHTML = `
                 ${variant.eti_evidence_level ? `
-                    <div class="data-point">
-                        <div class="data-label">Evidence Level</div>
-                        <div class="data-value capitalize">${variant.eti_evidence_level.replace('_', ' ')}</div>
+                    <div class="helix-data-point">
+                        <div class="helix-data-label">Evidence Level</div>
+                        <div class="helix-data-value capitalize">${variant.eti_evidence_level.replace('_', ' ')}</div>
                     </div>
                 ` : ''}
                 ${variant.last_evidence_update ? `
-                    <div class="data-point">
-                        <div class="data-label">Last Update</div>
-                        <div class="data-value">${new Date(variant.last_evidence_update).toLocaleDateString()}</div>
+                    <div class="helix-data-point">
+                        <div class="helix-data-label">Last Evidence Update</div>
+                        <div class="helix-data-value">${new Date(variant.last_evidence_update).toLocaleDateString()}</div>
                     </div>
                 ` : ''}
-                <div class="data-point">
-                    <div class="data-label">Evidence Sources</div>
-                    <div class="data-value">
-                        ${variant.evidence_count || 0}
-                    </div>
+                <div class="helix-data-point">
+                    <div class="helix-data-label">Evidence Sources</div>
+                    <div class="helix-data-value">${variant.evidence_count || 0}</div>
                 </div>
             `;
             
             // Clinical Alert
             if (variant.clinical_alert && !variant.clinical_alert.includes('Standard')) {
-                const alertClass = isExceptional ? 'alert-warning' : 
-                                 isTrueClassI ? 'alert-critical' : 'alert-info';
+                const alertType = isExceptional ? 'warning' : 
+                                variant.class_subtype === 'true' ? 'critical' : 'info';
                 
                 document.getElementById('clinicalAlertPanel').classList.remove('hidden');
+                document.getElementById('clinicalAlertPanel').className = `helix-alert helix-alert-${alertType} mb-6`;
+                
                 document.getElementById('alertContent').innerHTML = `
-                    <i class="fas ${isExceptional ? 'fa-bolt' : 'fa-exclamation-triangle'} mt-1 mr-3 
-                       ${isExceptional ? 'text-amber-500' : 'text-red-500'}"></i>
+                    <i class="fas ${isExceptional ? 'fa-bolt' : 'fa-exclamation-triangle'} mt-1 mr-4 
+                       ${isExceptional ? 'text-helix-amber' : 'text-helix-red'} text-xl"></i>
                     <div>
-                        <div class="font-semibold mb-1">Clinical Alert</div>
-                        <div class="text-gray-700">${variant.clinical_alert}</div>
+                        <div class="font-bold text-lg mb-2">Clinical Alert</div>
+                        <div class="text-gray-800 mb-3">${variant.clinical_alert}</div>
                         ${variant.eti_recommendation ? `
-                            <div class="mt-3 text-sm text-gray-600">
+                            <div class="font-medium text-gray-700">
                                 <i class="fas fa-lightbulb mr-2"></i>
                                 ${variant.eti_recommendation}
                             </div>
                         ` : ''}
                     </div>
                 `;
-                document.getElementById('clinicalAlertPanel').className = `clinical-card p-6 mb-6 ${alertClass}`;
             }
             
             // Evidence Chain
             if (variant.source_summary) {
                 document.getElementById('evidenceChain').innerHTML = `
-                    <div class="font-mono text-gray-600">
-                        ${variant.source_summary.split('_').join(' → ')}
+                    <div class="flex flex-wrap items-center gap-2">
+                        ${variant.source_summary.split('_').map((part, i) => `
+                            <span class="px-3 py-1 bg-gray-100 rounded-lg text-sm">${part}</span>
+                            ${i < variant.source_summary.split('_').length - 1 ? '<i class="fas fa-arrow-right text-gray-300"></i>' : ''}
+                        `).join('')}
                     </div>
                 `;
             }
@@ -729,98 +898,264 @@
             searchInput.addEventListener('input', () => {
                 clearTimeout(timeout);
                 timeout = setTimeout(() => {
-                    searchVariants();
+                    STATE.searchQuery = searchInput.value.toLowerCase();
+                    filterAndRenderVariants();
                 }, 300);
             });
         }
 
-        function searchVariants() {
-            const query = document.getElementById('searchInput').value.toLowerCase();
-            
-            STATE.filteredVariants = STATE.variants.filter(v => 
-                v.legacy_name.toLowerCase().includes(query) ||
-                (v.protein_name && v.protein_name.toLowerCase().includes(query)) ||
-                (v.cdna_name && v.cdna_name.toLowerCase().includes(query))
-            );
-            
-            renderVariantList();
-        }
-
         function filterVariants(filter) {
             STATE.activeFilter = filter;
-            
+            filterAndRenderVariants();
+        }
+
+        function updateFilterButtons() {
+            const buttons = ['all', 'exceptional', 'responsive'];
+            buttons.forEach(btn => {
+                const element = document.getElementById(`filter${btn.charAt(0).toUpperCase() + btn.slice(1)}`);
+                if (element) {
+                    if (btn === STATE.activeFilter) {
+                        element.style.borderColor = getFilterColor(btn);
+                        element.style.color = getFilterColor(btn);
+                        element.style.fontWeight = '600';
+                    } else {
+                        element.style.borderColor = '';
+                        element.style.color = '';
+                        element.style.fontWeight = '';
+                    }
+                }
+            });
+        }
+
+        function getFilterColor(filter) {
             switch(filter) {
-                case 'exceptional':
-                    STATE.filteredVariants = STATE.variants.filter(v => v.class_subtype === 'exceptional');
-                    break;
-                case 'responsive':
-                    STATE.filteredVariants = STATE.variants.filter(v => v.eti_prediction === 'responsive');
-                    break;
-                default:
-                    STATE.filteredVariants = [...STATE.variants];
+                case 'exceptional': return '#ff9a3c';
+                case 'responsive': return '#2a9d8f';
+                default: return '#00a8b5';
             }
+        }
+
+        // Pagination
+        function updatePagination() {
+            const totalPages = Math.ceil(STATE.filteredVariants.length / CONFIG.ITEMS_PER_PAGE);
+            const pagination = document.getElementById('paginationControls');
             
-            renderVariantList();
+            if (totalPages > 1) {
+                pagination.style.display = 'flex';
+                document.getElementById('currentPage').textContent = STATE.currentPage;
+                document.getElementById('totalPages').textContent = totalPages;
+                document.getElementById('prevBtn').disabled = STATE.currentPage === 1;
+                document.getElementById('nextBtn').disabled = STATE.currentPage === totalPages;
+            } else {
+                pagination.style.display = 'none';
+            }
+        }
+
+        function nextPage() {
+            const totalPages = Math.ceil(STATE.filteredVariants.length / CONFIG.ITEMS_PER_PAGE);
+            if (STATE.currentPage < totalPages) {
+                STATE.currentPage++;
+                renderVariantList();
+                updatePagination();
+            }
+        }
+
+        function previousPage() {
+            if (STATE.currentPage > 1) {
+                STATE.currentPage--;
+                renderVariantList();
+                updatePagination();
+            }
+        }
+
+        // Update Count
+        function updateVariantCount() {
+            document.getElementById('variantCount').textContent = STATE.filteredVariants.length;
         }
 
         // Quick Search
-        function searchVariant(name) {
-            document.getElementById('searchInput').value = name;
-            searchVariants();
+        function quickSearch(variantName) {
+            document.getElementById('searchInput').value = variantName;
+            STATE.searchQuery = variantName.toLowerCase();
+            filterAndRenderVariants();
             
-            // Select if found
             setTimeout(() => {
-                const variant = STATE.variants.find(v => v.legacy_name === name);
-                if (variant) selectVariant(name);
+                const variant = STATE.variants.find(v => v.legacy_name === variantName);
+                if (variant) selectVariant(variantName);
             }, 100);
         }
 
         // Modal Functions
-        function showImportModal() {
+        function showDataImport() {
             document.getElementById('importModal').classList.remove('hidden');
         }
 
         function closeImportModal() {
             document.getElementById('importModal').classList.add('hidden');
+            document.getElementById('jsonInput').value = '';
+            document.getElementById('importResults').innerHTML = '';
         }
 
-        function toggleDataPanel() {
-            const panel = document.getElementById('dataPanel');
-            panel.classList.toggle('translate-x-full');
+        function showDashboard() {
+            document.getElementById('dashboardModal').classList.remove('hidden');
+            createDashboardCharts();
         }
 
-        // Import
-        async function importJSON() {
+        function closeDashboard() {
+            document.getElementById('dashboardModal').classList.add('hidden');
+        }
+
+        // Import Validation
+        async function validateAndImport() {
             const jsonInput = document.getElementById('jsonInput').value;
+            const resultsDiv = document.getElementById('importResults');
+            
+            resultsDiv.innerHTML = '';
             
             try {
                 const data = JSON.parse(jsonInput);
-                showNotification('Data validated successfully', 'success');
-                closeImportModal();
+                
+                if (!Array.isArray(data)) {
+                    throw new Error('Data must be an array');
+                }
+                
+                // Simulate import (in production, call backend API)
+                resultsDiv.innerHTML = `
+                    <div class="p-3 bg-green-100 border border-green-200 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-check-circle text-green-600 mr-3"></i>
+                            <div>
+                                <p class="font-medium text-green-800">✓ Ready to Import</p>
+                                <p class="text-sm text-green-600">${data.length} variants validated</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // In production: await fetch('/api/import', { method: 'POST', body: JSON.stringify(data) });
+                
             } catch (error) {
-                showNotification('Invalid JSON format', 'error');
+                resultsDiv.innerHTML = `
+                    <div class="p-3 bg-red-100 border border-red-200 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-exclamation-circle text-red-600 mr-3"></i>
+                            <div>
+                                <p class="font-medium text-red-800">✗ Import Failed</p>
+                                <p class="text-sm text-red-600">${error.message}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
             }
         }
 
+        // Dashboard Charts
+        function createDashboardCharts() {
+            // Class Distribution
+            const classCtx = document.getElementById('classChart').getContext('2d');
+            const classData = {
+                labels: ['Class I', 'Exceptional', 'True', 'Other'],
+                datasets: [{
+                    data: [
+                        STATE.variants.filter(v => v.cftr_class === 'I').length,
+                        STATE.variants.filter(v => v.class_subtype === 'exceptional').length,
+                        STATE.variants.filter(v => v.class_subtype === 'true').length,
+                        STATE.variants.filter(v => v.cftr_class && v.cftr_class !== 'I').length
+                    ],
+                    backgroundColor: ['#0f4c81', '#ff9a3c', '#e63946', '#00a8b5']
+                }]
+            };
+            
+            new Chart(classCtx, {
+                type: 'doughnut',
+                data: classData,
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+            
+            // Response Chart
+            const responseCtx = document.getElementById('responseChart').getContext('2d');
+            const responseData = {
+                labels: ['ETI Responsive', 'ETI Non-responsive', 'Unknown'],
+                datasets: [{
+                    data: [
+                        STATE.variants.filter(v => v.eti_prediction === 'responsive').length,
+                        STATE.variants.filter(v => v.eti_prediction === 'non_responsive').length,
+                        STATE.variants.filter(v => !v.eti_prediction).length
+                    ],
+                    backgroundColor: ['#2a9d8f', '#e63946', '#718096']
+                }]
+            };
+            
+            new Chart(responseCtx, {
+                type: 'bar',
+                data: responseData,
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        // Export
+        function exportReport() {
+            const data = {
+                timestamp: new Date().toISOString(),
+                version: CONFIG.VERSION,
+                stats: {
+                    total_variants: document.getElementById('statTotal').textContent,
+                    class_i_count: document.getElementById('statClassI').textContent,
+                    exceptional_count: document.getElementById('statExceptional').textContent,
+                    responsive_count: document.getElementById('statResponsive').textContent
+                },
+                selected_variant: STATE.selectedVariant
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `delta-helix-report-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
         // Utility Functions
+        function setupEventListeners() {
+            // Close modals on ESC
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closeImportModal();
+                    closeDashboard();
+                }
+            });
+        }
+
         function showNotification(message, type = 'info') {
-            // Simple alert for now
+            // Simple implementation
             alert(`${type.toUpperCase()}: ${message}`);
         }
 
-        function showError(message) {
-            showNotification(message, 'error');
-        }
-
         // Expose functions to window
-        window.searchVariant = searchVariant;
         window.selectVariant = selectVariant;
         window.filterVariants = filterVariants;
-        window.searchVariants = searchVariants;
-        window.showImportModal = showImportModal;
+        window.quickSearch = quickSearch;
+        window.showDataImport = showDataImport;
         window.closeImportModal = closeImportModal;
-        window.toggleDataPanel = toggleDataPanel;
-        window.importJSON = importJSON;
+        window.showDashboard = showDashboard;
+        window.closeDashboard = closeDashboard;
+        window.validateAndImport = validateAndImport;
+        window.exportReport = exportReport;
+        window.previousPage = previousPage;
+        window.nextPage = nextPage;
     </script>
 </body>
 </html>
