@@ -321,116 +321,60 @@
             overflow-y: auto;
         }
 
-        /* Enhanced View Toggle System */
-        .data-view-toggle {
-            background: linear-gradient(135deg, rgba(15, 76, 129, 0.03) 0%, rgba(0, 168, 181, 0.03) 100%);
-            border: 1px solid rgba(15, 76, 129, 0.1);
-            border-radius: 12px;
-            padding: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .view-toggle-buttons {
+        /* View Toggle Styles */
+        .view-toggle-container {
             display: flex;
-            gap: 0.75rem;
-            margin-top: 0.75rem;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            background: rgba(15, 76, 129, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(15, 76, 129, 0.1);
         }
 
         .view-toggle-btn {
             flex: 1;
-            padding: 0.75rem 1rem;
-            border-radius: 10px;
-            border: 2px solid transparent;
-            background: white;
-            font-weight: 500;
+            padding: 0.625rem 1rem;
+            border-radius: 8px;
             font-size: 0.875rem;
+            font-weight: 500;
+            text-align: center;
             cursor: pointer;
             transition: all 0.2s;
+            border: 1px solid transparent;
+            background: white;
+            color: var(--helix-gray);
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
-            color: var(--helix-gray);
         }
 
         .view-toggle-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            background: rgba(15, 76, 129, 0.05);
         }
 
         .view-toggle-btn.active {
-            border-color: var(--helix-teal);
             background: var(--helix-teal);
             color: white;
-            box-shadow: 0 4px 12px rgba(0, 168, 181, 0.2);
+            border-color: var(--helix-teal);
+            box-shadow: 0 2px 8px rgba(0, 168, 181, 0.2);
         }
 
-        .view-toggle-btn.active.complete-view {
-            border-color: var(--helix-blue);
+        .view-toggle-btn.active.complete {
             background: var(--helix-blue);
+            border-color: var(--helix-blue);
         }
 
-        .view-toggle-btn.active.all-view {
-            border-color: var(--helix-gray);
+        .view-toggle-btn.active.all {
             background: var(--helix-gray);
+            border-color: var(--helix-gray);
         }
 
-        .view-count {
+        .view-count-badge {
             font-size: 0.75rem;
             padding: 0.125rem 0.5rem;
             border-radius: 999px;
             background: rgba(255, 255, 255, 0.2);
-            margin-left: 0.25rem;
-        }
-
-        .view-description {
-            font-size: 0.875rem;
-            color: var(--helix-gray);
-            margin-top: 0.5rem;
-            line-height: 1.4;
-        }
-
-        /* Classification Display Improvements */
-        .classification-display {
-            text-align: center;
-            padding: 0.5rem;
-        }
-
-        .classification-type {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: var(--helix-blue);
-            margin-bottom: 0.25rem;
-        }
-
-        .classification-subtype {
-            font-size: 0.875rem;
-            color: var(--helix-gray);
-            font-style: italic;
-        }
-
-        /* Enhanced Stats Cards */
-        .stat-card {
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 40px rgba(15, 76, 129, 0.15);
-        }
-
-        .stat-value {
-            font-size: 2rem;
-            font-weight: 700;
-            line-height: 1;
-            margin-bottom: 0.25rem;
-        }
-
-        .stat-label {
-            font-size: 0.875rem;
-            color: #6b7280;
         }
     </style>
 </head>
@@ -467,69 +411,53 @@
     <main class="container mx-auto px-6 py-8">
         <!-- Quick Stats Bar -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <div class="helix-card p-4 stat-card">
-                <div class="stat-value text-helix-blue" id="statTotal">-</div>
-                <div class="stat-label">Total Variants</div>
-                <div class="text-xs text-gray-400 mt-1" id="statContext"></div>
+            <div class="helix-card p-4">
+                <div class="text-2xl font-bold text-helix-blue" id="statTotal">-</div>
+                <div class="text-sm text-gray-600">Total Variants</div>
             </div>
-            <div class="helix-card p-4 stat-card">
-                <div class="stat-value text-helix-red" id="statClassI">-</div>
-                <div class="stat-label">Class I Variants</div>
-                <div class="text-xs text-gray-400 mt-1">In current view</div>
+            <div class="helix-card p-4">
+                <div class="text-2xl font-bold text-helix-red" id="statClassI">-</div>
+                <div class="text-sm text-gray-600">Class I Variants</div>
             </div>
-            <div class="helix-card p-4 stat-card">
-                <div class="stat-value text-helix-amber" id="statExceptional">-</div>
-                <div class="stat-label">Exceptional Cases</div>
-                <div class="text-xs text-gray-400 mt-1">Special Class I variants</div>
+            <div class="helix-card p-4">
+                <div class="text-2xl font-bold text-helix-amber" id="statExceptional">-</div>
+                <div class="text-sm text-gray-600">Exceptional Cases</div>
             </div>
-            <div class="helix-card p-4 stat-card">
-                <div class="stat-value text-helix-green" id="statResponsive">-</div>
-                <div class="stat-label">ETI Responsive</div>
-                <div class="text-xs text-gray-400 mt-1">Responds to therapy</div>
+            <div class="helix-card p-4">
+                <div class="text-2xl font-bold text-helix-green" id="statResponsive">-</div>
+                <div class="text-sm text-gray-600">ETI Responsive</div>
             </div>
         </div>
 
-        <!-- Data View Toggle System -->
-        <div class="data-view-toggle helix-card">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center">
-                    <i class="fas fa-eye text-helix-teal mr-3 text-lg"></i>
-                    <div>
-                        <h3 class="font-semibold text-gray-800">Data View Mode</h3>
-                        <div class="view-description" id="viewDescription">
-                            <span id="currentModeText">Complete Clinical Data</span> • 
-                            <span id="currentCountText">Loading...</span>
-                        </div>
+        <!-- Data View Toggle -->
+        <div class="helix-card p-4 mb-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <div class="flex items-center gap-2 mb-1">
+                        <i class="fas fa-eye text-helix-teal"></i>
+                        <span class="font-medium text-gray-700">Data View</span>
                     </div>
+                    <p class="text-sm text-gray-500" id="viewDescription">
+                        Showing variants with complete clinical data
+                    </p>
                 </div>
-                <div class="text-sm text-gray-500">
-                    <i class="fas fa-database mr-1"></i>
-                    <span id="databaseTotal">2,102</span> total variants in database
+                
+                <div class="view-toggle-container">
+                    <button onclick="setDataView('complete')" 
+                            class="view-toggle-btn active complete" 
+                            id="viewCompleteBtn">
+                        <i class="fas fa-check-circle"></i>
+                        Complete Data
+                        <span class="view-count-badge" id="completeCount">1,002</span>
+                    </button>
+                    <button onclick="setDataView('all')" 
+                            class="view-toggle-btn" 
+                            id="viewAllBtn">
+                        <i class="fas fa-database"></i>
+                        All Variants
+                        <span class="view-count-badge" id="allCount">2,102</span>
+                    </button>
                 </div>
-            </div>
-            
-            <div class="view-toggle-buttons">
-                <button onclick="setDataView('complete')" 
-                        class="view-toggle-btn active complete-view" 
-                        id="completeViewBtn">
-                    <i class="fas fa-check-circle"></i>
-                    Complete Clinical Data
-                    <span class="view-count" id="completeCount">1,002</span>
-                </button>
-                <button onclick="setDataView('all')" 
-                        class="view-toggle-btn" 
-                        id="allViewBtn">
-                    <i class="fas fa-database"></i>
-                    All Variants
-                    <span class="view-count" id="allCount">2,102</span>
-                </button>
-            </div>
-            
-            <div class="text-xs text-gray-500 mt-3 flex items-center">
-                <i class="fas fa-info-circle mr-2"></i>
-                <span id="filterInfo">
-                    Complete data requires: CFTR Class, ETI Prediction, and Confidence Level
-                </span>
             </div>
         </div>
 
@@ -553,7 +481,7 @@
                             <button onclick="filterVariants('all')" 
                                     class="flex-1 px-3 py-2 text-sm font-medium rounded-lg border border-gray-300 hover:border-helix-teal hover:text-helix-teal transition"
                                     id="filterAll">
-                                All Variants
+                                All
                             </button>
                             <button onclick="filterVariants('missing')" 
                                     class="flex-1 px-3 py-2 text-sm font-medium rounded-lg border border-gray-300 hover:border-helix-amber hover:text-helix-amber transition"
@@ -563,15 +491,13 @@
                         </div>
 
                         <div class="text-xs text-gray-500 mb-2">
-                            <i class="fas fa-list mr-1"></i>
-                            Showing <span id="variantCount" class="font-semibold">0</span> variants
-                            <span id="viewBadge" class="ml-2 px-2 py-0.5 bg-helix-teal text-white rounded-full text-xs">
-                                Complete
-                            </span>
+                            <i class="fas fa-info-circle mr-1"></i>
+                            <span id="variantCount">0</span> variants loaded
                         </div>
                     </div>
 
                     <div id="variantList" class="max-h-[500px] overflow-y-auto">
+                        <!-- Variants will load here -->
                         <div class="empty-state">
                             <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-helix-teal mx-auto"></div>
                             <p class="mt-4">Loading variants...</p>
@@ -609,12 +535,13 @@
                                 </div>
                             </div>
                             
-                            <div class="mt-4 md:mt-0">
-                                <div class="classification-display">
-                                    <div class="text-sm text-gray-500 mb-1">CFTR Classification</div>
-                                    <div id="variantClass" class="text-5xl font-bold text-helix-blue">-</div>
-                                    <div class="classification-type" id="classificationType">Select a variant</div>
-                                    <div class="classification-subtype" id="classificationSubtype"></div>
+                            <div class="mt-4 md:mt-0 text-center md:text-right">
+                                <div class="text-sm text-gray-500 mb-1">CFTR Classification</div>
+                                <div id="variantClass" class="text-5xl font-bold text-helix-blue">-</div>
+                                <div id="variantSubtype" class="text-gray-600 mt-2">
+                                    <span id="classificationType" class="font-medium">Select a variant</span>
+                                    <br>
+                                    <span id="classificationSubtype" class="text-sm text-gray-500"></span>
                                 </div>
                             </div>
                         </div>
@@ -655,7 +582,7 @@
                                 <i class="fas fa-prescription-bottle-alt mr-2 text-helix-green"></i>
                                 Therapeutic Prediction
                                 <span id="therapyMissing" class="ml-2 missing-count-badge hidden"></span>
-                            </h3>
+                        </h3>
                             <div id="therapeuticPrediction" class="space-y-4">
                                 <!-- Filled dynamically -->
                             </div>
@@ -834,19 +761,15 @@
 
     <!-- JavaScript Application -->
     <script>
-    // ============================================
-    // CONFIGURATION
-    // ============================================
+    // Configuration
     const CONFIG = {
         SUPABASE_URL: 'https://oxlkisjwfarseyqgeyuw.supabase.co',
         SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im94bGtpc2p3ZmFyc2V5cWdleXV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA2NjU2MzgsImV4cCI6MjA4NjI0MTYzOH0.O3RSGW2eMF_M_kywWsjXK9DM0saxvtu9aQUu8-YPkdU',
         ITEMS_PER_PAGE: 15,
-        VERSION: 'Δ3.0.0'
+        VERSION: 'Δ2.0.0'
     };
 
-    // ============================================
-    // APPLICATION STATE
-    // ============================================
+    // Application State
     const STATE = {
         variants: [],
         filteredVariants: [],
@@ -859,104 +782,65 @@
         dataViewMode: 'complete', // 'complete' or 'all'
         databaseStats: {
             total: 2102,
-            complete: 1002,
-            classI: 734,
-            exceptional: 21,
-            responsive: 39
+            complete: 1002
         }
     };
 
-    // ============================================
-    // INITIALIZATION
-    // ============================================
+    // Initialize Application
     document.addEventListener('DOMContentLoaded', () => {
         initializeApp();
     });
 
+    // Initialize Application
     async function initializeApp() {
-        console.log('🚀 Initializing Delta Helix v' + CONFIG.VERSION);
-        
-        // Load real database counts first
-        await fetchDatabaseStats();
-        
-        // Load variants based on current view mode
+        await loadDashboardStats();
         await loadVariants();
-        
         setupEventListeners();
         setupSearch();
         updateViewToggleUI();
-        
-        showNotification('Delta Helix initialized successfully!', 'success');
     }
 
-    // ============================================
-    // DATABASE STATS MANAGEMENT
-    // ============================================
-    async function fetchDatabaseStats() {
+    // Load Dashboard Stats
+    async function loadDashboardStats() {
         try {
-            console.log('📊 Fetching database statistics...');
-            
-            // Fetch complete data count
-            const completeResponse = await fetch(
-                `${CONFIG.SUPABASE_URL}/rest/v1/variants?select=count&cftr_class=not.is.null&eti_prediction=not.is.null&class_confidence=not.is.null`,
-                {
-                    headers: {
-                        'apikey': CONFIG.SUPABASE_KEY,
-                        'Authorization': `Bearer ${CONFIG.SUPABASE_KEY}`
-                    }
+            // Get counts from variants table
+            const response = await fetch(`${CONFIG.SUPABASE_URL}/rest/v1/variants?select=id,cftr_class,class_subtype,eti_prediction`, {
+                headers: {
+                    'apikey': CONFIG.SUPABASE_KEY,
+                    'Authorization': `Bearer ${CONFIG.SUPABASE_KEY}`
                 }
-            );
+            });
             
-            // Fetch all variants count
-            const allResponse = await fetch(
-                `${CONFIG.SUPABASE_URL}/rest/v1/variants?select=count`,
-                {
-                    headers: {
-                        'apikey': CONFIG.SUPABASE_KEY,
-                        'Authorization': `Bearer ${CONFIG.SUPABASE_KEY}`
-                    }
-                }
-            );
-            
-            if (!completeResponse.ok || !allResponse.ok) {
-                throw new Error('Failed to fetch database stats');
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
             
-            const completeData = await completeResponse.json();
-            const allData = await allResponse.json();
-            
-            // Update state with real counts
-            STATE.databaseStats = {
-                total: allData[0].count,
-                complete: completeData[0].count,
-                classI: 734,   // These would come from separate queries in production
-                exceptional: 21,
-                responsive: 39
-            };
-            
-            console.log('✅ Database stats loaded:', STATE.databaseStats);
-            updateDatabaseStatsUI();
+            const allVariants = await response.json();
+            updateDashboardStats(allVariants);
             
         } catch (error) {
-            console.error('❌ Error fetching database stats:', error);
-            showNotification('Using default database statistics', 'warning');
+            console.error('Dashboard error:', error);
+            showNotification('Failed to load dashboard stats', 'error');
         }
     }
 
-    function updateDatabaseStatsUI() {
-        document.getElementById('completeCount').textContent = STATE.databaseStats.complete.toLocaleString();
-        document.getElementById('allCount').textContent = STATE.databaseStats.total.toLocaleString();
-        document.getElementById('databaseTotal').textContent = STATE.databaseStats.total.toLocaleString();
+    // Update Dashboard Stats
+    function updateDashboardStats(variants) {
+        const total = variants.length;
+        const classICount = variants.filter(v => v.cftr_class === 'I').length;
+        const exceptionalCount = variants.filter(v => v.class_subtype === 'exceptional').length;
+        const responsiveCount = variants.filter(v => v.eti_prediction === 'responsive').length;
+        
+        document.getElementById('statTotal').textContent = total;
+        document.getElementById('statClassI').textContent = classICount;
+        document.getElementById('statExceptional').textContent = exceptionalCount;
+        document.getElementById('statResponsive').textContent = responsiveCount;
     }
 
-    // ============================================
-    // DATA VIEW MANAGEMENT
-    // ============================================
+    // Load Variants with current view mode
     async function loadVariants() {
         try {
-            showLoadingState();
-            
-            let url = `${CONFIG.SUPABASE_URL}/rest/v1/variants?select=*&order=legacy_name.asc`;
+            let url = `${CONFIG.SUPABASE_URL}/rest/v1/variants?select=*&order=legacy_name`;
             
             // Apply filters based on view mode
             if (STATE.dataViewMode === 'complete') {
@@ -976,119 +860,88 @@
             }
             
             STATE.variants = await response.json();
-            console.log(`✅ Loaded ${STATE.variants.length} variants (${STATE.dataViewMode} view)`);
+            console.log('Loaded variants:', STATE.variants.length);
             
             filterAndRenderVariants();
-            updateDashboardStats();
+            updateVariantCount();
             updateViewDescription();
             
         } catch (error) {
-            console.error('❌ Load error:', error);
+            console.error('Load error:', error);
             showNotification(`Failed to load variants: ${error.message}`, 'error');
-            showErrorState(error.message);
+            
+            // Show error state
+            document.getElementById('variantList').innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-exclamation-triangle empty-state-icon text-red-500"></i>
+                    <p class="text-red-600 font-medium">Connection Error</p>
+                    <p class="text-sm text-gray-500 mt-2">${error.message}</p>
+                    <button onclick="loadVariants()" class="mt-4 px-4 py-2 bg-helix-teal text-white rounded-lg hover:bg-opacity-90">
+                        <i class="fas fa-redo mr-2"></i>
+                        Retry Connection
+                    </button>
+                </div>
+            `;
         }
     }
 
+    // Set Data View Mode
     function setDataView(mode) {
-        if (STATE.dataViewMode === mode) return;
-        
         STATE.dataViewMode = mode;
-        
-        // Update UI immediately
         updateViewToggleUI();
+        updateViewDescription();
         
-        // Show appropriate notification
+        // Show notification
         if (mode === 'complete') {
-            showNotification(`Switched to Complete Data view (${STATE.databaseStats.complete} variants)`, 'info');
+            showNotification(`Now showing ${STATE.databaseStats.complete} variants with complete clinical data`, 'info');
         } else {
-            showNotification(`Switched to All Variants view (${STATE.databaseStats.total} variants)`, 'info');
+            showNotification(`Now showing all ${STATE.databaseStats.total} variants in database`, 'info');
         }
         
-        // Reload data with new view mode
+        // Reload data
         loadVariants();
     }
 
+    // Update View Toggle UI
     function updateViewToggleUI() {
-        const completeBtn = document.getElementById('completeViewBtn');
-        const allBtn = document.getElementById('allViewBtn');
-        const viewBadge = document.getElementById('viewBadge');
-        
-        // Update button states
-        completeBtn.classList.remove('active', 'complete-view');
-        allBtn.classList.remove('active', 'all-view');
+        const completeBtn = document.getElementById('viewCompleteBtn');
+        const allBtn = document.getElementById('viewAllBtn');
         
         if (STATE.dataViewMode === 'complete') {
-            completeBtn.classList.add('active', 'complete-view');
-            viewBadge.textContent = 'Complete';
-            viewBadge.className = 'ml-2 px-2 py-0.5 bg-helix-teal text-white rounded-full text-xs';
+            completeBtn.classList.add('active', 'complete');
+            allBtn.classList.remove('active', 'all');
+            document.getElementById('completeCount').textContent = STATE.databaseStats.complete;
+            document.getElementById('allCount').textContent = STATE.databaseStats.total;
         } else {
-            allBtn.classList.add('active', 'all-view');
-            viewBadge.textContent = 'All';
-            viewBadge.className = 'ml-2 px-2 py-0.5 bg-helix-gray text-white rounded-full text-xs';
+            allBtn.classList.add('active', 'all');
+            completeBtn.classList.remove('active', 'complete');
+            document.getElementById('completeCount').textContent = STATE.databaseStats.complete;
+            document.getElementById('allCount').textContent = STATE.databaseStats.total;
         }
     }
 
+    // Update View Description
     function updateViewDescription() {
-        const modeText = document.getElementById('currentModeText');
-        const countText = document.getElementById('currentCountText');
         const description = document.getElementById('viewDescription');
-        
         if (STATE.dataViewMode === 'complete') {
-            modeText.textContent = 'Complete Clinical Data';
-            countText.textContent = `${STATE.variants.length.toLocaleString()} variants`;
-            description.innerHTML = `
-                <span class="font-medium text-helix-blue">Complete Clinical Data</span> • 
-                <span>${STATE.variants.length.toLocaleString()} variants</span>
-            `;
+            description.textContent = `Showing ${STATE.databaseStats.complete} variants with complete clinical data (CFTR class, ETI prediction, and confidence level available)`;
         } else {
-            modeText.textContent = 'All Variants';
-            countText.textContent = `${STATE.variants.length.toLocaleString()} variants`;
-            description.innerHTML = `
-                <span class="font-medium text-gray-700">All Variants</span> • 
-                <span>${STATE.variants.length.toLocaleString()} variants</span>
-            `;
+            description.textContent = `Showing all ${STATE.databaseStats.total} variants in database, including those with missing clinical data`;
         }
     }
 
-    // ============================================
-    // DASHBOARD STATISTICS
-    // ============================================
-    function updateDashboardStats() {
-        const currentVariants = STATE.variants;
-        
-        // Calculate statistics from current view
-        const total = currentVariants.length;
-        const classICount = currentVariants.filter(v => v.cftr_class === 'I').length;
-        const exceptionalCount = currentVariants.filter(v => v.class_subtype === 'exceptional').length;
-        const responsiveCount = currentVariants.filter(v => v.eti_prediction === 'responsive').length;
-        
-        // Update display
-        document.getElementById('statTotal').textContent = total.toLocaleString();
-        document.getElementById('statClassI').textContent = classICount.toLocaleString();
-        document.getElementById('statExceptional').textContent = exceptionalCount.toLocaleString();
-        document.getElementById('statResponsive').textContent = responsiveCount.toLocaleString();
-        
-        // Update context text
-        const context = document.getElementById('statContext');
-        if (STATE.dataViewMode === 'complete') {
-            context.textContent = `Complete data only`;
-        } else {
-            context.textContent = `All variants`;
-        }
-    }
-
-    // ============================================
-    // VARIANT LIST MANAGEMENT
-    // ============================================
+    // Check if variant has missing data
     function hasMissingData(variant) {
         const criticalFields = ['cftr_class', 'eti_prediction', 'class_confidence'];
         return criticalFields.some(field => !variant[field] || variant[field] === 'null' || variant[field] === 'undefined');
     }
 
+    // Count missing data points in section
     function countMissingInSection(variant, fields) {
         return fields.filter(field => !variant[field] || variant[field] === 'null' || variant[field] === 'undefined').length;
     }
 
+    // Filter and Render Variants
     function filterAndRenderVariants() {
         let filtered = STATE.variants;
         
@@ -1111,10 +964,9 @@
         renderVariantList();
         updatePagination();
         updateFilterButtons();
-        updateVariantCount();
-        updateViewToggleUI();
     }
 
+    // Render Variant List
     function renderVariantList() {
         const list = document.getElementById('variantList');
         const startIdx = (STATE.currentPage - 1) * CONFIG.ITEMS_PER_PAGE;
@@ -1125,8 +977,8 @@
             list.innerHTML = `
                 <div class="empty-state">
                     <i class="fas fa-search empty-state-icon"></i>
-                    <p class="text-gray-600">No variants found</p>
-                    ${STATE.searchQuery ? '<p class="text-sm text-gray-500 mt-2">Try a different search term</p>' : ''}
+                    <p>No variants found</p>
+                    ${STATE.searchQuery ? '<p class="text-sm mt-2">Try a different search</p>' : ''}
                 </div>
             `;
             return;
@@ -1137,21 +989,19 @@
             const missingCount = countMissingInSection(variant, ['cftr_class', 'eti_prediction', 'class_confidence', 'eti_evidence_level']);
             const hasMissing = missingCount > 0;
             
-            // Determine classification badge
+            // Get classification badge
             let classBadge = '';
             if (variant.cftr_class) {
                 const badgeClass = variant.class_subtype === 'exceptional' ? 'helix-badge-exceptional' :
                                  variant.class_subtype === 'true' ? 'helix-badge-true' :
                                  `helix-badge-class-${variant.cftr_class.toLowerCase()}`;
                 
-                const badgeText = variant.class_subtype === 'exceptional' ? 'Exceptional' :
-                                variant.class_subtype === 'true' ? 'True Class I' :
-                                `Class ${variant.cftr_class}`;
-                
                 classBadge = `
                     <span class="helix-badge ${badgeClass}">
                         <i class="fas ${variant.class_subtype === 'exceptional' ? 'fa-bolt' : 'fa-dna'}"></i>
-                        ${badgeText}
+                        ${variant.class_subtype === 'exceptional' ? 'Exceptional' : 
+                          variant.class_subtype === 'true' ? 'True Class I' : 
+                          `Class ${variant.cftr_class}`}
                     </span>
                 `;
             }
@@ -1181,6 +1031,7 @@
         }).join('');
     }
 
+    // Select Variant
     function selectVariant(variantName) {
         const variant = STATE.variants.find(v => v.legacy_name === variantName);
         if (!variant) return;
@@ -1190,9 +1041,7 @@
         renderVariantList();
     }
 
-    // ============================================
-    // VARIANT DETAIL DISPLAY
-    // ============================================
+    // Create Data Point with Annotation Badge
     function createAnnotatableDataPoint(label, value, field, variant, section) {
         const isMissing = !value || value === 'null' || value === 'undefined';
         
@@ -1215,8 +1064,9 @@
         `;
     }
 
+    // Render Variant Detail - IMPROVED CLASSIFICATION DISPLAY
     function renderVariantDetail(variant) {
-        // Show content sections
+        // Show content
         document.getElementById('variantHeader').classList.remove('hidden');
         document.getElementById('variantContent').classList.remove('hidden');
         document.getElementById('emptyState').classList.add('hidden');
@@ -1227,39 +1077,36 @@
         const isResponsive = variant.eti_prediction === 'responsive';
         const missingCount = countMissingInSection(variant, ['cftr_class', 'eti_prediction', 'class_confidence', 'eti_evidence_level']);
         
-        // IMPROVED CLASSIFICATION DISPLAY
+        // IMPROVED: Better classification logic
         let displayClass = '-';
-        let classificationType = 'Unknown Classification';
+        let classificationType = 'Unknown';
         let classificationSubtype = '';
         let classColor = 'text-gray-600';
         
         if (variant.cftr_class) {
             displayClass = variant.cftr_class;
+            classificationType = `Class ${variant.cftr_class}`;
             
             // Set color based on class
-            switch(variant.cftr_class) {
-                case 'I': classColor = 'text-helix-red'; break;
-                case 'II': classColor = 'text-helix-amber'; break;
-                case 'III': classColor = 'text-helix-green'; break;
-                case 'IV': classColor = 'text-helix-blue'; break;
-                case 'V': classColor = 'text-helix-purple'; break;
-                default: classColor = 'text-gray-600';
-            }
+            if (variant.cftr_class === 'I') classColor = 'text-helix-red';
+            else if (variant.cftr_class === 'II') classColor = 'text-helix-amber';
+            else if (variant.cftr_class === 'III') classColor = 'text-helix-green';
+            else if (variant.cftr_class === 'IV') classColor = 'text-helix-blue';
+            else if (variant.cftr_class === 'V') classColor = 'text-helix-purple';
             
             // Handle special subtypes
             if (isExceptional) {
                 classificationType = 'Exceptional Case';
-                classificationSubtype = 'Modified Class I behavior with special characteristics';
+                classificationSubtype = 'Modified Class I behavior';
                 classColor = 'text-helix-amber';
             } else if (isTrueClassI) {
                 classificationType = 'True Class I';
-                classificationSubtype = 'Standard nonsense or frameshift mutation';
+                classificationSubtype = 'Standard classification';
                 classColor = 'text-helix-red';
+            } else if (variant.class_subtype) {
+                classificationSubtype = variant.class_subtype.charAt(0).toUpperCase() + variant.class_subtype.slice(1);
             } else {
-                classificationType = `Class ${variant.cftr_class}`;
-                classificationSubtype = variant.class_subtype ? 
-                    variant.class_subtype.charAt(0).toUpperCase() + variant.class_subtype.slice(1) + ' classification' : 
-                    'Standard classification';
+                classificationSubtype = 'Standard classification';
             }
         } else if (isExceptional || isTrueClassI) {
             displayClass = 'I';
@@ -1274,7 +1121,7 @@
             }
         }
         
-        // Update header
+        // Header
         document.getElementById('variantName').textContent = variant.legacy_name;
         document.getElementById('variantClass').textContent = displayClass;
         document.getElementById('variantClass').className = `text-5xl font-bold ${classColor}`;
@@ -1284,7 +1131,7 @@
         // Data completeness badge
         document.getElementById('dataCompleteness').innerHTML = missingCount > 0 ? `
             <span class="px-2 py-1 bg-helix-amber text-white text-xs rounded-full">
-                ${missingCount} missing data points
+                ${missingCount} data points need annotation
             </span>
         ` : `
             <span class="px-2 py-1 bg-helix-green text-white text-xs rounded-full">
@@ -1292,7 +1139,7 @@
             </span>
         `;
         
-        // Create badges
+        // Badges - IMPROVED
         const badges = [];
         if (displayClass !== '-') {
             if (isExceptional) {
@@ -1349,6 +1196,16 @@
         
         document.getElementById('nomenclatureGrid').innerHTML = nomenclaturePoints.join('');
         
+        // Update missing count for nomenclature
+        const nomenclatureMissing = nomenclaturePoints.filter(p => p.includes('missing')).length;
+        const nomenclatureBadge = document.getElementById('nomenclatureMissing');
+        if (nomenclatureMissing > 0) {
+            nomenclatureBadge.textContent = nomenclatureMissing;
+            nomenclatureBadge.classList.remove('hidden');
+        } else {
+            nomenclatureBadge.classList.add('hidden');
+        }
+        
         // Clinical Classification Section
         const classificationPoints = [
             createAnnotatableDataPoint('CFTR Class', variant.cftr_class, 'cftr_class', variant, 'classification'),
@@ -1359,6 +1216,16 @@
         
         document.getElementById('clinicalImpact').innerHTML = classificationPoints.join('');
         
+        // Update missing count for classification
+        const classificationMissing = classificationPoints.filter(p => p.includes('missing')).length;
+        const classificationBadge = document.getElementById('classificationMissing');
+        if (classificationMissing > 0) {
+            classificationBadge.textContent = classificationMissing;
+            classificationBadge.classList.remove('hidden');
+        } else {
+            classificationBadge.classList.add('hidden');
+        }
+        
         // Therapeutic Prediction Section
         const therapyPoints = [
             createAnnotatableDataPoint('ETI Response', variant.eti_prediction, 'eti_prediction', variant, 'therapy'),
@@ -1367,6 +1234,16 @@
         ];
         
         document.getElementById('therapeuticPrediction').innerHTML = therapyPoints.join('');
+        
+        // Update missing count for therapy
+        const therapyMissing = therapyPoints.filter(p => p.includes('missing')).length;
+        const therapyBadge = document.getElementById('therapyMissing');
+        if (therapyMissing > 0) {
+            therapyBadge.textContent = therapyMissing;
+            therapyBadge.classList.remove('hidden');
+        } else {
+            therapyBadge.classList.add('hidden');
+        }
         
         // Evidence Quality Section
         const evidencePoints = [
@@ -1377,9 +1254,20 @@
         
         document.getElementById('evidenceQuality').innerHTML = evidencePoints.join('');
         
+        // Update missing count for evidence
+        const evidenceMissing = evidencePoints.filter(p => p.includes('missing')).length;
+        const evidenceBadge = document.getElementById('evidenceMissing');
+        if (evidenceMissing > 0) {
+            evidenceBadge.textContent = evidenceMissing;
+            evidenceBadge.classList.remove('hidden');
+        } else {
+            evidenceBadge.classList.add('hidden');
+        }
+        
         // Clinical Alert
         if (variant.clinical_alert && !variant.clinical_alert.includes('Standard')) {
-            const alertType = isExceptional ? 'warning' : 'critical';
+            const alertType = isExceptional ? 'warning' : 
+                            isTrueClassI ? 'critical' : 'info';
             
             document.getElementById('clinicalAlertPanel').classList.remove('hidden');
             document.getElementById('clinicalAlertPanel').className = `helix-alert helix-alert-${alertType} mb-6`;
@@ -1413,15 +1301,14 @@
         }
     }
 
-    // ============================================
-    // ANNOTATION SYSTEM
-    // ============================================
+    // Show Annotation Modal
     function showAnnotationModal(variantName, field, currentValue) {
         const variant = STATE.variants.find(v => v.legacy_name === variantName);
         if (!variant) return;
         
         STATE.annotationContext = { variant, field, currentValue };
         
+        // Field display names
         const fieldNames = {
             'legacy_name': 'Legacy Name',
             'protein_name': 'Protein Notation',
@@ -1438,6 +1325,7 @@
             'changed_prev': 'Data Status'
         };
         
+        // Options for different fields
         let options = '';
         const fieldDisplay = fieldNames[field] || field.replace(/_/g, ' ');
         
@@ -1472,6 +1360,14 @@
                     <option value="unknown" ${currentValue === 'unknown' ? 'selected' : ''}>Unknown</option>
                 </select>
             `;
+        } else if (field === 'therapy_responsive') {
+            options = `
+                <select id="annotationValue" class="w-full p-2 border border-gray-300 rounded-lg">
+                    <option value="">Select</option>
+                    <option value="true" ${currentValue === 'true' ? 'selected' : ''}>Yes</option>
+                    <option value="false" ${currentValue === 'false' ? 'selected' : ''}>No</option>
+                </select>
+            `;
         } else {
             options = `
                 <textarea id="annotationValue" class="w-full p-3 border border-gray-300 rounded-lg" rows="3">${currentValue || ''}</textarea>
@@ -1501,6 +1397,7 @@
         document.getElementById('annotationModal').classList.remove('hidden');
     }
 
+    // Save Annotation
     async function saveAnnotation() {
         if (!STATE.annotationContext) return;
         
@@ -1508,6 +1405,7 @@
         const newValue = document.getElementById('annotationValue').value;
         
         try {
+            // Update in Supabase
             const response = await fetch(
                 `${CONFIG.SUPABASE_URL}/rest/v1/variants?id=eq.${variant.id}`,
                 {
@@ -1541,7 +1439,7 @@
             closeAnnotationModal();
             showNotification('Annotation saved successfully', 'success');
             filterAndRenderVariants();
-            updateDashboardStats();
+            loadDashboardStats();
             
         } catch (error) {
             console.error('Save error:', error);
@@ -1549,14 +1447,13 @@
         }
     }
 
+    // Close Annotation Modal
     function closeAnnotationModal() {
         document.getElementById('annotationModal').classList.add('hidden');
         STATE.annotationContext = null;
     }
 
-    // ============================================
-    // SEARCH AND FILTER
-    // ============================================
+    // Search and Filter
     function setupSearch() {
         const searchInput = document.getElementById('searchInput');
         let timeout;
@@ -1593,9 +1490,7 @@
         });
     }
 
-    // ============================================
-    // PAGINATION
-    // ============================================
+    // Pagination
     function updatePagination() {
         const totalPages = Math.ceil(STATE.filteredVariants.length / CONFIG.ITEMS_PER_PAGE);
         const pagination = document.getElementById('paginationControls');
@@ -1628,13 +1523,12 @@
         }
     }
 
+    // Update Count
     function updateVariantCount() {
-        document.getElementById('variantCount').textContent = STATE.filteredVariants.length.toLocaleString();
+        document.getElementById('variantCount').textContent = STATE.filteredVariants.length;
     }
 
-    // ============================================
-    // UTILITY FUNCTIONS
-    // ============================================
+    // Quick Search
     function quickSearch(variantName) {
         document.getElementById('searchInput').value = variantName;
         STATE.searchQuery = variantName.toLowerCase();
@@ -1646,67 +1540,7 @@
         }, 100);
     }
 
-    function showLoadingState() {
-        document.getElementById('variantList').innerHTML = `
-            <div class="empty-state">
-                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-helix-teal mx-auto"></div>
-                <p class="mt-4">Loading variants...</p>
-            </div>
-        `;
-    }
-
-    function showErrorState(message) {
-        document.getElementById('variantList').innerHTML = `
-            <div class="empty-state">
-                <i class="fas fa-exclamation-triangle empty-state-icon text-red-500"></i>
-                <p class="text-red-600 font-medium">Connection Error</p>
-                <p class="text-sm text-gray-500 mt-2">${message}</p>
-                <button onclick="loadVariants()" class="mt-4 px-4 py-2 bg-helix-teal text-white rounded-lg hover:bg-opacity-90">
-                    <i class="fas fa-redo mr-2"></i>
-                    Retry Connection
-                </button>
-            </div>
-        `;
-    }
-
-    function setupEventListeners() {
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                closeImportModal();
-                closeDashboard();
-                closeAnnotationModal();
-            }
-        });
-    }
-
-    function showNotification(message, type = 'info') {
-        const notification = document.createElement('div');
-        notification.className = `fixed bottom-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg border animate-fade-in ${
-            type === 'success' ? 'bg-green-50 border-green-200 text-green-800' :
-            type === 'error' ? 'bg-red-50 border-red-200 text-red-800' :
-            'bg-blue-50 border-blue-200 text-blue-800'
-        }`;
-        notification.innerHTML = `
-            <div class="flex items-center">
-                <i class="fas ${
-                    type === 'success' ? 'fa-check-circle' :
-                    type === 'error' ? 'fa-exclamation-circle' :
-                    'fa-info-circle'
-                } mr-2"></i>
-                <span>${message}</span>
-            </div>
-        `;
-        
-        document.body.appendChild(notification);
-        
-        setTimeout(() => {
-            notification.remove();
-        }, 3000);
-    }
-
-    // ============================================
-    // IMPORT/EXPORT FUNCTIONS (Preserved)
-    // ============================================
+    // IMPORT FUNCTIONS
     function showImportModal() {
         document.getElementById('importModal').classList.remove('hidden');
     }
@@ -1717,6 +1551,7 @@
         document.getElementById('importResults').innerHTML = '';
     }
 
+    // Validate Import
     async function validateImport() {
         const jsonInput = document.getElementById('jsonInput').value;
         const resultsDiv = document.getElementById('importResults');
@@ -1732,9 +1567,13 @@
         
         try {
             const data = JSON.parse(jsonInput);
+            
+            // Handle both single object and array
             const items = Array.isArray(data) ? data : [data];
             
-            if (!items[0].variant_legacy_name) {
+            // Validate structure
+            const firstItem = items[0];
+            if (!firstItem.variant_legacy_name) {
                 throw new Error('Missing required field: variant_legacy_name');
             }
             
@@ -1775,6 +1614,7 @@
         }
     }
 
+    // Execute Import
     async function executeImport(data) {
         const resultsDiv = document.getElementById('importResults');
         
@@ -1798,8 +1638,10 @@
         `;
         
         for (let i = 0; i < data.length; i++) {
+            const item = data[i];
+            
             try {
-                const item = data[i];
+                // Normalize data
                 const normalizedData = {
                     legacy_name: item.variant_legacy_name,
                     protein_name: item.variant_protein_name || null,
@@ -1811,6 +1653,7 @@
                     updated_at: new Date().toISOString()
                 };
                 
+                // Check if variant exists
                 const checkResponse = await fetch(
                     `${CONFIG.SUPABASE_URL}/rest/v1/variants?legacy_name=eq.${encodeURIComponent(normalizedData.legacy_name)}`,
                     {
@@ -1829,6 +1672,7 @@
                 const existing = await checkResponse.json();
                 
                 if (existing.length > 0) {
+                    // Update existing
                     const updateResponse = await fetch(
                         `${CONFIG.SUPABASE_URL}/rest/v1/variants?id=eq.${existing[0].id}`,
                         {
@@ -1848,6 +1692,7 @@
                         errorCount++;
                     }
                 } else {
+                    // Create new
                     const createResponse = await fetch(
                         `${CONFIG.SUPABASE_URL}/rest/v1/variants`,
                         {
@@ -1871,6 +1716,7 @@
                     }
                 }
                 
+                // Update progress
                 if ((i + 1) % 5 === 0 || i === data.length - 1) {
                     updateImportProgress(i + 1, data.length, successCount, updateCount, skipCount, errorCount);
                 }
@@ -1881,6 +1727,7 @@
             }
         }
         
+        // Final results
         resultsDiv.innerHTML += `
             <div class="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
                 <div class="flex items-center">
@@ -1907,6 +1754,7 @@
         `;
     }
 
+    // Update Import Progress
     function updateImportProgress(current, total, success, updated, skipped, errors) {
         const resultsDiv = document.getElementById('importResults');
         const progressPercent = Math.round((current / total) * 100);
@@ -1943,12 +1791,15 @@
         `;
     }
 
+    // Refresh After Import
     async function refreshAfterImport() {
         closeImportModal();
         showNotification('Refreshing data from database...', 'info');
         
+        // Reload everything
         await loadVariants();
         
+        // If there's a selected variant, refresh its view
         if (STATE.selectedVariant) {
             const variantName = STATE.selectedVariant.legacy_name;
             const updatedVariant = STATE.variants.find(v => v.legacy_name === variantName);
@@ -1960,9 +1811,7 @@
         showNotification('Data refreshed successfully', 'success');
     }
 
-    // ============================================
-    // DASHBOARD MODAL
-    // ============================================
+    // Dashboard Functions
     function showDashboard() {
         document.getElementById('dashboardModal').classList.remove('hidden');
         createDashboardCharts();
@@ -1972,7 +1821,9 @@
         document.getElementById('dashboardModal').classList.add('hidden');
     }
 
+    // Dashboard Charts
     function createDashboardCharts() {
+        // Clear previous charts
         if (STATE.charts.classChart) {
             STATE.charts.classChart.destroy();
         }
@@ -1980,6 +1831,7 @@
             STATE.charts.responseChart.destroy();
         }
         
+        // Class Distribution
         const classCtx = document.getElementById('classChart');
         if (classCtx) {
             const classData = {
@@ -2007,6 +1859,7 @@
             });
         }
         
+        // Response Chart
         const responseCtx = document.getElementById('responseChart');
         if (responseCtx) {
             const responseData = {
@@ -2034,6 +1887,7 @@
         }
     }
 
+    // Export Report
     function exportReport() {
         const data = {
             timestamp: new Date().toISOString(),
@@ -2046,7 +1900,7 @@
                 true_class_i_count: STATE.variants.filter(v => v.class_subtype === 'true').length,
                 responsive_count: STATE.variants.filter(v => v.eti_prediction === 'responsive').length
             },
-            database_stats: STATE.databaseStats,
+            variants_with_missing_data: STATE.variants.filter(v => hasMissingData(v)).map(v => v.legacy_name),
             selected_variant: STATE.selectedVariant
         };
         
@@ -2061,9 +1915,76 @@
         URL.revokeObjectURL(url);
     }
 
-    // ============================================
-    // EXPORT FUNCTIONS TO WINDOW
-    // ============================================
+    // Utility Functions
+    function setupEventListeners() {
+        // Close modals on ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeImportModal();
+                closeDashboard();
+                closeAnnotationModal();
+            }
+        });
+    }
+
+    function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `fixed bottom-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg border animate-fade-in ${
+            type === 'success' ? 'bg-green-50 border-green-200 text-green-800' :
+            type === 'error' ? 'bg-red-50 border-red-200 text-red-800' :
+            'bg-blue-50 border-blue-200 text-blue-800'
+        }`;
+        notification.innerHTML = `
+            <div class="flex items-center">
+                <i class="fas ${
+                    type === 'success' ? 'fa-check-circle' :
+                    type === 'error' ? 'fa-exclamation-circle' :
+                    'fa-info-circle'
+                } mr-2"></i>
+                <span>${message}</span>
+            </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Remove after 3 seconds
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
+    }
+
+    // Test Connection Function
+    async function testConnection() {
+        try {
+            const response = await fetch(`${CONFIG.SUPABASE_URL}/rest/v1/variants?select=count`, {
+                headers: {
+                    'apikey': CONFIG.SUPABASE_KEY,
+                    'Authorization': `Bearer ${CONFIG.SUPABASE_KEY}`
+                }
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Supabase connection successful! Variant count:', data[0].count);
+                return true;
+            } else {
+                console.error('Connection failed:', response.status);
+                return false;
+            }
+        } catch (error) {
+            console.error('Connection error:', error);
+            return false;
+        }
+    }
+
+    // Initialize test connection
+    testConnection().then(success => {
+        if (!success) {
+            showNotification('Please check your Supabase API key configuration', 'error');
+        }
+    });
+
+    // Expose functions to window
     window.selectVariant = selectVariant;
     window.filterVariants = filterVariants;
     window.quickSearch = quickSearch;
@@ -2081,6 +2002,6 @@
     window.closeAnnotationModal = closeAnnotationModal;
     window.saveAnnotation = saveAnnotation;
     window.setDataView = setDataView;
-    </script>
+</script>
 </body>
 </html>
