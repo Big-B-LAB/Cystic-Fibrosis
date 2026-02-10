@@ -1045,7 +1045,6 @@
         renderVariantList();
         updatePagination();
         updateFilterButtons();
-        updateVariantCount();
         updateCurrentViewStats();
         updateViewToggleUI();
     }
@@ -1624,7 +1623,12 @@
         updateDashboardStats();
         safeUpdateText('variantCount', STATE.filteredVariants.length.toLocaleString());
     }
-
+// ============================================
+// COMPLETE VARIANT COUNT UPDATE
+// ============================================
+function updateVariantCount() {
+    safeUpdateText('variantCount', STATE.filteredVariants.length.toLocaleString());
+}
     // ============================================
     // COMPLETE SEARCH SYSTEM
     // ============================================
