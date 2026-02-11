@@ -1033,28 +1033,52 @@
     // ============================================
     // COMPLETE APPLICATION STATE
     // ============================================
-    const STATE = {
-        variants: [],
-        filteredVariants: [],
-        selectedVariant: null,
-        activeFilter: 'all',
-        currentPage: 1,
-        searchQuery: '',
-        annotationContext: null,
-        charts: {},
-        dataViewMode: 'all'
-        databaseStats: {
-            total: 2102,
-            complete: 1002,
-            clinical: 1854,
-            classI: 979,
-            exceptional: 21,
-            responsive: 50
-        },
-        initialized: false,
-        searchTimeout: null
-    };
+const STATE = {
+    variants: [],
+    filteredVariants: [],
+    selectedVariant: null,
+    activeFilter: 'all',
+    currentPage: 1,
+    searchQuery: '',
+    annotationContext: null,
+    charts: {},
+    dataViewMode: 'all', 
+    databaseStats: {     
+        total: 2102,
+        complete: 1002,
+        clinical: 1854,
+        classI: 979,
+        exceptional: 21,
+        responsive: 50
+    },
+    initialized: false,
+    searchTimeout: null
+};
 
+// ============================================
+// VIEW MANAGEMENT FUNCTIONS
+// ============================================
+function setDataView(mode) {
+    if (STATE.dataViewMode === mode) return;
+    STATE.dataViewMode = mode;
+    updateViewToggleUI();
+    filterAndRenderVariants();
+}
+
+function updateViewToggleUI() {
+    ['complete', 'clinical', 'all'].forEach(view => {
+        const btn = document.getElementById(`${view}ViewBtn`);
+        if (btn) btn.classList.toggle('active', STATE.dataViewMode === view);
+    });
+    const badge = document.getElementById('viewBadge');
+    if (badge) {
+        const badges = { complete: 'Complete', clinical: 'Clinical', all: 'All' };
+        badge.textContent = badges[STATE.dataViewMode];
+    }
+}
+
+window.setDataView = setDataView;
+window.updateViewToggleUI = updateViewToggleUI;
     // ============================================
     // COMPLETE INITIALIZATION
     // ============================================
