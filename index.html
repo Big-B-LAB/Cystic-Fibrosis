@@ -1218,21 +1218,28 @@ window.updateViewToggleUI = updateViewToggleUI;
         // Apply search filter
         if (STATE.searchQuery) {
             filtered = filtered.filter(v => 
-                v.legacy_name?.toLowerCase().includes(STATE.searchQuery) ||
+                v.legacy_name?.toLowerCase().includes(STATE.searchQuery.toLowerCase()) ||
                 v.protein_name?.toLowerCase().includes(STATE.searchQuery) ||
                 v.cdna_name?.toLowerCase().includes(STATE.searchQuery)
             );
         }
         
         // Apply view mode filter
-        if (STATE.dataViewMode === 'complete') {
-            filtered = filtered.filter(v => v.data_status === 'complete_clinical');
-        } else if (STATE.dataViewMode === 'clinical') {
-            filtered = filtered.filter(v => 
-                v.data_status === 'complete_clinical' || 
-                v.data_status === 'partial_clinical'
-            );
-        }
+// FIXED FILTER - Case insensitive and handles null/undefined
+if (STATE.dataViewMode === 'complete') {
+    filtered = filtered.filter(v => 
+        v && (v.data_status === 'complete_clinical' || 
+              v.data_status === 'complete_clinical' ||
+              (v.cftr_class && v.eti_prediction))  // Fallback for variants without data_status
+    );
+} else if (STATE.dataViewMode === 'clinical') {
+    filtered = filtered.filter(v => 
+        v && (v.data_status === 'complete_clinical' || 
+              v.data_status === 'partial_clinical' ||
+              v.data_status === 'complete_clinical' ||
+              v.cftr_class || v.eti_prediction)  // Fallback
+    );
+}
         
         // Apply type filter
         if (STATE.activeFilter === 'missing') {
