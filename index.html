@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Δ Helix | CFTR Clinical Intelligence System</title>
+    <title>Δ Helix | CFTR Clinical Intelligence System — COMPLETE</title>
     
-    <!-- Fonts & Icons - BEST OF BOTH -->
+    <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -17,13 +17,10 @@
     
     <style>
         /* ===================================================================
-           Δ HELIX DESIGN SYSTEM 5.0 — HYBRID MASTER
-           UI: Version X (beautiful, polished)
-           LOGIC: Version 2 (clean, modular, maintainable)
+           Δ HELIX DESIGN SYSTEM 5.0 — COMPLETE
            =================================================================== */
         
         :root {
-            /* Scientific Color Palette - from Version X */
             --color-primary: #0a2e5a;
             --color-primary-light: #1a4a7a;
             --color-primary-lighter: #e9f0f9;
@@ -50,27 +47,9 @@
             --color-error: #b91c1c;
             --color-error-light: #fee2e2;
             
-            /* Typography - from Version X */
             --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             --font-display: 'Space Grotesk', var(--font-sans);
             --font-mono: 'JetBrains Mono', 'SF Mono', Monaco, 'Cascadia Code', monospace;
-            
-            --text-xs: 0.75rem;
-            --text-sm: 0.875rem;
-            --text-base: 1rem;
-            --text-lg: 1.125rem;
-            --text-xl: 1.25rem;
-            --text-2xl: 1.5rem;
-            --text-3xl: 1.875rem;
-            
-            /* Spacing */
-            --space-1: 0.25rem;
-            --space-2: 0.5rem;
-            --space-3: 0.75rem;
-            --space-4: 1rem;
-            --space-5: 1.25rem;
-            --space-6: 1.5rem;
-            --space-8: 2rem;
         }
 
         * {
@@ -81,14 +60,14 @@
 
         body {
             font-family: var(--font-sans);
-            font-size: var(--text-base);
+            font-size: 1rem;
             line-height: 1.6;
             color: #111827;
             background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
             -webkit-font-smoothing: antialiased;
         }
 
-        /* ========== CARDS ========== */
+        /* Cards */
         .card {
             background: white;
             border-radius: 0.75rem;
@@ -97,23 +76,19 @@
             transition: all 0.2s;
             overflow: hidden;
         }
-        .card:hover { 
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); 
-        }
+        .card:hover { box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
         .card-header {
-            padding: var(--space-4) var(--space-5);
+            padding: 1rem 1.25rem;
             border-bottom: 1px solid #e5e7eb;
             background: #f9fafb;
             font-weight: 600;
             display: flex;
             align-items: center;
-            gap: var(--space-2);
+            gap: 0.5rem;
         }
-        .card-body { 
-            padding: var(--space-5); 
-        }
+        .card-body { padding: 1.25rem; }
 
-        /* ========== VARIANT PILL - FROM VERSION X ========== */
+        /* Variant Pill */
         .variant-pill {
             display: inline-flex;
             align-items: center;
@@ -152,10 +127,10 @@
             font-weight: 500;
         }
 
-        /* ========== DATA POINT + ANNOTATION - FROM VERSION X ========== */
+        /* Data Point */
         .data-point {
             position: relative;
-            padding: var(--space-4);
+            padding: 1rem;
             background: white;
             border: 1px solid #e5e7eb;
             border-radius: 0.5rem;
@@ -170,27 +145,27 @@
             border-color: #fcd34d;
         }
         .data-label {
-            font-size: var(--text-xs);
+            font-size: 0.75rem;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.05em;
             color: #6b7280;
-            margin-bottom: var(--space-1);
+            margin-bottom: 0.25rem;
             display: flex;
             align-items: center;
-            gap: var(--space-1);
+            gap: 0.25rem;
         }
         .data-value {
             font-family: var(--font-mono);
-            font-size: var(--text-sm);
+            font-size: 0.875rem;
             font-weight: 500;
             color: #111827;
             word-break: break-word;
         }
         .annotation-trigger {
             position: absolute;
-            top: var(--space-2);
-            right: var(--space-2);
+            top: 0.5rem;
+            right: 0.5rem;
             width: 32px;
             height: 32px;
             border-radius: 0.5rem;
@@ -223,14 +198,14 @@
             border-color: var(--color-warning);
         }
 
-        /* ========== BADGES - FROM VERSION X ========== */
+        /* Badges */
         .badge {
             display: inline-flex;
             align-items: center;
-            gap: var(--space-1);
+            gap: 0.25rem;
             padding: 0.25rem 0.625rem;
             border-radius: 0.375rem;
-            font-size: var(--text-xs);
+            font-size: 0.75rem;
             font-weight: 600;
             line-height: 1;
             letter-spacing: 0.025em;
@@ -249,14 +224,14 @@
             border-width: 2px;
         }
 
-        /* ========== VARIANT LIST ========== */
+        /* Variant List */
         .variant-list {
             max-height: calc(100vh - 400px);
             overflow-y: auto;
             scroll-behavior: smooth;
         }
         .variant-item {
-            padding: var(--space-4);
+            padding: 1rem;
             border-bottom: 1px solid #f3f4f6;
             cursor: pointer;
             transition: all 0.2s;
@@ -268,16 +243,16 @@
         }
         .variant-name {
             font-family: var(--font-display);
-            font-size: var(--text-lg);
+            font-size: 1.125rem;
             font-weight: 600;
             color: #111827;
             letter-spacing: -0.01em;
         }
         .variant-subtitle {
             font-family: var(--font-mono);
-            font-size: var(--text-xs);
+            font-size: 0.75rem;
             color: #6b7280;
-            margin-top: var(--space-1);
+            margin-top: 0.25rem;
         }
         .search-highlight {
             background: rgba(14, 124, 123, 0.15);
@@ -287,10 +262,10 @@
             color: var(--color-accent);
         }
 
-        /* ========== VIEW TOGGLE - FROM VERSION X ========== */
+        /* View Toggle */
         .view-toggle {
             display: flex;
-            gap: var(--space-2);
+            gap: 0.5rem;
             background: white;
             border: 1px solid #e5e7eb;
             border-radius: 0.5rem;
@@ -298,7 +273,7 @@
         }
         .view-toggle-btn {
             padding: 0.5rem 1rem;
-            font-size: var(--text-sm);
+            font-size: 0.875rem;
             font-weight: 500;
             color: #6b7280;
             border-radius: 0.375rem;
@@ -328,15 +303,15 @@
             background: rgba(255,255,255,0.3);
         }
 
-        /* ========== SEARCH ========== */
+        /* Search */
         .search-wrapper {
             position: relative;
         }
         .search-input {
             width: 100%;
-            padding: var(--space-3) var(--space-3) var(--space-3) 2.5rem;
+            padding: 0.75rem 0.75rem 0.75rem 2.5rem;
             font-family: var(--font-sans);
-            font-size: var(--text-base);
+            font-size: 1rem;
             border: 1px solid #d1d5db;
             border-radius: 0.5rem;
             background: white;
@@ -349,14 +324,14 @@
         }
         .search-icon {
             position: absolute;
-            left: var(--space-3);
+            left: 0.75rem;
             top: 50%;
             transform: translateY(-50%);
             color: #9ca3af;
         }
         .search-clear {
             position: absolute;
-            right: var(--space-3);
+            right: 0.75rem;
             top: 50%;
             transform: translateY(-50%);
             color: #9ca3af;
@@ -366,13 +341,13 @@
         }
         .search-clear:hover { color: #4b5563; }
 
-        /* ========== EVIDENCE CHAIN ========== */
+        /* Evidence Chain */
         .evidence-step {
             padding: 0.375rem 0.75rem;
             background: #f3f4f6;
             border-radius: 0.5rem;
             font-family: var(--font-mono);
-            font-size: var(--text-xs);
+            font-size: 0.75rem;
             color: #4b5563;
             border: 1px solid #e5e7eb;
         }
@@ -381,7 +356,7 @@
             font-size: 0.75rem;
         }
 
-        /* ========== MODAL ========== */
+        /* Modal */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -394,7 +369,7 @@
             align-items: center;
             justify-content: center;
             z-index: 1000;
-            padding: var(--space-4);
+            padding: 1rem;
         }
         .modal {
             background: white;
@@ -411,39 +386,39 @@
             to { opacity: 1; transform: translateY(0); }
         }
         .modal-header {
-            padding: var(--space-5) var(--space-6);
+            padding: 1.25rem 1.5rem;
             border-bottom: 1px solid #e5e7eb;
             background: #f9fafb;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        .modal-body { padding: var(--space-6); }
+        .modal-body { padding: 1.5rem; }
         .modal-footer {
-            padding: var(--space-5) var(--space-6);
+            padding: 1.25rem 1.5rem;
             border-top: 1px solid #e5e7eb;
             background: #f9fafb;
             display: flex;
             justify-content: flex-end;
-            gap: var(--space-3);
+            gap: 0.75rem;
         }
 
-        /* ========== FORM ========== */
-        .form-group { margin-bottom: var(--space-5); }
+        /* Form */
+        .form-group { margin-bottom: 1.25rem; }
         .form-label {
             display: block;
-            font-size: var(--text-xs);
+            font-size: 0.75rem;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.05em;
             color: #6b7280;
-            margin-bottom: var(--space-2);
+            margin-bottom: 0.5rem;
         }
         .form-control {
             width: 100%;
-            padding: var(--space-3) var(--space-4);
+            padding: 0.75rem 1rem;
             font-family: var(--font-sans);
-            font-size: var(--text-base);
+            font-size: 1rem;
             border: 1px solid #d1d5db;
             border-radius: 0.5rem;
             background: white;
@@ -455,14 +430,14 @@
             box-shadow: 0 0 0 3px rgba(14,124,123,0.1);
         }
 
-        /* ========== BUTTONS ========== */
+        /* Buttons */
         .btn {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: var(--space-2);
+            gap: 0.5rem;
             padding: 0.5rem 1rem;
-            font-size: var(--text-sm);
+            font-size: 0.875rem;
             font-weight: 500;
             border-radius: 0.5rem;
             border: 1px solid transparent;
@@ -479,6 +454,12 @@
             transform: translateY(-1px);
             box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
         }
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
         .btn-secondary {
             background: white;
             border-color: #d1d5db;
@@ -487,6 +468,10 @@
         .btn-secondary:hover {
             background: #f9fafb;
             border-color: #9ca3af;
+        }
+        .btn-secondary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
         .btn-outline {
             background: transparent;
@@ -497,20 +482,38 @@
             background: var(--color-accent);
             color: white;
         }
-        .btn-sm { padding: 0.25rem 0.75rem; font-size: var(--text-xs); min-height: 32px; }
+        .btn-sm { padding: 0.25rem 0.75rem; font-size: 0.75rem; min-height: 32px; }
 
-        /* ========== NOTIFICATION ========== */
+        /* Loading Spinner */
+        .spinner {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid rgba(0,0,0,0.1);
+            border-radius: 50%;
+            border-top-color: var(--color-accent);
+            animation: spin 0.6s linear infinite;
+        }
+        .spinner-light {
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Notification */
         .notification {
             position: fixed;
-            bottom: var(--space-6);
-            right: var(--space-6);
-            padding: var(--space-4) var(--space-6);
+            bottom: 1.5rem;
+            right: 1.5rem;
+            padding: 1rem 1.5rem;
             background: white;
             border-radius: 0.75rem;
             box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
             display: flex;
             align-items: center;
-            gap: var(--space-3);
+            gap: 0.75rem;
             max-width: 400px;
             animation: slideIn 0.3s ease;
             border-left: 4px solid;
@@ -525,7 +528,7 @@
         .notification.warning { border-left-color: var(--color-warning); }
         .notification.info { border-left-color: var(--color-primary); }
 
-        /* ========== MISSING COUNT BADGE ========== */
+        /* Missing Count */
         .missing-count {
             display: inline-flex;
             align-items: center;
@@ -540,17 +543,17 @@
             padding: 0 0.375rem;
         }
 
-        /* ========== TABS ========== */
+        /* Tabs */
         .tabs {
             display: flex;
-            gap: var(--space-2);
+            gap: 0.5rem;
             border-bottom: 1px solid #e5e7eb;
-            padding-bottom: var(--space-2);
-            margin-bottom: var(--space-5);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.25rem;
         }
         .tab {
             padding: 0.5rem 1rem;
-            font-size: var(--text-sm);
+            font-size: 0.875rem;
             font-weight: 500;
             color: #6b7280;
             border-radius: 0.5rem;
@@ -558,7 +561,7 @@
             transition: all 0.2s;
             display: flex;
             align-items: center;
-            gap: var(--space-2);
+            gap: 0.5rem;
         }
         .tab:hover {
             color: #111827;
@@ -570,7 +573,23 @@
             font-weight: 600;
         }
 
-        /* ========== UTILITIES ========== */
+        /* Loading Overlay */
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255,255,255,0.8);
+            backdrop-filter: blur(2px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            border-radius: inherit;
+        }
+
+        /* Utilities */
         .hidden { display: none !important; }
         .text-accent { color: var(--color-accent); }
         .bg-accent-light { background: var(--color-accent-light); }
@@ -583,6 +602,15 @@
     </style>
 </head>
 <body>
+    <!-- Loading Overlay (Global) -->
+    <div id="globalLoadingOverlay" class="fixed inset-0 bg-white/80 backdrop-blur-sm z-[9999] hidden flex items-center justify-center">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl flex flex-col items-center">
+            <div class="w-16 h-16 border-4 border-[#0e7c7b] border-t-transparent rounded-full animate-spin mb-4"></div>
+            <p class="text-lg font-semibold text-gray-900" id="loadingMessage">Loading...</p>
+            <p class="text-sm text-gray-500 mt-2">Please wait</p>
+        </div>
+    </div>
+
     <!-- ==================== HEADER ==================== -->
     <header class="bg-white border-b border-gray-200 sticky top-0 z-50" style="backdrop-filter: blur(10px); background: rgba(255,255,255,0.95);">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -597,10 +625,10 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
-                    <button onclick="showDashboard()" class="btn btn-secondary hidden sm:flex">
+                    <button onclick="UI.showDashboard()" class="btn btn-secondary hidden sm:flex">
                         <i class="fas fa-chart-line"></i> Analytics
                     </button>
-                    <button onclick="showImportModal()" class="btn btn-primary">
+                    <button onclick="UI.showImportModal()" class="btn btn-primary">
                         <i class="fas fa-cloud-upload-alt"></i> <span class="hidden sm:inline">Import</span>
                     </button>
                 </div>
@@ -610,7 +638,7 @@
 
     <!-- ==================== MAIN ==================== -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- ========== STATS GRID ========== -->
+        <!-- Stats Grid -->
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             <div class="card">
                 <div class="card-body">
@@ -670,7 +698,7 @@
             </div>
         </div>
 
-        <!-- ========== VIEW TOGGLE ========== -->
+        <!-- View Toggle -->
         <div class="card mb-8">
             <div class="card-body">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
@@ -686,15 +714,15 @@
                     </div>
                 </div>
                 <div class="view-toggle">
-                    <button onclick="setDataView('all')" class="view-toggle-btn active" id="allViewBtn">
+                    <button onclick="View.setDataView('all')" class="view-toggle-btn active" id="allViewBtn">
                         <i class="fas fa-database"></i> All Variants
                         <span class="view-count" id="allCount">—</span>
                     </button>
-                    <button onclick="setDataView('complete')" class="view-toggle-btn" id="completeViewBtn">
+                    <button onclick="View.setDataView('complete')" class="view-toggle-btn" id="completeViewBtn">
                         <i class="fas fa-check-circle"></i> Complete Clinical
                         <span class="view-count" id="completeCount">—</span>
                     </button>
-                    <button onclick="setDataView('clinical')" class="view-toggle-btn" id="clinicalViewBtn">
+                    <button onclick="View.setDataView('clinical')" class="view-toggle-btn" id="clinicalViewBtn">
                         <i class="fas fa-clipboard-check"></i> Clinical Data
                         <span class="view-count" id="clinicalCount">—</span>
                     </button>
@@ -702,31 +730,34 @@
             </div>
         </div>
 
-        <!-- ========== MAIN GRID ========== -->
+        <!-- Main Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <!-- LEFT: VARIANT EXPLORER -->
+            <!-- LEFT: Variant Explorer -->
             <div class="lg:col-span-3">
-                <div class="card h-full flex flex-col">
+                <div class="card h-full flex flex-col relative" id="variantExplorerCard">
+                    <div id="variantExplorerLoading" class="loading-overlay hidden">
+                        <div class="spinner"></div>
+                    </div>
                     <div class="card-header">
                         <i class="fas fa-list-ul text-[#0a2e5a]"></i> Variant Explorer
                     </div>
                     <div class="card-body flex-1">
-                        <!-- SEARCH -->
+                        <!-- Search -->
                         <div class="search-wrapper mb-4">
                             <i class="fas fa-search search-icon"></i>
                             <input type="text" id="searchInput" class="search-input" placeholder="Search by name, protein, cDNA..." autocomplete="off">
                             <button class="search-clear hidden" id="searchClear"><i class="fas fa-times"></i></button>
                         </div>
-                        <!-- QUICK FILTERS -->
+                        <!-- Quick Filters -->
                         <div class="flex gap-2 mb-4">
-                            <button onclick="filterVariants('all')" id="filterAll" class="flex-1 px-3 py-2 text-sm font-medium rounded-lg border border-gray-200" style="border-color: #0e7c7b; color: #0e7c7b; font-weight: 600;">
+                            <button onclick="Filter.setFilter('all')" id="filterAll" class="flex-1 px-3 py-2 text-sm font-medium rounded-lg border border-gray-200" style="border-color: #0e7c7b; color: #0e7c7b; font-weight: 600;">
                                 <i class="fas fa-list-ul mr-1"></i>All
                             </button>
-                            <button onclick="filterVariants('missing')" id="filterMissing" class="flex-1 px-3 py-2 text-sm font-medium rounded-lg border border-gray-200 hover:border-[#b45309] hover:text-[#b45309] transition-all">
+                            <button onclick="Filter.setFilter('missing')" id="filterMissing" class="flex-1 px-3 py-2 text-sm font-medium rounded-lg border border-gray-200 hover:border-[#b45309] hover:text-[#b45309] transition-all">
                                 <i class="fas fa-exclamation-triangle mr-1"></i>Missing
                             </button>
                         </div>
-                        <!-- METADATA -->
+                        <!-- Metadata -->
                         <div class="flex items-center justify-between text-xs border-t border-gray-100 pt-3">
                             <span class="text-gray-500">
                                 <i class="fas fa-dna mr-1"></i>
@@ -735,21 +766,24 @@
                             <span id="viewBadge" class="px-2 py-1 bg-[#0e7c7b] text-white rounded-full text-xs font-medium">All</span>
                         </div>
                     </div>
-                    <!-- VARIANT LIST -->
+                    <!-- Variant List -->
                     <div class="variant-list px-4 pb-4" id="variantList"></div>
-                    <!-- PAGINATION -->
+                    <!-- Pagination -->
                     <div class="border-t border-gray-200 px-4 py-3 flex justify-between items-center" id="paginationControls" style="display: none;">
-                        <button onclick="previousPage()" class="btn btn-secondary btn-sm" id="prevBtn"><i class="fas fa-chevron-left"></i></button>
+                        <button onclick="Pagination.previousPage()" class="btn btn-secondary btn-sm" id="prevBtn"><i class="fas fa-chevron-left"></i></button>
                         <span class="text-sm text-gray-700">Page <span id="currentPage">1</span> of <span id="totalPages">1</span></span>
-                        <button onclick="nextPage()" class="btn btn-secondary btn-sm" id="nextBtn"><i class="fas fa-chevron-right"></i></button>
+                        <button onclick="Pagination.nextPage()" class="btn btn-secondary btn-sm" id="nextBtn"><i class="fas fa-chevron-right"></i></button>
                     </div>
                 </div>
             </div>
 
-            <!-- RIGHT: VARIANT DETAILS -->
+            <!-- RIGHT: Variant Details -->
             <div class="lg:col-span-9">
-                <div id="variantDetails">
-                    <!-- EMPTY STATE -->
+                <div id="variantDetails" class="relative">
+                    <div id="variantDetailsLoading" class="loading-overlay hidden">
+                        <div class="spinner"></div>
+                    </div>
+                    <!-- Empty State -->
                     <div id="emptyState" class="card py-12">
                         <div class="text-center max-w-md mx-auto">
                             <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#0e7c7b]/10 to-[#0e7c7b]/5 mx-auto mb-6 flex items-center justify-center">
@@ -758,10 +792,10 @@
                             <h2 class="font-['Space_Grotesk'] text-2xl font-bold text-gray-900 mb-3">No Variant Selected</h2>
                             <p class="text-gray-600 mb-8">Select a variant from the list to view clinical intelligence.</p>
                             <div class="flex flex-wrap justify-center gap-2">
-                                <button onclick="quickSearch('G542X')" class="btn btn-outline btn-sm">G542X</button>
-                                <button onclick="quickSearch('F508del')" class="btn btn-outline btn-sm">F508del</button>
-                                <button onclick="quickSearch('W1282X')" class="btn btn-outline btn-sm">W1282X</button>
-                                <button onclick="quickSearch('R334W')" class="btn btn-outline btn-sm">R334W</button>
+                                <button onclick="Variant.quickSearch('G542X')" class="btn btn-outline btn-sm">G542X</button>
+                                <button onclick="Variant.quickSearch('F508del')" class="btn btn-outline btn-sm">F508del</button>
+                                <button onclick="Variant.quickSearch('W1282X')" class="btn btn-outline btn-sm">W1282X</button>
+                                <button onclick="Variant.quickSearch('R334W')" class="btn btn-outline btn-sm">R334W</button>
                             </div>
                         </div>
                     </div>
@@ -770,7 +804,7 @@
         </div>
     </main>
 
-    <!-- ==================== IMPORT MODAL ==================== -->
+    <!-- Import Modal -->
     <div id="importModal" class="modal-overlay hidden">
         <div class="modal">
             <div class="modal-header">
@@ -778,14 +812,14 @@
                     <h2 class="font-['Space_Grotesk'] text-xl font-semibold text-gray-900">Import Clinical Data</h2>
                     <p class="text-xs font-semibold uppercase tracking-wider text-gray-500 mt-1">Add new variants or update existing</p>
                 </div>
-                <button onclick="closeImportModal()" class="w-8 h-8 rounded-lg hover:bg-gray-200 transition-colors"><i class="fas fa-times"></i></button>
+                <button onclick="UI.closeImportModal()" class="w-8 h-8 rounded-lg hover:bg-gray-200 transition-colors"><i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body">
                 <div class="tabs">
-                    <button id="jsonTabBtn" class="tab active" onclick="switchImportTab('json')"><i class="fas fa-code"></i>JSON Import</button>
-                    <button id="formTabBtn" class="tab" onclick="switchImportTab('form')"><i class="fas fa-edit"></i>Manual Entry</button>
+                    <button id="jsonTabBtn" class="tab active" onclick="Import.switchTab('json')"><i class="fas fa-code"></i>JSON Import</button>
+                    <button id="formTabBtn" class="tab" onclick="Import.switchTab('form')"><i class="fas fa-edit"></i>Manual Entry</button>
                 </div>
-                <!-- JSON PANEL -->
+                <!-- JSON Panel -->
                 <div id="jsonImportPanel">
                     <div class="bg-gray-50 rounded-lg p-4 border border-gray-200 mb-5">
                         <p class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-3 flex items-center gap-2">
@@ -805,12 +839,12 @@
                     </div>
                     <div id="importResults" class="space-y-3"></div>
                     <div class="flex justify-end gap-3">
-                        <button onclick="clearImportForm()" class="btn btn-secondary">Clear</button>
-                        <button onclick="validateImport()" class="btn btn-secondary">Validate</button>
-                        <button onclick="executeJsonImport()" class="btn btn-primary" id="executeImportBtn" disabled>Import Data</button>
+                        <button onclick="Import.clearForm()" class="btn btn-secondary">Clear</button>
+                        <button onclick="Import.validate()" class="btn btn-secondary">Validate</button>
+                        <button onclick="Import.executeJson()" class="btn btn-primary" id="executeImportBtn" disabled>Import Data</button>
                     </div>
                 </div>
-                <!-- FORM PANEL -->
+                <!-- Form Panel -->
                 <div id="formImportPanel" class="hidden">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="form-group">
@@ -861,19 +895,19 @@
                         </div>
                     </div>
                     <div class="flex justify-end gap-3 mt-6">
-                        <button onclick="clearManualForm()" class="btn btn-secondary">Clear</button>
-                        <button onclick="submitManualForm()" class="btn btn-primary">Save Variant</button>
+                        <button onclick="Import.clearManualForm()" class="btn btn-secondary">Clear</button>
+                        <button onclick="Import.submitManual()" class="btn btn-primary">Save Variant</button>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
                 <span class="text-xs text-gray-500 flex-1"><i class="fas fa-shield-alt mr-1"></i>All data validated against clinical standards</span>
-                <button onclick="closeImportModal()" class="btn btn-secondary">Cancel</button>
+                <button onclick="UI.closeImportModal()" class="btn btn-secondary">Cancel</button>
             </div>
         </div>
     </div>
 
-    <!-- ==================== ANNOTATION MODAL ==================== -->
+    <!-- Annotation Modal -->
     <div id="annotationModal" class="modal-overlay hidden">
         <div class="modal" style="max-width: 500px;">
             <div class="modal-header">
@@ -881,22 +915,22 @@
                     <h3 class="font-['Space_Grotesk'] text-lg font-semibold text-gray-900" id="annotationTitle">Annotate Data</h3>
                     <p class="text-xs font-semibold uppercase tracking-wider text-gray-500 mt-1" id="annotationField"></p>
                 </div>
-                <button onclick="closeAnnotationModal()" class="w-8 h-8 rounded-lg hover:bg-gray-200 transition-colors"><i class="fas fa-times"></i></button>
+                <button onclick="UI.closeAnnotationModal()" class="w-8 h-8 rounded-lg hover:bg-gray-200 transition-colors"><i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body" id="annotationContent"></div>
             <div class="modal-footer">
-                <button onclick="closeAnnotationModal()" class="btn btn-secondary">Cancel</button>
-                <button onclick="saveAnnotation()" class="btn btn-primary">Save Annotation</button>
+                <button onclick="UI.closeAnnotationModal()" class="btn btn-secondary">Cancel</button>
+                <button onclick="Annotation.save()" class="btn btn-primary">Save Annotation</button>
             </div>
         </div>
     </div>
 
-    <!-- ==================== DASHBOARD MODAL ==================== -->
+    <!-- Dashboard Modal -->
     <div id="dashboardModal" class="modal-overlay hidden">
         <div class="modal" style="max-width: 800px;">
             <div class="modal-header">
                 <h3 class="font-['Space_Grotesk'] text-xl font-semibold text-gray-900">Δ Helix Analytics</h3>
-                <button onclick="closeDashboard()" class="w-8 h-8 rounded-lg hover:bg-gray-200 transition-colors"><i class="fas fa-times"></i></button>
+                <button onclick="UI.closeDashboard()" class="w-8 h-8 rounded-lg hover:bg-gray-200 transition-colors"><i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -915,19 +949,18 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button onclick="exportReport()" class="btn btn-primary">Export Report</button>
+                <button onclick="Report.exportCSV()" class="btn btn-primary">Export Report</button>
             </div>
         </div>
     </div>
 
-    <!-- ==================== NOTIFICATION CONTAINER ==================== -->
+    <!-- Notification Container -->
     <div id="notification-container" class="fixed bottom-6 right-6 z-[2000] space-y-2"></div>
 
     <script>
         // ===================================================================
-        // Δ HELIX HYBRID MASTER v5.0.0
-        // UI: Version X (beautiful, polished)
-        // LOGIC: Version 2 (clean, modular, maintainable)
+        // Δ HELIX COMPLETE v6.0.0
+        // Fully functional with all fixes applied
         // ===================================================================
         
         // ------------------------------------------------------------------
@@ -943,11 +976,11 @@
                 SEARCH_DELAY: 300,
                 NOTIFICATION_DURATION: 4000
             },
-            VERSION: '5.0.0'
+            VERSION: '6.0.0-COMPLETE'
         };
 
         // ------------------------------------------------------------------
-        // STATE MANAGEMENT
+        // CORE STATE - COMPLETE
         // ------------------------------------------------------------------
         const STATE = {
             variants: [],
@@ -964,1029 +997,1256 @@
             
             charts: {},
             searchTimeout: null,
+            loadingCount: 0,
             
             databaseStats: {
                 total: 0,
                 complete: 0,
                 clinical: 0,
                 classI: 0,
+                classII: 0,
+                classIII: 0,
+                classIV: 0,
+                classV: 0,
                 exceptional: 0,
-                responsive: 0
+                responsive: 0,
+                nonResponsive: 0,
+                unknown: 0
             }
         };
 
         // ------------------------------------------------------------------
-        // INITIALIZATION
+        // DEMO DATA - COMPLETE
         // ------------------------------------------------------------------
-        document.addEventListener('DOMContentLoaded', async function() {
-            console.log(`🚀 Δ Helix v${CONFIG.VERSION} initializing...`);
-            
-            attachEventListeners();
-            initializeSearch();
-            
-            try {
-                await loadVariantCatalog();
-                await loadDatabaseStats();
-                
-                updateUIFromState();
-                renderVariantCatalog();
-                refreshViewDescription();
-                
-                showNotification(`✓ System ready • ${STATE.variants.length} variants loaded`, 'success');
-            } catch (error) {
-                console.error('❌ Initialization failed:', error);
-                loadDemoData();
-                showNotification('⚠️ Demo mode • Using sample data', 'warning');
+        const DEMO_VARIANTS = [
+            {
+                id: 1,
+                legacy_name: 'G542X',
+                protein_name: 'p.Gly542X',
+                cdna_name: 'c.1624G>T',
+                final_determination: 'CF-causing',
+                cftr_class: 'I',
+                class_subtype: 'exceptional',
+                eti_prediction: 'responsive',
+                eti_evidence_level: 'High',
+                therapy_responsive: true,
+                class_confidence: 'Confirmed',
+                data_status: 'complete_clinical',
+                source_summary: 'ClinVar_CFTR2_Evidence'
+            },
+            {
+                id: 2,
+                legacy_name: 'F508del',
+                protein_name: 'p.Phe508del',
+                cdna_name: 'c.1521_1523delCTT',
+                final_determination: 'CF-causing',
+                cftr_class: 'II',
+                class_subtype: 'standard',
+                eti_prediction: 'responsive',
+                eti_evidence_level: 'High',
+                therapy_responsive: true,
+                class_confidence: 'Confirmed',
+                data_status: 'complete_clinical',
+                source_summary: 'ClinVar_CFTR2'
+            },
+            {
+                id: 3,
+                legacy_name: 'W1282X',
+                protein_name: 'p.Trp1282X',
+                cdna_name: 'c.3846G>A',
+                final_determination: 'CF-causing',
+                cftr_class: 'I',
+                class_subtype: 'true',
+                eti_prediction: 'non_responsive',
+                eti_evidence_level: 'Moderate',
+                therapy_responsive: false,
+                class_confidence: 'Confirmed',
+                data_status: 'complete_clinical',
+                source_summary: 'ClinVar'
+            },
+            {
+                id: 4,
+                legacy_name: 'R334W',
+                protein_name: 'p.Arg334Trp',
+                cdna_name: 'c.1000C>T',
+                final_determination: 'CF-causing',
+                cftr_class: 'IV',
+                class_subtype: 'standard',
+                eti_prediction: 'responsive',
+                eti_evidence_level: 'High',
+                therapy_responsive: true,
+                class_confidence: 'Confirmed',
+                data_status: 'complete_clinical',
+                source_summary: 'CFTR2_ClinVar'
+            },
+            {
+                id: 5,
+                legacy_name: 'N1303K',
+                protein_name: 'p.Asn1303Lys',
+                cdna_name: 'c.3909C>G',
+                final_determination: 'CF-causing',
+                cftr_class: 'II',
+                class_subtype: 'standard',
+                eti_prediction: 'non_responsive',
+                eti_evidence_level: 'Moderate',
+                therapy_responsive: false,
+                class_confidence: 'Confirmed',
+                data_status: 'complete_clinical',
+                source_summary: 'ClinVar'
+            },
+            {
+                id: 6,
+                legacy_name: 'G551D',
+                protein_name: 'p.Gly551Asp',
+                cdna_name: 'c.1652G>A',
+                final_determination: 'CF-causing',
+                cftr_class: 'III',
+                class_subtype: 'standard',
+                eti_prediction: 'responsive',
+                eti_evidence_level: 'High',
+                therapy_responsive: true,
+                class_confidence: 'Confirmed',
+                data_status: 'complete_clinical',
+                source_summary: 'CFTR2_ClinVar'
+            },
+            {
+                id: 7,
+                legacy_name: 'E831X',
+                protein_name: 'p.Glu831X',
+                cdna_name: 'c.2491G>T',
+                final_determination: 'Probably responsive to ETI',
+                cftr_class: 'I',
+                class_subtype: 'exceptional',
+                eti_prediction: 'responsive',
+                eti_evidence_level: 'High',
+                therapy_responsive: true,
+                class_confidence: 'High',
+                data_status: 'complete_clinical',
+                source_summary: 'CFTR2_2026_Bulk_Import'
+            },
+            {
+                id: 8,
+                legacy_name: 'R117H',
+                protein_name: 'p.Arg117His',
+                cdna_name: 'c.350G>A',
+                final_determination: 'Variant of unknown significance',
+                cftr_class: 'IV',
+                class_subtype: 'standard',
+                eti_prediction: 'unknown',
+                eti_evidence_level: 'Low',
+                therapy_responsive: null,
+                class_confidence: 'Moderate',
+                data_status: 'partial_clinical',
+                source_summary: 'CFTR2'
+            },
+            {
+                id: 9,
+                legacy_name: '3849+10kbC>T',
+                protein_name: 'p.??',
+                cdna_name: 'c.3718-2477C>T',
+                final_determination: 'CF-causing',
+                cftr_class: 'V',
+                class_subtype: 'standard',
+                eti_prediction: 'unknown',
+                eti_evidence_level: 'Low',
+                therapy_responsive: null,
+                class_confidence: 'Moderate',
+                data_status: 'partial_clinical',
+                source_summary: 'CFTR2'
+            },
+            {
+                id: 10,
+                legacy_name: '2789+5G>A',
+                protein_name: 'p.??',
+                cdna_name: 'c.2657+5G>A',
+                final_determination: 'CF-causing',
+                cftr_class: 'V',
+                class_subtype: 'standard',
+                eti_prediction: 'unknown',
+                eti_evidence_level: 'Low',
+                therapy_responsive: null,
+                class_confidence: 'Moderate',
+                data_status: 'partial_clinical',
+                source_summary: 'CFTR2'
             }
-        });
+        ];
 
         // ------------------------------------------------------------------
-        // DEMO DATA (FALLBACK)
+        // LOADING MANAGER
         // ------------------------------------------------------------------
-        function loadDemoData() {
-            STATE.variants = [
-                {
-                    id: 1,
-                    legacy_name: 'G542X',
-                    protein_name: 'p.Gly542X',
-                    cdna_name: 'c.1624G>T',
-                    final_determination: 'CF-causing',
-                    cftr_class: 'I',
-                    class_subtype: 'exceptional',
-                    eti_prediction: 'responsive',
-                    eti_evidence_level: 'High',
-                    therapy_responsive: true,
-                    class_confidence: 'Confirmed',
-                    data_status: 'complete_clinical',
-                    source_summary: 'ClinVar_CFTR2_Evidence'
-                },
-                {
-                    id: 2,
-                    legacy_name: 'F508del',
-                    protein_name: 'p.Phe508del',
-                    cdna_name: 'c.1521_1523delCTT',
-                    final_determination: 'CF-causing',
-                    cftr_class: 'II',
-                    class_subtype: 'standard',
-                    eti_prediction: 'responsive',
-                    eti_evidence_level: 'High',
-                    therapy_responsive: true,
-                    class_confidence: 'Confirmed',
-                    data_status: 'complete_clinical',
-                    source_summary: 'ClinVar_CFTR2'
-                },
-                {
-                    id: 3,
-                    legacy_name: 'W1282X',
-                    protein_name: 'p.Trp1282X',
-                    cdna_name: 'c.3846G>A',
-                    final_determination: 'CF-causing',
-                    cftr_class: 'I',
-                    class_subtype: 'true',
-                    eti_prediction: 'non_responsive',
-                    eti_evidence_level: 'Moderate',
-                    therapy_responsive: false,
-                    class_confidence: 'Confirmed',
-                    data_status: 'complete_clinical',
-                    source_summary: 'ClinVar'
-                },
-                {
-                    id: 4,
-                    legacy_name: 'R334W',
-                    protein_name: 'p.Arg334Trp',
-                    cdna_name: 'c.1000C>T',
-                    final_determination: 'CF-causing',
-                    cftr_class: 'IV',
-                    class_subtype: 'standard',
-                    eti_prediction: 'responsive',
-                    eti_evidence_level: 'High',
-                    therapy_responsive: true,
-                    class_confidence: 'Confirmed',
-                    data_status: 'complete_clinical',
-                    source_summary: 'CFTR2_ClinVar'
-                },
-                {
-                    id: 5,
-                    legacy_name: 'G551D',
-                    protein_name: 'p.Gly551Asp',
-                    cdna_name: 'c.1652G>A',
-                    final_determination: 'CF-causing',
-                    cftr_class: 'III',
-                    class_subtype: 'standard',
-                    eti_prediction: 'responsive',
-                    eti_evidence_level: 'High',
-                    therapy_responsive: true,
-                    class_confidence: 'Confirmed',
-                    data_status: 'complete_clinical',
-                    source_summary: 'CFTR2_ClinVar'
+        const LoadingManager = {
+            showGlobal(message = 'Loading...') {
+                const overlay = document.getElementById('globalLoadingOverlay');
+                const msgEl = document.getElementById('loadingMessage');
+                if (msgEl) msgEl.textContent = message;
+                if (overlay) {
+                    overlay.classList.remove('hidden');
+                    STATE.loadingCount++;
                 }
-            ];
+            },
             
-            STATE.filteredVariants = [...STATE.variants];
-            updateDatabaseStatsFromData();
-        }
-
-        // ------------------------------------------------------------------
-        // DATABASE OPERATIONS
-        // ------------------------------------------------------------------
-        async function request(endpoint, options = {}) {
-            const url = `${CONFIG.SUPABASE.URL}/rest/v1/${endpoint}`;
-            const headers = {
-                'apikey': CONFIG.SUPABASE.KEY,
-                'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`,
-                'Content-Type': 'application/json',
-                'Prefer': 'return=representation'
-            };
+            hideGlobal() {
+                STATE.loadingCount = Math.max(0, STATE.loadingCount - 1);
+                if (STATE.loadingCount === 0) {
+                    const overlay = document.getElementById('globalLoadingOverlay');
+                    if (overlay) overlay.classList.add('hidden');
+                }
+            },
             
-            const response = await fetch(url, { ...options, headers });
-            if (!response.ok) throw new Error(`Supabase error (${response.status})`);
-            if (response.status === 204) return { data: null };
+            showExplorer() {
+                const el = document.getElementById('variantExplorerLoading');
+                if (el) el.classList.remove('hidden');
+            },
             
-            const data = await response.json();
-            return { data };
-        }
-
-        async function loadVariantCatalog() {
-            try {
-                const res = await request('clinical_variants?select=*&order=legacy_name.asc');
-                STATE.variants = res.data || [];
-                STATE.filteredVariants = [...STATE.variants];
-                updateDatabaseStatsFromData();
-            } catch (e) {
-                console.error('Failed to load variants:', e);
-                throw e;
+            hideExplorer() {
+                const el = document.getElementById('variantExplorerLoading');
+                if (el) el.classList.add('hidden');
+            },
+            
+            showDetails() {
+                const el = document.getElementById('variantDetailsLoading');
+                if (el) el.classList.remove('hidden');
+            },
+            
+            hideDetails() {
+                const el = document.getElementById('variantDetailsLoading');
+                if (el) el.classList.add('hidden');
             }
-        }
+        };
 
-        async function loadDatabaseStats() {
-            try {
-                const total = await request('clinical_variants?select=count');
-                const complete = await request('clinical_variants?data_status=eq.complete_clinical&select=count');
-                const clinical = await request('clinical_variants?or=(data_status.eq.complete_clinical,data_status.eq.partial_clinical)&select=count');
-                const classI = await request('clinical_variants?cftr_class=eq.I&select=count');
-                const exceptional = await request('clinical_variants?class_subtype=eq.exceptional&select=count');
-                const responsive = await request('clinical_variants?eti_prediction=eq.responsive&select=count');
+        // ------------------------------------------------------------------
+        // DATABASE SERVICE
+        // ------------------------------------------------------------------
+        const DatabaseService = {
+            async request(endpoint, options = {}) {
+                try {
+                    const url = `${CONFIG.SUPABASE.URL}/rest/v1/${endpoint}`;
+                    const headers = {
+                        'apikey': CONFIG.SUPABASE.KEY,
+                        'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=representation'
+                    };
+                    
+                    const response = await fetch(url, { ...options, headers });
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    if (response.status === 204) return { data: null };
+                    
+                    const data = await response.json();
+                    return { data, error: null };
+                } catch (error) {
+                    console.error('Database request failed:', error);
+                    return { data: null, error };
+                }
+            },
+            
+            async loadVariants() {
+                const { data, error } = await this.request('clinical_variants?select=*&order=legacy_name.asc');
+                if (error) throw error;
+                return data || [];
+            },
+            
+            async loadStats() {
+                const endpoints = [
+                    { key: 'total', url: 'clinical_variants?select=count' },
+                    { key: 'complete', url: 'clinical_variants?data_status=eq.complete_clinical&select=count' },
+                    { key: 'clinical', url: 'clinical_variants?or=(data_status.eq.complete_clinical,data_status.eq.partial_clinical)&select=count' },
+                    { key: 'classI', url: 'clinical_variants?cftr_class=eq.I&select=count' },
+                    { key: 'classII', url: 'clinical_variants?cftr_class=eq.II&select=count' },
+                    { key: 'classIII', url: 'clinical_variants?cftr_class=eq.III&select=count' },
+                    { key: 'classIV', url: 'clinical_variants?cftr_class=eq.IV&select=count' },
+                    { key: 'classV', url: 'clinical_variants?cftr_class=eq.V&select=count' },
+                    { key: 'exceptional', url: 'clinical_variants?class_subtype=eq.exceptional&select=count' },
+                    { key: 'responsive', url: 'clinical_variants?eti_prediction=eq.responsive&select=count' },
+                    { key: 'nonResponsive', url: 'clinical_variants?eti_prediction=eq.non_responsive&select=count' },
+                    { key: 'unknown', url: 'clinical_variants?eti_prediction=eq.unknown&select=count' }
+                ];
                 
-                STATE.databaseStats = {
-                    total: total.data?.[0]?.count || STATE.variants.length,
-                    complete: complete.data?.[0]?.count || STATE.variants.filter(v => v.data_status === 'complete_clinical').length,
-                    clinical: clinical.data?.[0]?.count || STATE.variants.filter(v => v.data_status === 'complete_clinical' || v.data_status === 'partial_clinical').length,
-                    classI: classI.data?.[0]?.count || STATE.variants.filter(v => v.cftr_class === 'I').length,
-                    exceptional: exceptional.data?.[0]?.count || STATE.variants.filter(v => v.class_subtype === 'exceptional').length,
-                    responsive: responsive.data?.[0]?.count || STATE.variants.filter(v => v.eti_prediction === 'responsive').length
-                };
-                
-                updateStatsUI();
-            } catch (e) {
-                console.warn('Stats fetch failed, using local', e);
-                updateDatabaseStatsFromData();
-            }
-        }
-
-        function updateDatabaseStatsFromData() {
-            STATE.databaseStats = {
-                total: STATE.variants.length,
-                complete: STATE.variants.filter(v => v.data_status === 'complete_clinical').length,
-                clinical: STATE.variants.filter(v => v.data_status === 'complete_clinical' || v.data_status === 'partial_clinical').length,
-                classI: STATE.variants.filter(v => v.cftr_class === 'I').length,
-                exceptional: STATE.variants.filter(v => v.class_subtype === 'exceptional').length,
-                responsive: STATE.variants.filter(v => v.eti_prediction === 'responsive').length
-            };
-            updateStatsUI();
-        }
-
-        async function upsertVariant(data) {
-            const exists = STATE.variants.find(v => v.legacy_name === data.legacy_name);
-            
-            if (exists) {
-                await request(`clinical_variants?legacy_name=eq.${encodeURIComponent(data.legacy_name)}`, {
-                    method: 'PATCH',
-                    body: JSON.stringify({ ...data, updated_at: new Date().toISOString() })
-                });
-                return { status: 'updated' };
-            } else {
-                await request('clinical_variants', {
-                    method: 'POST',
-                    body: JSON.stringify({ ...data, created_at: new Date().toISOString(), updated_at: new Date().toISOString() })
-                });
-                return { status: 'created' };
-            }
-        }
-
-        async function updateVariantField(legacyName, field, value) {
-            await request(`clinical_variants?legacy_name=eq.${encodeURIComponent(legacyName)}`, {
-                method: 'PATCH',
-                body: JSON.stringify({ [field]: value, updated_at: new Date().toISOString() })
-            });
-        }
-
-        async function deleteVariant(legacyName) {
-            await request(`clinical_variants?legacy_name=eq.${encodeURIComponent(legacyName)}`, { method: 'DELETE' });
-        }
-
-        // ------------------------------------------------------------------
-        // FILTER ENGINE
-        // ------------------------------------------------------------------
-        function applyFilterChain() {
-            let filtered = [...STATE.variants];
-            
-            // Apply search
-            if (STATE.searchQuery) {
-                const q = STATE.searchQuery.toLowerCase();
-                filtered = filtered.filter(v => 
-                    (v.legacy_name?.toLowerCase().includes(q)) ||
-                    (v.protein_name?.toLowerCase().includes(q)) ||
-                    (v.cdna_name?.toLowerCase().includes(q))
+                const results = await Promise.all(
+                    endpoints.map(async e => {
+                        const { data } = await this.request(e.url);
+                        return { key: e.key, count: data?.[0]?.count || 0 };
+                    })
                 );
+                
+                const stats = {};
+                results.forEach(r => { stats[r.key] = r.count; });
+                return stats;
+            },
+            
+            async upsertVariant(data) {
+                if (!data.legacy_name || !data.protein_name || !data.cdna_name || !data.final_determination) {
+                    throw new Error('Missing required fields');
+                }
+                
+                const exists = STATE.variants.find(v => v.legacy_name === data.legacy_name);
+                
+                if (exists) {
+                    const { error } = await this.request(
+                        `clinical_variants?legacy_name=eq.${encodeURIComponent(data.legacy_name)}`,
+                        {
+                            method: 'PATCH',
+                            body: JSON.stringify({ ...data, updated_at: new Date().toISOString() })
+                        }
+                    );
+                    if (error) throw error;
+                    return { status: 'updated' };
+                } else {
+                    const { error } = await this.request(
+                        'clinical_variants',
+                        {
+                            method: 'POST',
+                            body: JSON.stringify({ 
+                                ...data, 
+                                created_at: new Date().toISOString(), 
+                                updated_at: new Date().toISOString() 
+                            })
+                        }
+                    );
+                    if (error) throw error;
+                    return { status: 'created' };
+                }
+            },
+            
+            async updateField(legacyName, field, value) {
+                const { error } = await this.request(
+                    `clinical_variants?legacy_name=eq.${encodeURIComponent(legacyName)}`,
+                    {
+                        method: 'PATCH',
+                        body: JSON.stringify({ [field]: value, updated_at: new Date().toISOString() })
+                    }
+                );
+                if (error) throw error;
+            },
+            
+            async deleteVariant(legacyName) {
+                const { error } = await this.request(
+                    `clinical_variants?legacy_name=eq.${encodeURIComponent(legacyName)}`,
+                    { method: 'DELETE' }
+                );
+                if (error) throw error;
             }
-            
-            // Apply view mode
-            if (STATE.dataViewMode === 'complete') {
-                filtered = filtered.filter(v => v.data_status === 'complete_clinical');
-            } else if (STATE.dataViewMode === 'clinical') {
-                filtered = filtered.filter(v => v.data_status === 'complete_clinical' || v.data_status === 'partial_clinical');
-            }
-            
-            // Apply missing filter
-            if (STATE.activeFilter === 'missing') {
-                filtered = filtered.filter(v => hasMissingData(v));
-            }
-            
-            STATE.filteredVariants = filtered;
-            STATE.currentPage = 1;
-            
-            renderVariantCatalog();
-            updatePagination();
-            updateStatsFromView();
-            updateViewCounts();
-        }
-
-        function hasMissingData(variant) {
-            const criticalFields = ['cftr_class', 'eti_prediction', 'final_determination'];
-            return criticalFields.some(f => !variant[f] || variant[f] === 'null' || variant[f] === 'undefined');
-        }
-
-        function countMissingFields(variant) {
-            let count = 0;
-            if (!variant.cftr_class) count++;
-            if (!variant.eti_prediction) count++;
-            if (!variant.final_determination) count++;
-            if (!variant.class_confidence) count++;
-            return count;
-        }
+        };
 
         // ------------------------------------------------------------------
-        // RENDER VARIANT LIST
+        // VARIANT SERVICE
         // ------------------------------------------------------------------
-        function renderVariantCatalog() {
-            const container = document.getElementById('variantList');
-            if (!container) return;
+        const VariantService = {
+            async loadAll() {
+                LoadingManager.showGlobal('Loading variant catalog...');
+                try {
+                    const variants = await DatabaseService.loadVariants();
+                    STATE.variants = variants;
+                    STATE.filteredVariants = [...variants];
+                    Notification.show(`✓ Loaded ${variants.length} variants`, 'success');
+                } catch (error) {
+                    console.error('Failed to load variants, using demo data:', error);
+                    STATE.variants = [...DEMO_VARIANTS];
+                    STATE.filteredVariants = [...DEMO_VARIANTS];
+                    Notification.show('⚠️ Using demo data - database connection failed', 'warning');
+                } finally {
+                    LoadingManager.hideGlobal();
+                }
+            },
             
-            const start = (STATE.currentPage - 1) * CONFIG.UI.ITEMS_PER_PAGE;
-            const end = start + CONFIG.UI.ITEMS_PER_PAGE;
-            const page = STATE.filteredVariants.slice(start, end);
+            async refreshStats() {
+                try {
+                    const stats = await DatabaseService.loadStats();
+                    STATE.databaseStats = { ...STATE.databaseStats, ...stats };
+                } catch (error) {
+                    console.warn('Failed to load stats, using local counts:', error);
+                    this.updateLocalStats();
+                }
+                StatsUI.updateAll();
+            },
             
-            if (!page.length) {
-                container.innerHTML = `
-                    <div class="p-8 text-center">
-                        <div class="w-16 h-16 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center">
-                            <i class="fas fa-dna text-2xl text-gray-400"></i>
+            updateLocalStats() {
+                const v = STATE.variants;
+                STATE.databaseStats = {
+                    total: v.length,
+                    complete: v.filter(v => v.data_status === 'complete_clinical').length,
+                    clinical: v.filter(v => v.data_status === 'complete_clinical' || v.data_status === 'partial_clinical').length,
+                    classI: v.filter(v => v.cftr_class === 'I').length,
+                    classII: v.filter(v => v.cftr_class === 'II').length,
+                    classIII: v.filter(v => v.cftr_class === 'III').length,
+                    classIV: v.filter(v => v.cftr_class === 'IV').length,
+                    classV: v.filter(v => v.cftr_class === 'V').length,
+                    exceptional: v.filter(v => v.class_subtype === 'exceptional').length,
+                    responsive: v.filter(v => v.eti_prediction === 'responsive').length,
+                    nonResponsive: v.filter(v => v.eti_prediction === 'non_responsive').length,
+                    unknown: v.filter(v => v.eti_prediction === 'unknown').length
+                };
+            },
+            
+            hasMissingData(variant) {
+                const critical = ['cftr_class', 'eti_prediction', 'final_determination'];
+                return critical.some(f => !variant[f] || variant[f] === 'null' || variant[f] === 'undefined');
+            },
+            
+            countMissingFields(variant) {
+                let count = 0;
+                if (!variant.cftr_class) count++;
+                if (!variant.eti_prediction) count++;
+                if (!variant.final_determination) count++;
+                if (!variant.class_confidence) count++;
+                return count;
+            },
+            
+            async delete(legacyName) {
+                if (!confirm(`Delete variant ${legacyName}? This action cannot be undone.`)) return false;
+                
+                LoadingManager.showGlobal(`Deleting ${legacyName}...`);
+                try {
+                    await DatabaseService.deleteVariant(legacyName);
+                    
+                    STATE.variants = STATE.variants.filter(v => v.legacy_name !== legacyName);
+                    STATE.filteredVariants = STATE.filteredVariants.filter(v => v.legacy_name !== legacyName);
+                    
+                    if (STATE.selectedVariant?.legacy_name === legacyName) {
+                        STATE.selectedVariant = null;
+                        Renderer.showEmptyState();
+                    }
+                    
+                    Notification.show(`✓ Deleted ${legacyName}`, 'success');
+                    Filter.apply();
+                    await this.refreshStats();
+                    return true;
+                } catch (error) {
+                    Notification.show(`Delete failed: ${error.message}`, 'error');
+                    return false;
+                } finally {
+                    LoadingManager.hideGlobal();
+                }
+            },
+            
+            async updateField(legacyName, field, value) {
+                LoadingManager.showGlobal('Saving...');
+                try {
+                    await DatabaseService.updateField(legacyName, field, value);
+                    
+                    STATE.variants = STATE.variants.map(v => 
+                        v.legacy_name === legacyName ? { ...v, [field]: value } : v
+                    );
+                    
+                    if (STATE.selectedVariant?.legacy_name === legacyName) {
+                        STATE.selectedVariant = { ...STATE.selectedVariant, [field]: value };
+                        Renderer.renderVariantDetails(STATE.selectedVariant);
+                    }
+                    
+                    Notification.show(`✓ ${field.replace(/_/g, ' ')} updated`, 'success');
+                    Filter.apply();
+                    await this.refreshStats();
+                    return true;
+                } catch (error) {
+                    Notification.show(`Update failed: ${error.message}`, 'error');
+                    return false;
+                } finally {
+                    LoadingManager.hideGlobal();
+                }
+            }
+        };
+
+        // ------------------------------------------------------------------
+        // FILTER SERVICE
+        // ------------------------------------------------------------------
+        const Filter = {
+            apply() {
+                let filtered = [...STATE.variants];
+                
+                // Apply search
+                if (STATE.searchQuery) {
+                    const q = STATE.searchQuery.toLowerCase().trim();
+                    filtered = filtered.filter(v => 
+                        (v.legacy_name?.toLowerCase().includes(q)) ||
+                        (v.protein_name?.toLowerCase().includes(q)) ||
+                        (v.cdna_name?.toLowerCase().includes(q))
+                    );
+                }
+                
+                // Apply view mode
+                if (STATE.dataViewMode === 'complete') {
+                    filtered = filtered.filter(v => v.data_status === 'complete_clinical');
+                } else if (STATE.dataViewMode === 'clinical') {
+                    filtered = filtered.filter(v => v.data_status === 'complete_clinical' || v.data_status === 'partial_clinical');
+                }
+                
+                // Apply missing filter
+                if (STATE.activeFilter === 'missing') {
+                    filtered = filtered.filter(v => VariantService.hasMissingData(v));
+                }
+                
+                STATE.filteredVariants = filtered;
+                STATE.currentPage = 1;
+                
+                Renderer.renderVariantList();
+                Pagination.update();
+                StatsUI.updateFromView();
+                ViewCounts.update();
+            },
+            
+            setFilter(filter) {
+                STATE.activeFilter = filter;
+                
+                const allBtn = document.getElementById('filterAll');
+                const missBtn = document.getElementById('filterMissing');
+                
+                if (allBtn && missBtn) {
+                    if (filter === 'all') {
+                        allBtn.style.borderColor = '#0e7c7b';
+                        allBtn.style.color = '#0e7c7b';
+                        allBtn.style.fontWeight = '600';
+                        missBtn.style.borderColor = '#d1d5db';
+                        missBtn.style.color = '#374151';
+                        missBtn.style.fontWeight = '400';
+                    } else {
+                        allBtn.style.borderColor = '#d1d5db';
+                        allBtn.style.color = '#374151';
+                        allBtn.style.fontWeight = '400';
+                        missBtn.style.borderColor = '#b45309';
+                        missBtn.style.color = '#b45309';
+                        missBtn.style.fontWeight = '600';
+                    }
+                }
+                
+                this.apply();
+            }
+        };
+
+        // ------------------------------------------------------------------
+        // RENDERER
+        // ------------------------------------------------------------------
+        const Renderer = {
+            renderVariantList() {
+                const container = document.getElementById('variantList');
+                if (!container) return;
+                
+                const start = (STATE.currentPage - 1) * CONFIG.UI.ITEMS_PER_PAGE;
+                const end = start + CONFIG.UI.ITEMS_PER_PAGE;
+                const page = STATE.filteredVariants.slice(start, end);
+                
+                if (!page.length) {
+                    container.innerHTML = `
+                        <div class="p-8 text-center">
+                            <div class="w-16 h-16 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                                <i class="fas fa-dna text-2xl text-gray-400"></i>
+                            </div>
+                            <p class="text-gray-700 font-medium">No variants found</p>
+                            <p class="text-sm text-gray-500 mt-2">
+                                ${STATE.searchQuery ? 'Try adjusting your search terms' : 'No variants match current filters'}
+                            </p>
                         </div>
-                        <p class="text-gray-700 font-medium">No variants found</p>
-                        <p class="text-sm text-gray-500 mt-2">Try adjusting your search or filters</p>
+                    `;
+                    return;
+                }
+                
+                container.innerHTML = page.map(v => {
+                    const selected = STATE.selectedVariant?.id === v.id;
+                    const missing = VariantService.countMissingFields(v);
+                    
+                    let displayName = Utils.escapeHTML(v.legacy_name || '');
+                    if (STATE.searchQuery) {
+                        const regex = new RegExp(`(${Utils.escapeRegExp(STATE.searchQuery)})`, 'gi');
+                        displayName = displayName.replace(regex, '<span class="search-highlight">$1</span>');
+                    }
+                    
+                    let badge = '';
+                    if (v.cftr_class) {
+                        badge = `<span class="badge badge-class-${v.cftr_class.toLowerCase()}">
+                            <i class="fas fa-dna"></i>Class ${v.cftr_class}
+                        </span>`;
+                    } else if (v.class_subtype === 'exceptional') {
+                        badge = `<span class="badge badge-exceptional">
+                            <i class="fas fa-bolt"></i>Exceptional
+                        </span>`;
+                    }
+                    
+                    return `
+                        <div class="variant-item ${selected ? 'selected' : ''}" onclick="Variant.select('${v.legacy_name}')">
+                            <div class="flex justify-between items-start mb-2">
+                                <div>
+                                    <h4 class="variant-name">${displayName}</h4>
+                                    ${v.protein_name ? `<p class="variant-subtitle">${Utils.escapeHTML(v.protein_name)}</p>` : ''}
+                                </div>
+                                ${badge}
+                            </div>
+                            <div class="flex justify-between items-center mt-2">
+                                <span class="text-xs text-gray-600">${v.final_determination || 'Not specified'}</span>
+                                ${missing ? `<span class="missing-count">${missing}</span>` : ''}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            },
+            
+            renderVariantDetails(v) {
+                if (!v) return;
+                
+                STATE.selectedVariant = v;
+                const missing = VariantService.countMissingFields(v);
+                const isExceptional = v.class_subtype === 'exceptional';
+                const isResponsive = v.eti_prediction === 'responsive';
+                
+                let classColor = '#374151';
+                if (v.cftr_class) {
+                    if (isExceptional) classColor = '#b45309';
+                    else if (v.cftr_class === 'I') classColor = '#b91c1c';
+                    else if (v.cftr_class === 'II') classColor = '#b45309';
+                    else if (v.cftr_class === 'III') classColor = '#0f766e';
+                    else if (v.cftr_class === 'IV') classColor = '#1e40af';
+                    else if (v.cftr_class === 'V') classColor = '#6d28d9';
+                }
+                
+                const html = `
+                    <div class="card mb-6">
+                        <div class="card-body" style="background: linear-gradient(135deg, #f9fafb 0%, #ffffff 100%);">
+                            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-3 mb-3">
+                                        <div class="variant-pill">
+                                            <i class="fas fa-dna"></i>
+                                            <div class="variant-pill-content">
+                                                <span class="variant-pill-primary">${Utils.escapeHTML(v.legacy_name)}</span>
+                                                <span class="variant-pill-secondary">${Utils.escapeHTML(v.protein_name || 'No protein notation')}</span>
+                                            </div>
+                                        </div>
+                                        ${missing ? 
+                                            `<span class="badge" style="background: #ffedd5; color: #b45309; border-color: #fcd34d;">
+                                                <i class="fas fa-exclamation-triangle"></i>${missing} missing
+                                            </span>` : 
+                                            `<span class="badge" style="background: #ccfbf1; color: #0f766e; border-color: #bbf7d0;">
+                                                <i class="fas fa-check-circle"></i>Complete
+                                            </span>`
+                                        }
+                                    </div>
+                                    <div class="flex flex-wrap gap-2">
+                                        ${v.cftr_class ? `
+                                            <span class="badge badge-class-${v.cftr_class.toLowerCase()}">
+                                                <i class="fas fa-dna"></i>Class ${v.cftr_class}${isExceptional ? ' • Exceptional' : ''}
+                                            </span>
+                                        ` : ''}
+                                        ${v.eti_prediction ? `
+                                            <span class="badge" style="background: ${isResponsive ? '#ccfbf1' : '#fee2e2'}; 
+                                                color: ${isResponsive ? '#0f766e' : '#b91c1c'}; 
+                                                border-color: ${isResponsive ? '#bbf7d0' : '#fecaca'};">
+                                                <i class="fas ${isResponsive ? 'fa-check' : 'fa-times'}"></i>
+                                                ETI ${isResponsive ? 'Responsive' : 'Non-responsive'}
+                                            </span>
+                                        ` : ''}
+                                        ${v.final_determination === 'CF-causing' ? `
+                                            <span class="badge" style="background: #fee2e2; color: #b91c1c; border-color: #fecaca;">
+                                                <i class="fas fa-exclamation-triangle"></i>CF-causing
+                                            </span>
+                                        ` : ''}
+                                    </div>
+                                </div>
+                                <div class="bg-gray-50 rounded-lg p-4 border border-gray-200 min-w-[160px]">
+                                    <p class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Classification</p>
+                                    <p class="font-['Space_Grotesk'] text-2xl font-bold" style="color: ${classColor};">${v.cftr_class || '—'}</p>
+                                    <p class="text-sm font-medium text-gray-700 mt-1">${isExceptional ? 'Exceptional Case' : v.cftr_class ? `Class ${v.cftr_class}` : 'Not classified'}</p>
+                                    ${v.class_confidence ? `
+                                        <p class="text-xs text-gray-500 mt-1">
+                                            <i class="fas fa-shield-alt mr-1"></i>${v.class_confidence}
+                                        </p>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        ${this.createDataPoint('Legacy Name', v.legacy_name, 'legacy_name', v)}
+                        ${this.createDataPoint('Protein Notation', v.protein_name, 'protein_name', v)}
+                        ${this.createDataPoint('cDNA Notation', v.cdna_name, 'cdna_name', v)}
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="fas fa-stethoscope text-[#b91c1c]"></i> 
+                                Clinical Impact
+                                ${(!v.final_determination || !v.cftr_class) ? '<span class="missing-count text-xs ml-2">Missing</span>' : ''}
+                            </div>
+                            <div class="card-body">
+                                <div class="space-y-3">
+                                    ${this.createDataPoint('Determination', v.final_determination, 'final_determination', v)}
+                                    ${this.createDataPoint('CFTR Class', v.cftr_class, 'cftr_class', v)}
+                                    ${this.createDataPoint('Subtype', v.class_subtype, 'class_subtype', v)}
+                                    ${this.createDataPoint('Confidence', v.class_confidence, 'class_confidence', v)}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="fas fa-prescription-bottle-alt text-[#0f766e]"></i> 
+                                Therapeutic Prediction
+                                ${!v.eti_prediction ? '<span class="missing-count text-xs ml-2">Missing</span>' : ''}
+                            </div>
+                            <div class="card-body">
+                                <div class="space-y-3">
+                                    ${this.createDataPoint('ETI Response', v.eti_prediction, 'eti_prediction', v)}
+                                    ${this.createDataPoint('Responsive', v.therapy_responsive !== null ? (v.therapy_responsive ? 'Yes' : 'No') : null, 'therapy_responsive', v)}
+                                    ${this.createDataPoint('Evidence Level', v.eti_evidence_level, 'eti_evidence_level', v)}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-microscope text-[#6d28d9]"></i> Evidence Chain
+                        </div>
+                        <div class="card-body">
+                            ${v.source_summary ? `
+                                <div class="flex flex-wrap items-center gap-2">
+                                    ${v.source_summary.split('_').map((part, i) => `
+                                        <span class="evidence-step">${Utils.escapeHTML(part)}</span>
+                                        ${i < v.source_summary.split('_').length - 1 ? '<i class="fas fa-arrow-right evidence-arrow"></i>' : ''}
+                                    `).join('')}
+                                </div>
+                            ` : `
+                                <div class="flex items-center gap-2">
+                                    <p class="text-sm text-gray-500 italic">No evidence chain available</p>
+                                    <button onclick="Annotation.show('${v.legacy_name}', 'source_summary', '')" 
+                                            class="px-3 py-1.5 text-xs bg-[#0e7c7b] text-white rounded-lg hover:bg-[#0f766e]">
+                                        <i class="fas fa-plus mr-1"></i>Add Source
+                                    </button>
+                                </div>
+                            `}
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 flex justify-end">
+                        <button onclick="VariantService.delete('${v.legacy_name}')" 
+                                class="px-4 py-2 text-xs font-medium text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100">
+                            <i class="fas fa-trash-alt mr-1"></i>Delete Variant
+                        </button>
                     </div>
                 `;
-                return;
-            }
+                
+                document.getElementById('variantDetails').innerHTML = html;
+                document.getElementById('emptyState')?.classList.add('hidden');
+            },
             
-            container.innerHTML = page.map(v => {
-                const selected = STATE.selectedVariant?.id === v.id;
-                const missing = countMissingFields(v);
-                
-                let displayName = escapeHTML(v.legacy_name || '');
-                if (STATE.searchQuery) {
-                    const re = new RegExp(`(${escapeRegExp(STATE.searchQuery)})`, 'gi');
-                    displayName = displayName.replace(re, '<span class="search-highlight">$1</span>');
-                }
-                
-                let badge = '';
-                if (v.cftr_class) {
-                    badge = `<span class="badge badge-class-${v.cftr_class.toLowerCase()}">
-                        <i class="fas fa-dna"></i>Class ${v.cftr_class}
-                    </span>`;
-                } else if (v.class_subtype === 'exceptional') {
-                    badge = `<span class="badge badge-exceptional">
-                        <i class="fas fa-bolt"></i>Exceptional
-                    </span>`;
-                }
+            createDataPoint(label, value, field, variant) {
+                const missing = !value || value === 'null' || value === 'undefined';
+                const display = missing ? 'Not specified' : Utils.escapeHTML(String(value));
+                const escapedValue = value ? String(value).replace(/'/g, "\\'") : '';
                 
                 return `
-                    <div class="variant-item ${selected ? 'selected' : ''}" onclick="selectVariant('${v.legacy_name}')">
-                        <div class="flex justify-between items-start mb-2">
-                            <div>
-                                <h4 class="variant-name">${displayName}</h4>
-                                ${v.protein_name ? `<p class="variant-subtitle">${escapeHTML(v.protein_name)}</p>` : ''}
-                            </div>
-                            ${badge}
+                    <div class="data-point ${missing ? 'missing' : ''}">
+                        <div class="annotation-trigger" 
+                             onclick="Annotation.show('${variant.legacy_name}', '${field}', '${escapedValue}')" 
+                             title="Annotate ${label}">
+                            <i class="fas ${missing ? 'fa-plus' : 'fa-pencil-alt'}"></i>
                         </div>
-                        <div class="flex justify-between items-center mt-2">
-                            <span class="text-xs text-gray-600">${v.final_determination || 'Not specified'}</span>
-                            ${missing ? `<span class="missing-count">${missing}</span>` : ''}
-                        </div>
+                        <div class="data-label"><i class="fas fa-tag"></i>${label}</div>
+                        <div class="data-value ${missing ? 'text-[#b45309]' : ''}">${display}</div>
                     </div>
                 `;
-            }).join('');
-        }
-
-        // ------------------------------------------------------------------
-        // RENDER VARIANT DETAILS
-        // ------------------------------------------------------------------
-        function renderVariantDetails(v) {
-            if (!v) return;
+            },
             
-            STATE.selectedVariant = v;
-            const missing = countMissingFields(v);
-            const isExceptional = v.class_subtype === 'exceptional';
-            const isResponsive = v.eti_prediction === 'responsive';
-            
-            let classColor = '#374151';
-            if (v.cftr_class) {
-                if (isExceptional) classColor = '#b45309';
-                else if (v.cftr_class === 'I') classColor = '#b91c1c';
-                else if (v.cftr_class === 'II') classColor = '#b45309';
-                else if (v.cftr_class === 'III') classColor = '#0f766e';
-                else if (v.cftr_class === 'IV') classColor = '#1e40af';
-                else if (v.cftr_class === 'V') classColor = '#6d28d9';
-            }
-            
-            const html = `
-                <!-- Header with Beautiful Pill -->
-                <div class="card mb-6">
-                    <div class="card-body" style="background: linear-gradient(135deg, #f9fafb 0%, #ffffff 100%);">
-                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                            <div class="flex-1">
-                                <div class="flex items-center gap-3 mb-3">
-                                    <div class="variant-pill">
-                                        <i class="fas fa-dna"></i>
-                                        <div class="variant-pill-content">
-                                            <span class="variant-pill-primary">${escapeHTML(v.legacy_name)}</span>
-                                            <span class="variant-pill-secondary">${escapeHTML(v.protein_name || 'No protein notation')}</span>
-                                        </div>
-                                    </div>
-                                    ${missing ? 
-                                        `<span class="badge" style="background: #ffedd5; color: #b45309; border-color: #fcd34d;">
-                                            <i class="fas fa-exclamation-triangle"></i>${missing} missing
-                                        </span>` : 
-                                        `<span class="badge" style="background: #ccfbf1; color: #0f766e; border-color: #bbf7d0;">
-                                            <i class="fas fa-check-circle"></i>Complete
-                                        </span>`
-                                    }
-                                </div>
-                                <div class="flex flex-wrap gap-2">
-                                    ${v.cftr_class ? `
-                                        <span class="badge badge-class-${v.cftr_class.toLowerCase()}">
-                                            <i class="fas fa-dna"></i>Class ${v.cftr_class}${isExceptional ? ' • Exceptional' : ''}
-                                        </span>
-                                    ` : ''}
-                                    ${v.eti_prediction ? `
-                                        <span class="badge" style="background: ${isResponsive ? '#ccfbf1' : '#fee2e2'}; 
-                                            color: ${isResponsive ? '#0f766e' : '#b91c1c'}; 
-                                            border-color: ${isResponsive ? '#bbf7d0' : '#fecaca'};">
-                                            <i class="fas ${isResponsive ? 'fa-check' : 'fa-times'}"></i>
-                                            ETI ${isResponsive ? 'Responsive' : 'Non-responsive'}
-                                        </span>
-                                    ` : ''}
-                                    ${v.final_determination === 'CF-causing' ? `
-                                        <span class="badge" style="background: #fee2e2; color: #b91c1c; border-color: #fecaca;">
-                                            <i class="fas fa-exclamation-triangle"></i>CF-causing
-                                        </span>
-                                    ` : ''}
-                                </div>
-                            </div>
-                            <div class="bg-gray-50 rounded-lg p-4 border border-gray-200 min-w-[160px]">
-                                <p class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Classification</p>
-                                <p class="font-['Space_Grotesk'] text-2xl font-bold" style="color: ${classColor};">${v.cftr_class || '—'}</p>
-                                <p class="text-sm font-medium text-gray-700 mt-1">${isExceptional ? 'Exceptional Case' : v.cftr_class ? `Class ${v.cftr_class}` : 'Not classified'}</p>
-                                ${v.class_confidence ? `
-                                    <p class="text-xs text-gray-500 mt-1">
-                                        <i class="fas fa-shield-alt mr-1"></i>${v.class_confidence}
-                                    </p>
-                                ` : ''}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Nomenclature Row -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    ${createDataPoint('Legacy Name', v.legacy_name, 'legacy_name', v)}
-                    ${createDataPoint('Protein Notation', v.protein_name, 'protein_name', v)}
-                    ${createDataPoint('cDNA Notation', v.cdna_name, 'cdna_name', v)}
-                </div>
-                
-                <!-- Clinical + Therapy -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <i class="fas fa-stethoscope text-[#b91c1c]"></i> 
-                            Clinical Impact
-                            ${(!v.final_determination || !v.cftr_class) ? '<span class="missing-count text-xs ml-2">Missing</span>' : ''}
-                        </div>
-                        <div class="card-body">
-                            <div class="space-y-3">
-                                ${createDataPoint('Determination', v.final_determination, 'final_determination', v)}
-                                ${createDataPoint('CFTR Class', v.cftr_class, 'cftr_class', v)}
-                                ${createDataPoint('Subtype', v.class_subtype, 'class_subtype', v)}
-                                ${createDataPoint('Confidence', v.class_confidence, 'class_confidence', v)}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <div class="card-header">
-                            <i class="fas fa-prescription-bottle-alt text-[#0f766e]"></i> 
-                            Therapeutic Prediction
-                            ${!v.eti_prediction ? '<span class="missing-count text-xs ml-2">Missing</span>' : ''}
-                        </div>
-                        <div class="card-body">
-                            <div class="space-y-3">
-                                ${createDataPoint('ETI Response', v.eti_prediction, 'eti_prediction', v)}
-                                ${createDataPoint('Responsive', v.therapy_responsive !== null ? (v.therapy_responsive ? 'Yes' : 'No') : null, 'therapy_responsive', v)}
-                                ${createDataPoint('Evidence Level', v.eti_evidence_level, 'eti_evidence_level', v)}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Evidence Chain -->
-                <div class="card">
-                    <div class="card-header">
-                        <i class="fas fa-microscope text-[#6d28d9]"></i> Evidence Chain
-                    </div>
-                    <div class="card-body">
-                        ${v.source_summary ? `
-                            <div class="flex flex-wrap items-center gap-2">
-                                ${v.source_summary.split('_').map((part, i) => `
-                                    <span class="evidence-step">${escapeHTML(part)}</span>
-                                    ${i < v.source_summary.split('_').length - 1 ? '<i class="fas fa-arrow-right evidence-arrow"></i>' : ''}
-                                `).join('')}
-                            </div>
-                        ` : `
-                            <div class="flex items-center gap-2">
-                                <p class="text-sm text-gray-500 italic">No evidence chain available</p>
-                                <button onclick="showAnnotationModal('${v.legacy_name}', 'source_summary', '')" 
-                                        class="px-3 py-1.5 text-xs bg-[#0e7c7b] text-white rounded-lg hover:bg-[#0f766e]">
-                                    <i class="fas fa-plus mr-1"></i>Add Source
-                                </button>
-                            </div>
-                        `}
-                    </div>
-                </div>
-                
-                <!-- Delete Button -->
-                <div class="mt-4 flex justify-end">
-                    <button onclick="confirmDeleteVariant('${v.legacy_name}')" 
-                            class="px-4 py-2 text-xs font-medium text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100">
-                        <i class="fas fa-trash-alt mr-1"></i>Delete Variant
-                    </button>
-                </div>
-            `;
-            
-            document.getElementById('variantDetails').innerHTML = html;
-            document.getElementById('emptyState')?.classList.add('hidden');
-        }
-
-        function createDataPoint(label, value, field, variant) {
-            const missing = !value || value === 'null' || value === 'undefined';
-            const display = missing ? 'Not specified' : escapeHTML(String(value));
-            const escapedValue = value ? String(value).replace(/'/g, "\\'") : '';
-            
-            return `
-                <div class="data-point ${missing ? 'missing' : ''}">
-                    <div class="annotation-trigger" 
-                         onclick="showAnnotationModal('${variant.legacy_name}', '${field}', '${escapedValue}')" 
-                         title="Annotate ${label}">
-                        <i class="fas ${missing ? 'fa-plus' : 'fa-pencil-alt'}"></i>
-                    </div>
-                    <div class="data-label"><i class="fas fa-tag"></i>${label}</div>
-                    <div class="data-value ${missing ? 'text-[#b45309]' : ''}">${display}</div>
-                </div>
-            `;
-        }
-
-        // ------------------------------------------------------------------
-        // ANNOTATION SYSTEM
-        // ------------------------------------------------------------------
-        window.showAnnotationModal = function(name, field, current) {
-            const variant = STATE.variants.find(v => v.legacy_name === name);
-            if (!variant) {
-                showNotification('Variant not found', 'error');
-                return;
-            }
-            
-            STATE.annotationContext = { variant, field, currentValue: current };
-            
-            const labels = {
-                'legacy_name': 'Legacy Name',
-                'protein_name': 'Protein',
-                'cdna_name': 'cDNA',
-                'final_determination': 'Clinical Impact',
-                'cftr_class': 'CFTR Class',
-                'class_subtype': 'Subtype',
-                'class_confidence': 'Confidence',
-                'eti_prediction': 'ETI Response',
-                'eti_evidence_level': 'Evidence Level',
-                'therapy_responsive': 'Therapy Responsive',
-                'source_summary': 'Evidence Source'
-            };
-            
-            document.getElementById('annotationTitle').textContent = `Annotate ${name}`;
-            document.getElementById('annotationField').textContent = labels[field] || field;
-            
-            let input = '';
-            
-            if (field === 'cftr_class') {
-                input = `
-                    <select id="annotationValue" class="form-control">
-                        <option value="">Select</option>
-                        <option value="I" ${current === 'I' ? 'selected' : ''}>Class I</option>
-                        <option value="II" ${current === 'II' ? 'selected' : ''}>Class II</option>
-                        <option value="III" ${current === 'III' ? 'selected' : ''}>Class III</option>
-                        <option value="IV" ${current === 'IV' ? 'selected' : ''}>Class IV</option>
-                        <option value="V" ${current === 'V' ? 'selected' : ''}>Class V</option>
-                    </select>
-                `;
-            } else if (field === 'class_subtype') {
-                input = `
-                    <select id="annotationValue" class="form-control">
-                        <option value="">Select</option>
-                        <option value="standard" ${current === 'standard' ? 'selected' : ''}>Standard</option>
-                        <option value="exceptional" ${current === 'exceptional' ? 'selected' : ''}>Exceptional</option>
-                        <option value="true" ${current === 'true' ? 'selected' : ''}>True Class I</option>
-                    </select>
-                `;
-            } else if (field === 'eti_prediction') {
-                input = `
-                    <select id="annotationValue" class="form-control">
-                        <option value="">Select</option>
-                        <option value="responsive" ${current === 'responsive' ? 'selected' : ''}>Responsive</option>
-                        <option value="non_responsive" ${current === 'non_responsive' ? 'selected' : ''}>Non-responsive</option>
-                        <option value="unknown" ${current === 'unknown' ? 'selected' : ''}>Unknown</option>
-                    </select>
-                `;
-            } else if (field === 'therapy_responsive') {
-                const bool = current === true || current === 'true';
-                input = `
-                    <select id="annotationValue" class="form-control">
-                        <option value="">Select</option>
-                        <option value="true" ${bool ? 'selected' : ''}>Yes</option>
-                        <option value="false" ${current === false || current === 'false' ? 'selected' : ''}>No</option>
-                    </select>
-                `;
-            } else if (field === 'class_confidence' || field === 'eti_evidence_level') {
-                input = `
-                    <select id="annotationValue" class="form-control">
-                        <option value="">Select</option>
-                        <option value="High" ${current === 'High' ? 'selected' : ''}>High</option>
-                        <option value="Moderate" ${current === 'Moderate' ? 'selected' : ''}>Moderate</option>
-                        <option value="Low" ${current === 'Low' ? 'selected' : ''}>Low</option>
-                        <option value="Confirmed" ${current === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
-                    </select>
-                `;
-            } else if (field === 'final_determination') {
-                input = `
-                    <select id="annotationValue" class="form-control">
-                        <option value="">Select</option>
-                        <option value="CF-causing" ${current === 'CF-causing' ? 'selected' : ''}>CF-causing</option>
-                        <option value="Probably responsive to ETI" ${current === 'Probably responsive to ETI' ? 'selected' : ''}>Probably responsive to ETI</option>
-                        <option value="Variant of unknown significance" ${current === 'Variant of unknown significance' ? 'selected' : ''}>VUS</option>
-                    </select>
-                `;
-            } else {
-                input = `<textarea id="annotationValue" class="form-control font-mono" rows="3">${escapeHTML(current || '')}</textarea>`;
-            }
-            
-            document.getElementById('annotationContent').innerHTML = `
-                <div class="bg-gray-50 rounded-lg p-4 mb-4 border border-gray-200">
-                    <p class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">Current Value</p>
-                    <p class="font-mono text-sm ${!current ? 'text-gray-400 italic' : ''}">
-                        ${current ? escapeHTML(String(current)) : 'Not specified'}
-                    </p>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">${labels[field] || field}</label>
-                    ${input}
-                </div>
-            `;
-            
-            document.getElementById('annotationModal').classList.remove('hidden');
-        };
-
-        window.closeAnnotationModal = function() {
-            document.getElementById('annotationModal').classList.add('hidden');
-            STATE.annotationContext = null;
-        };
-
-        window.saveAnnotation = async function() {
-            if (!STATE.annotationContext) {
-                showNotification('No context', 'error');
-                return;
-            }
-            
-            const { variant, field } = STATE.annotationContext;
-            const input = document.getElementById('annotationValue');
-            
-            if (!input) {
-                showNotification('Input not found', 'error');
-                return;
-            }
-            
-            let newVal = input.value;
-            if (field === 'therapy_responsive') newVal = newVal === 'true';
-            
-            try {
-                // Update local state
-                STATE.variants = STATE.variants.map(v => 
-                    v.legacy_name === variant.legacy_name ? { ...v, [field]: newVal } : v
-                );
-                
-                if (STATE.selectedVariant?.legacy_name === variant.legacy_name) {
-                    STATE.selectedVariant = { ...STATE.selectedVariant, [field]: newVal };
-                    renderVariantDetails(STATE.selectedVariant);
+            showEmptyState() {
+                const container = document.getElementById('variantDetails');
+                if (container) {
+                    container.innerHTML = document.getElementById('emptyState').outerHTML;
                 }
-                
-                // Update database
-                await updateVariantField(variant.legacy_name, field, newVal);
-                
-                closeAnnotationModal();
-                showNotification(`✓ ${field.replace(/_/g, ' ')} updated`, 'success');
-                
-                renderVariantCatalog();
-                applyFilterChain();
-                loadDatabaseStats();
-            } catch(e) {
-                showNotification(`Save failed: ${e.message}`, 'error');
             }
         };
 
         // ------------------------------------------------------------------
-        // DELETE VARIANT
+        // VARIANT SELECTION
         // ------------------------------------------------------------------
-        window.confirmDeleteVariant = async function(name) {
-            if (!confirm(`Delete ${name}?`)) return;
-            
-            try {
-                await deleteVariant(name);
-                
-                STATE.variants = STATE.variants.filter(v => v.legacy_name !== name);
-                STATE.filteredVariants = STATE.filteredVariants.filter(v => v.legacy_name !== name);
-                
-                if (STATE.selectedVariant?.legacy_name === name) {
-                    STATE.selectedVariant = null;
-                    document.getElementById('variantDetails').innerHTML = document.getElementById('emptyState').outerHTML;
+        const Variant = {
+            select(name) {
+                const v = STATE.variants.find(v => v.legacy_name === name);
+                if (v) {
+                    Renderer.renderVariantDetails(v);
+                    Renderer.renderVariantList();
                 }
-                
-                showNotification(`✓ Deleted ${name}`, 'success');
-                renderVariantCatalog();
-                updatePagination();
-                loadDatabaseStats();
-            } catch(e) {
-                showNotification(`Delete failed: ${e.message}`, 'error');
+            },
+            
+            quickSearch(name) {
+                const input = document.getElementById('searchInput');
+                if (input) {
+                    input.value = name;
+                    STATE.searchQuery = name;
+                    Filter.apply();
+                    setTimeout(() => this.select(name), 100);
+                }
             }
         };
 
         // ------------------------------------------------------------------
         // VIEW CONTROLS
         // ------------------------------------------------------------------
-        window.selectVariant = function(name) {
-            const v = STATE.variants.find(v => v.legacy_name === name);
-            if (v) renderVariantDetails(v);
-            renderVariantCatalog();
-        };
-
-        window.quickSearch = function(name) {
-            document.getElementById('searchInput').value = name;
-            STATE.searchQuery = name;
-            applyFilterChain();
-            setTimeout(() => selectVariant(name), 100);
-        };
-
-        window.setDataView = function(mode) {
-            STATE.dataViewMode = mode;
-            
-            ['all', 'complete', 'clinical'].forEach(m => {
-                document.getElementById(`${m}ViewBtn`)?.classList.toggle('active', m === mode);
-            });
-            
-            applyFilterChain();
-            
-            const modeNames = {
-                'all': 'All Variants',
-                'complete': 'Complete Clinical Data',
-                'clinical': 'Clinical Data'
-            };
-            document.getElementById('currentModeText').textContent = modeNames[mode];
-            
-            const badge = document.getElementById('viewBadge');
-            if (badge) {
-                badge.textContent = { 'all': 'All', 'complete': 'Complete', 'clinical': 'Clinical' }[mode];
-                badge.className = `px-2 py-1 rounded-full text-xs font-medium ${
-                    mode === 'complete' ? 'bg-[#0e7c7b]' : 
-                    mode === 'clinical' ? 'bg-[#0a2e5a]' : 'bg-gray-600'
-                } text-white`;
-            }
-        };
-
-        window.filterVariants = function(filter) {
-            STATE.activeFilter = filter;
-            
-            const allBtn = document.getElementById('filterAll');
-            const missBtn = document.getElementById('filterMissing');
-            
-            if (allBtn && missBtn) {
-                if (filter === 'all') {
-                    allBtn.style.borderColor = '#0e7c7b';
-                    allBtn.style.color = '#0e7c7b';
-                    allBtn.style.fontWeight = '600';
-                    missBtn.style.borderColor = '#d1d5db';
-                    missBtn.style.color = '#374151';
-                    missBtn.style.fontWeight = '400';
-                } else {
-                    allBtn.style.borderColor = '#d1d5db';
-                    allBtn.style.color = '#374151';
-                    allBtn.style.fontWeight = '400';
-                    missBtn.style.borderColor = '#b45309';
-                    missBtn.style.color = '#b45309';
-                    missBtn.style.fontWeight = '600';
+        const View = {
+            setDataView(mode) {
+                if (STATE.dataViewMode === mode) return;
+                
+                STATE.dataViewMode = mode;
+                
+                ['all', 'complete', 'clinical'].forEach(m => {
+                    document.getElementById(`${m}ViewBtn`)?.classList.toggle('active', m === mode);
+                });
+                
+                const badge = document.getElementById('viewBadge');
+                if (badge) {
+                    const labels = { all: 'All', complete: 'Complete', clinical: 'Clinical' };
+                    badge.textContent = labels[mode] || 'All';
+                    badge.className = `px-2 py-1 rounded-full text-xs font-medium ${
+                        mode === 'complete' ? 'bg-[#0e7c7b]' : 
+                        mode === 'clinical' ? 'bg-[#0a2e5a]' : 'bg-gray-600'
+                    } text-white`;
                 }
+                
+                Filter.apply();
+                
+                const modeNames = { 
+                    all: 'All Variants', 
+                    complete: 'Complete Clinical Data', 
+                    clinical: 'Clinical Data' 
+                };
+                document.getElementById('currentModeText').textContent = modeNames[mode];
             }
-            
-            applyFilterChain();
         };
 
         // ------------------------------------------------------------------
         // PAGINATION
         // ------------------------------------------------------------------
-        function updatePagination() {
-            const total = Math.ceil(STATE.filteredVariants.length / CONFIG.UI.ITEMS_PER_PAGE);
-            const el = document.getElementById('paginationControls');
+        const Pagination = {
+            update() {
+                const total = Math.ceil(STATE.filteredVariants.length / CONFIG.UI.ITEMS_PER_PAGE);
+                const el = document.getElementById('paginationControls');
+                
+                if (!el) return;
+                
+                if (total > 1) {
+                    el.style.display = 'flex';
+                    document.getElementById('currentPage').textContent = STATE.currentPage;
+                    document.getElementById('totalPages').textContent = total;
+                    
+                    const prevBtn = document.getElementById('prevBtn');
+                    const nextBtn = document.getElementById('nextBtn');
+                    
+                    if (prevBtn) {
+                        prevBtn.disabled = STATE.currentPage === 1;
+                        prevBtn.style.opacity = STATE.currentPage === 1 ? '0.5' : '1';
+                    }
+                    
+                    if (nextBtn) {
+                        nextBtn.disabled = STATE.currentPage === total;
+                        nextBtn.style.opacity = STATE.currentPage === total ? '0.5' : '1';
+                    }
+                } else {
+                    el.style.display = 'none';
+                }
+            },
             
-            if (!el) return;
+            previousPage() {
+                if (STATE.currentPage > 1) {
+                    STATE.currentPage--;
+                    Renderer.renderVariantList();
+                    this.update();
+                }
+            },
             
-            if (total > 1) {
-                el.style.display = 'flex';
-                document.getElementById('currentPage').textContent = STATE.currentPage;
-                document.getElementById('totalPages').textContent = total;
-                document.getElementById('prevBtn').disabled = STATE.currentPage === 1;
-                document.getElementById('nextBtn').disabled = STATE.currentPage === total;
-            } else {
-                el.style.display = 'none';
-            }
-        }
-
-        window.previousPage = function() {
-            if (STATE.currentPage > 1) {
-                STATE.currentPage--;
-                renderVariantCatalog();
-                updatePagination();
-            }
-        };
-
-        window.nextPage = function() {
-            const total = Math.ceil(STATE.filteredVariants.length / CONFIG.UI.ITEMS_PER_PAGE);
-            if (STATE.currentPage < total) {
-                STATE.currentPage++;
-                renderVariantCatalog();
-                updatePagination();
+            nextPage() {
+                const total = Math.ceil(STATE.filteredVariants.length / CONFIG.UI.ITEMS_PER_PAGE);
+                if (STATE.currentPage < total) {
+                    STATE.currentPage++;
+                    Renderer.renderVariantList();
+                    this.update();
+                }
             }
         };
 
         // ------------------------------------------------------------------
         // SEARCH
         // ------------------------------------------------------------------
-        function initializeSearch() {
-            const input = document.getElementById('searchInput');
-            const clear = document.getElementById('searchClear');
-            
-            if (!input) return;
-            
-            input.addEventListener('input', function() {
-                clearTimeout(STATE.searchTimeout);
-                clear?.classList.toggle('hidden', !input.value);
+        const Search = {
+            initialize() {
+                const input = document.getElementById('searchInput');
+                const clear = document.getElementById('searchClear');
                 
-                STATE.searchTimeout = setTimeout(() => {
-                    STATE.searchQuery = input.value;
-                    STATE.currentPage = 1;
-                    applyFilterChain();
-                }, CONFIG.UI.SEARCH_DELAY);
-            });
-            
-            clear?.addEventListener('click', function() {
-                input.value = '';
-                clear.classList.add('hidden');
-                STATE.searchQuery = '';
-                applyFilterChain();
-                input.focus();
-            });
-            
-            input.addEventListener('keydown', e => {
-                if (e.key === 'Escape') {
+                if (!input) return;
+                
+                input.addEventListener('input', () => {
+                    clearTimeout(STATE.searchTimeout);
+                    clear?.classList.toggle('hidden', !input.value);
+                    
+                    STATE.searchTimeout = setTimeout(() => {
+                        STATE.searchQuery = input.value;
+                        STATE.currentPage = 1;
+                        Filter.apply();
+                    }, CONFIG.UI.SEARCH_DELAY);
+                });
+                
+                clear?.addEventListener('click', () => {
                     input.value = '';
-                    clear?.classList.add('hidden');
+                    clear.classList.add('hidden');
                     STATE.searchQuery = '';
-                    applyFilterChain();
+                    Filter.apply();
+                    input.focus();
+                });
+                
+                input.addEventListener('keydown', e => {
+                    if (e.key === 'Escape') {
+                        input.value = '';
+                        clear?.classList.add('hidden');
+                        STATE.searchQuery = '';
+                        Filter.apply();
+                    }
+                });
+            }
+        };
+
+        // ------------------------------------------------------------------
+        // ANNOTATION
+        // ------------------------------------------------------------------
+        const Annotation = {
+            show(name, field, current) {
+                const variant = STATE.variants.find(v => v.legacy_name === name);
+                if (!variant) {
+                    Notification.show('Variant not found', 'error');
+                    return;
                 }
-            });
-        }
+                
+                STATE.annotationContext = { variant, field, currentValue: current };
+                
+                const labels = {
+                    'legacy_name': 'Legacy Name',
+                    'protein_name': 'Protein',
+                    'cdna_name': 'cDNA',
+                    'final_determination': 'Clinical Impact',
+                    'cftr_class': 'CFTR Class',
+                    'class_subtype': 'Subtype',
+                    'class_confidence': 'Confidence',
+                    'eti_prediction': 'ETI Response',
+                    'eti_evidence_level': 'Evidence Level',
+                    'therapy_responsive': 'Therapy Responsive',
+                    'source_summary': 'Evidence Source'
+                };
+                
+                document.getElementById('annotationTitle').textContent = `Annotate ${name}`;
+                document.getElementById('annotationField').textContent = labels[field] || field;
+                
+                let input = '';
+                
+                if (field === 'cftr_class') {
+                    input = `
+                        <select id="annotationValue" class="form-control">
+                            <option value="">Select</option>
+                            <option value="I" ${current === 'I' ? 'selected' : ''}>Class I</option>
+                            <option value="II" ${current === 'II' ? 'selected' : ''}>Class II</option>
+                            <option value="III" ${current === 'III' ? 'selected' : ''}>Class III</option>
+                            <option value="IV" ${current === 'IV' ? 'selected' : ''}>Class IV</option>
+                            <option value="V" ${current === 'V' ? 'selected' : ''}>Class V</option>
+                        </select>
+                    `;
+                } else if (field === 'class_subtype') {
+                    input = `
+                        <select id="annotationValue" class="form-control">
+                            <option value="">Select</option>
+                            <option value="standard" ${current === 'standard' ? 'selected' : ''}>Standard</option>
+                            <option value="exceptional" ${current === 'exceptional' ? 'selected' : ''}>Exceptional</option>
+                            <option value="true" ${current === 'true' ? 'selected' : ''}>True Class I</option>
+                        </select>
+                    `;
+                } else if (field === 'eti_prediction') {
+                    input = `
+                        <select id="annotationValue" class="form-control">
+                            <option value="">Select</option>
+                            <option value="responsive" ${current === 'responsive' ? 'selected' : ''}>Responsive</option>
+                            <option value="non_responsive" ${current === 'non_responsive' ? 'selected' : ''}>Non-responsive</option>
+                            <option value="unknown" ${current === 'unknown' ? 'selected' : ''}>Unknown</option>
+                        </select>
+                    `;
+                } else if (field === 'therapy_responsive') {
+                    const bool = current === true || current === 'true';
+                    input = `
+                        <select id="annotationValue" class="form-control">
+                            <option value="">Select</option>
+                            <option value="true" ${bool ? 'selected' : ''}>Yes</option>
+                            <option value="false" ${current === false || current === 'false' ? 'selected' : ''}>No</option>
+                        </select>
+                    `;
+                } else if (field === 'class_confidence' || field === 'eti_evidence_level') {
+                    input = `
+                        <select id="annotationValue" class="form-control">
+                            <option value="">Select</option>
+                            <option value="High" ${current === 'High' ? 'selected' : ''}>High</option>
+                            <option value="Moderate" ${current === 'Moderate' ? 'selected' : ''}>Moderate</option>
+                            <option value="Low" ${current === 'Low' ? 'selected' : ''}>Low</option>
+                            <option value="Confirmed" ${current === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
+                        </select>
+                    `;
+                } else if (field === 'final_determination') {
+                    input = `
+                        <select id="annotationValue" class="form-control">
+                            <option value="">Select</option>
+                            <option value="CF-causing" ${current === 'CF-causing' ? 'selected' : ''}>CF-causing</option>
+                            <option value="Probably responsive to ETI" ${current === 'Probably responsive to ETI' ? 'selected' : ''}>Probably responsive to ETI</option>
+                            <option value="Variant of unknown significance" ${current === 'Variant of unknown significance' ? 'selected' : ''}>VUS</option>
+                        </select>
+                    `;
+                } else {
+                    input = `<textarea id="annotationValue" class="form-control font-mono" rows="3">${Utils.escapeHTML(current || '')}</textarea>`;
+                }
+                
+                document.getElementById('annotationContent').innerHTML = `
+                    <div class="bg-gray-50 rounded-lg p-4 mb-4 border border-gray-200">
+                        <p class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">Current Value</p>
+                        <p class="font-mono text-sm ${!current ? 'text-gray-400 italic' : ''}">
+                            ${current ? Utils.escapeHTML(String(current)) : 'Not specified'}
+                        </p>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">${labels[field] || field}</label>
+                        ${input}
+                    </div>
+                `;
+                
+                document.getElementById('annotationModal').classList.remove('hidden');
+            },
+            
+            close() {
+                document.getElementById('annotationModal').classList.add('hidden');
+                STATE.annotationContext = null;
+            },
+            
+            async save() {
+                if (!STATE.annotationContext) {
+                    Notification.show('No annotation context', 'error');
+                    return;
+                }
+                
+                const { variant, field } = STATE.annotationContext;
+                const input = document.getElementById('annotationValue');
+                
+                if (!input) {
+                    Notification.show('Input field not found', 'error');
+                    return;
+                }
+                
+                let newValue = input.value;
+                if (field === 'therapy_responsive') {
+                    newValue = newValue === 'true';
+                }
+                
+                const success = await VariantService.updateField(variant.legacy_name, field, newValue);
+                if (success) {
+                    this.close();
+                }
+            }
+        };
 
         // ------------------------------------------------------------------
         // IMPORT
         // ------------------------------------------------------------------
-        window.showImportModal = function() {
-            document.getElementById('importModal').classList.remove('hidden');
-            switchImportTab('json');
-        };
-
-        window.closeImportModal = function() {
-            document.getElementById('importModal').classList.add('hidden');
-            clearImportForm();
-            clearManualForm();
-        };
-
-        window.switchImportTab = function(tab) {
-            const jt = document.getElementById('jsonTabBtn');
-            const ft = document.getElementById('formTabBtn');
-            const jp = document.getElementById('jsonImportPanel');
-            const fp = document.getElementById('formImportPanel');
+        const Import = {
+            switchTab(tab) {
+                const jt = document.getElementById('jsonTabBtn');
+                const ft = document.getElementById('formTabBtn');
+                const jp = document.getElementById('jsonImportPanel');
+                const fp = document.getElementById('formImportPanel');
+                
+                if (tab === 'json') {
+                    jt?.classList.add('active');
+                    ft?.classList.remove('active');
+                    jp?.classList.remove('hidden');
+                    fp?.classList.add('hidden');
+                } else {
+                    jt?.classList.remove('active');
+                    ft?.classList.add('active');
+                    jp?.classList.add('hidden');
+                    fp?.classList.remove('hidden');
+                }
+            },
             
-            if (tab === 'json') {
-                jt?.classList.add('active');
-                ft?.classList.remove('active');
-                jp?.classList.remove('hidden');
-                fp?.classList.add('hidden');
-            } else {
-                jt?.classList.remove('active');
-                ft?.classList.add('active');
-                jp?.classList.add('hidden');
-                fp?.classList.remove('hidden');
-            }
-        };
-
-        window.clearImportForm = function() {
-            document.getElementById('jsonInput').value = '';
-            document.getElementById('importResults').innerHTML = '';
-            document.getElementById('executeImportBtn').disabled = true;
-            STATE.validatedJson = null;
-        };
-
-        window.clearManualForm = function() {
-            ['formLegacyName', 'formProteinName', 'formCdnaName', 'formDetermination', 'formClass', 'formEtiResponse'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.value = '';
-            });
-        };
-
-        window.validateImport = function() {
-            const input = document.getElementById('jsonInput');
-            const results = document.getElementById('importResults');
-            const btn = document.getElementById('executeImportBtn');
-            
-            try {
-                const d = JSON.parse(input.value.trim());
-                const required = ['variant_legacy_name', 'variant_protein_name', 'variant_cDNA_name', 'variant_final_determination'];
-                const missing = required.filter(f => !d[f]);
-                
-                if (missing.length) throw new Error(`Missing: ${missing.join(', ')}`);
-                
-                STATE.validatedJson = d;
-                
-                results.innerHTML = `
-                    <div class="bg-[#e3f9e9] border border-[#0e7b4e] rounded-lg p-4">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-full bg-[#0e7b4e]/10 flex items-center justify-center">
-                                <i class="fas fa-check-circle text-[#0e7b4e]"></i>
-                            </div>
-                            <div>
-                                <p class="font-medium text-[#0e7b4e]">✓ Valid JSON</p>
-                                <p class="text-sm text-gray-700 mt-1">Ready to import: <span class="font-mono font-medium">${d.variant_legacy_name}</span></p>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                btn.disabled = false;
-            } catch(e) {
-                results.innerHTML = `
-                    <div class="bg-[#fee2e2] border border-[#b91c1c] rounded-lg p-4">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-full bg-[#b91c1c]/10 flex items-center justify-center">
-                                <i class="fas fa-exclamation-circle text-[#b91c1c]"></i>
-                            </div>
-                            <div>
-                                <p class="font-medium text-[#b91c1c]">Invalid JSON</p>
-                                <p class="text-sm text-gray-700 mt-1">${escapeHTML(e.message)}</p>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                btn.disabled = true;
+            clearForm() {
+                document.getElementById('jsonInput').value = '';
+                document.getElementById('importResults').innerHTML = '';
+                document.getElementById('executeImportBtn').disabled = true;
                 STATE.validatedJson = null;
-            }
-        };
-
-        window.executeJsonImport = async function() {
-            if (!STATE.validatedJson) {
-                showNotification('Validate JSON first', 'warning');
-                return;
-            }
+            },
             
-            const d = STATE.validatedJson;
-            
-            try {
-                await upsertVariant({
-                    legacy_name: d.variant_legacy_name,
-                    protein_name: d.variant_protein_name,
-                    cdna_name: d.variant_cDNA_name,
-                    final_determination: d.variant_final_determination,
-                    data_status: 'partial_clinical'
+            clearManualForm() {
+                ['formLegacyName', 'formProteinName', 'formCdnaName', 'formDetermination', 'formClass', 'formEtiResponse'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.value = '';
                 });
-                
-                showNotification(`✓ Imported ${d.variant_legacy_name}`, 'success');
-                
-                await loadVariantCatalog();
-                await loadDatabaseStats();
-                applyFilterChain();
-                clearImportForm();
-                
-                setTimeout(() => closeImportModal(), 1500);
-            } catch(e) {
-                showNotification(`Import failed: ${e.message}`, 'error');
-            }
-        };
-
-        window.submitManualForm = async function() {
-            const legacy = document.getElementById('formLegacyName')?.value.trim();
-            const protein = document.getElementById('formProteinName')?.value.trim();
-            const cdna = document.getElementById('formCdnaName')?.value.trim();
-            const det = document.getElementById('formDetermination')?.value;
+            },
             
-            if (!legacy || !protein || !cdna || !det) {
-                showNotification('Required fields missing', 'warning');
-                return;
-            }
+            validate() {
+                const input = document.getElementById('jsonInput');
+                const results = document.getElementById('importResults');
+                const btn = document.getElementById('executeImportBtn');
+                
+                try {
+                    const d = JSON.parse(input.value.trim());
+                    const required = ['variant_legacy_name', 'variant_protein_name', 'variant_cDNA_name', 'variant_final_determination'];
+                    const missing = required.filter(f => !d[f]);
+                    
+                    if (missing.length) throw new Error(`Missing: ${missing.join(', ')}`);
+                    
+                    STATE.validatedJson = d;
+                    
+                    results.innerHTML = `
+                        <div class="bg-[#e3f9e9] border border-[#0e7b4e] rounded-lg p-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-[#0e7b4e]/10 flex items-center justify-center">
+                                    <i class="fas fa-check-circle text-[#0e7b4e]"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-[#0e7b4e]">✓ Valid JSON</p>
+                                    <p class="text-sm text-gray-700 mt-1">Ready to import: <span class="font-mono font-medium">${d.variant_legacy_name}</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    btn.disabled = false;
+                } catch(e) {
+                    results.innerHTML = `
+                        <div class="bg-[#fee2e2] border border-[#b91c1c] rounded-lg p-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-[#b91c1c]/10 flex items-center justify-center">
+                                    <i class="fas fa-exclamation-circle text-[#b91c1c]"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-[#b91c1c]">Invalid JSON</p>
+                                    <p class="text-sm text-gray-700 mt-1">${Utils.escapeHTML(e.message)}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    btn.disabled = true;
+                    STATE.validatedJson = null;
+                }
+            },
             
-            try {
-                await upsertVariant({
-                    legacy_name: legacy,
-                    protein_name: protein,
-                    cdna_name: cdna,
-                    final_determination: det,
-                    cftr_class: document.getElementById('formClass')?.value || null,
-                    eti_prediction: document.getElementById('formEtiResponse')?.value || null,
-                    data_status: 'partial_clinical'
-                });
+            async executeJson() {
+                if (!STATE.validatedJson) {
+                    Notification.show('Validate JSON first', 'warning');
+                    return;
+                }
                 
-                showNotification(`✓ Saved ${legacy}`, 'success');
+                const d = STATE.validatedJson;
                 
-                await loadVariantCatalog();
-                await loadDatabaseStats();
-                applyFilterChain();
-                clearManualForm();
+                try {
+                    await DatabaseService.upsertVariant({
+                        legacy_name: d.variant_legacy_name,
+                        protein_name: d.variant_protein_name,
+                        cdna_name: d.variant_cDNA_name,
+                        final_determination: d.variant_final_determination,
+                        data_status: 'partial_clinical'
+                    });
+                    
+                    Notification.show(`✓ Imported ${d.variant_legacy_name}`, 'success');
+                    
+                    await VariantService.loadAll();
+                    await VariantService.refreshStats();
+                    Filter.apply();
+                    this.clearForm();
+                    
+                    setTimeout(() => UI.closeImportModal(), 1500);
+                } catch(e) {
+                    Notification.show(`Import failed: ${e.message}`, 'error');
+                }
+            },
+            
+            async submitManual() {
+                const legacy = document.getElementById('formLegacyName')?.value.trim();
+                const protein = document.getElementById('formProteinName')?.value.trim();
+                const cdna = document.getElementById('formCdnaName')?.value.trim();
+                const det = document.getElementById('formDetermination')?.value;
                 
-                setTimeout(() => closeImportModal(), 1500);
-            } catch(e) {
-                showNotification(`Save failed: ${e.message}`, 'error');
+                if (!legacy || !protein || !cdna || !det) {
+                    Notification.show('Required fields missing', 'warning');
+                    return;
+                }
+                
+                try {
+                    await DatabaseService.upsertVariant({
+                        legacy_name: legacy,
+                        protein_name: protein,
+                        cdna_name: cdna,
+                        final_determination: det,
+                        cftr_class: document.getElementById('formClass')?.value || null,
+                        eti_prediction: document.getElementById('formEtiResponse')?.value || null,
+                        data_status: 'partial_clinical'
+                    });
+                    
+                    Notification.show(`✓ Saved ${legacy}`, 'success');
+                    
+                    await VariantService.loadAll();
+                    await VariantService.refreshStats();
+                    Filter.apply();
+                    this.clearManualForm();
+                    
+                    setTimeout(() => UI.closeImportModal(), 1500);
+                } catch(e) {
+                    Notification.show(`Save failed: ${e.message}`, 'error');
+                }
             }
         };
 
         // ------------------------------------------------------------------
-        // DASHBOARD
+        // UI CONTROLS
         // ------------------------------------------------------------------
-        window.showDashboard = function() {
-            document.getElementById('dashboardModal').classList.remove('hidden');
-            renderCharts();
-        };
-
-        window.closeDashboard = function() {
-            document.getElementById('dashboardModal').classList.add('hidden');
-        };
-
-        function renderCharts() {
-            const s = STATE.databaseStats;
+        const UI = {
+            showImportModal() {
+                document.getElementById('importModal').classList.remove('hidden');
+                Import.switchTab('json');
+            },
             
-            const classCtx = document.getElementById('classChart');
-            if (classCtx) {
+            closeImportModal() {
+                document.getElementById('importModal').classList.add('hidden');
+                Import.clearForm();
+                Import.clearManualForm();
+            },
+            
+            showDashboard() {
+                document.getElementById('dashboardModal').classList.remove('hidden');
+                Charts.render();
+            },
+            
+            closeDashboard() {
+                document.getElementById('dashboardModal').classList.add('hidden');
+            },
+            
+            closeAnnotationModal() {
+                Annotation.close();
+            }
+        };
+
+        // ------------------------------------------------------------------
+        // CHARTS
+        // ------------------------------------------------------------------
+        const Charts = {
+            render() {
+                setTimeout(() => {
+                    this.renderClassChart();
+                    this.renderResponseChart();
+                }, 100);
+            },
+            
+            renderClassChart() {
+                const ctx = document.getElementById('classChart');
+                if (!ctx) return;
+                
                 if (STATE.charts.classChart) STATE.charts.classChart.destroy();
                 
-                STATE.charts.classChart = new Chart(classCtx, {
+                STATE.charts.classChart = new Chart(ctx, {
                     type: 'doughnut',
                     data: {
                         labels: ['Class I', 'Class II', 'Class III', 'Class IV', 'Class V'],
                         datasets: [{
                             data: [
-                                s.classI || 0,
-                                532, // Demo data, replace with real counts
-                                278,
-                                156,
-                                157
+                                STATE.databaseStats.classI || 0,
+                                STATE.databaseStats.classII || 0,
+                                STATE.databaseStats.classIII || 0,
+                                STATE.databaseStats.classIV || 0,
+                                STATE.databaseStats.classV || 0
                             ],
                             backgroundColor: ['#b91c1c', '#b45309', '#0f766e', '#1e40af', '#6d28d9'],
                             borderWidth: 3,
@@ -1995,26 +2255,31 @@
                     },
                     options: {
                         responsive: true,
-                        plugins: { legend: { position: 'bottom' } },
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: { position: 'bottom', labels: { font: { size: 11 } } }
+                        },
                         cutout: '60%'
                     }
                 });
-            }
+            },
             
-            const respCtx = document.getElementById('responseChart');
-            if (respCtx) {
+            renderResponseChart() {
+                const ctx = document.getElementById('responseChart');
+                if (!ctx) return;
+                
                 if (STATE.charts.responseChart) STATE.charts.responseChart.destroy();
                 
-                STATE.charts.responseChart = new Chart(respCtx, {
+                STATE.charts.responseChart = new Chart(ctx, {
                     type: 'bar',
                     data: {
                         labels: ['Responsive', 'Non-responsive', 'Unknown'],
                         datasets: [{
                             label: 'Variants',
                             data: [
-                                s.responsive || 0,
-                                STATE.variants.filter(v => v.eti_prediction === 'non_responsive').length,
-                                STATE.variants.filter(v => v.eti_prediction === 'unknown').length
+                                STATE.databaseStats.responsive || 0,
+                                STATE.databaseStats.nonResponsive || 0,
+                                STATE.databaseStats.unknown || 0
                             ],
                             backgroundColor: ['#0f766e', '#b91c1c', '#b45309'],
                             borderRadius: 6
@@ -2022,200 +2287,236 @@
                     },
                     options: {
                         responsive: true,
-                        scales: { y: { beginAtZero: true } },
+                        maintainAspectRatio: true,
+                        scales: {
+                            y: { 
+                                beginAtZero: true,
+                                grid: { color: '#f3f4f6' }
+                            }
+                        },
                         plugins: { legend: { display: false } }
                     }
                 });
             }
-        }
+        };
 
-        window.exportReport = function() {
-            const headers = ['Legacy', 'Protein', 'cDNA', 'Determination', 'Class', 'Subtype', 'ETI', 'Evidence', 'Responsive', 'Confidence', 'Source'];
-            const rows = STATE.variants.map(v => [
-                v.legacy_name || '',
-                v.protein_name || '',
-                v.cdna_name || '',
-                v.final_determination || '',
-                v.cftr_class || '',
-                v.class_subtype || '',
-                v.eti_prediction || '',
-                v.eti_evidence_level || '',
-                v.therapy_responsive !== null ? (v.therapy_responsive ? 'Yes' : 'No') : '',
-                v.class_confidence || '',
-                v.source_summary || ''
-            ]);
-            
-            const csv = [headers, ...rows].map(r => 
-                r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')
-            ).join('\n');
-            
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
-            a.download = `helix-${new Date().toISOString().split('T')[0]}.csv`;
-            a.click();
-            
-            showNotification('Report exported', 'success');
+        // ------------------------------------------------------------------
+        // REPORT
+        // ------------------------------------------------------------------
+        const Report = {
+            exportCSV() {
+                const headers = ['Legacy Name', 'Protein', 'cDNA', 'Determination', 'CFTR Class', 'Subtype', 'ETI Response', 'Evidence Level', 'Responsive', 'Confidence', 'Source'];
+                const rows = STATE.variants.map(v => [
+                    v.legacy_name || '',
+                    v.protein_name || '',
+                    v.cdna_name || '',
+                    v.final_determination || '',
+                    v.cftr_class || '',
+                    v.class_subtype || '',
+                    v.eti_prediction || '',
+                    v.eti_evidence_level || '',
+                    v.therapy_responsive !== null ? (v.therapy_responsive ? 'Yes' : 'No') : '',
+                    v.class_confidence || '',
+                    v.source_summary || ''
+                ]);
+                
+                const csv = [headers, ...rows].map(row => 
+                    row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')
+                ).join('\n');
+                
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `helix-export-${new Date().toISOString().split('T')[0]}.csv`;
+                a.click();
+                window.URL.revokeObjectURL(url);
+                
+                Notification.show('Report exported successfully', 'success');
+            }
         };
 
         // ------------------------------------------------------------------
         // STATS UI
         // ------------------------------------------------------------------
-        function updateStatsUI() {
-            const s = STATE.databaseStats;
+        const StatsUI = {
+            updateAll() {
+                const s = STATE.databaseStats;
+                
+                Utils.setText('statTotal', s.total.toLocaleString());
+                Utils.setText('statClassI', s.classI.toLocaleString());
+                Utils.setText('statExceptional', s.exceptional.toLocaleString());
+                Utils.setText('statResponsive', s.responsive.toLocaleString());
+                Utils.setText('databaseTotal', s.total.toLocaleString());
+                Utils.setText('allCount', s.total.toLocaleString());
+                Utils.setText('completeCount', s.complete.toLocaleString());
+                Utils.setText('clinicalCount', s.clinical.toLocaleString());
+                
+                if (s.total > 0) {
+                    Utils.setText('classIPercentage', ((s.classI / s.total) * 100).toFixed(1) + '%');
+                    Utils.setText('responsivePercentage', ((s.responsive / s.total) * 100).toFixed(1) + '%');
+                }
+                if (s.classI > 0) {
+                    Utils.setText('exceptionalPercentage', ((s.exceptional / s.classI) * 100).toFixed(1) + '%');
+                }
+            },
             
-            safeSetText('statTotal', s.total.toLocaleString());
-            safeSetText('statClassI', s.classI.toLocaleString());
-            safeSetText('statExceptional', s.exceptional.toLocaleString());
-            safeSetText('statResponsive', s.responsive.toLocaleString());
-            safeSetText('databaseTotal', s.total.toLocaleString());
-            safeSetText('allCount', s.total.toLocaleString());
-            safeSetText('completeCount', s.complete.toLocaleString());
-            safeSetText('clinicalCount', s.clinical.toLocaleString());
-            
-            if (s.total > 0) {
-                safeSetText('classIPercentage', ((s.classI / s.total) * 100).toFixed(1) + '%');
-                safeSetText('responsivePercentage', ((s.responsive / s.total) * 100).toFixed(1) + '%');
+            updateFromView() {
+                const f = STATE.filteredVariants;
+                
+                Utils.setText('statTotal', f.length.toLocaleString());
+                Utils.setText('statClassI', f.filter(v => v.cftr_class === 'I').length.toLocaleString());
+                Utils.setText('statExceptional', f.filter(v => v.class_subtype === 'exceptional').length.toLocaleString());
+                Utils.setText('statResponsive', f.filter(v => v.eti_prediction === 'responsive').length.toLocaleString());
+                Utils.setText('variantCount', f.length.toLocaleString());
             }
-            if (s.classI > 0) {
-                safeSetText('exceptionalPercentage', ((s.exceptional / s.classI) * 100).toFixed(1) + '%');
+        };
+
+        // ------------------------------------------------------------------
+        // VIEW COUNTS
+        // ------------------------------------------------------------------
+        const ViewCounts = {
+            update() {
+                const all = STATE.variants.length;
+                const comp = STATE.variants.filter(v => v.data_status === 'complete_clinical').length;
+                const clin = STATE.variants.filter(v => v.data_status === 'complete_clinical' || v.data_status === 'partial_clinical').length;
+                
+                Utils.setText('allCount', all.toLocaleString());
+                Utils.setText('completeCount', comp.toLocaleString());
+                Utils.setText('clinicalCount', clin.toLocaleString());
             }
-        }
+        };
 
-        function updateStatsFromView() {
-            const f = STATE.filteredVariants;
-            
-            safeSetText('statTotal', f.length.toLocaleString());
-            safeSetText('statClassI', f.filter(v => v.cftr_class === 'I').length.toLocaleString());
-            safeSetText('statExceptional', f.filter(v => v.class_subtype === 'exceptional').length.toLocaleString());
-            safeSetText('statResponsive', f.filter(v => v.eti_prediction === 'responsive').length.toLocaleString());
-            safeSetText('variantCount', f.length.toLocaleString());
-        }
-
-        function updateViewCounts() {
-            const all = STATE.variants.length;
-            const comp = STATE.variants.filter(v => v.data_status === 'complete_clinical').length;
-            const clin = STATE.variants.filter(v => v.data_status === 'complete_clinical' || v.data_status === 'partial_clinical').length;
-            
-            safeSetText('allCount', all.toLocaleString());
-            safeSetText('completeCount', comp.toLocaleString());
-            safeSetText('clinicalCount', clin.toLocaleString());
-        }
-
-        function updateUIFromState() {
-            updateStatsUI();
-            updateStatsFromView();
-            updateViewCounts();
-        }
-
-        function refreshViewDescription() {
-            const names = {
-                'all': 'All Variants',
-                'complete': 'Complete Clinical Data',
-                'clinical': 'Clinical Data'
-            };
-            safeSetText('currentModeText', names[STATE.dataViewMode]);
-        }
+        // ------------------------------------------------------------------
+        // NOTIFICATION
+        // ------------------------------------------------------------------
+        const Notification = {
+            show(message, type = 'info', duration = CONFIG.UI.NOTIFICATION_DURATION) {
+                let container = document.getElementById('notification-container');
+                if (!container) {
+                    container = document.createElement('div');
+                    container.id = 'notification-container';
+                    container.className = 'fixed bottom-6 right-6 z-[2000] space-y-2';
+                    document.body.appendChild(container);
+                }
+                
+                const styles = {
+                    success: { bg: '#e3f9e9', text: '#0e7b4e', border: '#0e7b4e', icon: 'fa-check-circle' },
+                    error: { bg: '#fee2e2', text: '#b91c1c', border: '#b91c1c', icon: 'fa-exclamation-circle' },
+                    warning: { bg: '#ffedd5', text: '#b45309', border: '#b45309', icon: 'fa-exclamation-triangle' },
+                    info: { bg: '#eff6ff', text: '#1e40af', border: '#1e40af', icon: 'fa-info-circle' }
+                };
+                
+                const style = styles[type] || styles.info;
+                
+                const notification = document.createElement('div');
+                notification.className = 'notification';
+                notification.style.backgroundColor = style.bg;
+                notification.style.color = style.text;
+                notification.style.borderLeftColor = style.border;
+                notification.style.border = `1px solid ${style.border}20`;
+                notification.style.borderLeftWidth = '4px';
+                
+                notification.innerHTML = `
+                    <i class="fas ${style.icon}"></i>
+                    <span class="text-sm font-medium">${message}</span>
+                    <button onclick="this.parentElement.remove()" class="ml-auto text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                
+                container.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.style.opacity = '0';
+                    notification.style.transform = 'translateX(100%)';
+                    notification.style.transition = 'all 0.3s ease';
+                    setTimeout(() => notification.remove(), 300);
+                }, duration);
+            }
+        };
 
         // ------------------------------------------------------------------
         // UTILITIES
         // ------------------------------------------------------------------
-        function escapeHTML(s) {
-            if (!s) return '';
-            return String(s)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#039;');
-        }
-
-        function escapeRegExp(s) {
-            return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        }
-
-        function safeSetText(id, txt) {
-            const el = document.getElementById(id);
-            if (el) el.textContent = txt;
-        }
-
-        function showNotification(msg, type = 'info', dur = CONFIG.UI.NOTIFICATION_DURATION) {
-            let c = document.getElementById('notification-container');
-            if (!c) {
-                c = document.createElement('div');
-                c.id = 'notification-container';
-                c.className = 'fixed bottom-6 right-6 z-[2000] space-y-2';
-                document.body.appendChild(c);
+        const Utils = {
+            escapeHTML(str) {
+                if (!str) return '';
+                return String(str)
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#039;');
+            },
+            
+            escapeRegExp(str) {
+                return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            },
+            
+            setText(id, text) {
+                const el = document.getElementById(id);
+                if (el) el.textContent = text;
             }
-            
-            const n = document.createElement('div');
-            n.className = `notification ${type}`;
-            
-            const icons = {
-                success: 'fa-check-circle',
-                error: 'fa-exclamation-circle',
-                warning: 'fa-exclamation-triangle',
-                info: 'fa-info-circle'
-            };
-            
-            n.innerHTML = `
-                <i class="fas ${icons[type] || icons.info}"></i>
-                <span class="text-sm font-medium">${msg}</span>
-                <button onclick="this.parentElement.remove()" class="ml-auto text-gray-500 hover:text-gray-700">
-                    <i class="fas fa-times"></i>
-                </button>
-            `;
-            
-            c.appendChild(n);
-            
-            setTimeout(() => {
-                n.style.opacity = '0';
-                n.style.transform = 'translateX(100%)';
-                n.style.transition = 'all 0.3s ease';
-                setTimeout(() => n.remove(), 300);
-            }, dur);
-        }
+        };
 
+        // ------------------------------------------------------------------
+        // EVENT LISTENERS
+        // ------------------------------------------------------------------
         function attachEventListeners() {
             document.addEventListener('keydown', e => {
                 if (e.key === 'Escape') {
-                    closeImportModal();
-                    closeDashboard();
-                    closeAnnotationModal();
+                    UI.closeImportModal();
+                    UI.closeDashboard();
+                    Annotation.close();
                 }
             });
             
             document.addEventListener('click', e => {
                 if (e.target.classList.contains('modal-overlay')) {
-                    closeImportModal();
-                    closeDashboard();
-                    closeAnnotationModal();
+                    UI.closeImportModal();
+                    UI.closeDashboard();
+                    Annotation.close();
                 }
             });
         }
 
-        // Expose functions to window
-        window.selectVariant = selectVariant;
-        window.filterVariants = filterVariants;
-        window.quickSearch = quickSearch;
-        window.setDataView = setDataView;
-        window.previousPage = previousPage;
-        window.nextPage = nextPage;
-        window.showImportModal = showImportModal;
-        window.closeImportModal = closeImportModal;
-        window.switchImportTab = switchImportTab;
-        window.validateImport = validateImport;
-        window.executeJsonImport = executeJsonImport;
-        window.submitManualForm = submitManualForm;
-        window.clearImportForm = clearImportForm;
-        window.clearManualForm = clearManualForm;
-        window.showDashboard = showDashboard;
-        window.closeDashboard = closeDashboard;
-        window.exportReport = exportReport;
-        window.showAnnotationModal = showAnnotationModal;
-        window.closeAnnotationModal = closeAnnotationModal;
-        window.saveAnnotation = saveAnnotation;
-        window.confirmDeleteVariant = confirmDeleteVariant;
-        window.showNotification = showNotification;
+        // ------------------------------------------------------------------
+        // INITIALIZATION
+        // ------------------------------------------------------------------
+        async function initialize() {
+            console.log(`🚀 Δ Helix v${CONFIG.VERSION} initializing...`);
+            
+            attachEventListeners();
+            Search.initialize();
+            
+            await VariantService.loadAll();
+            await VariantService.refreshStats();
+            
+            StatsUI.updateAll();
+            Filter.apply();
+            ViewCounts.update();
+            
+            Notification.show(`✓ System ready • ${STATE.variants.length} variants loaded`, 'success');
+        }
+
+        // ------------------------------------------------------------------
+        // EXPOSE TO WINDOW
+        // ------------------------------------------------------------------
+        window.VariantService = VariantService;
+        window.Variant = Variant;
+        window.Filter = Filter;
+        window.View = View;
+        window.Pagination = Pagination;
+        window.Import = Import;
+        window.Annotation = Annotation;
+        window.UI = UI;
+        window.Report = Report;
+        window.Notification = Notification;
+        window.Utils = Utils;
+
+        // Start the application
+        initialize();
     </script>
 </body>
 </html>
