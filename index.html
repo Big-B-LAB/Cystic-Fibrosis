@@ -1019,31 +1019,64 @@
     </div>
     
     <!-- COMPLETE JAVASCRIPT IMPLEMENTATION -->
-    <script>
-    // ============================================
-    // COMPLETE CONFIGURATION
-    // ============================================
-    const CONFIG = {
-        SUPABASE_URL: 'https://oxlkisjwfarseyqgeyuw.supabase.co',
-        SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im94bGtpc2p3ZmFyc2V5cWdleXV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA2NjU2MzgsImV4cCI6MjA4NjI0MTYzOH0.O3RSGW2eMF_M_kywWsjXK9DM0saxvtu9aQUu8-YPkdU',
-        ITEMS_PER_PAGE: 15,
-        VERSION: 'Δ5.0.0'
-    };
+   <script>
+// ======================================================================
+// Δ HELIX | CFTR CLINICAL INTELLIGENCE SYSTEM
+// ======================================================================
+// VERSION: 5.0.0
+// LAST UPDATED: 2026-02-11
+// 
+// ARCHITECTURE:
+// 1. CONFIGURATION          - System constants & endpoints
+// 2. STATE MANAGEMENT       - Single source of truth
+// 3. INITIALIZATION         - App bootstrap & lifecycle
+// 4. DATABASE OPERATIONS    - Supabase interactions
+// 5. FILTER ENGINE          - Search, view modes, filtering
+// 6. RENDER ENGINE          - UI rendering components
+// 7. VIEW MANAGEMENT        - Toggle systems & displays
+// 8. ANNOTATION SYSTEM      - Data annotation workflows
+// 9. CHART ENGINE           - Analytics visualization
+// 10. UTILITIES            - Helpers, notifications, exports
+// 11. EVENT HANDLERS       - User interactions
+// 12. WINDOW EXPORTS       - Global function registry
+// ======================================================================
 
-    // ============================================
-    // COMPLETE APPLICATION STATE
-    // ============================================
+// ======================================================================
+// 1. ⚙️ CONFIGURATION - SYSTEM CONSTANTS
+// ======================================================================
+const CONFIG = {
+    SUPABASE: {
+        URL: 'https://oxlkisjwfarseyqgeyuw.supabase.co',
+        KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im94bGtpc2p3ZmFyc2V5cWdleXV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA2NjU2MzgsImV4cCI6MjA4NjI0MTYzOH0.O3RSGW2eMF_M_kywWsjXK9DM0saxvtu9aQUu8-YPkdU'
+    },
+    UI: {
+        ITEMS_PER_PAGE: 15,
+        SEARCH_DELAY: 300,
+        NOTIFICATION_DURATION: 3000
+    },
+    VERSION: 'Δ5.0.0',
+    RELEASE_DATE: '2026-02-11'
+};
+
+// ======================================================================
+// 2. 🗂️ STATE MANAGEMENT - SINGLE SOURCE OF TRUTH
+// ======================================================================
 const STATE = {
+    // Data Collections
     variants: [],
     filteredVariants: [],
     selectedVariant: null,
+    
+    // UI State
     activeFilter: 'all',
     currentPage: 1,
     searchQuery: '',
+    dataViewMode: 'all',
+    
+    // Metadata
     annotationContext: null,
     charts: {},
-    dataViewMode: 'all', 
-    databaseStats: {     
+    databaseStats: {
         total: 2102,
         complete: 1002,
         clinical: 1854,
@@ -1051,1155 +1084,1220 @@ const STATE = {
         exceptional: 21,
         responsive: 50
     },
+    
+    // System Flags
     initialized: false,
     searchTimeout: null
 };
 
-// ============================================
-// VIEW MANAGEMENT FUNCTIONS
-// ============================================
-function setDataView(mode) {
-    if (STATE.dataViewMode === mode) return;
-    STATE.dataViewMode = mode;
-    updateViewToggleUI();
-    filterAndRenderVariants();
+// ======================================================================
+// 3. 🚀 INITIALIZATION - APP BOOTSTRAP
+// ======================================================================
+document.addEventListener('DOMContentLoaded', bootstrapApp);
+
+async function bootstrapApp() {
+    try {
+        console.log(`🚀 Δ Helix v${CONFIG.VERSION} initializing...`);
+        
+        validateDOMElements();
+        showLoadingState('Establishing secure connection...');
+        
+        // Parallel initialization for speed
+        await Promise.all([
+            fetchDatabaseStatistics(),
+            loadVariantCatalog()
+        ]);
+        
+        attachEventListeners();
+        initializeSearchEngine();
+        synchronizeViewUI();
+        
+        STATE.initialized = true;
+        
+        console.log('✅ Δ Helix initialized successfully!');
+        emitNotification('System ready • ' + STATE.variants.length + ' variants loaded', 'success');
+        
+    } catch (error) {
+        console.error('❌ Initialization failed:', error);
+        emitNotification('System initialization failed: ' + error.message, 'error');
+        renderErrorState(error.message);
+    }
 }
 
-function updateViewToggleUI() {
+function validateDOMElements() {
+    const requiredIds = [
+        'statTotal', 'statClassI', 'statExceptional', 'statResponsive',
+        'completeCount', 'clinicalCount', 'allCount', 'databaseTotal',
+        'variantList', 'variantHeader', 'variantContent', 'emptyState'
+    ];
+    
+    requiredIds.forEach(id => {
+        if (!document.getElementById(id)) {
+            console.warn(`⚠️ DOM element '#${id}' not found - verify HTML structure`);
+        }
+    });
+}
+
+// ======================================================================
+// 4. 📊 DATABASE OPERATIONS - SUPABASE INTEGRATION
+// ======================================================================
+async function fetchDatabaseStatistics() {
+    try {
+        console.log('📊 Retrieving database statistics...');
+        
+        const endpoints = [
+            { key: 'total', url: '/variants?select=count' },
+            { key: 'complete', url: '/variants?cftr_class=not.is.null&eti_prediction=not.is.null&class_confidence=not.is.null&select=count' },
+            { key: 'clinical', url: '/variants?or=(cftr_class.not.is.null,eti_prediction.not.is.null)&select=count' },
+            { key: 'classI', url: '/variants?cftr_class=eq.I&select=count' },
+            { key: 'exceptional', url: '/variants?class_subtype=eq.exceptional&select=count' },
+            { key: 'responsive', url: '/variants?eti_prediction=eq.responsive&select=count' }
+        ];
+        
+        const responses = await Promise.all(
+            endpoints.map(endpoint => 
+                fetch(`${CONFIG.SUPABASE.URL}/rest/v1${endpoint.url}`, {
+                    headers: {
+                        'apikey': CONFIG.SUPABASE.KEY,
+                        'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`
+                    }
+                })
+            )
+        );
+        
+        const results = await Promise.all(responses.map(res => res.json()));
+        
+        STATE.databaseStats = {
+            total: results[0][0]?.count || 2102,
+            complete: results[1][0]?.count || 1002,
+            clinical: results[2][0]?.count || 1854,
+            classI: results[3][0]?.count || 979,
+            exceptional: results[4][0]?.count || 21,
+            responsive: results[5][0]?.count || 50
+        };
+        
+        renderDatabaseStatistics();
+        
+    } catch (error) {
+        console.warn('⚠️ Using default statistics (Supabase unavailable):', error);
+        renderDatabaseStatistics();
+    }
+}
+
+async function loadVariantCatalog() {
+    try {
+        console.log('🧬 Loading variant catalog...');
+        
+        const response = await fetch(
+            `${CONFIG.SUPABASE.URL}/rest/v1/clinical_variants?select=*&order=legacy_name.asc`,
+            {
+                headers: {
+                    'apikey': CONFIG.SUPABASE.KEY,
+                    'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+        
+        if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        
+        STATE.variants = await response.json();
+        console.log(`✅ Loaded ${STATE.variants.length} unique variants`);
+        
+        applyFilterChain();
+        updateAnalyticsDashboard();
+        refreshViewDescription();
+        
+    } catch (error) {
+        console.error('❌ Variant loading failed:', error);
+        emitNotification(`Database connection failed: ${error.message}`, 'error');
+        renderErrorState('Unable to connect to variant database');
+    }
+}
+
+async function updateVariantRecord(variantId, field, value) {
+    try {
+        const response = await fetch(
+            `${CONFIG.SUPABASE.URL}/rest/v1/variants?id=eq.${variantId}`,
+            {
+                method: 'PATCH',
+                headers: {
+                    'apikey': CONFIG.SUPABASE.KEY,
+                    'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    [field]: value,
+                    updated_at: new Date().toISOString()
+                })
+            }
+        );
+        
+        if (!response.ok) throw new Error(`Update failed: ${response.status}`);
+        return true;
+        
+    } catch (error) {
+        console.error('❌ Database update failed:', error);
+        throw error;
+    }
+}
+
+// ======================================================================
+// 5. 🔍 FILTER ENGINE - SEARCH, VIEWS, FILTERS
+// ======================================================================
+function applyFilterChain() {
+    let filtered = [...STATE.variants];
+    
+    // Stage 1: Apply text search
+    if (STATE.searchQuery) {
+        const query = STATE.searchQuery.toLowerCase();
+        filtered = filtered.filter(v => 
+            v.legacy_name?.toLowerCase().includes(query) ||
+            v.protein_name?.toLowerCase().includes(query) ||
+            v.cdna_name?.toLowerCase().includes(query)
+        );
+    }
+    
+    // Stage 2: Apply view mode filter (CRITICAL - This ensures variants appear!)
+    if (STATE.dataViewMode === 'complete') {
+        filtered = filtered.filter(v => 
+            v && (
+                v.data_status === 'complete_clinical' ||
+                v.data_status === 'complete_clinical' ||
+                (v.cftr_class && v.eti_prediction)
+            )
+        );
+    } else if (STATE.dataViewMode === 'clinical') {
+        filtered = filtered.filter(v => 
+            v && (
+                v.data_status === 'complete_clinical' || 
+                v.data_status === 'partial_clinical' ||
+                v.cftr_class || 
+                v.eti_prediction
+            )
+        );
+    }
+    // 'all' mode - no filter, ALL variants shown!
+    
+    // Stage 3: Apply missing data filter
+    if (STATE.activeFilter === 'missing') {
+        filtered = filtered.filter(v => hasMissingCriticalData(v));
+    }
+    
+    STATE.filteredVariants = filtered;
+    STATE.currentPage = 1;
+    
+    renderVariantCatalog();
+    refreshPagination();
+    synchronizeFilterUI();
+    refreshVariantCounter();
+    refreshViewStatistics();
+    synchronizeViewUI();
+}
+
+function hasMissingCriticalData(variant) {
+    const criticalFields = ['cftr_class', 'eti_prediction', 'class_confidence'];
+    return criticalFields.some(field => 
+        !variant[field] || 
+        variant[field] === 'null' || 
+        variant[field] === 'undefined'
+    );
+}
+
+function countMissingFields(variant, fields) {
+    return fields.filter(field => 
+        !variant[field] || 
+        variant[field] === 'null' || 
+        variant[field] === 'undefined'
+    ).length;
+}
+
+function initializeSearchEngine() {
+    const searchInput = document.getElementById('searchInput');
+    const searchClear = document.getElementById('searchClear');
+    
+    if (!searchInput) return;
+    
+    searchInput.addEventListener('input', () => {
+        clearTimeout(STATE.searchTimeout);
+        
+        if (searchClear) {
+            searchClear.classList.toggle('hidden', searchInput.value.length === 0);
+        }
+        
+        STATE.searchTimeout = setTimeout(() => {
+            STATE.searchQuery = searchInput.value;
+            applyFilterChain();
+            
+            if (STATE.searchQuery && STATE.filteredVariants.length) {
+                emitNotification(`Found ${STATE.filteredVariants.length} matching variants`, 'info', 1500);
+            }
+        }, CONFIG.UI.SEARCH_DELAY);
+    });
+    
+    if (searchClear) {
+        searchClear.addEventListener('click', () => {
+            searchInput.value = '';
+            searchClear.classList.add('hidden');
+            STATE.searchQuery = '';
+            applyFilterChain();
+            searchInput.focus();
+        });
+    }
+    
+    searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            searchInput.value = '';
+            STATE.searchQuery = '';
+            applyFilterChain();
+            if (searchClear) searchClear.classList.add('hidden');
+        }
+    });
+}
+
+// ======================================================================
+// 6. 🎨 RENDER ENGINE - UI COMPONENTS
+// ======================================================================
+function renderVariantCatalog() {
+    const container = document.getElementById('variantList');
+    if (!container) return;
+    
+    const startIndex = (STATE.currentPage - 1) * CONFIG.UI.ITEMS_PER_PAGE;
+    const endIndex = startIndex + CONFIG.UI.ITEMS_PER_PAGE;
+    const pageVariants = STATE.filteredVariants.slice(startIndex, endIndex);
+    
+    if (pageVariants.length === 0) {
+        container.innerHTML = `
+            <div class="p-12 text-center">
+                <div class="p-4 bg-gray-50 rounded-full inline-flex mb-4">
+                    <i class="fas fa-dna text-gray-400 text-2xl"></i>
+                </div>
+                <p class="text-gray-700 font-medium">No variants found</p>
+                <p class="text-xs text-gray-500 mt-2 max-w-xs mx-auto">
+                    ${STATE.searchQuery 
+                        ? 'Try adjusting your search terms' 
+                        : STATE.activeFilter === 'missing'
+                            ? 'All variants have complete data'
+                            : 'No variants match current filters'}
+                </p>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = pageVariants.map(variant => {
+        const isSelected = STATE.selectedVariant?.id === variant.id;
+        const missingCount = countMissingFields(variant, ['cftr_class', 'eti_prediction', 'class_confidence']);
+        const hasMissing = missingCount > 0;
+        
+        let classBadgeHTML = '';
+        if (variant.cftr_class || variant.class_subtype) {
+            const isExceptional = variant.class_subtype === 'exceptional';
+            const isTrueClassI = variant.class_subtype === 'true';
+            const classValue = variant.cftr_class || 'I';
+            
+            let badgeClass = 'helix-badge';
+            let badgeIcon = 'fa-dna';
+            let badgeText = '';
+            
+            if (isExceptional) {
+                badgeClass += ' helix-badge-exceptional';
+                badgeIcon = 'fa-bolt';
+                badgeText = 'Exceptional';
+            } else if (isTrueClassI) {
+                badgeClass += ' helix-badge-true';
+                badgeIcon = 'fa-dna';
+                badgeText = 'True Class I';
+            } else {
+                badgeClass += ` helix-badge-class-${classValue.toLowerCase()}`;
+                badgeText = `Class ${classValue}`;
+            }
+            
+            classBadgeHTML = `
+                <span class="${badgeClass}">
+                    <i class="fas ${badgeIcon}"></i>
+                    ${badgeText}
+                </span>
+            `;
+        }
+        
+        return `
+            <div class="variant-cell ${isSelected ? 'selected' : ''}" 
+                 onclick="selectVariant('${variant.legacy_name}')">
+                <div class="flex justify-between items-start mb-2">
+                    <div class="flex-1">
+                        <h4 class="variant-name">${escapeHTML(variant.legacy_name)}</h4>
+                        ${variant.protein_name ? `
+                            <div class="variant-subtitle">${escapeHTML(variant.protein_name)}</div>
+                        ` : ''}
+                    </div>
+                    ${classBadgeHTML}
+                </div>
+                
+                <div class="flex justify-between items-center text-xs text-gray-500">
+                    <span>${variant.final_determination || 'Clinical impact not specified'}</span>
+                    ${hasMissing ? `
+                        <span class="missing-count-badge" title="${missingCount} missing data fields">
+                            ${missingCount}
+                        </span>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function renderVariantDetails(variant) {
+    if (!variant) return;
+    
+    // Unhide containers
+    const header = document.getElementById('variantHeader');
+    const content = document.getElementById('variantContent');
+    const emptyState = document.getElementById('emptyState');
+    
+    if (header) header.classList.remove('hidden');
+    if (content) content.classList.remove('hidden');
+    if (emptyState) emptyState.classList.add('hidden');
+    
+    // Calculate state
+    const isExceptional = variant.class_subtype === 'exceptional';
+    const isTrueClassI = variant.class_subtype === 'true';
+    const isResponsive = variant.eti_prediction === 'responsive';
+    const missingCount = countMissingFields(variant, [
+        'cftr_class', 'eti_prediction', 'class_confidence', 'eti_evidence_level'
+    ]);
+    
+    // ========== CLASSIFICATION DISPLAY ==========
+    let displayClass = variant.cftr_class || (isExceptional || isTrueClassI ? 'I' : '-');
+    let classificationType = 'Unknown Classification';
+    let classificationSubtype = '';
+    let classColor = 'var(--helix-dna)';
+    
+    if (variant.cftr_class || isExceptional || isTrueClassI) {
+        const classValue = variant.cftr_class || 'I';
+        
+        const colorMap = {
+            'I': 'var(--helix-mutation)',
+            'II': 'var(--helix-warning)',
+            'III': 'var(--helix-therapy)',
+            'IV': 'var(--helix-dna)',
+            'V': 'var(--helix-evidence)'
+        };
+        classColor = colorMap[classValue] || 'var(--helix-dna)';
+        
+        if (isExceptional) {
+            classificationType = 'Exceptional Case';
+            classificationSubtype = 'Modified Class I - Special consideration for ETI';
+            classColor = 'var(--helix-warning)';
+        } else if (isTrueClassI) {
+            classificationType = 'True Class I';
+            classificationSubtype = 'Standard nonsense/frameshift mutation';
+            classColor = 'var(--helix-mutation)';
+        } else {
+            classificationType = `Class ${variant.cftr_class}`;
+            classificationSubtype = variant.class_subtype 
+                ? `${variant.class_subtype.charAt(0).toUpperCase() + variant.class_subtype.slice(1)} subtype`
+                : 'Standard classification';
+        }
+    }
+    
+    safeSetText('variantName', variant.legacy_name);
+    safeSetText('variantClass', displayClass);
+    
+    const classEl = document.getElementById('variantClass');
+    if (classEl) classEl.style.color = classColor;
+    
+    safeSetText('classificationType', classificationType);
+    safeSetText('classificationSubtype', classificationSubtype);
+    
+    // ========== DATA COMPLETENESS BADGE ==========
+    const completenessEl = document.getElementById('dataCompleteness');
+    if (completenessEl) {
+        completenessEl.innerHTML = missingCount > 0 
+            ? `<span class="px-2 py-1 bg-helix-warning text-white text-xs rounded-full font-medium">
+                ${missingCount} missing ${missingCount === 1 ? 'field' : 'fields'}
+               </span>`
+            : `<span class="px-2 py-1 bg-helix-therapy text-white text-xs rounded-full font-medium">
+                Complete clinical dataset
+               </span>`;
+    }
+    
+    // ========== BADGES ==========
+    const badges = [];
+    
+    if (displayClass !== '-') {
+        if (isExceptional) {
+            badges.push(`
+                <span class="helix-badge helix-badge-exceptional">
+                    <i class="fas fa-bolt"></i>
+                    Exceptional Case
+                </span>
+            `);
+        } else if (isTrueClassI) {
+            badges.push(`
+                <span class="helix-badge helix-badge-true">
+                    <i class="fas fa-dna"></i>
+                    True Class I
+                </span>
+            `);
+        } else if (variant.cftr_class) {
+            badges.push(`
+                <span class="helix-badge helix-badge-class-${variant.cftr_class.toLowerCase()}">
+                    <i class="fas fa-dna"></i>
+                    Class ${variant.cftr_class}
+                </span>
+            `);
+        }
+    }
+    
+    if (variant.final_determination === 'CF-causing') {
+        badges.push(`
+            <span class="helix-badge" style="background: #fef2f2; color: var(--helix-mutation); border-color: #fecaca;">
+                <i class="fas fa-exclamation-triangle"></i>
+                CF-causing
+            </span>
+        `);
+    }
+    
+    if (variant.eti_prediction) {
+        const isResp = variant.eti_prediction === 'responsive';
+        badges.push(`
+            <span class="helix-badge" style="background: ${isResp ? '#f0fdf4' : '#fef2f2'}; 
+                                            color: ${isResp ? 'var(--helix-therapy)' : 'var(--helix-mutation)'}; 
+                                            border-color: ${isResp ? '#bbf7d0' : '#fecaca'};">
+                <i class="fas ${isResp ? 'fa-check' : 'fa-times'}"></i>
+                ETI ${variant.eti_prediction}
+            </span>
+        `);
+    }
+    
+    const badgeContainer = document.getElementById('variantBadges');
+    if (badgeContainer) badgeContainer.innerHTML = badges.join('');
+    
+    // ========== DATA SECTIONS ==========
+    renderNomenclatureSection(variant);
+    renderClassificationSection(variant);
+    renderTherapySection(variant);
+    renderEvidenceSection(variant);
+}
+
+function renderNomenclatureSection(variant) {
+    const grid = document.getElementById('nomenclatureGrid');
+    if (!grid) return;
+    
+    grid.innerHTML = [
+        createDataPoint('Legacy Name', variant.legacy_name, 'legacy_name', variant, 'nomenclature'),
+        createDataPoint('Protein Notation', variant.protein_name, 'protein_name', variant, 'nomenclature'),
+        createDataPoint('cDNA Notation', variant.cdna_name, 'cdna_name', variant, 'nomenclature')
+    ].join('');
+}
+
+function renderClassificationSection(variant) {
+    const container = document.getElementById('clinicalImpact');
+    if (!container) return;
+    
+    container.innerHTML = [
+        createDataPoint('CFTR Class', variant.cftr_class, 'cftr_class', variant, 'classification'),
+        createDataPoint('Subtype', variant.class_subtype, 'class_subtype', variant, 'classification'),
+        createDataPoint('Clinical Impact', variant.final_determination, 'final_determination', variant, 'classification'),
+        createDataPoint('Confidence', variant.class_confidence, 'class_confidence', variant, 'classification')
+    ].join('');
+}
+
+function renderTherapySection(variant) {
+    const container = document.getElementById('therapeuticPrediction');
+    if (!container) return;
+    
+    container.innerHTML = [
+        createDataPoint('ETI Response', variant.eti_prediction, 'eti_prediction', variant, 'therapy'),
+        createDataPoint('Recommendation', variant.eti_recommendation, 'eti_recommendation', variant, 'therapy'),
+        createDataPoint('Responsive', variant.therapy_responsive !== null 
+            ? (variant.therapy_responsive ? 'Yes' : 'No') 
+            : null, 'therapy_responsive', variant, 'therapy')
+    ].join('');
+}
+
+function renderEvidenceSection(variant) {
+    const container = document.getElementById('evidenceQuality');
+    if (!container) return;
+    
+    container.innerHTML = [
+        createDataPoint('Evidence Level', variant.eti_evidence_level, 'eti_evidence_level', variant, 'evidence'),
+        createDataPoint('Last Update', variant.last_evidence_update 
+            ? new Date(variant.last_evidence_update).toLocaleDateString() 
+            : null, 'last_evidence_update', variant, 'evidence'),
+        createDataPoint('Data Status', variant.changed_prev, 'changed_prev', variant, 'evidence')
+    ].join('');
+    
+    // Evidence chain
+    const chainContainer = document.getElementById('evidenceChain');
+    if (chainContainer && variant.source_summary) {
+        const parts = variant.source_summary.split('_');
+        chainContainer.innerHTML = parts.map((part, i) => `
+            <span class="evidence-step">${escapeHTML(part)}</span>
+            ${i < parts.length - 1 ? '<i class="fas fa-arrow-right evidence-arrow"></i>' : ''}
+        `).join('');
+    }
+}
+
+function createDataPoint(label, value, field, variant, section) {
+    const isMissing = !value || value === 'null' || value === 'undefined';
+    const displayValue = isMissing ? 'Not specified' : escapeHTML(String(value));
+    
+    return `
+        <div class="data-point ${isMissing ? 'missing' : ''}">
+            <div class="annotation-trigger" onclick="showAnnotationModal('${variant.legacy_name}', '${field}', ${JSON.stringify(value || '')})">
+                <i class="fas ${isMissing ? 'fa-plus' : 'fa-pencil-alt'}"></i>
+            </div>
+            
+            <div class="data-label">
+                <i class="fas fa-tag text-xs"></i>
+                ${label}
+            </div>
+            <div class="data-value ${isMissing ? 'text-helix-warning' : ''}">
+                ${displayValue}
+            </div>
+        </div>
+    `;
+}
+
+// ======================================================================
+// 7. 👁️ VIEW MANAGEMENT - TOGGLE SYSTEMS & DISPLAYS
+// ======================================================================
+function setDataView(mode) {
+    if (STATE.dataViewMode === mode) return;
+    
+    STATE.dataViewMode = mode;
+    synchronizeViewUI();
+    applyFilterChain(); // CRITICAL - This refreshes the variant list!
+    
+    const messages = {
+        'complete': `Showing complete clinical variants (${STATE.databaseStats.complete})`,
+        'clinical': `Showing clinical data variants (${STATE.databaseStats.clinical})`,
+        'all': `Showing ALL variants (${STATE.databaseStats.total})`
+    };
+    
+    emitNotification(messages[mode], 'info');
+    refreshViewDescription();
+}
+
+function synchronizeViewUI() {
     ['complete', 'clinical', 'all'].forEach(view => {
         const btn = document.getElementById(`${view}ViewBtn`);
         if (btn) btn.classList.toggle('active', STATE.dataViewMode === view);
     });
+    
     const badge = document.getElementById('viewBadge');
     if (badge) {
-        const badges = { complete: 'Complete', clinical: 'Clinical', all: 'All' };
-        badge.textContent = badges[STATE.dataViewMode];
+        const labels = { complete: 'Complete', clinical: 'Clinical', all: 'All' };
+        badge.textContent = labels[STATE.dataViewMode] || 'All';
+        
+        const colors = {
+            complete: 'bg-helix-protein',
+            clinical: 'bg-helix-dna',
+            all: 'bg-gray-600'
+        };
+        badge.className = `ml-2 px-2 py-0.5 ${colors[STATE.dataViewMode] || 'bg-gray-600'} text-white rounded-full text-xs font-medium`;
     }
 }
 
-window.setDataView = setDataView;
-window.updateViewToggleUI = updateViewToggleUI;
-    // ============================================
-    // COMPLETE INITIALIZATION
-    // ============================================
-    document.addEventListener('DOMContentLoaded', () => {
-        console.log('🚀 Initializing Δ Helix v' + CONFIG.VERSION);
-        initializeApp();
+function refreshViewDescription() {
+    const modeDisplay = {
+        'complete': 'Complete Clinical Data',
+        'clinical': 'Clinical Data (Complete + Partial)',
+        'all': 'All Variants'
+    };
+    
+    safeSetText('currentModeText', modeDisplay[STATE.dataViewMode] || 'All Variants');
+    safeSetText('currentCountText', `${STATE.filteredVariants.length.toLocaleString()} variants`);
+}
+
+function filterVariants(filter) {
+    STATE.activeFilter = filter;
+    applyFilterChain();
+}
+
+function synchronizeFilterUI() {
+    const filterMap = { 'all': 'filterAll', 'missing': 'filterMissing' };
+    
+    Object.entries(filterMap).forEach(([filterValue, elementId]) => {
+        const element = document.getElementById(elementId);
+        if (element) {
+            if (STATE.activeFilter === filterValue) {
+                element.style.borderColor = filterValue === 'missing' ? 'var(--helix-warning)' : 'var(--helix-protein)';
+                element.style.color = filterValue === 'missing' ? 'var(--helix-warning)' : 'var(--helix-protein)';
+                element.style.fontWeight = '600';
+            } else {
+                element.style.borderColor = '';
+                element.style.color = '';
+                element.style.fontWeight = '';
+            }
+        }
     });
-
-    async function initializeApp() {
-        try {
-            ensureUIElements();
-            showLoadingState('Initializing Δ Helix...');
-            
-            await Promise.all([
-                updateDatabaseStats(),
-                loadVariants()
-            ]);
-            
-            setupEventListeners();
-            setupSearch();
-            updateViewToggleUI();
-            
-            STATE.initialized = true;
-            console.log('✅ Δ Helix initialized successfully!');
-            showNotification('Δ Helix initialized successfully!', 'success');
-            
-        } catch (error) {
-            console.error('❌ Initialization error:', error);
-            showNotification('Failed to initialize application', 'error');
-        }
-    }
-
-    function ensureUIElements() {
-        const required = ['statTotal', 'statClassI', 'statExceptional', 'statResponsive',
-                         'completeCount', 'clinicalCount', 'allCount', 'databaseTotal'];
-        required.forEach(id => {
-            if (!document.getElementById(id)) console.warn(`⚠️ Element #${id} not found`);
-        });
-    }
-
-    // ============================================
-    // DATABASE STATS
-    // ============================================
-    async function updateDatabaseStats() {
-        try {
-            console.log('📊 Fetching database statistics...');
-            
-            const [allResp, completeResp, clinicalResp, classIResp, exceptionalResp, responsiveResp] = await Promise.all([
-                fetch(`${CONFIG.SUPABASE_URL}/rest/v1/variants?select=count`, {
-                    headers: { 'apikey': CONFIG.SUPABASE_KEY, 'Authorization': `Bearer ${CONFIG.SUPABASE_KEY}` }
-                }),
-                fetch(`${CONFIG.SUPABASE_URL}/rest/v1/variants?cftr_class=not.is.null&eti_prediction=not.is.null&class_confidence=not.is.null&select=count`, {
-                    headers: { 'apikey': CONFIG.SUPABASE_KEY, 'Authorization': `Bearer ${CONFIG.SUPABASE_KEY}` }
-                }),
-                fetch(`${CONFIG.SUPABASE_URL}/rest/v1/variants?or=(cftr_class.not.is.null,eti_prediction.not.is.null)&select=count`, {
-                    headers: { 'apikey': CONFIG.SUPABASE_KEY, 'Authorization': `Bearer ${CONFIG.SUPABASE_KEY}` }
-                }),
-                fetch(`${CONFIG.SUPABASE_URL}/rest/v1/variants?cftr_class=eq.I&select=count`, {
-                    headers: { 'apikey': CONFIG.SUPABASE_KEY, 'Authorization': `Bearer ${CONFIG.SUPABASE_KEY}` }
-                }),
-                fetch(`${CONFIG.SUPABASE_URL}/rest/v1/variants?class_subtype=eq.exceptional&select=count`, {
-                    headers: { 'apikey': CONFIG.SUPABASE_KEY, 'Authorization': `Bearer ${CONFIG.SUPABASE_KEY}` }
-                }),
-                fetch(`${CONFIG.SUPABASE_URL}/rest/v1/variants?eti_prediction=eq.responsive&select=count`, {
-                    headers: { 'apikey': CONFIG.SUPABASE_KEY, 'Authorization': `Bearer ${CONFIG.SUPABASE_KEY}` }
-                })
-            ]);
-
-            const [allData, completeData, clinicalData, classIData, exceptionalData, responsiveData] = await Promise.all([
-                allResp.json(), completeResp.json(), clinicalResp.json(), 
-                classIResp.json(), exceptionalResp.json(), responsiveResp.json()
-            ]);
-
-            STATE.databaseStats = {
-                total: allData[0]?.count || 2102,
-                complete: completeData[0]?.count || 1002,
-                clinical: clinicalData[0]?.count || 1854,
-                classI: classIData[0]?.count || 979,
-                exceptional: exceptionalData[0]?.count || 21,
-                responsive: responsiveData[0]?.count || 50
-            };
-
-            updateDatabaseStatsUI();
-            
-        } catch (error) {
-            console.error('❌ Error fetching database stats:', error);
-            updateDatabaseStatsUI();
-        }
-    }
-
-    function updateDatabaseStatsUI() {
-        safeUpdateText('completeCount', STATE.databaseStats.complete.toLocaleString());
-        safeUpdateText('clinicalCount', STATE.databaseStats.clinical.toLocaleString());
-        safeUpdateText('allCount', STATE.databaseStats.total.toLocaleString());
-        safeUpdateText('databaseTotal', STATE.databaseStats.total.toLocaleString());
-    }
-
-    // ============================================
-    // VARIANT LOADING
-    // ============================================
-    async function loadVariants() {
-        try {
-            showLoadingState('Loading variants...');
-            
-            const url = `${CONFIG.SUPABASE_URL}/rest/v1/clinical_variants?select=*&order=legacy_name.asc`;
-            
-            const response = await fetch(url, {
-                headers: {
-                    'apikey': CONFIG.SUPABASE_KEY,
-                    'Authorization': `Bearer ${CONFIG.SUPABASE_KEY}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-            
-            if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            
-            STATE.variants = await response.json();
-            console.log(`✅ Loaded ${STATE.variants.length} variants`);
-            
-            filterAndRenderVariants();
-            updateDashboardStats();
-            updateViewDescription();
-            
-        } catch (error) {
-            console.error('❌ Load error:', error);
-            showNotification(`Failed to load variants: ${error.message}`, 'error');
-            showErrorState(error.message);
-        }
-    }
-
-    // ============================================
-    // FILTERING AND RENDERING
-    // ============================================
-    function filterAndRenderVariants() {
-        let filtered = STATE.variants;
-        
-        // Apply search filter
-        if (STATE.searchQuery) {
-            filtered = filtered.filter(v => 
-                v.legacy_name?.toLowerCase().includes(STATE.searchQuery.toLowerCase()) ||
-                v.protein_name?.toLowerCase().includes(STATE.searchQuery) ||
-                v.cdna_name?.toLowerCase().includes(STATE.searchQuery)
-            );
-        }
-        
-        // Apply view mode filter
-// FIXED FILTER - Case insensitive and handles null/undefined
-if (STATE.dataViewMode === 'complete') {
-    filtered = filtered.filter(v => 
-        v && (v.data_status === 'complete_clinical' || 
-              v.data_status === 'complete_clinical' ||
-              (v.cftr_class && v.eti_prediction))  // Fallback for variants without data_status
-    );
-} else if (STATE.dataViewMode === 'clinical') {
-    filtered = filtered.filter(v => 
-        v && (v.data_status === 'complete_clinical' || 
-              v.data_status === 'partial_clinical' ||
-              v.data_status === 'complete_clinical' ||
-              v.cftr_class || v.eti_prediction)  // Fallback
-    );
 }
-        
-        // Apply type filter
-        if (STATE.activeFilter === 'missing') {
-            filtered = filtered.filter(v => hasMissingData(v));
-        }
-        
-        STATE.filteredVariants = filtered;
-        STATE.currentPage = 1;
-        renderVariantList();
-        updatePagination();
-        updateFilterButtons();
-        updateVariantCount();
-        updateCurrentViewStats();
-        updateViewToggleUI();
-    }
 
-    // ============================================
-    // VARIANT LIST RENDERING
-    // ============================================
-    function renderVariantList() {
-        const list = document.getElementById('variantList');
-        if (!list) return;
-        
-        const startIdx = (STATE.currentPage - 1) * CONFIG.ITEMS_PER_PAGE;
-        const endIdx = startIdx + CONFIG.ITEMS_PER_PAGE;
-        const pageVariants = STATE.filteredVariants.slice(startIdx, endIdx);
-        
-        if (pageVariants.length === 0) {
-            list.innerHTML = `
-                <div class="p-8 text-center">
-                    <i class="fas fa-search text-gray-300 text-2xl mb-3"></i>
-                    <p class="text-gray-600">No variants found</p>
-                    ${STATE.searchQuery ? '<p class="text-xs text-gray-500 mt-1">Try a different search term</p>' : ''}
-                </div>
-            `;
-            return;
-        }
-        
-        list.innerHTML = pageVariants.map(variant => {
-            const isSelected = STATE.selectedVariant?.id === variant.id;
-            const missingCount = countMissingInSection(variant, ['cftr_class', 'eti_prediction', 'class_confidence']);
-            const hasMissing = missingCount > 0;
-            
-            let classBadge = '';
-            if (variant.cftr_class) {
-                const badgeClass = variant.class_subtype === 'exceptional' ? 'helix-badge-exceptional' :
-                                 variant.class_subtype === 'true' ? 'helix-badge-true' :
-                                 `helix-badge-class-${variant.cftr_class.toLowerCase()}`;
-                
-                const badgeText = variant.class_subtype === 'exceptional' ? 'Exceptional' :
-                                variant.class_subtype === 'true' ? 'True Class I' :
-                                `Class ${variant.cftr_class}`;
-                
-                classBadge = `
-                    <span class="helix-badge ${badgeClass}">
-                        <i class="fas ${variant.class_subtype === 'exceptional' ? 'fa-bolt' : 'fa-dna'}"></i>
-                        ${badgeText}
-                    </span>
-                `;
-            }
-            
-            return `
-                <div class="variant-cell ${isSelected ? 'selected' : ''}" 
-                     onclick="selectVariant('${variant.legacy_name}')">
-                    <div class="flex justify-between items-start mb-2">
-                        <div class="flex-1">
-                            <h4 class="variant-name">${variant.legacy_name}</h4>
-                            ${variant.protein_name ? `
-                                <div class="variant-subtitle">${variant.protein_name}</div>
-                            ` : ''}
-                        </div>
-                        ${classBadge}
-                    </div>
-                    
-                    <div class="flex justify-between items-center text-xs text-gray-500">
-                        <span>${variant.final_determination || 'Clinical impact unknown'}</span>
-                        ${hasMissing ? `
-                            <span class="missing-count-badge" title="${missingCount} missing data points">
-                                ${missingCount}
-                            </span>
-                        ` : ''}
-                    </div>
-                </div>
-            `;
-        }).join('');
+// ======================================================================
+// 8. 📝 ANNOTATION SYSTEM - DATA ENRICHMENT WORKFLOW
+// ======================================================================
+function showAnnotationModal(variantName, field, currentValue) {
+    const variant = STATE.variants.find(v => v.legacy_name === variantName);
+    if (!variant) return;
+    
+    STATE.annotationContext = { variant, field, currentValue };
+    
+    const fieldLabels = {
+        'legacy_name': 'Legacy Name',
+        'protein_name': 'Protein Notation',
+        'cdna_name': 'cDNA Notation',
+        'final_determination': 'Clinical Impact',
+        'cftr_class': 'CFTR Class',
+        'class_subtype': 'Classification Subtype',
+        'class_confidence': 'Confidence Level',
+        'eti_prediction': 'ETI Response',
+        'eti_recommendation': 'Therapy Recommendation',
+        'therapy_responsive': 'Therapy Responsive',
+        'eti_evidence_level': 'Evidence Level',
+        'last_evidence_update': 'Last Evidence Update',
+        'changed_prev': 'Data Status'
+    };
+    
+    safeSetText('annotationTitle', `Annotate ${variantName}`);
+    safeSetText('annotationField', fieldLabels[field] || field.replace(/_/g, ' '));
+    
+    // Generate appropriate input field
+    let inputHTML = '';
+    
+    if (field === 'cftr_class') {
+        inputHTML = `
+            <select id="annotationValue" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-helix-protein focus:border-helix-protein">
+                <option value="">Select Class</option>
+                <option value="I" ${currentValue === 'I' ? 'selected' : ''}>Class I</option>
+                <option value="II" ${currentValue === 'II' ? 'selected' : ''}>Class II</option>
+                <option value="III" ${currentValue === 'III' ? 'selected' : ''}>Class III</option>
+                <option value="IV" ${currentValue === 'IV' ? 'selected' : ''}>Class IV</option>
+                <option value="V" ${currentValue === 'V' ? 'selected' : ''}>Class V</option>
+            </select>
+        `;
+    } else if (field === 'class_subtype') {
+        inputHTML = `
+            <select id="annotationValue" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-helix-protein focus:border-helix-protein">
+                <option value="">Select Subtype</option>
+                <option value="standard" ${currentValue === 'standard' ? 'selected' : ''}>Standard</option>
+                <option value="exceptional" ${currentValue === 'exceptional' ? 'selected' : ''}>Exceptional Case</option>
+                <option value="true" ${currentValue === 'true' ? 'selected' : ''}>True Class I</option>
+                <option value="complex" ${currentValue === 'complex' ? 'selected' : ''}>Complex</option>
+                <option value="variable" ${currentValue === 'variable' ? 'selected' : ''}>Variable</option>
+            </select>
+        `;
+    } else if (field === 'eti_prediction') {
+        inputHTML = `
+            <select id="annotationValue" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-helix-protein focus:border-helix-protein">
+                <option value="">Select Response</option>
+                <option value="responsive" ${currentValue === 'responsive' ? 'selected' : ''}>Responsive</option>
+                <option value="non_responsive" ${currentValue === 'non_responsive' ? 'selected' : ''}>Non-responsive</option>
+                <option value="unknown" ${currentValue === 'unknown' ? 'selected' : ''}>Unknown</option>
+            </select>
+        `;
+    } else {
+        inputHTML = `
+            <textarea id="annotationValue" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-helix-protein focus:border-helix-protein" rows="3">${escapeHTML(currentValue || '')}</textarea>
+        `;
     }
-
-    // ============================================
-    // VARIANT DETAIL RENDERING
-    // ============================================
-    function renderVariantDetail(variant) {
-        const variantHeader = document.getElementById('variantHeader');
-        const variantContent = document.getElementById('variantContent');
-        const emptyState = document.getElementById('emptyState');
-        
-        if (!variantHeader || !variantContent || !emptyState) return;
-        
-        variantHeader.classList.remove('hidden');
-        variantContent.classList.remove('hidden');
-        emptyState.classList.add('hidden');
-        
-        const isExceptional = variant.class_subtype === 'exceptional';
-        const isTrueClassI = variant.class_subtype === 'true';
-        const isResponsive = variant.eti_prediction === 'responsive';
-        const missingCount = countMissingInSection(variant, ['cftr_class', 'eti_prediction', 'class_confidence', 'eti_evidence_level']);
-        
-        // Classification Display
-        let displayClass = '-';
-        let classificationType = 'Unknown Classification';
-        let classificationSubtype = '';
-        let classColor = 'text-gray-600';
-        
-        if (variant.cftr_class) {
-            displayClass = variant.cftr_class;
-            switch(variant.cftr_class) {
-                case 'I': classColor = 'var(--helix-mutation)'; break;
-                case 'II': classColor = 'var(--helix-warning)'; break;
-                case 'III': classColor = 'var(--helix-therapy)'; break;
-                case 'IV': classColor = 'var(--helix-dna)'; break;
-                case 'V': classColor = 'var(--helix-evidence)'; break;
-                default: classColor = 'var(--helix-dna)';
-            }
-            
-            if (isExceptional) {
-                classificationType = 'Exceptional Case';
-                classificationSubtype = 'Modified Class I behavior with special characteristics';
-                classColor = 'var(--helix-warning)';
-            } else if (isTrueClassI) {
-                classificationType = 'True Class I';
-                classificationSubtype = 'Standard nonsense or frameshift mutation';
-                classColor = 'var(--helix-mutation)';
-            } else {
-                classificationType = `Class ${variant.cftr_class}`;
-                classificationSubtype = variant.class_subtype ? 
-                    variant.class_subtype.charAt(0).toUpperCase() + variant.class_subtype.slice(1) + ' classification' : 
-                    'Standard classification';
-            }
-        } else if (isExceptional || isTrueClassI) {
-            displayClass = 'I';
-            if (isExceptional) {
-                classificationType = 'Exceptional Case';
-                classificationSubtype = 'Modified Class I behavior';
-                classColor = 'var(--helix-warning)';
-            } else {
-                classificationType = 'True Class I';
-                classificationSubtype = 'Standard classification';
-                classColor = 'var(--helix-mutation)';
-            }
-        }
-        
-        safeUpdateText('variantName', variant.legacy_name);
-        safeUpdateText('variantClass', displayClass);
-        
-        const variantClassElement = document.getElementById('variantClass');
-        if (variantClassElement) {
-            variantClassElement.style.color = classColor;
-        }
-        
-        safeUpdateText('classificationType', classificationType);
-        safeUpdateText('classificationSubtype', classificationSubtype);
-        
-        // Data completeness badge
-        const dataCompleteness = document.getElementById('dataCompleteness');
-        if (dataCompleteness) {
-            dataCompleteness.innerHTML = missingCount > 0 ? `
-                <span class="px-2 py-1 bg-helix-warning text-white text-xs rounded-full font-medium">
-                    ${missingCount} missing data points
-                </span>
-            ` : `
-                <span class="px-2 py-1 bg-helix-therapy text-white text-xs rounded-full font-medium">
-                    Complete clinical data
-                </span>
-            `;
-        }
-        
-        // Create badges
-        const badges = [];
-        if (displayClass !== '-') {
-            if (isExceptional) {
-                badges.push(`
-                    <span class="helix-badge helix-badge-exceptional">
-                        <i class="fas fa-bolt"></i>
-                        Exceptional Case
-                    </span>
-                `);
-            } else if (isTrueClassI) {
-                badges.push(`
-                    <span class="helix-badge helix-badge-true">
-                        <i class="fas fa-dna"></i>
-                        True Class I
-                    </span>
-                `);
-            } else {
-                badges.push(`
-                    <span class="helix-badge helix-badge-class-${variant.cftr_class.toLowerCase()}">
-                        <i class="fas fa-dna"></i>
-                        Class ${variant.cftr_class}
-                    </span>
-                `);
-            }
-        }
-        
-        if (variant.final_determination === 'CF-causing') {
-            badges.push(`
-                <span class="helix-badge" style="background: #fef2f2; color: var(--helix-mutation); border-color: #fecaca;">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    CF-causing
-                </span>
-            `);
-        }
-        
-        if (variant.eti_prediction) {
-            badges.push(`
-                <span class="helix-badge ${isResponsive ? 'helix-badge-responsive' : ''}" 
-                      style="${!isResponsive ? 'background: #fef2f2; color: var(--helix-mutation); border-color: #fecaca;' : 'background: #f0fdf4; color: var(--helix-therapy); border-color: #bbf7d0;'}">
-                    <i class="fas ${isResponsive ? 'fa-check' : 'fa-times'}"></i>
-                    ETI ${variant.eti_prediction}
-                </span>
-            `);
-        }
-        
-        const variantBadges = document.getElementById('variantBadges');
-        if (variantBadges) {
-            variantBadges.innerHTML = badges.join('');
-        }
-        
-        // Nomenclature Section
-        const nomenclaturePoints = [
-            createAnnotatableDataPoint('Legacy Name', variant.legacy_name, 'legacy_name', variant, 'nomenclature'),
-            createAnnotatableDataPoint('Protein Notation', variant.protein_name, 'protein_name', variant, 'nomenclature'),
-            createAnnotatableDataPoint('cDNA Notation', variant.cdna_name, 'cdna_name', variant, 'nomenclature')
-        ];
-        
-        const nomenclatureGrid = document.getElementById('nomenclatureGrid');
-        if (nomenclatureGrid) {
-            nomenclatureGrid.innerHTML = nomenclaturePoints.join('');
-        }
-        
-        // Clinical Classification Section
-        const classificationPoints = [
-            createAnnotatableDataPoint('CFTR Class', variant.cftr_class, 'cftr_class', variant, 'classification'),
-            createAnnotatableDataPoint('Classification Subtype', variant.class_subtype, 'class_subtype', variant, 'classification'),
-            createAnnotatableDataPoint('Clinical Impact', variant.final_determination, 'final_determination', variant, 'classification'),
-            createAnnotatableDataPoint('Confidence Level', variant.class_confidence, 'class_confidence', variant, 'classification')
-        ];
-        
-        const clinicalImpact = document.getElementById('clinicalImpact');
-        if (clinicalImpact) {
-            clinicalImpact.innerHTML = classificationPoints.join('');
-        }
-        
-        // Therapeutic Prediction Section
-        const therapyPoints = [
-            createAnnotatableDataPoint('ETI Response', variant.eti_prediction, 'eti_prediction', variant, 'therapy'),
-            createAnnotatableDataPoint('Therapy Recommendation', variant.eti_recommendation, 'eti_recommendation', variant, 'therapy'),
-            createAnnotatableDataPoint('Therapy Responsive', variant.therapy_responsive !== null ? (variant.therapy_responsive ? 'Yes' : 'No') : null, 'therapy_responsive', variant, 'therapy')
-        ];
-        
-        const therapeuticPrediction = document.getElementById('therapeuticPrediction');
-        if (therapeuticPrediction) {
-            therapeuticPrediction.innerHTML = therapyPoints.join('');
-        }
-        
-        // Evidence Quality Section
-        const evidencePoints = [
-            createAnnotatableDataPoint('Evidence Level', variant.eti_evidence_level, 'eti_evidence_level', variant, 'evidence'),
-            createAnnotatableDataPoint('Last Evidence Update', variant.last_evidence_update ? new Date(variant.last_evidence_update).toLocaleDateString() : null, 'last_evidence_update', variant, 'evidence'),
-            createAnnotatableDataPoint('Data Status', variant.changed_prev, 'changed_prev', variant, 'evidence')
-        ];
-        
-        const evidenceQuality = document.getElementById('evidenceQuality');
-        if (evidenceQuality) {
-            evidenceQuality.innerHTML = evidencePoints.join('');
-        }
-        
-        // Evidence Chain
-        if (variant.source_summary) {
-            const evidenceChain = document.getElementById('evidenceChain');
-            if (evidenceChain) {
-                const parts = variant.source_summary.split('_');
-                evidenceChain.innerHTML = parts.map((part, i) => `
-                    <span class="evidence-step">${part}</span>
-                    ${i < parts.length - 1 ? '<i class="fas fa-arrow-right evidence-arrow"></i>' : ''}
-                `).join('');
-            }
-        }
-    }
-
-    function createAnnotatableDataPoint(label, value, field, variant, section) {
-        const isMissing = !value || value === 'null' || value === 'undefined';
-        
-        let displayValue = value;
-        if (isMissing) {
-            displayValue = 'Not specified';
-        }
-        
-        return `
-            <div class="data-point ${isMissing ? 'missing' : ''}">
-                <div class="annotation-trigger" onclick="showAnnotationModal('${variant.legacy_name}', '${field}', '${value || ''}')">
-                    <i class="fas ${isMissing ? 'fa-plus' : 'fa-pencil-alt'}"></i>
+    
+    const content = document.getElementById('annotationContent');
+    if (content) {
+        content.innerHTML = `
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Current Value:
+                </label>
+                <div class="p-3 bg-gray-50 rounded-lg border border-gray-200 text-sm">
+                    ${currentValue ? escapeHTML(currentValue) : '<span class="text-gray-400 italic">Not specified</span>'}
                 </div>
-                
-                <div class="data-label">
-                    <i class="fas fa-tag text-xs"></i>
-                    ${label}
-                </div>
-                <div class="data-value ${isMissing ? 'text-helix-warning' : ''}">
-                    ${displayValue}
-                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    New Value:
+                </label>
+                ${inputHTML}
             </div>
         `;
     }
+    
+    const modal = document.getElementById('annotationModal');
+    if (modal) modal.classList.remove('hidden');
+}
 
-    function countMissingInSection(variant, fields) {
-        return fields.filter(field => !variant[field] || variant[field] === 'null' || variant[field] === 'undefined').length;
-    }
-
-    function hasMissingData(variant) {
-        const criticalFields = ['cftr_class', 'eti_prediction', 'class_confidence'];
-        return criticalFields.some(field => !variant[field] || variant[field] === 'null' || variant[field] === 'undefined');
-    }
-
-    // ============================================
-    // ANNOTATION SYSTEM
-    // ============================================
-    function showAnnotationModal(variantName, field, currentValue) {
-        const variant = STATE.variants.find(v => v.legacy_name === variantName);
-        if (!variant) return;
+async function saveAnnotation() {
+    if (!STATE.annotationContext) return;
+    
+    const { variant, field } = STATE.annotationContext;
+    const input = document.getElementById('annotationValue');
+    
+    if (!input) return;
+    
+    const newValue = input.value;
+    
+    try {
+        emitNotification('Saving annotation...', 'info', 2000);
         
-        STATE.annotationContext = { variant, field, currentValue };
+        await updateVariantRecord(variant.id, field, newValue);
         
-        const fieldNames = {
-            'legacy_name': 'Legacy Name',
-            'protein_name': 'Protein Notation',
-            'cdna_name': 'cDNA Notation',
-            'final_determination': 'Clinical Impact',
-            'cftr_class': 'CFTR Class',
-            'class_subtype': 'Classification Subtype',
-            'class_confidence': 'Confidence Level',
-            'eti_prediction': 'ETI Response',
-            'eti_recommendation': 'Therapy Recommendation',
-            'therapy_responsive': 'Therapy Responsive',
-            'eti_evidence_level': 'Evidence Level',
-            'last_evidence_update': 'Last Evidence Update',
-            'changed_prev': 'Data Status'
-        };
-        
-        let options = '';
-        const fieldDisplay = fieldNames[field] || field.replace(/_/g, ' ');
-        
-        if (field === 'cftr_class') {
-            options = `
-                <select id="annotationValue" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-helix-protein focus:border-helix-protein">
-                    <option value="">Select Class</option>
-                    <option value="I" ${currentValue === 'I' ? 'selected' : ''}>Class I</option>
-                    <option value="II" ${currentValue === 'II' ? 'selected' : ''}>Class II</option>
-                    <option value="III" ${currentValue === 'III' ? 'selected' : ''}>Class III</option>
-                    <option value="IV" ${currentValue === 'IV' ? 'selected' : ''}>Class IV</option>
-                    <option value="V" ${currentValue === 'V' ? 'selected' : ''}>Class V</option>
-                </select>
-            `;
-        } else if (field === 'class_subtype') {
-            options = `
-                <select id="annotationValue" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-helix-protein focus:border-helix-protein">
-                    <option value="">Select Subtype</option>
-                    <option value="standard" ${currentValue === 'standard' ? 'selected' : ''}>Standard</option>
-                    <option value="exceptional" ${currentValue === 'exceptional' ? 'selected' : ''}>Exceptional Case</option>
-                    <option value="true" ${currentValue === 'true' ? 'selected' : ''}>True Class I</option>
-                    <option value="complex" ${currentValue === 'complex' ? 'selected' : ''}>Complex</option>
-                    <option value="variable" ${currentValue === 'variable' ? 'selected' : ''}>Variable</option>
-                </select>
-            `;
-        } else if (field === 'eti_prediction') {
-            options = `
-                <select id="annotationValue" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-helix-protein focus:border-helix-protein">
-                    <option value="">Select Response</option>
-                    <option value="responsive" ${currentValue === 'responsive' ? 'selected' : ''}>Responsive</option>
-                    <option value="non_responsive" ${currentValue === 'non_responsive' ? 'selected' : ''}>Non-responsive</option>
-                    <option value="unknown" ${currentValue === 'unknown' ? 'selected' : ''}>Unknown</option>
-                </select>
-            `;
-        } else {
-            options = `
-                <textarea id="annotationValue" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-helix-protein focus:border-helix-protein" rows="3">${currentValue || ''}</textarea>
-            `;
-        }
-        
-        safeUpdateText('annotationTitle', `Annotate ${variantName}`);
-        safeUpdateText('annotationField', fieldDisplay);
-        
-        const annotationContent = document.getElementById('annotationContent');
-        if (annotationContent) {
-            annotationContent.innerHTML = `
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Current Value:
-                    </label>
-                    <div class="p-3 bg-gray-50 rounded-lg">
-                        ${currentValue || '<span class="text-gray-400 italic">Not specified</span>'}
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                        New Value:
-                    </label>
-                    ${options}
-                </div>
-            `;
-        }
-        
-        const annotationModal = document.getElementById('annotationModal');
-        if (annotationModal) {
-            annotationModal.classList.remove('hidden');
-        }
-    }
-
-    async function saveAnnotation() {
-        if (!STATE.annotationContext) return;
-        
-        const { variant, field } = STATE.annotationContext;
-        const annotationValue = document.getElementById('annotationValue');
-        if (!annotationValue) return;
-        
-        const newValue = annotationValue.value;
-        
-        try {
-            const response = await fetch(
-                `${CONFIG.SUPABASE_URL}/rest/v1/variants?id=eq.${variant.id}`,
-                {
-                    method: 'PATCH',
-                    headers: {
-                        'apikey': CONFIG.SUPABASE_KEY,
-                        'Authorization': `Bearer ${CONFIG.SUPABASE_KEY}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        [field]: newValue,
-                        updated_at: new Date().toISOString()
-                    })
-                }
-            );
-            
-            if (!response.ok) throw new Error(`Update failed: ${response.status}`);
-            
-            // Update local state
-            STATE.variants = STATE.variants.map(v => 
-                v.id === variant.id ? {...v, [field]: newValue} : v
-            );
-            
-            if (STATE.selectedVariant?.id === variant.id) {
-                STATE.selectedVariant = {...STATE.selectedVariant, [field]: newValue};
-                renderVariantDetail(STATE.selectedVariant);
-            }
-            
-            closeAnnotationModal();
-            showNotification('Annotation saved successfully', 'success');
-            filterAndRenderVariants();
-            updateDashboardStats();
-            
-        } catch (error) {
-            console.error('Save error:', error);
-            showNotification('Failed to save annotation', 'error');
-        }
-    }
-
-    function closeAnnotationModal() {
-        const annotationModal = document.getElementById('annotationModal');
-        if (annotationModal) {
-            annotationModal.classList.add('hidden');
-        }
-        STATE.annotationContext = null;
-    }
-
-    // ============================================
-    // VIEW MANAGEMENT
-    // ============================================
-    function setDataView(mode) {
-        if (STATE.dataViewMode === mode) return;
-        
-        STATE.dataViewMode = mode;
-        updateViewToggleUI();
-        
-        const messages = {
-            'complete': `Switched to Complete Clinical view (${STATE.databaseStats.complete} variants)`,
-            'clinical': `Switched to Clinical Data view (${STATE.databaseStats.clinical} variants)`,
-            'all': `Switched to All Variants view (${STATE.databaseStats.total} variants)`
-        };
-        showNotification(messages[mode], 'info');
-        
-        filterAndRenderVariants();
-    }
-
-    function updateViewToggleUI() {
-        const buttons = ['complete', 'clinical', 'all'];
-        buttons.forEach(view => {
-            const btn = document.getElementById(`${view}ViewBtn`);
-            const badge = document.getElementById('viewBadge');
-            
-            if (btn) btn.classList.remove('active');
-            if (STATE.dataViewMode === view && btn) btn.classList.add('active');
-            
-            if (badge) {
-                const badges = {
-                    'complete': { text: 'Complete', color: 'bg-helix-protein' },
-                    'clinical': { text: 'Clinical', color: 'bg-helix-dna' },
-                    'all': { text: 'All', color: 'bg-gray-600' }
-                };
-                badge.textContent = badges[view].text;
-                badge.className = `ml-2 px-2 py-0.5 ${badges[view].color} text-white rounded-full text-xs font-medium`;
-            }
-        });
-    }
-
-    function updateViewDescription() {
-        const counts = {
-            'complete': STATE.variants.filter(v => v.data_status === 'complete_clinical').length,
-            'clinical': STATE.variants.filter(v => 
-                v.data_status === 'complete_clinical' || 
-                v.data_status === 'partial_clinical'
-            ).length,
-            'all': STATE.variants.length
-        };
-        
-        safeUpdateText('currentModeText', 
-            STATE.dataViewMode === 'complete' ? 'Complete Clinical Data' :
-            STATE.dataViewMode === 'clinical' ? 'Clinical Data (Complete + Partial)' :
-            'All Variants'
+        // Update local state
+        STATE.variants = STATE.variants.map(v => 
+            v.id === variant.id ? { ...v, [field]: newValue } : v
         );
-        safeUpdateText('currentCountText', `${STATE.filteredVariants.length.toLocaleString()} variants`);
-    }
-
-    // ============================================
-    // STATS MANAGEMENT
-    // ============================================
-    function updateDashboardStats() {
-        const currentVariants = STATE.filteredVariants;
-        const total = currentVariants.length;
-        const classICount = currentVariants.filter(v => v.cftr_class === 'I').length;
-        const exceptionalCount = currentVariants.filter(v => v.class_subtype === 'exceptional').length;
-        const responsiveCount = currentVariants.filter(v => v.eti_prediction === 'responsive').length;
         
-        safeUpdateText('statTotal', total.toLocaleString());
-        safeUpdateText('statClassI', classICount.toLocaleString());
-        safeUpdateText('statExceptional', exceptionalCount.toLocaleString());
-        safeUpdateText('statResponsive', responsiveCount.toLocaleString());
-        
-        const contextText = STATE.dataViewMode === 'complete' 
-            ? 'Complete clinical data only' 
-            : STATE.dataViewMode === 'clinical' 
-            ? 'Clinical data (complete + partial)' 
-            : 'All variants in database';
-        safeUpdateText('statContext', contextText);
-    }
-
-    function updateCurrentViewStats() {
-        updateDashboardStats();
-        safeUpdateText('variantCount', STATE.filteredVariants.length.toLocaleString());
-    }
-
-    // ============================================
-    // SEARCH SYSTEM
-    // ============================================
-    function setupSearch() {
-        const searchInput = document.getElementById('searchInput');
-        const searchClear = document.getElementById('searchClear');
-        
-        if (!searchInput) return;
-        
-        let timeout;
-        
-        searchInput.addEventListener('input', () => {
-            clearTimeout(timeout);
-            
-            if (searchClear) {
-                searchClear.classList.toggle('hidden', searchInput.value.length === 0);
-            }
-            
-            timeout = setTimeout(() => {
-                STATE.searchQuery = searchInput.value.toLowerCase();
-                filterAndRenderVariants();
-                
-                if (STATE.searchQuery && STATE.filteredVariants.length > 0) {
-                    showNotification(`Found ${STATE.filteredVariants.length} variants`, 'info', 1500);
-                }
-            }, 300);
-        });
-        
-        if (searchClear) {
-            searchClear.addEventListener('click', () => {
-                searchInput.value = '';
-                searchClear.classList.add('hidden');
-                STATE.searchQuery = '';
-                filterAndRenderVariants();
-                searchInput.focus();
-            });
+        if (STATE.selectedVariant?.id === variant.id) {
+            STATE.selectedVariant = { ...STATE.selectedVariant, [field]: newValue };
+            renderVariantDetails(STATE.selectedVariant);
         }
         
-        searchInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                searchInput.value = '';
-                STATE.searchQuery = '';
-                filterAndRenderVariants();
-                if (searchClear) searchClear.classList.add('hidden');
+        closeAnnotationModal();
+        emitNotification('Annotation saved successfully', 'success');
+        applyFilterChain(); // Refresh view with new data
+        updateAnalyticsDashboard();
+        
+    } catch (error) {
+        emitNotification(`Failed to save: ${error.message}`, 'error');
+    }
+}
+
+function closeAnnotationModal() {
+    const modal = document.getElementById('annotationModal');
+    if (modal) modal.classList.add('hidden');
+    STATE.annotationContext = null;
+}
+
+// ======================================================================
+// 9. 📈 CHART ENGINE - ANALYTICS VISUALIZATION
+// ======================================================================
+function showDashboard() {
+    const modal = document.getElementById('dashboardModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        renderAnalyticsCharts();
+    }
+}
+
+function closeDashboard() {
+    const modal = document.getElementById('dashboardModal');
+    if (modal) modal.classList.add('hidden');
+}
+
+function renderAnalyticsCharts() {
+    // Class distribution chart
+    const classCtx = document.getElementById('classChart');
+    if (classCtx && !STATE.charts.classChart) {
+        STATE.charts.classChart = new Chart(classCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Class I', 'Class II', 'Class III', 'Class IV', 'Class V'],
+                datasets: [{
+                    data: [
+                        STATE.databaseStats.classI,
+                        8, 12, 1, 8
+                    ],
+                    backgroundColor: [
+                        'var(--helix-mutation)',
+                        'var(--helix-warning)',
+                        'var(--helix-therapy)',
+                        'var(--helix-dna)',
+                        'var(--helix-evidence)'
+                    ],
+                    borderWidth: 2,
+                    borderColor: 'white'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            font: { family: 'Inter', size: 12 },
+                            padding: 15,
+                            usePointStyle: true,
+                            pointStyle: 'circle'
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'white',
+                        titleColor: '#1e293b',
+                        bodyColor: '#475569',
+                        borderColor: '#e2e8f0',
+                        borderWidth: 1,
+                        padding: 12,
+                        boxPadding: 6
+                    }
+                }
             }
         });
     }
-
-    function filterVariants(filter) {
-        STATE.activeFilter = filter;
-        filterAndRenderVariants();
+    
+    // ETI response chart
+    const responseCtx = document.getElementById('responseChart');
+    if (responseCtx && !STATE.charts.responseChart) {
+        STATE.charts.responseChart = new Chart(responseCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Responsive', 'Non-responsive', 'Unknown'],
+                datasets: [{
+                    label: 'ETI Response Prediction',
+                    data: [
+                        STATE.databaseStats.responsive,
+                        1804,
+                        248
+                    ],
+                    backgroundColor: [
+                        'var(--helix-therapy)',
+                        'var(--helix-mutation)',
+                        'var(--helix-warning)'
+                    ],
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: '#f1f5f9' },
+                        ticks: { font: { family: 'Inter', size: 11 } }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { font: { family: 'Inter', size: 11 } }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: 'white',
+                        titleColor: '#1e293b',
+                        bodyColor: '#475569',
+                        borderColor: '#e2e8f0',
+                        borderWidth: 1,
+                        padding: 12
+                    }
+                }
+            }
+        });
     }
+}
 
-    function quickSearch(variantName) {
-        const searchInput = document.getElementById('searchInput');
-        if (searchInput) searchInput.value = variantName;
-        STATE.searchQuery = variantName.toLowerCase();
-        filterAndRenderVariants();
+function updateAnalyticsDashboard() {
+    const currentVariants = STATE.filteredVariants;
+    
+    safeSetText('statTotal', currentVariants.length.toLocaleString());
+    safeSetText('statClassI', currentVariants.filter(v => v.cftr_class === 'I').length.toLocaleString());
+    safeSetText('statExceptional', currentVariants.filter(v => v.class_subtype === 'exceptional').length.toLocaleString());
+    safeSetText('statResponsive', currentVariants.filter(v => v.eti_prediction === 'responsive').length.toLocaleString());
+    
+    const contextMap = {
+        'complete': 'Complete clinical data only',
+        'clinical': 'Clinical data (complete + partial)',
+        'all': 'All variants in database'
+    };
+    safeSetText('statContext', contextMap[STATE.dataViewMode] || '');
+}
+
+function renderDatabaseStatistics() {
+    safeSetText('completeCount', STATE.databaseStats.complete.toLocaleString());
+    safeSetText('clinicalCount', STATE.databaseStats.clinical.toLocaleString());
+    safeSetText('allCount', STATE.databaseStats.total.toLocaleString());
+    safeSetText('databaseTotal', STATE.databaseStats.total.toLocaleString());
+}
+
+function refreshVariantCounter() {
+    safeSetText('variantCount', STATE.filteredVariants.length.toLocaleString());
+}
+
+function refreshViewStatistics() {
+    updateAnalyticsDashboard();
+}
+
+// ======================================================================
+// 10. 🧰 UTILITIES - HELPERS & NOTIFICATIONS
+// ======================================================================
+function selectVariant(variantName) {
+    const variant = STATE.variants.find(v => v.legacy_name === variantName);
+    if (!variant) {
+        emitNotification(`Variant ${variantName} not found`, 'warning');
+        return;
+    }
+    
+    STATE.selectedVariant = variant;
+    renderVariantDetails(variant);
+    renderVariantCatalog(); // Refresh list to show selected state
+}
+
+function quickSearch(variantName) {
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.value = variantName;
+        STATE.searchQuery = variantName;
+        applyFilterChain();
         
+        // Auto-select the variant
         setTimeout(() => {
             const variant = STATE.variants.find(v => v.legacy_name === variantName);
             if (variant) selectVariant(variantName);
         }, 100);
     }
+}
 
-    // ============================================
-    // PAGINATION
-    // ============================================
-    function updatePagination() {
-        const totalPages = Math.ceil(STATE.filteredVariants.length / CONFIG.ITEMS_PER_PAGE);
-        const pagination = document.getElementById('paginationControls');
-        
-        if (!pagination) return;
-        
-        if (totalPages > 1) {
-            pagination.style.display = 'flex';
-            safeUpdateText('currentPage', STATE.currentPage);
-            safeUpdateText('totalPages', totalPages);
-            
-            const prevBtn = document.getElementById('prevBtn');
-            const nextBtn = document.getElementById('nextBtn');
-            if (prevBtn) prevBtn.disabled = STATE.currentPage === 1;
-            if (nextBtn) nextBtn.disabled = STATE.currentPage === totalPages;
-        } else {
-            pagination.style.display = 'none';
-        }
-    }
+function escapeHTML(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
 
-    function previousPage() {
-        if (STATE.currentPage > 1) {
-            STATE.currentPage--;
-            renderVariantList();
-            updatePagination();
-        }
-    }
+function safeSetText(elementId, text) {
+    const element = document.getElementById(elementId);
+    if (element) element.textContent = text;
+}
 
-    function nextPage() {
-        const totalPages = Math.ceil(STATE.filteredVariants.length / CONFIG.ITEMS_PER_PAGE);
-        if (STATE.currentPage < totalPages) {
-            STATE.currentPage++;
-            renderVariantList();
-            updatePagination();
-        }
-    }
-
-    // ============================================
-    // MODAL MANAGEMENT
-    // ============================================
-    function showDashboard() {
-        const dashboardModal = document.getElementById('dashboardModal');
-        if (dashboardModal) {
-            dashboardModal.classList.remove('hidden');
-            renderDashboardCharts();
-        }
-    }
-
-    function closeDashboard() {
-        const dashboardModal = document.getElementById('dashboardModal');
-        if (dashboardModal) {
-            dashboardModal.classList.add('hidden');
-        }
-    }
-
-    function renderDashboardCharts() {
-        // Classification Chart
-        const classCtx = document.getElementById('classChart');
-        if (classCtx && !STATE.charts.classChart) {
-            STATE.charts.classChart = new Chart(classCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Class I', 'Class II', 'Class III', 'Class IV', 'Class V'],
-                    datasets: [{
-                        data: [979, 8, 12, 1, 8],
-                        backgroundColor: [
-                            'var(--helix-mutation)',
-                            'var(--helix-warning)',
-                            'var(--helix-therapy)',
-                            'var(--helix-dna)',
-                            'var(--helix-evidence)'
-                        ],
-                        borderWidth: 2,
-                        borderColor: 'white'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: { 
-                            position: 'bottom',
-                            labels: {
-                                font: { family: 'Inter', size: 12 },
-                                padding: 15
-                            }
-                        }
-                    }
-                }
-            });
-        }
-        
-        // Response Chart
-        const responseCtx = document.getElementById('responseChart');
-        if (responseCtx && !STATE.charts.responseChart) {
-            STATE.charts.responseChart = new Chart(responseCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['Responsive', 'Non-responsive', 'Unknown'],
-                    datasets: [{
-                        label: 'ETI Response',
-                        data: [50, 1804, 248],
-                        backgroundColor: [
-                            'var(--helix-therapy)',
-                            'var(--helix-mutation)',
-                            'var(--helix-warning)'
-                        ]
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        y: { 
-                            beginAtZero: true,
-                            ticks: { font: { family: 'Inter', size: 11 } }
-                        },
-                        x: { 
-                            ticks: { font: { family: 'Inter', size: 11 } }
-                        }
-                    }
-                }
-            });
-        }
-    }
-
-    function exportReport() {
-        showNotification('Export feature coming soon!', 'info');
-    }
-
-    function showImportModal() {
-        const importModal = document.getElementById('importModal');
-        if (importModal) {
-            importModal.classList.remove('hidden');
-        }
-    }
-
-    function closeImportModal() {
-        const importModal = document.getElementById('importModal');
-        if (importModal) {
-            importModal.classList.add('hidden');
-        }
-        
-        const jsonInput = document.getElementById('jsonInput');
-        if (jsonInput) {
-            jsonInput.value = '';
-        }
-        
-        const importResults = document.getElementById('importResults');
-        if (importResults) {
-            importResults.innerHTML = '';
-        }
-    }
-        // ============================================
-// UTILITY FUNCTIONS - ADD THIS FUNCTION
-// ============================================
-function updateVariantCount() {
-    const element = document.getElementById('variantCount');
-    if (element) {
-        element.textContent = STATE.filteredVariants.length.toLocaleString();
+function showLoadingState(message = 'Loading...') {
+    const list = document.getElementById('variantList');
+    if (list) {
+        list.innerHTML = `
+            <div class="p-12 text-center">
+                <div class="animate-spin rounded-full h-10 w-10 border-3 border-helix-protein border-t-transparent mx-auto"></div>
+                <p class="mt-4 text-gray-600 font-medium">${message}</p>
+                <p class="text-xs text-gray-500 mt-2">Establishing secure connection</p>
+            </div>
+        `;
     }
 }
 
-    function validateImport() {
-        const jsonInput = document.getElementById('jsonInput');
-        const importResults = document.getElementById('importResults');
-        
-        if (!jsonInput || !importResults) return;
-        
-        try {
-            const data = JSON.parse(jsonInput.value);
-            importResults.innerHTML = `
-                <div class="p-4 bg-green-50 text-green-800 rounded-lg border border-green-200">
-                    <div class="flex items-center">
-                        <i class="fas fa-check-circle mr-2"></i>
-                        <span>Valid JSON format detected</span>
-                    </div>
-                    <div class="text-sm mt-2">
-                        Ready to import ${Object.keys(data).length} fields for variant
-                    </div>
+function renderErrorState(message) {
+    const list = document.getElementById('variantList');
+    if (list) {
+        list.innerHTML = `
+            <div class="p-12 text-center">
+                <div class="p-4 bg-red-50 rounded-full inline-flex mb-4">
+                    <i class="fas fa-exclamation-triangle text-red-500 text-2xl"></i>
                 </div>
-            `;
-        } catch (error) {
-            importResults.innerHTML = `
-                <div class="p-4 bg-red-50 text-red-800 rounded-lg border border-red-200">
-                    <div class="flex items-center">
-                        <i class="fas fa-exclamation-circle mr-2"></i>
-                        <span>Invalid JSON format</span>
-                    </div>
-                    <div class="text-sm mt-2">
-                        ${error.message}
-                    </div>
-                </div>
-            `;
-        }
-    }
-
-    async function executeImport() {
-        showNotification('Import execution coming soon!', 'info');
-    }
-
-    // ============================================
-    // UTILITY FUNCTIONS
-    // ============================================
-    function selectVariant(variantName) {
-        const variant = STATE.variants.find(v => v.legacy_name === variantName);
-        if (!variant) return;
-        
-        STATE.selectedVariant = variant;
-        renderVariantDetail(variant);
-        renderVariantList();
-    }
-
-    function updateFilterButtons() {
-        const buttons = ['all', 'missing'];
-        buttons.forEach(btn => {
-            const element = document.getElementById(`filter${btn.charAt(0).toUpperCase() + btn.slice(1)}`);
-            if (element) {
-                if (btn === STATE.activeFilter) {
-                    element.style.borderColor = btn === 'missing' ? 'var(--helix-warning)' : 'var(--helix-protein)';
-                    element.style.color = btn === 'missing' ? 'var(--helix-warning)' : 'var(--helix-protein)';
-                    element.style.fontWeight = '600';
-                } else {
-                    element.style.borderColor = '';
-                    element.style.color = '';
-                    element.style.fontWeight = '';
-                }
-            }
-        });
-    }
-
-    function showLoadingState(message = 'Loading...') {
-        const list = document.getElementById('variantList');
-        if (list) {
-            list.innerHTML = `
-                <div class="p-8 text-center">
-                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-helix-protein mx-auto"></div>
-                    <p class="mt-4 text-gray-600">${message}</p>
-                </div>
-            `;
-        }
-    }
-
-    function showErrorState(message) {
-        const list = document.getElementById('variantList');
-        if (list) {
-            list.innerHTML = `
-                <div class="p-8 text-center">
-                    <i class="fas fa-exclamation-triangle text-red-500 text-2xl mb-3"></i>
-                    <p class="text-red-600 font-medium">Connection Error</p>
-                    <p class="text-sm text-gray-500 mt-2">${message}</p>
-                    <button onclick="loadVariants()" class="mt-4 px-4 py-2 bg-helix-protein text-white rounded-lg hover:bg-opacity-90 font-medium">
-                        <i class="fas fa-redo mr-2"></i>
-                        Retry Connection
-                    </button>
-                </div>
-            `;
-        }
-    }
-
-    function setupEventListeners() {
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                closeImportModal();
-                closeDashboard();
-                closeAnnotationModal();
-            }
-        });
-    }
-
-    function showNotification(message, type = 'info', duration = 3000) {
-        // Create notification container if it doesn't exist
-        let notificationContainer = document.getElementById('notification-container');
-        if (!notificationContainer) {
-            notificationContainer = document.createElement('div');
-            notificationContainer.id = 'notification-container';
-            notificationContainer.className = 'fixed bottom-4 right-4 z-3000 space-y-2';
-            document.body.appendChild(notificationContainer);
-        }
-        
-        const notification = document.createElement('div');
-        const colors = {
-            success: { bg: '#f0fdf4', text: '#166534', border: '#bbf7d0', icon: 'fa-check-circle' },
-            error: { bg: '#fef2f2', text: '#991b1b', border: '#fecaca', icon: 'fa-exclamation-circle' },
-            info: { bg: '#eff6ff', text: '#1e40af', border: '#bfdbfe', icon: 'fa-info-circle' },
-            warning: { bg: '#fffbeb', text: '#92400e', border: '#fed7aa', icon: 'fa-exclamation-triangle' }
-        };
-        
-        const color = colors[type] || colors.info;
-        
-        notification.className = `helix-notification animate-fade-in`;
-        notification.style.backgroundColor = color.bg;
-        notification.style.color = color.text;
-        notification.style.borderLeftColor = color.text;
-        
-        notification.innerHTML = `
-            <i class="fas ${color.icon}"></i>
-            <span class="font-medium">${message}</span>
+                <p class="text-red-600 font-semibold">Connection Error</p>
+                <p class="text-sm text-gray-600 mt-2 max-w-xs mx-auto">${message}</p>
+                <button onclick="location.reload()" class="mt-6 px-5 py-2.5 bg-helix-protein text-white rounded-lg hover:bg-opacity-90 font-medium transition-all">
+                    <i class="fas fa-redo mr-2"></i>
+                    Retry Connection
+                </button>
+            </div>
         `;
-        
-        notificationContainer.appendChild(notification);
-        
-        setTimeout(() => {
-            notification.classList.add('opacity-0', 'translate-x-4');
-            setTimeout(() => notification.remove(), 300);
-        }, duration);
     }
+}
 
-    function safeUpdateText(elementId, text) {
-        const element = document.getElementById(elementId);
-        if (element) element.textContent = text;
+function emitNotification(message, type = 'info', duration = CONFIG.UI.NOTIFICATION_DURATION) {
+    let container = document.getElementById('notification-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'notification-container';
+        container.className = 'fixed bottom-5 right-5 z-[3000] space-y-2';
+        document.body.appendChild(container);
     }
+    
+    const styles = {
+        success: { bg: '#f0fdf4', text: '#166534', border: '#bbf7d0', icon: 'fa-check-circle' },
+        error: { bg: '#fef2f2', text: '#991b1b', border: '#fecaca', icon: 'fa-exclamation-circle' },
+        warning: { bg: '#fffbeb', text: '#92400e', border: '#fed7aa', icon: 'fa-exclamation-triangle' },
+        info: { bg: '#eff6ff', text: '#1e40af', border: '#bfdbfe', icon: 'fa-info-circle' }
+    };
+    
+    const style = styles[type] || styles.info;
+    
+    const notification = document.createElement('div');
+    notification.className = 'flex items-center gap-3 px-5 py-3 rounded-lg shadow-lg border-l-4 animate-slideInRight';
+    notification.style.backgroundColor = style.bg;
+    notification.style.color = style.text;
+    notification.style.borderLeftColor = style.text;
+    notification.style.border = `1px solid ${style.border}`;
+    notification.style.borderLeftWidth = '4px';
+    
+    notification.innerHTML = `
+        <i class="fas ${style.icon}"></i>
+        <span class="font-medium text-sm">${message}</span>
+        <button onclick="this.parentElement.remove()" class="ml-2 opacity-60 hover:opacity-100">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+    
+    container.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        notification.style.transform = 'translateX(100%)';
+        notification.style.transition = 'all 0.3s ease';
+        setTimeout(() => notification.remove(), 300);
+    }, duration);
+}
 
-    // ============================================
-    // WINDOW EXPORTS
-    // ============================================
-    window.selectVariant = selectVariant;
-    window.filterVariants = filterVariants;
-    window.quickSearch = quickSearch;
-    window.showImportModal = showImportModal;
-    window.closeImportModal = closeImportModal;
-    window.validateImport = validateImport;
-    window.executeImport = executeImport;
-    window.showDashboard = showDashboard;
-    window.closeDashboard = closeDashboard;
-    window.exportReport = exportReport;
-    window.previousPage = previousPage;
-    window.nextPage = nextPage;
-    window.showAnnotationModal = showAnnotationModal;
-    window.closeAnnotationModal = closeAnnotationModal;
-    window.saveAnnotation = saveAnnotation;
-    window.setDataView = setDataView;
+// ======================================================================
+// 11. 🔄 PAGINATION - PAGE NAVIGATION
+// ======================================================================
+function refreshPagination() {
+    const totalPages = Math.ceil(STATE.filteredVariants.length / CONFIG.UI.ITEMS_PER_PAGE);
+    const pagination = document.getElementById('paginationControls');
+    
+    if (!pagination) return;
+    
+    if (totalPages > 1) {
+        pagination.style.display = 'flex';
+        safeSetText('currentPage', STATE.currentPage);
+        safeSetText('totalPages', totalPages);
+        
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        
+        if (prevBtn) {
+            prevBtn.disabled = STATE.currentPage === 1;
+            prevBtn.style.opacity = STATE.currentPage === 1 ? '0.5' : '1';
+            prevBtn.style.cursor = STATE.currentPage === 1 ? 'not-allowed' : 'pointer';
+        }
+        
+        if (nextBtn) {
+            nextBtn.disabled = STATE.currentPage === totalPages;
+            nextBtn.style.opacity = STATE.currentPage === totalPages ? '0.5' : '1';
+            nextBtn.style.cursor = STATE.currentPage === totalPages ? 'not-allowed' : 'pointer';
+        }
+    } else {
+        pagination.style.display = 'none';
+    }
+}
 
-    // Initialize
-    setTimeout(initializeApp, 100);
-    </script>
+function previousPage() {
+    if (STATE.currentPage > 1) {
+        STATE.currentPage--;
+        renderVariantCatalog();
+        refreshPagination();
+    }
+}
+
+function nextPage() {
+    const totalPages = Math.ceil(STATE.filteredVariants.length / CONFIG.UI.ITEMS_PER_PAGE);
+    if (STATE.currentPage < totalPages) {
+        STATE.currentPage++;
+        renderVariantCatalog();
+        refreshPagination();
+    }
+}
+
+// ======================================================================
+// 12. 📤 IMPORT SYSTEM - DATA UPLOAD
+// ======================================================================
+function showImportModal() {
+    const modal = document.getElementById('importModal');
+    if (modal) modal.classList.remove('hidden');
+}
+
+function closeImportModal() {
+    const modal = document.getElementById('importModal');
+    if (modal) modal.classList.add('hidden');
+    
+    const input = document.getElementById('jsonInput');
+    if (input) input.value = '';
+    
+    const results = document.getElementById('importResults');
+    if (results) results.innerHTML = '';
+}
+
+function validateImport() {
+    const input = document.getElementById('jsonInput');
+    const results = document.getElementById('importResults');
+    
+    if (!input || !results) return;
+    
+    try {
+        const data = JSON.parse(input.value);
+        results.innerHTML = `
+            <div class="p-4 bg-green-50 text-green-800 rounded-lg border border-green-200">
+                <div class="flex items-center">
+                    <i class="fas fa-check-circle mr-2"></i>
+                    <span class="font-medium">Valid JSON structure</span>
+                </div>
+                <div class="text-sm mt-2 opacity-80">
+                    Ready to import ${Object.keys(data).length} fields
+                </div>
+            </div>
+        `;
+    } catch (error) {
+        results.innerHTML = `
+            <div class="p-4 bg-red-50 text-red-800 rounded-lg border border-red-200">
+                <div class="flex items-center">
+                    <i class="fas fa-exclamation-circle mr-2"></i>
+                    <span class="font-medium">Invalid JSON</span>
+                </div>
+                <div class="text-sm mt-2 opacity-80">
+                    ${escapeHTML(error.message)}
+                </div>
+            </div>
+        `;
+    }
+}
+
+function executeImport() {
+    emitNotification('Import functionality will be available in v5.1.0', 'info');
+}
+
+function exportReport() {
+    emitNotification('Export feature coming soon', 'info');
+}
+
+// ======================================================================
+// 13. 🎯 EVENT HANDLERS - USER INTERACTIONS
+// ======================================================================
+function attachEventListeners() {
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closeImportModal();
+            closeDashboard();
+            closeAnnotationModal();
+        }
+    });
+    
+    // Click outside to close modals
+    document.addEventListener('click', (e) => {
+        if (e.target.classList.contains('modal-overlay')) {
+            closeImportModal();
+            closeDashboard();
+            closeAnnotationModal();
+        }
+    });
+}
+
+// ======================================================================
+// 14. 🌐 WINDOW EXPORTS - GLOBAL FUNCTION REGISTRY
+// ======================================================================
+window.selectVariant = selectVariant;
+window.filterVariants = filterVariants;
+window.quickSearch = quickSearch;
+window.setDataView = setDataView;
+window.previousPage = previousPage;
+window.nextPage = nextPage;
+window.showImportModal = showImportModal;
+window.closeImportModal = closeImportModal;
+window.validateImport = validateImport;
+window.executeImport = executeImport;
+window.showDashboard = showDashboard;
+window.closeDashboard = closeDashboard;
+window.exportReport = exportReport;
+window.showAnnotationModal = showAnnotationModal;
+window.closeAnnotationModal = closeAnnotationModal;
+window.saveAnnotation = saveAnnotation;
+
+// ======================================================================
+// 15. 🏁 INITIALIZATION TRIGGER
+// ======================================================================
+// Small delay ensures DOM is fully parsed
+setTimeout(bootstrapApp, 50);
+</script>
 </body>
 </html>
