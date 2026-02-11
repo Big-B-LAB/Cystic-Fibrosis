@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Δ Helix | CFTR Clinical Intelligence System</title>
     
-    <!-- Fonts & Icons -->
+    <!-- Fonts & Icons - Premium Typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Tailwind -->
@@ -18,13 +18,13 @@
     <style>
         /* ============================================
            SCIENTIFIC TYPOGRAPHY SYSTEM
-        ============================================ */
+           ============================================ */
         :root {
             --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             --font-display: 'Space Grotesk', var(--font-sans);
             --font-mono: 'JetBrains Mono', 'SF Mono', Monaco, 'Cascadia Code', monospace;
             
-            /* Scientific Color Palette */
+            /* Scientific Color Palette - Refined */
             --color-primary: #0a2e5a;
             --color-primary-light: #1a4a7a;
             --color-primary-lighter: #e9f0f9;
@@ -49,15 +49,30 @@
             --color-warning-light: #ffedd5;
             --color-error: #b91c1c;
             --color-error-light: #fee2e2;
+            --color-info: #1e40af;
+            --color-info-light: #dbeafe;
             
-            /* Typography Scale */
-            --text-xs: 0.75rem;
-            --text-sm: 0.875rem;
-            --text-base: 1rem;
-            --text-lg: 1.125rem;
-            --text-xl: 1.25rem;
-            --text-2xl: 1.5rem;
-            --text-3xl: 1.875rem;
+            --color-gray-50: #f9fafb;
+            --color-gray-100: #f3f4f6;
+            --color-gray-200: #e5e7eb;
+            --color-gray-300: #d1d5db;
+            --color-gray-400: #9ca3af;
+            --color-gray-500: #6b7280;
+            --color-gray-600: #4b5563;
+            --color-gray-700: #374151;
+            --color-gray-800: #1f2937;
+            --color-gray-900: #111827;
+            
+            /* Typography Scale - Major Third */
+            --text-xs: 0.75rem;     /* 12px */
+            --text-sm: 0.875rem;    /* 14px */
+            --text-base: 1rem;      /* 16px */
+            --text-lg: 1.125rem;    /* 18px */
+            --text-xl: 1.25rem;     /* 20px */
+            --text-2xl: 1.5rem;     /* 24px */
+            --text-3xl: 1.875rem;   /* 30px */
+            --text-4xl: 2.25rem;    /* 36px */
+            --text-5xl: 3rem;       /* 48px */
             
             /* Spacing */
             --space-1: 0.25rem;
@@ -67,6 +82,22 @@
             --space-5: 1.25rem;
             --space-6: 1.5rem;
             --space-8: 2rem;
+            --space-10: 2.5rem;
+            --space-12: 3rem;
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            
+            /* Borders */
+            --radius-sm: 0.375rem;
+            --radius: 0.5rem;
+            --radius-md: 0.75rem;
+            --radius-lg: 1rem;
+            --radius-xl: 1.5rem;
         }
 
         * {
@@ -79,44 +110,110 @@
             font-family: var(--font-sans);
             font-size: var(--text-base);
             line-height: 1.6;
-            color: #111827;
+            color: var(--color-gray-900);
             background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
             -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
-        /* Card Styles */
+        /* ============================================
+           TYPOGRAPHY UTILITIES
+           ============================================ */
+        .heading-1 {
+            font-family: var(--font-display);
+            font-size: var(--text-3xl);
+            font-weight: 700;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+        }
+
+        .heading-2 {
+            font-family: var(--font-display);
+            font-size: var(--text-2xl);
+            font-weight: 600;
+            line-height: 1.3;
+            letter-spacing: -0.01em;
+        }
+
+        .heading-3 {
+            font-family: var(--font-display);
+            font-size: var(--text-xl);
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        .body-large {
+            font-size: var(--text-lg);
+            line-height: 1.6;
+        }
+
+        .body {
+            font-size: var(--text-base);
+            line-height: 1.6;
+        }
+
+        .body-small {
+            font-size: var(--text-sm);
+            line-height: 1.5;
+        }
+
+        .caption {
+            font-size: var(--text-xs);
+            line-height: 1.5;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+            font-weight: 600;
+            color: var(--color-gray-500);
+        }
+
+        .mono {
+            font-family: var(--font-mono);
+            font-size: var(--text-sm);
+        }
+
+        /* ============================================
+           CARD STYLES
+           ============================================ */
         .card {
             background: white;
-            border-radius: 0.75rem;
-            border: 1px solid #e5e7eb;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            transition: all 0.2s;
+            border-radius: var(--radius);
+            border: 1px solid var(--color-gray-200);
+            box-shadow: var(--shadow-sm);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             overflow: hidden;
+        }
+
+        .card:hover {
+            border-color: var(--color-gray-300);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
         }
 
         .card-header {
             padding: var(--space-4) var(--space-5);
-            border-bottom: 1px solid #e5e7eb;
-            background: #f9fafb;
+            border-bottom: 1px solid var(--color-gray-200);
+            background: var(--color-gray-50);
         }
 
         .card-body {
             padding: var(--space-5);
         }
 
-        /* Data Point Component */
+        /* ============================================
+           DATA POINT COMPONENT
+           ============================================ */
         .data-point {
             position: relative;
-            padding: var(--space-3);
+            padding: var(--space-4);
             background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 0.5rem;
+            border: 1px solid var(--color-gray-200);
+            border-radius: var(--radius-sm);
             transition: all 0.2s;
         }
 
         .data-point:hover {
-            border-color: #9ca3af;
-            background: #f9fafb;
+            border-color: var(--color-gray-400);
+            background: var(--color-gray-50);
         }
 
         .data-point.missing {
@@ -129,7 +226,7 @@
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            color: #6b7280;
+            color: var(--color-gray-500);
             margin-bottom: var(--space-1);
             display: flex;
             align-items: center;
@@ -138,9 +235,9 @@
 
         .data-value {
             font-family: var(--font-mono);
-            font-size: var(--text-sm);
+            font-size: var(--text-base);
             font-weight: 500;
-            color: #111827;
+            color: var(--color-gray-900);
             word-break: break-word;
         }
 
@@ -148,15 +245,15 @@
             position: absolute;
             top: var(--space-2);
             right: var(--space-2);
-            width: 28px;
-            height: 28px;
-            border-radius: 0.375rem;
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-sm);
             background: white;
-            border: 1px solid #e5e7eb;
+            border: 1px solid var(--color-gray-200);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #6b7280;
+            color: var(--color-gray-500);
             cursor: pointer;
             transition: all 0.2s;
             opacity: 0;
@@ -173,13 +270,15 @@
             transform: scale(1.05);
         }
 
-        /* Badges */
+        /* ============================================
+           BADGES
+           ============================================ */
         .badge {
             display: inline-flex;
             align-items: center;
             gap: var(--space-1);
-            padding: 0.25rem 0.625rem;
-            border-radius: 0.375rem;
+            padding: var(--space-1) var(--space-2);
+            border-radius: var(--radius-sm);
             font-size: var(--text-xs);
             font-weight: 600;
             line-height: 1;
@@ -206,28 +305,42 @@
             border-color: #bbf7d0;
         }
 
+        .badge-class-iv {
+            background: var(--color-class-iv-light);
+            color: var(--color-class-iv);
+            border-color: #bfdbfe;
+        }
+
+        .badge-class-v {
+            background: var(--color-class-v-light);
+            color: var(--color-class-v);
+            border-color: #ddd6fe;
+        }
+
         .badge-exceptional {
             background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
             color: #92400e;
             border-color: #fbbf24;
         }
 
-        /* Variant List */
+        /* ============================================
+           VARIANT LIST
+           ============================================ */
         .variant-list {
-            max-height: calc(100vh - 350px);
+            max-height: calc(100vh - 300px);
             overflow-y: auto;
             scroll-behavior: smooth;
         }
 
         .variant-item {
             padding: var(--space-4);
-            border-bottom: 1px solid #f3f4f6;
+            border-bottom: 1px solid var(--color-gray-100);
             cursor: pointer;
             transition: all 0.2s;
         }
 
         .variant-item:hover {
-            background: #f9fafb;
+            background: var(--color-gray-50);
         }
 
         .variant-item.selected {
@@ -239,18 +352,20 @@
             font-family: var(--font-display);
             font-size: var(--text-lg);
             font-weight: 600;
-            color: #111827;
+            color: var(--color-gray-900);
             letter-spacing: -0.01em;
         }
 
         .variant-subtitle {
             font-family: var(--font-mono);
             font-size: var(--text-xs);
-            color: #6b7280;
+            color: var(--color-gray-500);
             margin-top: var(--space-1);
         }
 
-        /* Search */
+        /* ============================================
+           SEARCH COMPONENT
+           ============================================ */
         .search-wrapper {
             position: relative;
         }
@@ -260,8 +375,8 @@
             padding: var(--space-3) var(--space-3) var(--space-3) 2.5rem;
             font-family: var(--font-sans);
             font-size: var(--text-base);
-            border: 1px solid #d1d5db;
-            border-radius: 0.5rem;
+            border: 1px solid var(--color-gray-300);
+            border-radius: var(--radius);
             background: white;
             transition: all 0.2s;
         }
@@ -269,7 +384,7 @@
         .search-input:focus {
             outline: none;
             border-color: var(--color-accent);
-            box-shadow: 0 0 0 3px rgba(14,124,123,0.1);
+            box-shadow: 0 0 0 3px rgba(14, 124, 123, 0.1);
         }
 
         .search-icon {
@@ -277,17 +392,19 @@
             left: var(--space-3);
             top: 50%;
             transform: translateY(-50%);
-            color: #9ca3af;
+            color: var(--color-gray-400);
         }
 
-        /* Modal */
+        /* ============================================
+           IMPORT MODAL - REDESIGNED
+           ============================================ */
         .modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(4px);
             display: flex;
             align-items: center;
@@ -298,12 +415,12 @@
 
         .modal {
             background: white;
-            border-radius: 1rem;
-            max-width: 600px;
+            border-radius: var(--radius-lg);
+            max-width: 700px;
             width: 100%;
             max-height: 90vh;
             overflow-y: auto;
-            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+            box-shadow: var(--shadow-xl);
             animation: modalSlideUp 0.3s ease;
         }
 
@@ -320,8 +437,8 @@
 
         .modal-header {
             padding: var(--space-5) var(--space-6);
-            border-bottom: 1px solid #e5e7eb;
-            background: #f9fafb;
+            border-bottom: 1px solid var(--color-gray-200);
+            background: var(--color-gray-50);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -333,14 +450,51 @@
 
         .modal-footer {
             padding: var(--space-5) var(--space-6);
-            border-top: 1px solid #e5e7eb;
-            background: #f9fafb;
+            border-top: 1px solid var(--color-gray-200);
+            background: var(--color-gray-50);
             display: flex;
             justify-content: flex-end;
             gap: var(--space-3);
         }
 
-        /* Form Elements */
+        /* ============================================
+           TABS COMPONENT
+           ============================================ */
+        .tabs {
+            display: flex;
+            gap: var(--space-2);
+            margin-bottom: var(--space-5);
+            border-bottom: 1px solid var(--color-gray-200);
+            padding-bottom: var(--space-2);
+        }
+
+        .tab {
+            padding: var(--space-2) var(--space-4);
+            font-size: var(--text-sm);
+            font-weight: 500;
+            color: var(--color-gray-600);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+
+        .tab:hover {
+            color: var(--color-gray-900);
+            background: var(--color-gray-100);
+        }
+
+        .tab.active {
+            color: var(--color-accent);
+            background: var(--color-accent-light);
+            font-weight: 600;
+        }
+
+        /* ============================================
+           FORM ELEMENTS
+           ============================================ */
         .form-group {
             margin-bottom: var(--space-5);
         }
@@ -351,7 +505,7 @@
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            color: #6b7280;
+            color: var(--color-gray-500);
             margin-bottom: var(--space-2);
         }
 
@@ -360,8 +514,8 @@
             padding: var(--space-3) var(--space-4);
             font-family: var(--font-sans);
             font-size: var(--text-base);
-            border: 1px solid #d1d5db;
-            border-radius: 0.5rem;
+            border: 1px solid var(--color-gray-300);
+            border-radius: var(--radius);
             background: white;
             transition: all 0.2s;
         }
@@ -369,26 +523,38 @@
         .form-control:focus {
             outline: none;
             border-color: var(--color-accent);
-            box-shadow: 0 0 0 3px rgba(14,124,123,0.1);
+            box-shadow: 0 0 0 3px rgba(14, 124, 123, 0.1);
         }
 
         .form-control.mono {
             font-family: var(--font-mono);
         }
 
-        /* Buttons */
+        select.form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linecap='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+            background-position: right var(--space-3) center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: var(--space-10);
+        }
+
+        /* ============================================
+           BUTTONS
+           ============================================ */
         .btn {
             display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: var(--space-2);
-            padding: 0.5rem 1rem;
+            padding: var(--space-2) var(--space-4);
             font-size: var(--text-sm);
             font-weight: 500;
-            border-radius: 0.5rem;
+            border-radius: var(--radius);
             border: 1px solid transparent;
             cursor: pointer;
             transition: all 0.2s;
+            line-height: 1.5;
             min-height: 40px;
         }
 
@@ -400,62 +566,53 @@
         .btn-primary:hover {
             background: var(--color-class-iii);
             transform: translateY(-1px);
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            box-shadow: var(--shadow-md);
         }
 
         .btn-secondary {
             background: white;
-            border-color: #d1d5db;
-            color: #374151;
+            border-color: var(--color-gray-300);
+            color: var(--color-gray-700);
         }
 
         .btn-secondary:hover {
-            background: #f9fafb;
-            border-color: #9ca3af;
+            background: var(--color-gray-50);
+            border-color: var(--color-gray-400);
         }
 
-        /* Tabs */
-        .tabs {
-            display: flex;
-            gap: var(--space-2);
-            border-bottom: 1px solid #e5e7eb;
-            padding-bottom: var(--space-2);
-            margin-bottom: var(--space-5);
-        }
-
-        .tab {
-            padding: 0.5rem 1rem;
-            font-size: var(--text-sm);
-            font-weight: 500;
-            color: #6b7280;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: var(--space-2);
-        }
-
-        .tab:hover {
-            color: #111827;
-            background: #f3f4f6;
-        }
-
-        .tab.active {
+        .btn-outline {
+            background: transparent;
+            border-color: var(--color-accent);
             color: var(--color-accent);
-            background: var(--color-accent-light);
-            font-weight: 600;
         }
 
-        /* Notification */
+        .btn-outline:hover {
+            background: var(--color-accent-light);
+        }
+
+        .btn-sm {
+            padding: var(--space-1) var(--space-3);
+            font-size: var(--text-xs);
+            min-height: 32px;
+        }
+
+        .btn-lg {
+            padding: var(--space-3) var(--space-6);
+            font-size: var(--text-base);
+            min-height: 48px;
+        }
+
+        /* ============================================
+           NOTIFICATIONS
+           ============================================ */
         .notification {
             position: fixed;
             bottom: var(--space-6);
             right: var(--space-6);
             padding: var(--space-4) var(--space-6);
             background: white;
-            border-radius: 0.75rem;
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
             display: flex;
             align-items: center;
             gap: var(--space-3);
@@ -476,41 +633,89 @@
             }
         }
 
-        .notification.success { border-left-color: var(--color-success); }
-        .notification.error { border-left-color: var(--color-error); }
-        .notification.warning { border-left-color: var(--color-warning); }
-        .notification.info { border-left-color: var(--color-primary); }
+        .notification.success {
+            border-left-color: var(--color-success);
+        }
 
-        /* Missing Count Badge */
+        .notification.error {
+            border-left-color: var(--color-error);
+        }
+
+        .notification.warning {
+            border-left-color: var(--color-warning);
+        }
+
+        .notification.info {
+            border-left-color: var(--color-info);
+        }
+
+        /* ============================================
+           UTILITIES
+           ============================================ */
         .missing-count {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            min-width: 20px;
+            width: 20px;
             height: 20px;
             border-radius: 9999px;
             background: var(--color-warning);
             color: white;
             font-size: 0.75rem;
             font-weight: 600;
-            padding: 0 0.375rem;
         }
 
-        /* Responsive */
-        @media (max-width: 1024px) {
-            .variant-list {
-                max-height: 400px;
+        .responsive-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-4);
+        }
+
+        /* ============================================
+           ANIMATIONS
+           ============================================ */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
         }
 
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease;
+        }
+
+        .animate-slide-up {
+            animation: slideUp 0.3s ease;
+        }
+
+        /* ============================================
+           RESPONSIVE
+           ============================================ */
         @media (max-width: 768px) {
+            :root {
+                --text-3xl: 1.75rem;
+                --text-2xl: 1.5rem;
+                --text-xl: 1.25rem;
+                --text-lg: 1rem;
+            }
+
+            .responsive-grid {
+                grid-template-columns: 1fr;
+            }
+
             .modal {
                 margin: var(--space-4);
             }
-        }
-
-        .hidden {
-            display: none !important;
         }
     </style>
 </head>
@@ -524,19 +729,19 @@
                         <i class="fas fa-dna text-white text-lg"></i>
                     </div>
                     <div>
-                        <h1 class="font-['Space_Grotesk'] text-xl font-bold text-[#0a2e5a] leading-none">Δ Helix</h1>
-                        <p class="text-xs font-semibold uppercase tracking-wider text-gray-500">CFTR Clinical Intelligence</p>
+                        <h1 class="heading-2 text-[#0a2e5a] mb-0 leading-none">Δ Helix</h1>
+                        <p class="caption text-gray-500 mb-0">CFTR Clinical Intelligence System</p>
                     </div>
                 </div>
                 
-                <div class="flex items-center gap-2">
-                    <button onclick="showDashboard()" class="btn btn-secondary hidden sm:flex">
+                <div class="flex items-center gap-3">
+                    <button onclick="showDashboard()" class="btn btn-secondary btn-sm hidden sm:flex">
                         <i class="fas fa-chart-line"></i>
                         <span>Analytics</span>
                     </button>
                     <button onclick="showImportModal()" class="btn btn-primary">
                         <i class="fas fa-cloud-upload-alt"></i>
-                        <span class="hidden sm:inline">Import</span>
+                        <span class="hidden sm:inline">Import Data</span>
                     </button>
                 </div>
             </div>
@@ -545,61 +750,65 @@
 
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- Stats Grid -->
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <div class="card">
+        <!-- Stats Bar -->
+        <div class="responsive-grid mb-8">
+            <div class="card animate-slide-up" style="animation-delay: 0s;">
                 <div class="card-body">
                     <div class="flex items-start justify-between">
                         <div>
-                            <p class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Total Variants</p>
-                            <p class="font-['Space_Grotesk'] text-3xl font-bold text-[#0a2e5a]" id="statTotal">-</p>
+                            <p class="caption mb-1">Total Variants</p>
+                            <p class="heading-1 text-[#0a2e5a] mb-0" id="statTotal">-</p>
                         </div>
                         <div class="w-10 h-10 rounded-lg bg-[#e9f0f9] flex items-center justify-center">
                             <i class="fas fa-database text-[#0a2e5a]"></i>
                         </div>
                     </div>
+                    <p class="text-xs text-gray-500 mt-2" id="statContext"></p>
                 </div>
             </div>
             
-            <div class="card">
+            <div class="card animate-slide-up" style="animation-delay: 0.05s;">
                 <div class="card-body">
                     <div class="flex items-start justify-between">
                         <div>
-                            <p class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Class I</p>
-                            <p class="font-['Space_Grotesk'] text-3xl font-bold text-[#b91c1c]" id="statClassI">-</p>
+                            <p class="caption mb-1">Class I Variants</p>
+                            <p class="heading-1 text-[#b91c1c] mb-0" id="statClassI">-</p>
                         </div>
                         <div class="w-10 h-10 rounded-lg bg-[#fee2e2] flex items-center justify-center">
                             <i class="fas fa-exclamation-triangle text-[#b91c1c]"></i>
                         </div>
                     </div>
+                    <p class="text-xs text-gray-500 mt-1">Nonsense & frameshift</p>
                 </div>
             </div>
             
-            <div class="card">
+            <div class="card animate-slide-up" style="animation-delay: 0.1s;">
                 <div class="card-body">
                     <div class="flex items-start justify-between">
                         <div>
-                            <p class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Exceptional</p>
-                            <p class="font-['Space_Grotesk'] text-3xl font-bold text-[#b45309]" id="statExceptional">-</p>
+                            <p class="caption mb-1">Exceptional Cases</p>
+                            <p class="heading-1 text-[#b45309] mb-0" id="statExceptional">-</p>
                         </div>
                         <div class="w-10 h-10 rounded-lg bg-[#ffedd5] flex items-center justify-center">
                             <i class="fas fa-bolt text-[#b45309]"></i>
                         </div>
                     </div>
+                    <p class="text-xs text-gray-500 mt-1">ETI responsive Class I</p>
                 </div>
             </div>
             
-            <div class="card">
+            <div class="card animate-slide-up" style="animation-delay: 0.15s;">
                 <div class="card-body">
                     <div class="flex items-start justify-between">
                         <div>
-                            <p class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">ETI Responsive</p>
-                            <p class="font-['Space_Grotesk'] text-3xl font-bold text-[#0f766e]" id="statResponsive">-</p>
+                            <p class="caption mb-1">ETI Responsive</p>
+                            <p class="heading-1 text-[#0f766e] mb-0" id="statResponsive">-</p>
                         </div>
                         <div class="w-10 h-10 rounded-lg bg-[#ccfbf1] flex items-center justify-center">
                             <i class="fas fa-check-circle text-[#0f766e]"></i>
                         </div>
                     </div>
+                    <p class="text-xs text-gray-500 mt-1">Responds to therapy</p>
                 </div>
             </div>
         </div>
@@ -607,10 +816,10 @@
         <!-- View Toggle -->
         <div class="card mb-8">
             <div class="card-body">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
                     <div>
-                        <p class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">DATA VIEW</p>
-                        <p class="font-['Space_Grotesk'] text-xl font-semibold text-gray-900" id="currentModeText">All Variants</p>
+                        <p class="caption mb-1">DATA VIEW</p>
+                        <p class="heading-3 text-gray-900 mb-0" id="currentModeText">All Variants</p>
                     </div>
                     <div class="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg">
                         <i class="fas fa-database text-gray-400"></i>
@@ -620,7 +829,7 @@
                     </div>
                 </div>
                 
-                <div class="flex gap-2">
+                <div class="tabs">
                     <button onclick="setDataView('all')" class="tab active" id="allViewBtn">
                         <i class="fas fa-database"></i>
                         All Variants
@@ -628,48 +837,63 @@
                     </button>
                     <button onclick="setDataView('complete')" class="tab" id="completeViewBtn">
                         <i class="fas fa-check-circle"></i>
-                        Complete
+                        Complete Clinical
                         <span class="bg-gray-200 px-2 py-0.5 rounded-full text-xs ml-1" id="completeCount">-</span>
                     </button>
                     <button onclick="setDataView('clinical')" class="tab" id="clinicalViewBtn">
                         <i class="fas fa-clipboard-check"></i>
-                        Clinical
+                        Clinical Data
                         <span class="bg-gray-200 px-2 py-0.5 rounded-full text-xs ml-1" id="clinicalCount">-</span>
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- Main Grid - OPTIMIZED LAYOUT -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <!-- Left Column - Variant Explorer (3 columns) -->
-            <div class="lg:col-span-3">
+        <!-- Main Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <!-- Left Column - Variant Explorer -->
+            <div class="lg:col-span-1">
                 <div class="card h-full flex flex-col">
                     <div class="card-header">
                         <div class="search-wrapper mb-4">
                             <i class="fas fa-search search-icon"></i>
-                            <input type="text" id="searchInput" class="search-input" placeholder="Search variants..." autocomplete="off">
+                            <input 
+                                type="text" 
+                                id="searchInput"
+                                class="search-input"
+                                placeholder="Search by name, protein, cDNA..."
+                                autocomplete="off"
+                            >
                         </div>
                         
                         <div class="flex gap-2">
-                            <button onclick="filterVariants('all')" class="flex-1 px-3 py-2 text-sm font-medium rounded-lg border border-gray-200 hover:border-[#0e7c7b] hover:text-[#0e7c7b] transition-all" id="filterAll">
-                                <i class="fas fa-list-ul mr-1"></i>All
+                            <button onclick="filterVariants('all')" 
+                                    class="flex-1 px-3 py-2 text-sm font-medium rounded-lg border border-gray-200 hover:border-[#0e7c7b] hover:text-[#0e7c7b] transition-all"
+                                    id="filterAll">
+                                <i class="fas fa-list-ul mr-1"></i>
+                                All
                             </button>
-                            <button onclick="filterVariants('missing')" class="flex-1 px-3 py-2 text-sm font-medium rounded-lg border border-gray-200 hover:border-[#b45309] hover:text-[#b45309] transition-all" id="filterMissing">
-                                <i class="fas fa-exclamation-triangle mr-1"></i>Missing
+                            <button onclick="filterVariants('missing')" 
+                                    class="flex-1 px-3 py-2 text-sm font-medium rounded-lg border border-gray-200 hover:border-[#b45309] hover:text-[#b45309] transition-all"
+                                    id="filterMissing">
+                                <i class="fas fa-exclamation-triangle mr-1"></i>
+                                Needs Data
                             </button>
                         </div>
                     </div>
                     
                     <div class="variant-list" id="variantList">
-                        <!-- Variant list rendered here -->
+                        <!-- Variant list will be rendered here -->
                     </div>
                     
+                    <!-- Pagination -->
                     <div class="card-footer border-t border-gray-200 px-4 py-3 flex justify-between items-center" id="paginationControls" style="display: none;">
                         <button onclick="previousPage()" class="btn btn-sm btn-secondary" id="prevBtn">
                             <i class="fas fa-chevron-left"></i>
                         </button>
-                        <span class="text-sm text-gray-700">Page <span id="currentPage">1</span> of <span id="totalPages">1</span></span>
+                        <span class="text-sm text-gray-700">
+                            Page <span id="currentPage">1</span> of <span id="totalPages">1</span>
+                        </span>
                         <button onclick="nextPage()" class="btn btn-sm btn-secondary" id="nextBtn">
                             <i class="fas fa-chevron-right"></i>
                         </button>
@@ -677,22 +901,37 @@
                 </div>
             </div>
 
-            <!-- Right Column - Variant Details (9 columns) - OPTIMIZED LAYOUT -->
-            <div class="lg:col-span-9">
+            <!-- Right Column - Variant Details -->
+            <div class="lg:col-span-3">
                 <div id="variantDetails">
                     <!-- Empty State -->
-                    <div id="emptyState" class="card py-12">
+                    <div id="emptyState" class="card py-12 animate-fade-in">
                         <div class="text-center max-w-md mx-auto">
                             <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#0e7c7b]/10 to-[#0e7c7b]/5 mx-auto mb-6 flex items-center justify-center">
                                 <i class="fas fa-dna text-4xl text-[#0e7c7b]"></i>
                             </div>
-                            <h2 class="font-['Space_Grotesk'] text-2xl font-bold text-gray-900 mb-3">No Variant Selected</h2>
-                            <p class="text-gray-600 mb-8">Select a variant from the list to view clinical intelligence.</p>
+                            <h2 class="heading-2 text-gray-900 mb-3">No Variant Selected</h2>
+                            <p class="text-gray-600 mb-8">
+                                Select a variant from the list to view clinical intelligence. 
+                                Variants with missing data can be annotated for clinical use.
+                            </p>
                             <div class="flex flex-wrap justify-center gap-2">
-                                <button onclick="quickSearch('G542X')" class="btn btn-outline btn-sm">G542X</button>
-                                <button onclick="quickSearch('F508del')" class="btn btn-outline btn-sm">F508del</button>
-                                <button onclick="quickSearch('R334W')" class="btn btn-outline btn-sm">R334W</button>
-                                <button onclick="quickSearch('W1282X')" class="btn btn-outline btn-sm">W1282X</button>
+                                <button onclick="quickSearch('G542X')" 
+                                        class="btn btn-outline btn-sm">
+                                    <span class="mono">G542X</span>
+                                </button>
+                                <button onclick="quickSearch('F508del')" 
+                                        class="btn btn-outline btn-sm">
+                                    <span class="mono">F508del</span>
+                                </button>
+                                <button onclick="quickSearch('R334W')" 
+                                        class="btn btn-outline btn-sm">
+                                    <span class="mono">R334W</span>
+                                </button>
+                                <button onclick="quickSearch('W1282X')" 
+                                        class="btn btn-outline btn-sm">
+                                    <span class="mono">W1282X</span>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -702,14 +941,14 @@
     </main>
 
     <!-- ============================================
-         IMPORT MODAL
+         IMPORT MODAL - REDESIGNED WITH FORM & JSON
          ============================================ -->
     <div id="importModal" class="modal-overlay hidden">
         <div class="modal">
             <div class="modal-header">
                 <div>
-                    <h2 class="font-['Space_Grotesk'] text-xl font-semibold text-gray-900">Import Clinical Data</h2>
-                    <p class="text-xs font-semibold uppercase tracking-wider text-gray-500 mt-1">Add new variants or update existing</p>
+                    <h2 class="heading-3 text-gray-900">Import Clinical Data</h2>
+                    <p class="caption mt-1">Add new variants or update existing records</p>
                 </div>
                 <button onclick="closeImportModal()" class="w-8 h-8 rounded-lg hover:bg-gray-200 transition-colors">
                     <i class="fas fa-times"></i>
@@ -720,20 +959,23 @@
                 <!-- Tab Navigation -->
                 <div class="flex border-b border-gray-200 mb-6">
                     <button id="jsonTabBtn" class="tab active" onclick="switchImportTab('json')">
-                        <i class="fas fa-code"></i>JSON Import
+                        <i class="fas fa-code"></i>
+                        JSON Import
                     </button>
                     <button id="formTabBtn" class="tab" onclick="switchImportTab('form')">
-                        <i class="fas fa-edit"></i>Manual Entry
+                        <i class="fas fa-edit"></i>
+                        Manual Entry
                     </button>
                 </div>
                 
                 <!-- JSON Import Panel -->
-                <div id="jsonImportPanel">
-                    <div class="bg-gray-50 rounded-lg p-4 border border-gray-200 mb-5">
-                        <p class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-3 flex items-center gap-2">
-                            <i class="fas fa-info-circle text-[#0e7c7b]"></i>Expected JSON Format
+                <div id="jsonImportPanel" class="space-y-5">
+                    <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                        <p class="caption mb-3 flex items-center gap-2">
+                            <i class="fas fa-info-circle text-[#0e7c7b]"></i>
+                            Expected JSON Format
                         </p>
-                        <pre class="font-mono text-xs bg-white p-3 rounded-lg border border-gray-200 overflow-x-auto">
+                        <pre class="mono text-xs bg-white p-3 rounded-lg border border-gray-200 overflow-x-auto" style="font-size: 0.75rem; line-height: 1.5;">
 {
   "variant_legacy_name": "G542X",
   "variant_protein_name": "p.Gly542X",
@@ -744,44 +986,74 @@
                     
                     <div class="form-group">
                         <label class="form-label">JSON Data</label>
-                        <textarea id="jsonInput" class="form-control font-mono" rows="6" placeholder='Paste JSON here...' spellcheck="false"></textarea>
+                        <textarea id="jsonInput" 
+                                  class="form-control mono"
+                                  rows="8"
+                                  placeholder='Paste your JSON data here...'
+                                  spellcheck="false"></textarea>
                     </div>
                     
-                    <div id="importResults" class="space-y-3"></div>
+                    <div id="importResults" class="space-y-3">
+                        <!-- Validation results appear here -->
+                    </div>
                     
                     <div class="flex justify-end gap-3">
-                        <button onclick="clearImportForm()" class="btn btn-secondary">Clear</button>
-                        <button onclick="validateImport()" class="btn btn-secondary">Validate</button>
-                        <button onclick="executeJsonImport()" class="btn btn-primary" id="executeImportBtn" disabled>Import Data</button>
+                        <button onclick="clearImportForm()" class="btn btn-secondary">
+                            Clear
+                        </button>
+                        <button onclick="validateImport()" class="btn btn-secondary">
+                            <i class="fas fa-check-circle mr-2"></i>
+                            Validate JSON
+                        </button>
+                        <button onclick="executeJsonImport()" class="btn btn-primary" id="executeImportBtn" disabled>
+                            <i class="fas fa-cloud-upload-alt mr-2"></i>
+                            Import Data
+                        </button>
                     </div>
                 </div>
                 
                 <!-- Manual Entry Form Panel -->
-                <div id="formImportPanel" class="hidden">
-                    <div class="bg-[#e9f0f9] rounded-lg p-4 border border-[#0a2e5a]/20 mb-5">
+                <div id="formImportPanel" class="space-y-5 hidden">
+                    <div class="bg-[#e9f0f9] rounded-lg p-4 border border-[#0a2e5a]/20">
                         <p class="text-sm text-[#0a2e5a] flex items-center gap-2">
-                            <i class="fas fa-info-circle"></i>Enter variant information manually.
+                            <i class="fas fa-info-circle"></i>
+                            Enter variant information manually. All fields are required.
                         </p>
                     </div>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="form-group">
-                            <label class="form-label">Legacy Name *</label>
-                            <input type="text" id="formLegacyName" class="form-control font-mono" placeholder="e.g., G542X">
+                            <label class="form-label">
+                                <i class="fas fa-tag mr-1"></i>
+                                Legacy Name
+                            </label>
+                            <input type="text" id="formLegacyName" class="form-control mono" placeholder="e.g., G542X">
+                            <p class="text-xs text-gray-500 mt-1">Variant identifier (e.g., G542X)</p>
                         </div>
                         
                         <div class="form-group">
-                            <label class="form-label">Protein Name *</label>
-                            <input type="text" id="formProteinName" class="form-control font-mono" placeholder="e.g., p.Gly542X">
+                            <label class="form-label">
+                                <i class="fas fa-dna mr-1"></i>
+                                Protein Name
+                            </label>
+                            <input type="text" id="formProteinName" class="form-control mono" placeholder="e.g., p.Gly542X">
+                            <p class="text-xs text-gray-500 mt-1">HGVS protein notation</p>
                         </div>
                         
                         <div class="form-group">
-                            <label class="form-label">cDNA Name *</label>
-                            <input type="text" id="formCdnaName" class="form-control font-mono" placeholder="e.g., c.1624G>T">
+                            <label class="form-label">
+                                <i class="fas fa-dna mr-1"></i>
+                                cDNA Name
+                            </label>
+                            <input type="text" id="formCdnaName" class="form-control mono" placeholder="e.g., c.1624G>T">
+                            <p class="text-xs text-gray-500 mt-1">HGVS cDNA notation</p>
                         </div>
                         
                         <div class="form-group">
-                            <label class="form-label">Determination *</label>
+                            <label class="form-label">
+                                <i class="fas fa-flask mr-1"></i>
+                                Final Determination
+                            </label>
                             <select id="formDetermination" class="form-control">
                                 <option value="">Select determination</option>
                                 <option value="CF-causing">CF-causing</option>
@@ -792,8 +1064,11 @@
                         </div>
                     </div>
                     
-                    <div class="bg-gray-50 rounded-lg p-4 border border-gray-200 mt-4">
-                        <p class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-3">Optional Clinical Data</p>
+                    <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                        <p class="caption mb-2 flex items-center gap-2">
+                            <i class="fas fa-shield-alt text-[#0e7c7b]"></i>
+                            Optional Clinical Data
+                        </p>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="form-label text-gray-600">CFTR Class</label>
@@ -818,31 +1093,37 @@
                         </div>
                     </div>
                     
-                    <div class="flex justify-end gap-3 mt-6">
-                        <button onclick="clearManualForm()" class="btn btn-secondary">Clear</button>
-                        <button onclick="submitManualForm()" class="btn btn-primary">Save Variant</button>
+                    <div class="flex justify-end gap-3">
+                        <button onclick="clearManualForm()" class="btn btn-secondary">
+                            Clear Form
+                        </button>
+                        <button onclick="submitManualForm()" class="btn btn-primary">
+                            <i class="fas fa-save mr-2"></i>
+                            Save Variant
+                        </button>
                     </div>
                 </div>
             </div>
             
             <div class="modal-footer">
                 <span class="text-xs text-gray-500 flex-1">
-                    <i class="fas fa-shield-alt mr-1"></i>All data validated against clinical standards
+                    <i class="fas fa-shield-alt mr-1"></i>
+                    All imported data is validated against clinical standards
                 </span>
-                <button onclick="closeImportModal()" class="btn btn-secondary">Cancel</button>
+                <button onclick="closeImportModal()" class="btn btn-secondary">
+                    Cancel
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- ============================================
-         ANNOTATION MODAL - FIXED WORKING VERSION
-         ============================================ -->
+    <!-- Annotation Modal -->
     <div id="annotationModal" class="modal-overlay hidden">
         <div class="modal" style="max-width: 500px;">
             <div class="modal-header">
                 <div>
-                    <h3 class="font-['Space_Grotesk'] text-lg font-semibold text-gray-900" id="annotationTitle">Annotate Data</h3>
-                    <p class="text-xs font-semibold uppercase tracking-wider text-gray-500 mt-1" id="annotationField"></p>
+                    <h3 class="heading-3 text-gray-900" id="annotationTitle">Annotate Data</h3>
+                    <p class="caption mt-1" id="annotationField"></p>
                 </div>
                 <button onclick="closeAnnotationModal()" class="w-8 h-8 rounded-lg hover:bg-gray-200 transition-colors">
                     <i class="fas fa-times"></i>
@@ -854,19 +1135,22 @@
             </div>
             
             <div class="modal-footer">
-                <button onclick="closeAnnotationModal()" class="btn btn-secondary">Cancel</button>
-                <button onclick="saveAnnotation()" class="btn btn-primary">Save Annotation</button>
+                <button onclick="closeAnnotationModal()" class="btn btn-secondary">
+                    Cancel
+                </button>
+                <button onclick="saveAnnotation()" class="btn btn-primary">
+                    <i class="fas fa-save mr-2"></i>
+                    Save Annotation
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- ============================================
-         DASHBOARD MODAL
-         ============================================ -->
+    <!-- Dashboard Modal -->
     <div id="dashboardModal" class="modal-overlay hidden">
         <div class="modal" style="max-width: 800px;">
             <div class="modal-header">
-                <h3 class="font-['Space_Grotesk'] text-xl font-semibold text-gray-900">Δ Helix Analytics</h3>
+                <h3 class="heading-3 text-gray-900">Δ Helix Analytics</h3>
                 <button onclick="closeDashboard()" class="w-8 h-8 rounded-lg hover:bg-gray-200 transition-colors">
                     <i class="fas fa-times"></i>
                 </button>
@@ -876,13 +1160,14 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="card">
                         <div class="card-body">
-                            <p class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-3">Classification Distribution</p>
+                            <p class="caption mb-3">Classification Distribution</p>
                             <canvas id="classChart" height="200"></canvas>
                         </div>
                     </div>
+                    
                     <div class="card">
                         <div class="card-body">
-                            <p class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-3">ETI Response Prediction</p>
+                            <p class="caption mb-3">ETI Response Prediction</p>
                             <canvas id="responseChart" height="200"></canvas>
                         </div>
                     </div>
@@ -890,17 +1175,20 @@
             </div>
             
             <div class="modal-footer">
-                <button onclick="exportReport()" class="btn btn-primary">Export Report</button>
+                <button onclick="exportReport()" class="btn btn-primary">
+                    <i class="fas fa-download mr-2"></i>
+                    Export Report
+                </button>
             </div>
         </div>
     </div>
 
     <!-- ============================================
-         COMPLETE JAVASCRIPT - FIXED AND WORKING
+         COMPLETE JAVASCRIPT IMPLEMENTATION
          ============================================ -->
     <script>
         // ======================================================================
-        // Δ HELIX | CFTR CLINICAL INTELLIGENCE SYSTEM v6.1.0
+        // Δ HELIX | CFTR CLINICAL INTELLIGENCE SYSTEM v6.0.0
         // ======================================================================
         
         // ----------------------------------------------------------------------
@@ -916,26 +1204,28 @@
                 SEARCH_DELAY: 300,
                 NOTIFICATION_DURATION: 4000
             },
-            USE_DEMO_MODE: true // Set to false to use real Supabase
+            VERSION: 'Δ6.0.0'
         };
 
         // ----------------------------------------------------------------------
-        // STATE MANAGEMENT
+        // STATE MANAGEMENT - Single Source of Truth
         // ----------------------------------------------------------------------
         const STATE = {
             variants: [],
             filteredVariants: [],
             selectedVariant: null,
             
+            // UI State
             activeFilter: 'all',
             currentPage: 1,
             searchQuery: '',
             dataViewMode: 'all',
             importTabActive: 'json',
             
+            // Validation State
             validatedJson: null,
-            annotationContext: null,
             
+            // Database Stats - Will be updated from actual DB
             databaseStats: {
                 total: 0,
                 complete: 0,
@@ -946,40 +1236,196 @@
             },
             
             charts: {},
-            searchTimeout: null,
-            initialized: false
+            searchTimeout: null
         };
 
         // ----------------------------------------------------------------------
         // INITIALIZATION
         // ----------------------------------------------------------------------
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeApp();
-        });
+        document.addEventListener('DOMContentLoaded', initializeApp);
 
-        function initializeApp() {
-            console.log('🚀 Δ Helix initializing...');
-            
-            attachEventListeners();
-            initializeSearch();
-            
-            if (CONFIG.USE_DEMO_MODE) {
-                loadDemoData();
+        async function initializeApp() {
+            try {
+                console.log(`🚀 Δ Helix v${CONFIG.VERSION} initializing...`);
+                
+                showLoadingState('Connecting to database...');
+                attachEventListeners();
+                
+                // Load real data from Supabase
+                await loadDatabaseStats();
+                await loadVariantCatalog();
+                
+                // Update UI
                 updateStatsUI();
                 renderVariantCatalog();
                 refreshViewDescription();
-                showNotification('Demo mode • ' + STATE.variants.length + ' variants loaded', 'info');
-            } else {
-                showLoadingState('Connecting to database...');
-                loadDatabaseStats();
-                loadVariantCatalog();
+                
+                showNotification('System ready • ' + STATE.variants.length + ' variants loaded', 'success');
+                
+            } catch (error) {
+                console.error('❌ Initialization failed:', error);
+                showNotification('Failed to connect to database. Loading demo data.', 'warning');
+                loadDemoData();
             }
-            
-            STATE.initialized = true;
         }
 
         // ----------------------------------------------------------------------
-        // DEMO DATA
+        // DATABASE OPERATIONS
+        // ----------------------------------------------------------------------
+        async function loadDatabaseStats() {
+            try {
+                const response = await fetch(
+                    `${CONFIG.SUPABASE.URL}/rest/v1/variants?select=count`,
+                    {
+                        headers: {
+                            'apikey': CONFIG.SUPABASE.KEY,
+                            'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`
+                        }
+                    }
+                );
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    STATE.databaseStats.total = data[0]?.count || 0;
+                }
+                
+                // Load other stats in parallel
+                const [complete, clinical, classI, exceptional, responsive] = await Promise.all([
+                    fetchCount('variants?cftr_class=not.is.null&eti_prediction=not.is.null&class_confidence=not.is.null'),
+                    fetchCount('variants?or=(cftr_class.not.is.null,eti_prediction.not.is.null)'),
+                    fetchCount('variants?cftr_class=eq.I'),
+                    fetchCount('variants?class_subtype=eq.exceptional'),
+                    fetchCount('variants?eti_prediction=eq.responsive')
+                ]);
+                
+                STATE.databaseStats.complete = complete;
+                STATE.databaseStats.clinical = clinical;
+                STATE.databaseStats.classI = classI;
+                STATE.databaseStats.exceptional = exceptional;
+                STATE.databaseStats.responsive = responsive;
+                
+            } catch (error) {
+                console.warn('Could not fetch database stats:', error);
+                loadDefaultStats();
+            }
+        }
+
+        async function fetchCount(endpoint) {
+            try {
+                const response = await fetch(
+                    `${CONFIG.SUPABASE.URL}/rest/v1/${endpoint}&select=count`,
+                    {
+                        headers: {
+                            'apikey': CONFIG.SUPABASE.KEY,
+                            'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`
+                        }
+                    }
+                );
+                const data = await response.json();
+                return data[0]?.count || 0;
+            } catch {
+                return 0;
+            }
+        }
+
+        async function loadVariantCatalog() {
+            try {
+                const response = await fetch(
+                    `${CONFIG.SUPABASE.URL}/rest/v1/clinical_variants?select=*&order=legacy_name.asc`,
+                    {
+                        headers: {
+                            'apikey': CONFIG.SUPABASE.KEY,
+                            'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`
+                        }
+                    }
+                );
+                
+                if (!response.ok) throw new Error('Failed to load variants');
+                
+                STATE.variants = await response.json();
+                STATE.filteredVariants = [...STATE.variants];
+                
+                // Update stats with actual counts
+                updateDatabaseStatsFromData();
+                
+            } catch (error) {
+                console.error('Error loading variants:', error);
+                throw error;
+            }
+        }
+
+        async function importVariant(variantData) {
+            try {
+                // Check if variant already exists
+                const existingResponse = await fetch(
+                    `${CONFIG.SUPABASE.URL}/rest/v1/clinical_variants?legacy_name=eq.${encodeURIComponent(variantData.variant_legacy_name)}`,
+                    {
+                        headers: {
+                            'apikey': CONFIG.SUPABASE.KEY,
+                            'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`
+                        }
+                    }
+                );
+                
+                const existing = await existingResponse.json();
+                
+                if (existing && existing.length > 0) {
+                    // Update existing variant
+                    const response = await fetch(
+                        `${CONFIG.SUPABASE.URL}/rest/v1/clinical_variants?legacy_name=eq.${encodeURIComponent(variantData.variant_legacy_name)}`,
+                        {
+                            method: 'PATCH',
+                            headers: {
+                                'apikey': CONFIG.SUPABASE.KEY,
+                                'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`,
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                protein_name: variantData.variant_protein_name,
+                                cdna_name: variantData.variant_cDNA_name,
+                                final_determination: variantData.variant_final_determination,
+                                updated_at: new Date().toISOString()
+                            })
+                        }
+                    );
+                    
+                    if (!response.ok) throw new Error('Update failed');
+                    return { status: 'updated', variant: variantData.variant_legacy_name };
+                    
+                } else {
+                    // Insert new variant
+                    const response = await fetch(
+                        `${CONFIG.SUPABASE.URL}/rest/v1/clinical_variants`,
+                        {
+                            method: 'POST',
+                            headers: {
+                                'apikey': CONFIG.SUPABASE.KEY,
+                                'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`,
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                legacy_name: variantData.variant_legacy_name,
+                                protein_name: variantData.variant_protein_name,
+                                cdna_name: variantData.variant_cDNA_name,
+                                final_determination: variantData.variant_final_determination,
+                                created_at: new Date().toISOString(),
+                                updated_at: new Date().toISOString()
+                            })
+                        }
+                    );
+                    
+                    if (!response.ok) throw new Error('Insert failed');
+                    return { status: 'created', variant: variantData.variant_legacy_name };
+                }
+                
+            } catch (error) {
+                console.error('Import error:', error);
+                throw error;
+            }
+        }
+
+        // ----------------------------------------------------------------------
+        // DEMO DATA (Fallback)
         // ----------------------------------------------------------------------
         function loadDemoData() {
             STATE.variants = [
@@ -994,8 +1440,7 @@
                     eti_prediction: 'responsive',
                     eti_evidence_level: 'High',
                     therapy_responsive: true,
-                    class_confidence: 'Confirmed',
-                    source_summary: 'ClinVar_CFTR2_Evidence'
+                    class_confidence: 'Confirmed'
                 },
                 {
                     id: 2,
@@ -1008,8 +1453,7 @@
                     eti_prediction: 'responsive',
                     eti_evidence_level: 'High',
                     therapy_responsive: true,
-                    class_confidence: 'Confirmed',
-                    source_summary: 'ClinVar_CFTR2'
+                    class_confidence: 'Confirmed'
                 },
                 {
                     id: 3,
@@ -1022,8 +1466,7 @@
                     eti_prediction: 'non_responsive',
                     eti_evidence_level: 'Moderate',
                     therapy_responsive: false,
-                    class_confidence: 'Confirmed',
-                    source_summary: 'ClinVar'
+                    class_confidence: 'Confirmed'
                 },
                 {
                     id: 4,
@@ -1036,39 +1479,25 @@
                     eti_prediction: 'responsive',
                     eti_evidence_level: 'High',
                     therapy_responsive: true,
-                    class_confidence: 'Confirmed',
-                    source_summary: 'CFTR2_ClinVar'
-                },
-                {
-                    id: 5,
-                    legacy_name: 'N1303K',
-                    protein_name: 'p.Asn1303Lys',
-                    cdna_name: 'c.3909C>G',
-                    final_determination: 'CF-causing',
-                    cftr_class: 'II',
-                    class_subtype: 'standard',
-                    eti_prediction: 'non_responsive',
-                    eti_evidence_level: 'Moderate',
-                    therapy_responsive: false,
-                    class_confidence: 'Confirmed'
-                },
-                {
-                    id: 6,
-                    legacy_name: 'G551D',
-                    protein_name: 'p.Gly551Asp',
-                    cdna_name: 'c.1652G>A',
-                    final_determination: 'CF-causing',
-                    cftr_class: 'III',
-                    class_subtype: 'standard',
-                    eti_prediction: 'responsive',
-                    eti_evidence_level: 'High',
-                    therapy_responsive: true,
                     class_confidence: 'Confirmed'
                 }
             ];
             
             STATE.filteredVariants = [...STATE.variants];
+            STATE.databaseStats = {
+                total: 2102,
+                complete: 1002,
+                clinical: 1854,
+                classI: 979,
+                exceptional: 21,
+                responsive: 50
+            };
             
+            updateStatsUI();
+            renderVariantCatalog();
+        }
+
+        function loadDefaultStats() {
             STATE.databaseStats = {
                 total: 2102,
                 complete: 1002,
@@ -1079,27 +1508,53 @@
             };
         }
 
+        function updateDatabaseStatsFromData() {
+            STATE.databaseStats.total = STATE.variants.length;
+            STATE.databaseStats.complete = STATE.variants.filter(v => 
+                v.cftr_class && v.eti_prediction && v.class_confidence
+            ).length;
+            STATE.databaseStats.clinical = STATE.variants.filter(v => 
+                v.cftr_class || v.eti_prediction
+            ).length;
+            STATE.databaseStats.classI = STATE.variants.filter(v => 
+                v.cftr_class === 'I'
+            ).length;
+            STATE.databaseStats.exceptional = STATE.variants.filter(v => 
+                v.class_subtype === 'exceptional'
+            ).length;
+            STATE.databaseStats.responsive = STATE.variants.filter(v => 
+                v.eti_prediction === 'responsive'
+            ).length;
+        }
+
         // ----------------------------------------------------------------------
         // FILTER ENGINE
         // ----------------------------------------------------------------------
         function applyFilterChain() {
             let filtered = [...STATE.variants];
             
+            // Search filter
             if (STATE.searchQuery) {
                 const query = STATE.searchQuery.toLowerCase();
                 filtered = filtered.filter(v => 
-                    (v.legacy_name && v.legacy_name.toLowerCase().includes(query)) ||
-                    (v.protein_name && v.protein_name.toLowerCase().includes(query)) ||
-                    (v.cdna_name && v.cdna_name.toLowerCase().includes(query))
+                    v.legacy_name?.toLowerCase().includes(query) ||
+                    v.protein_name?.toLowerCase().includes(query) ||
+                    v.cdna_name?.toLowerCase().includes(query)
                 );
             }
             
+            // View mode filter
             if (STATE.dataViewMode === 'complete') {
-                filtered = filtered.filter(v => v.cftr_class && v.eti_prediction);
+                filtered = filtered.filter(v => 
+                    v.cftr_class && v.eti_prediction && v.class_confidence
+                );
             } else if (STATE.dataViewMode === 'clinical') {
-                filtered = filtered.filter(v => v.cftr_class || v.eti_prediction);
+                filtered = filtered.filter(v => 
+                    v.cftr_class || v.eti_prediction
+                );
             }
             
+            // Missing data filter
             if (STATE.activeFilter === 'missing') {
                 filtered = filtered.filter(v => hasMissingData(v));
             }
@@ -1113,18 +1568,19 @@
         }
 
         function hasMissingData(variant) {
-            return !variant.cftr_class || !variant.eti_prediction;
+            return !variant.cftr_class || !variant.eti_prediction || !variant.class_confidence;
         }
 
         function countMissingFields(variant) {
             let count = 0;
             if (!variant.cftr_class) count++;
             if (!variant.eti_prediction) count++;
+            if (!variant.class_confidence) count++;
             return count;
         }
 
         // ----------------------------------------------------------------------
-        // RENDER ENGINE - VARIANT LIST
+        // RENDER ENGINE
         // ----------------------------------------------------------------------
         function renderVariantCatalog() {
             const container = document.getElementById('variantList');
@@ -1135,40 +1591,74 @@
             const pageVariants = STATE.filteredVariants.slice(startIndex, endIndex);
             
             if (pageVariants.length === 0) {
-                container.innerHTML = '<div class="p-8 text-center"><div class="w-16 h-16 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center"><i class="fas fa-dna text-2xl text-gray-400"></i></div><p class="text-gray-700 font-medium">No variants found</p><p class="text-sm text-gray-500 mt-2">Try adjusting your filters</p></div>';
+                container.innerHTML = `
+                    <div class="p-8 text-center">
+                        <div class="w-16 h-16 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                            <i class="fas fa-dna text-2xl text-gray-400"></i>
+                        </div>
+                        <p class="text-gray-700 font-medium">No variants found</p>
+                        <p class="text-sm text-gray-500 mt-2">
+                            ${STATE.searchQuery 
+                                ? 'Try adjusting your search terms' 
+                                : STATE.activeFilter === 'missing'
+                                    ? 'All variants have complete data'
+                                    : 'No variants match current filters'}
+                        </p>
+                    </div>
+                `;
                 return;
             }
             
             container.innerHTML = pageVariants.map(variant => {
-                const isSelected = STATE.selectedVariant && STATE.selectedVariant.id === variant.id;
+                const isSelected = STATE.selectedVariant?.id === variant.id;
                 const missingCount = countMissingFields(variant);
                 
                 let badgeHTML = '';
                 if (variant.cftr_class) {
-                    badgeHTML = `<span class="badge badge-class-${variant.cftr_class.toLowerCase()}"><i class="fas fa-dna"></i>Class ${variant.cftr_class}</span>`;
+                    badgeHTML = `<span class="badge badge-class-${variant.cftr_class.toLowerCase()}">
+                        <i class="fas fa-dna"></i>
+                        Class ${variant.cftr_class}
+                    </span>`;
+                } else if (variant.class_subtype === 'exceptional') {
+                    badgeHTML = `<span class="badge badge-exceptional">
+                        <i class="fas fa-bolt"></i>
+                        Exceptional
+                    </span>`;
                 }
                 
                 return `
-                    <div class="variant-item ${isSelected ? 'selected' : ''}" onclick="selectVariant('${variant.legacy_name}')">
+                    <div class="variant-item ${isSelected ? 'selected' : ''}" 
+                         onclick="selectVariant('${variant.legacy_name}')">
                         <div class="flex justify-between items-start mb-2">
                             <div>
                                 <h4 class="variant-name">${escapeHTML(variant.legacy_name)}</h4>
-                                ${variant.protein_name ? `<p class="variant-subtitle">${escapeHTML(variant.protein_name)}</p>` : ''}
+                                ${variant.protein_name ? `
+                                    <p class="variant-subtitle">${escapeHTML(variant.protein_name)}</p>
+                                ` : ''}
                             </div>
                             ${badgeHTML}
                         </div>
                         <div class="flex justify-between items-center mt-2">
-                            <span class="text-xs text-gray-600">${variant.final_determination || 'Not specified'}</span>
-                            ${missingCount > 0 ? `<span class="missing-count" title="${missingCount} missing field${missingCount > 1 ? 's' : ''}">${missingCount}</span>` : ''}
+                            <span class="text-xs text-gray-600">
+                                ${variant.final_determination || 'Clinical impact not specified'}
+                            </span>
+                            ${missingCount > 0 ? `
+                                <span class="missing-count" title="${missingCount} missing field${missingCount > 1 ? 's' : ''}">
+                                    ${missingCount}
+                                </span>
+                            ` : ''}
                         </div>
                     </div>
                 `;
             }).join('');
+            
+            // Update variant count
+            const variantCountEl = document.querySelector('.variant-count');
+            if (variantCountEl) {
+                variantCountEl.textContent = STATE.filteredVariants.length;
+            }
         }
 
-        // ----------------------------------------------------------------------
-        // RENDER ENGINE - VARIANT DETAILS - OPTIMIZED LAYOUT
-        // ----------------------------------------------------------------------
         function renderVariantDetails(variant) {
             if (!variant) return;
             
@@ -1176,204 +1666,172 @@
             
             const missingCount = countMissingFields(variant);
             const isExceptional = variant.class_subtype === 'exceptional';
+            const isTrueClassI = variant.class_subtype === 'true';
             
-            // OPTIMIZED LAYOUT - Nomenclature in compact row, Clinical/Therapy side by side
             const detailsHTML = `
-                <!-- Header Card -->
-                <div class="card mb-6">
+                <div id="variantHeader" class="card mb-6 animate-fade-in">
                     <div class="card-body" style="background: linear-gradient(135deg, #f9fafb 0%, #ffffff 100%);">
                         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                             <div class="flex-1">
                                 <div class="flex items-center gap-3 mb-2">
-                                    <h2 class="font-['Space_Grotesk'] text-2xl font-bold text-gray-900">${escapeHTML(variant.legacy_name)}</h2>
-                                    ${missingCount > 0 ? 
-                                        `<span class="badge" style="background: #ffedd5; color: #b45309; border-color: #fcd34d;"><i class="fas fa-exclamation-triangle"></i>${missingCount} missing</span>` : 
-                                        `<span class="badge" style="background: #ccfbf1; color: #0f766e; border-color: #bbf7d0;"><i class="fas fa-check-circle"></i>Complete</span>`
-                                    }
+                                    <h2 class="heading-2 text-gray-900">${escapeHTML(variant.legacy_name)}</h2>
+                                    ${missingCount > 0 ? `
+                                        <span class="badge" style="background: #ffedd5; color: #b45309; border-color: #fcd34d;">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                            ${missingCount} missing
+                                        </span>
+                                    ` : `
+                                        <span class="badge" style="background: #ccfbf1; color: #0f766e; border-color: #bbf7d0;">
+                                            <i class="fas fa-check-circle"></i>
+                                            Complete
+                                        </span>
+                                    `}
                                 </div>
-                                <div class="flex flex-wrap gap-2">
+                                <div class="flex flex-wrap gap-2 mb-3">
                                     ${variant.cftr_class ? `
                                         <span class="badge badge-class-${variant.cftr_class.toLowerCase()}">
-                                            <i class="fas fa-dna"></i>Class ${variant.cftr_class}
-                                            ${isExceptional ? '• Exceptional' : ''}
+                                            <i class="fas fa-dna"></i>
+                                            Class ${variant.cftr_class}
+                                            ${isExceptional ? '• Exceptional' : isTrueClassI ? '• True Class I' : ''}
                                         </span>
                                     ` : ''}
                                     ${variant.eti_prediction ? `
-                                        <span class="badge" style="background: ${variant.eti_prediction === 'responsive' ? '#ccfbf1' : '#fee2e2'}; color: ${variant.eti_prediction === 'responsive' ? '#0f766e' : '#b91c1c'}; border-color: ${variant.eti_prediction === 'responsive' ? '#bbf7d0' : '#fecaca'};">
+                                        <span class="badge" style="background: ${variant.eti_prediction === 'responsive' ? '#ccfbf1' : '#fee2e2'}; 
+                                                              color: ${variant.eti_prediction === 'responsive' ? '#0f766e' : '#b91c1c'}; 
+                                                              border-color: ${variant.eti_prediction === 'responsive' ? '#bbf7d0' : '#fecaca'};">
                                             <i class="fas ${variant.eti_prediction === 'responsive' ? 'fa-check' : 'fa-times'}"></i>
                                             ETI ${variant.eti_prediction === 'responsive' ? 'Responsive' : 'Non-responsive'}
                                         </span>
                                     ` : ''}
                                     ${variant.final_determination === 'CF-causing' ? `
                                         <span class="badge" style="background: #fee2e2; color: #b91c1c; border-color: #fecaca;">
-                                            <i class="fas fa-exclamation-triangle"></i>CF-causing
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                            CF-causing
                                         </span>
                                     ` : ''}
                                 </div>
                             </div>
                             
-                            <div class="bg-gray-50 rounded-lg p-4 border border-gray-200 min-w-[180px]">
-                                <p class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Classification</p>
-                                <p class="font-['Space_Grotesk'] text-2xl font-bold" style="color: ${variant.cftr_class ? 
+                            <div class="bg-gray-50 rounded-lg p-4 border border-gray-200 min-w-[200px]">
+                                <p class="caption mb-1">Clinical Classification</p>
+                                <p class="heading-2 mb-0" style="color: ${variant.cftr_class ? 
                                     (isExceptional ? '#b45309' : 
                                      variant.cftr_class === 'I' ? '#b91c1c' :
                                      variant.cftr_class === 'II' ? '#b45309' :
-                                     variant.cftr_class === 'III' ? '#0f766e' : '#1e40af') : '#374151'
-                                };">
+                                     variant.cftr_class === 'III' ? '#0f766e' :
+                                     variant.cftr_class === 'IV' ? '#1e40af' : '#6d28d9') : '#374151'
+                                }">
                                     ${variant.cftr_class || '—'}
                                 </p>
                                 <p class="text-sm font-medium text-gray-700 mt-1">
-                                    ${isExceptional ? 'Exceptional Case' : variant.cftr_class ? `Class ${variant.cftr_class}` : 'Not classified'}
+                                    ${isExceptional ? 'Exceptional Case' : 
+                                      isTrueClassI ? 'True Class I' : 
+                                      variant.cftr_class ? `Class ${variant.cftr_class}` : 'Not classified'}
                                 </p>
                                 ${variant.class_confidence ? `
-                                    <p class="text-xs text-gray-500 mt-1"><i class="fas fa-shield-alt mr-1"></i>${variant.class_confidence}</p>
+                                    <p class="text-xs text-gray-500 mt-1">
+                                        <i class="fas fa-shield-alt mr-1"></i>
+                                        ${variant.class_confidence}
+                                    </p>
                                 ` : ''}
                             </div>
                         </div>
                     </div>
                 </div>
                 
-                <!-- COMPACT NOMENCLATURE ROW - 3 columns, minimal space -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <div class="data-point ${!variant.legacy_name ? 'missing' : ''}">
-                        <button class="annotation-trigger" onclick="showAnnotationModal('${variant.legacy_name}', 'legacy_name', ${JSON.stringify(variant.legacy_name || '')})">
-                            <i class="fas ${!variant.legacy_name ? 'fa-plus' : 'fa-pencil-alt'}"></i>
-                        </button>
-                        <div class="data-label"><i class="fas fa-tag"></i>Legacy Name</div>
-                        <div class="data-value">${escapeHTML(variant.legacy_name || 'Not specified')}</div>
-                    </div>
-                    <div class="data-point ${!variant.protein_name ? 'missing' : ''}">
-                        <button class="annotation-trigger" onclick="showAnnotationModal('${variant.legacy_name}', 'protein_name', ${JSON.stringify(variant.protein_name || '')})">
-                            <i class="fas ${!variant.protein_name ? 'fa-plus' : 'fa-pencil-alt'}"></i>
-                        </button>
-                        <div class="data-label"><i class="fas fa-dna"></i>Protein</div>
-                        <div class="data-value">${escapeHTML(variant.protein_name || 'Not specified')}</div>
-                    </div>
-                    <div class="data-point ${!variant.cdna_name ? 'missing' : ''}">
-                        <button class="annotation-trigger" onclick="showAnnotationModal('${variant.legacy_name}', 'cdna_name', ${JSON.stringify(variant.cdna_name || '')})">
-                            <i class="fas ${!variant.cdna_name ? 'fa-plus' : 'fa-pencil-alt'}"></i>
-                        </button>
-                        <div class="data-label"><i class="fas fa-dna"></i>cDNA</div>
-                        <div class="data-value">${escapeHTML(variant.cdna_name || 'Not specified')}</div>
-                    </div>
-                </div>
-                
-                <!-- CLINICAL & THERAPY SIDE BY SIDE - OPTIMIZED LAYOUT -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <!-- Clinical Impact Card -->
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="flex items-center gap-2">
-                                <i class="fas fa-stethoscope text-[#b91c1c]"></i>
-                                <span class="font-semibold text-gray-900">Clinical Impact</span>
-                                ${!variant.final_determination || !variant.cftr_class ? 
-                                    '<span class="missing-count text-xs ml-2">Missing</span>' : ''}
-                            </div>
-                        </div>
+                <div class="responsive-grid mb-6">
+                    <!-- Nomenclature -->
+                    <div class="card md:col-span-2">
                         <div class="card-body">
-                            <div class="space-y-3">
-                                <div class="data-point ${!variant.final_determination ? 'missing' : ''}">
-                                    <button class="annotation-trigger" onclick="showAnnotationModal('${variant.legacy_name}', 'final_determination', ${JSON.stringify(variant.final_determination || '')})">
-                                        <i class="fas ${!variant.final_determination ? 'fa-plus' : 'fa-pencil-alt'}"></i>
-                                    </button>
-                                    <div class="data-label">Determination</div>
-                                    <div class="data-value">${escapeHTML(variant.final_determination || 'Not specified')}</div>
-                                </div>
-                                <div class="data-point ${!variant.cftr_class ? 'missing' : ''}">
-                                    <button class="annotation-trigger" onclick="showAnnotationModal('${variant.legacy_name}', 'cftr_class', ${JSON.stringify(variant.cftr_class || '')})">
-                                        <i class="fas ${!variant.cftr_class ? 'fa-plus' : 'fa-pencil-alt'}"></i>
-                                    </button>
-                                    <div class="data-label">CFTR Class</div>
-                                    <div class="data-value">${escapeHTML(variant.cftr_class || 'Not specified')}</div>
-                                </div>
-                                <div class="data-point ${!variant.class_subtype ? 'missing' : ''}">
-                                    <button class="annotation-trigger" onclick="showAnnotationModal('${variant.legacy_name}', 'class_subtype', ${JSON.stringify(variant.class_subtype || '')})">
-                                        <i class="fas ${!variant.class_subtype ? 'fa-plus' : 'fa-pencil-alt'}"></i>
-                                    </button>
-                                    <div class="data-label">Subtype</div>
-                                    <div class="data-value">${escapeHTML(variant.class_subtype || 'Not specified')}</div>
-                                </div>
-                                <div class="data-point ${!variant.class_confidence ? 'missing' : ''}">
-                                    <button class="annotation-trigger" onclick="showAnnotationModal('${variant.legacy_name}', 'class_confidence', ${JSON.stringify(variant.class_confidence || '')})">
-                                        <i class="fas ${!variant.class_confidence ? 'fa-plus' : 'fa-pencil-alt'}"></i>
-                                    </button>
-                                    <div class="data-label">Confidence</div>
-                                    <div class="data-value">${escapeHTML(variant.class_confidence || 'Not specified')}</div>
-                                </div>
+                            <p class="caption mb-3 flex items-center gap-2">
+                                <i class="fas fa-tag"></i>
+                                Genetic Nomenclature
+                                ${!variant.protein_name || !variant.cdna_name ? `
+                                    <span class="missing-count text-xs" style="width: auto; padding: 0 0.5rem; border-radius: 12px;">
+                                        <i class="fas fa-exclamation-triangle mr-1"></i>
+                                        Incomplete
+                                    </span>
+                                ` : ''}
+                            </p>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                                ${createDataPoint('Legacy Name', variant.legacy_name, 'legacy_name', variant)}
+                                ${createDataPoint('Protein', variant.protein_name, 'protein_name', variant)}
+                                ${createDataPoint('cDNA', variant.cdna_name, 'cdna_name', variant)}
                             </div>
                         </div>
                     </div>
                     
-                    <!-- Therapeutic Prediction Card -->
+                    <!-- Clinical Impact -->
                     <div class="card">
-                        <div class="card-header">
-                            <div class="flex items-center gap-2">
-                                <i class="fas fa-prescription-bottle-alt text-[#0f766e]"></i>
-                                <span class="font-semibold text-gray-900">Therapeutic Prediction</span>
-                                ${!variant.eti_prediction ? 
-                                    '<span class="missing-count text-xs ml-2">Missing</span>' : ''}
-                            </div>
-                        </div>
                         <div class="card-body">
+                            <p class="caption mb-3 flex items-center gap-2">
+                                <i class="fas fa-stethoscope"></i>
+                                Clinical Impact
+                                ${!variant.final_determination ? `
+                                    <span class="missing-count text-xs" style="width: auto; padding: 0 0.5rem; border-radius: 12px;">
+                                        Missing
+                                    </span>
+                                ` : ''}
+                            </p>
                             <div class="space-y-3">
-                                <div class="data-point ${!variant.eti_prediction ? 'missing' : ''}">
-                                    <button class="annotation-trigger" onclick="showAnnotationModal('${variant.legacy_name}', 'eti_prediction', ${JSON.stringify(variant.eti_prediction || '')})">
-                                        <i class="fas ${!variant.eti_prediction ? 'fa-plus' : 'fa-pencil-alt'}"></i>
-                                    </button>
-                                    <div class="data-label">ETI Response</div>
-                                    <div class="data-value">${escapeHTML(variant.eti_prediction || 'Not specified')}</div>
-                                </div>
-                                <div class="data-point ${variant.therapy_responsive === undefined || variant.therapy_responsive === null ? 'missing' : ''}">
-                                    <button class="annotation-trigger" onclick="showAnnotationModal('${variant.legacy_name}', 'therapy_responsive', ${JSON.stringify(variant.therapy_responsive)})">
-                                        <i class="fas ${variant.therapy_responsive === undefined || variant.therapy_responsive === null ? 'fa-plus' : 'fa-pencil-alt'}"></i>
-                                    </button>
-                                    <div class="data-label">Responsive</div>
-                                    <div class="data-value">${variant.therapy_responsive !== undefined && variant.therapy_responsive !== null ? (variant.therapy_responsive ? 'Yes' : 'No') : 'Not specified'}</div>
-                                </div>
-                                <div class="data-point ${!variant.eti_evidence_level ? 'missing' : ''}">
-                                    <button class="annotation-trigger" onclick="showAnnotationModal('${variant.legacy_name}', 'eti_evidence_level', ${JSON.stringify(variant.eti_evidence_level || '')})">
-                                        <i class="fas ${!variant.eti_evidence_level ? 'fa-plus' : 'fa-pencil-alt'}"></i>
-                                    </button>
-                                    <div class="data-label">Evidence Level</div>
-                                    <div class="data-value">${escapeHTML(variant.eti_evidence_level || 'Not specified')}</div>
-                                </div>
-                                <div class="data-point ${!variant.eti_recommendation ? 'missing' : ''}">
-                                    <button class="annotation-trigger" onclick="showAnnotationModal('${variant.legacy_name}', 'eti_recommendation', ${JSON.stringify(variant.eti_recommendation || '')})">
-                                        <i class="fas ${!variant.eti_recommendation ? 'fa-plus' : 'fa-pencil-alt'}"></i>
-                                    </button>
-                                    <div class="data-label">Recommendation</div>
-                                    <div class="data-value">${escapeHTML(variant.eti_recommendation || 'Not specified')}</div>
-                                </div>
+                                ${createDataPoint('Determination', variant.final_determination, 'final_determination', variant)}
+                                ${createDataPoint('CFTR Class', variant.cftr_class, 'cftr_class', variant)}
+                                ${createDataPoint('Subtype', variant.class_subtype, 'class_subtype', variant)}
+                                ${createDataPoint('Confidence', variant.class_confidence, 'class_confidence', variant)}
                             </div>
                         </div>
                     </div>
-                </div>
-                
-                <!-- Evidence Chain - Full Width -->
-                <div class="card">
-                    <div class="card-header">
-                        <div class="flex items-center gap-2">
-                            <i class="fas fa-microscope text-[#6d28d9]"></i>
-                            <span class="font-semibold text-gray-900">Evidence Chain</span>
+                    
+                    <!-- Therapeutic Prediction -->
+                    <div class="card">
+                        <div class="card-body">
+                            <p class="caption mb-3 flex items-center gap-2">
+                                <i class="fas fa-prescription-bottle-alt"></i>
+                                Therapeutic Prediction
+                                ${!variant.eti_prediction ? `
+                                    <span class="missing-count text-xs" style="width: auto; padding: 0 0.5rem; border-radius: 12px;">
+                                        Missing
+                                    </span>
+                                ` : ''}
+                            </p>
+                            <div class="space-y-3">
+                                ${createDataPoint('ETI Response', variant.eti_prediction, 'eti_prediction', variant)}
+                                ${createDataPoint('Recommendation', variant.eti_recommendation, 'eti_recommendation', variant)}
+                                ${createDataPoint('Responsive', variant.therapy_responsive !== null 
+                                    ? (variant.therapy_responsive ? 'Yes' : 'No') 
+                                    : null, 'therapy_responsive', variant)}
+                                ${createDataPoint('Evidence Level', variant.eti_evidence_level, 'eti_evidence_level', variant)}
+                            </div>
                         </div>
                     </div>
-                    <div class="card-body">
-                        ${variant.source_summary ? `
-                            <div class="flex flex-wrap items-center gap-2">
-                                ${variant.source_summary.split('_').map((part, i) => `
-                                    <span class="px-3 py-1.5 bg-gray-100 rounded-lg text-xs font-mono">${escapeHTML(part)}</span>
-                                    ${i < variant.source_summary.split('_').length - 1 ? '<i class="fas fa-arrow-right text-gray-400 text-xs"></i>' : ''}
-                                `).join('')}
-                            </div>
-                        ` : `
-                            <div class="flex items-center gap-2">
-                                <p class="text-sm text-gray-500 italic">No evidence chain available</p>
-                                <button onclick="showAnnotationModal('${variant.legacy_name}', 'source_summary', '')" 
-                                        class="px-3 py-1.5 text-xs bg-[#0e7c7b] text-white rounded-lg hover:bg-[#0f766e]">
-                                    <i class="fas fa-plus mr-1"></i>Add Source
-                                </button>
-                            </div>
-                        `}
+                    
+                    <!-- Evidence Chain -->
+                    <div class="card md:col-span-3">
+                        <div class="card-body">
+                            <p class="caption mb-3 flex items-center gap-2">
+                                <i class="fas fa-microscope"></i>
+                                Evidence Chain
+                            </p>
+                            ${variant.source_summary ? `
+                                <div class="flex flex-wrap items-center gap-2">
+                                    ${variant.source_summary.split('_').map((part, i) => `
+                                        <span class="px-3 py-1.5 bg-gray-100 rounded-lg text-xs font-mono">
+                                            ${escapeHTML(part)}
+                                        </span>
+                                        ${i < variant.source_summary.split('_').length - 1 ? 
+                                            '<i class="fas fa-arrow-right text-gray-400 text-xs"></i>' : ''}
+                                    `).join('')}
+                                </div>
+                            ` : `
+                                <p class="text-sm text-gray-500 italic">
+                                    No evidence chain available
+                                    <button onclick="showAnnotationModal('${variant.legacy_name}', 'source_summary', '')" 
+                                            class="ml-2 text-[#0e7c7b] hover:underline">
+                                        Add source
+                                    </button>
+                                </p>
+                            `}
+                        </div>
                     </div>
                 </div>
             `;
@@ -1382,21 +1840,298 @@
             if (container) {
                 container.innerHTML = detailsHTML;
             }
+        }
+
+        function createDataPoint(label, value, field, variant) {
+            const isMissing = !value || value === 'null' || value === 'undefined';
+            const displayValue = isMissing ? 'Not specified' : escapeHTML(String(value));
             
-            document.getElementById('emptyState')?.classList.add('hidden');
+            return `
+                <div class="data-point ${isMissing ? 'missing' : ''}">
+                    <button class="annotation-trigger" 
+                            onclick="showAnnotationModal('${variant.legacy_name}', '${field}', ${JSON.stringify(value || '')})">
+                        <i class="fas ${isMissing ? 'fa-plus' : 'fa-pencil-alt'}"></i>
+                    </button>
+                    <div class="data-label">
+                        <i class="fas fa-tag"></i>
+                        ${label}
+                    </div>
+                    <div class="data-value ${isMissing ? 'text-[#b45309]' : ''}">
+                        ${displayValue}
+                    </div>
+                </div>
+            `;
         }
 
         // ----------------------------------------------------------------------
-        // ANNOTATION SYSTEM - FULLY FIXED AND WORKING
+        // IMPORT SYSTEM
         // ----------------------------------------------------------------------
-        function showAnnotationModal(variantName, field, currentValue) {
-            console.log('Opening annotation modal for:', variantName, field, currentValue);
+        function showImportModal() {
+            const modal = document.getElementById('importModal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                // Reset to JSON tab by default
+                switchImportTab('json');
+            }
+        }
+
+        function closeImportModal() {
+            const modal = document.getElementById('importModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                clearImportForm();
+                clearManualForm();
+            }
+        }
+
+        function switchImportTab(tab) {
+            STATE.importTabActive = tab;
             
-            const variant = STATE.variants.find(v => v.legacy_name === variantName);
-            if (!variant) {
-                showNotification('Variant not found', 'error');
+            // Update tab buttons
+            const jsonTab = document.getElementById('jsonTabBtn');
+            const formTab = document.getElementById('formTabBtn');
+            const jsonPanel = document.getElementById('jsonImportPanel');
+            const formPanel = document.getElementById('formImportPanel');
+            
+            if (jsonTab && formTab && jsonPanel && formPanel) {
+                if (tab === 'json') {
+                    jsonTab.classList.add('active');
+                    formTab.classList.remove('active');
+                    jsonPanel.classList.remove('hidden');
+                    formPanel.classList.add('hidden');
+                } else {
+                    jsonTab.classList.remove('active');
+                    formTab.classList.add('active');
+                    jsonPanel.classList.add('hidden');
+                    formPanel.classList.remove('hidden');
+                }
+            }
+        }
+
+        function clearImportForm() {
+            const input = document.getElementById('jsonInput');
+            const results = document.getElementById('importResults');
+            const executeBtn = document.getElementById('executeImportBtn');
+            
+            if (input) input.value = '';
+            if (results) results.innerHTML = '';
+            if (executeBtn) executeBtn.disabled = true;
+            
+            STATE.validatedJson = null;
+        }
+
+        function clearManualForm() {
+            const fields = ['formLegacyName', 'formProteinName', 'formCdnaName', 'formDetermination', 'formClass', 'formEtiResponse'];
+            fields.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+        }
+
+        function validateImport() {
+            const input = document.getElementById('jsonInput');
+            const results = document.getElementById('importResults');
+            const executeBtn = document.getElementById('executeImportBtn');
+            
+            if (!input || !results) return;
+            
+            try {
+                const jsonData = JSON.parse(input.value.trim());
+                
+                // Validate required fields
+                const requiredFields = ['variant_legacy_name', 'variant_protein_name', 'variant_cDNA_name', 'variant_final_determination'];
+                const missingFields = requiredFields.filter(field => !jsonData[field]);
+                
+                if (missingFields.length > 0) {
+                    throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
+                }
+                
+                // Validate final determination
+                const validDeterminations = ['CF-causing', 'Non CF-causing', 'Variant of unknown significance', 'Likely CF-causing'];
+                if (!validDeterminations.includes(jsonData.variant_final_determination)) {
+                    throw new Error('Invalid final determination value');
+                }
+                
+                // Store validated data
+                STATE.validatedJson = jsonData;
+                
+                results.innerHTML = `
+                    <div class="bg-[#e3f9e9] border border-[#0e7b4e] rounded-lg p-4 animate-fade-in">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-[#0e7b4e]/10 flex items-center justify-center">
+                                <i class="fas fa-check-circle text-[#0e7b4e]"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-[#0e7b4e]">Valid JSON Structure</p>
+                                <p class="text-sm text-gray-700 mt-1">
+                                    Ready to import variant: <span class="font-mono font-medium">${jsonData.variant_legacy_name}</span>
+                                </p>
+                                <div class="mt-2 text-xs bg-white/50 rounded p-2">
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <span class="text-gray-600">Protein:</span>
+                                        <span class="font-mono">${jsonData.variant_protein_name}</span>
+                                        <span class="text-gray-600">cDNA:</span>
+                                        <span class="font-mono">${jsonData.variant_cDNA_name}</span>
+                                        <span class="text-gray-600">Determination:</span>
+                                        <span class="font-mono">${jsonData.variant_final_determination}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                if (executeBtn) executeBtn.disabled = false;
+                
+            } catch (error) {
+                results.innerHTML = `
+                    <div class="bg-[#fee2e2] border border-[#b91c1c] rounded-lg p-4 animate-fade-in">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-[#b91c1c]/10 flex items-center justify-center">
+                                <i class="fas fa-exclamation-circle text-[#b91c1c]"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-[#b91c1c]">Invalid JSON</p>
+                                <p class="text-sm text-gray-700 mt-1">${escapeHTML(error.message)}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                if (executeBtn) executeBtn.disabled = true;
+                STATE.validatedJson = null;
+            }
+        }
+
+        async function executeJsonImport() {
+            if (!STATE.validatedJson) {
+                showNotification('Please validate JSON first', 'warning');
                 return;
             }
+            
+            const executeBtn = document.getElementById('executeImportBtn');
+            if (executeBtn) {
+                executeBtn.disabled = true;
+                executeBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Importing...';
+            }
+            
+            try {
+                const result = await importVariant(STATE.validatedJson);
+                
+                showNotification(
+                    `✓ Successfully ${result.status} variant ${result.variant}`,
+                    'success'
+                );
+                
+                // Refresh variant catalog
+                await loadVariantCatalog();
+                applyFilterChain();
+                
+                // Clear form
+                clearImportForm();
+                
+                // Close modal after short delay
+                setTimeout(() => {
+                    closeImportModal();
+                }, 2000);
+                
+            } catch (error) {
+                showNotification(`Import failed: ${error.message}`, 'error');
+                if (executeBtn) executeBtn.disabled = false;
+            }
+            
+            if (executeBtn) {
+                executeBtn.innerHTML = '<i class="fas fa-cloud-upload-alt mr-2"></i>Import Data';
+            }
+        }
+
+        async function submitManualForm() {
+            // Get form values
+            const legacyName = document.getElementById('formLegacyName')?.value.trim();
+            const proteinName = document.getElementById('formProteinName')?.value.trim();
+            const cdnaName = document.getElementById('formCdnaName')?.value.trim();
+            const determination = document.getElementById('formDetermination')?.value;
+            const cftrClass = document.getElementById('formClass')?.value;
+            const etiResponse = document.getElementById('formEtiResponse')?.value;
+            
+            // Validate required fields
+            if (!legacyName || !proteinName || !cdnaName || !determination) {
+                showNotification('Please fill in all required fields', 'warning');
+                return;
+            }
+            
+            // Construct variant object
+            const variantData = {
+                variant_legacy_name: legacyName,
+                variant_protein_name: proteinName,
+                variant_cDNA_name: cdnaName,
+                variant_final_determination: determination
+            };
+            
+            try {
+                showNotification('Saving variant...', 'info');
+                
+                const result = await importVariant(variantData);
+                
+                // If additional data provided, update it
+                if (cftrClass || etiResponse) {
+                    await updateVariantRecord(legacyName, {
+                        ...(cftrClass && { cftr_class: cftrClass }),
+                        ...(etiResponse && { eti_prediction: etiResponse })
+                    });
+                }
+                
+                showNotification(
+                    `✓ Successfully ${result.status} variant ${legacyName}`,
+                    'success'
+                );
+                
+                // Refresh data
+                await loadVariantCatalog();
+                applyFilterChain();
+                
+                // Clear form and close modal
+                clearManualForm();
+                setTimeout(() => closeImportModal(), 1500);
+                
+            } catch (error) {
+                showNotification(`Failed to save variant: ${error.message}`, 'error');
+            }
+        }
+
+        async function updateVariantRecord(legacyName, updates) {
+            try {
+                const response = await fetch(
+                    `${CONFIG.SUPABASE.URL}/rest/v1/clinical_variants?legacy_name=eq.${encodeURIComponent(legacyName)}`,
+                    {
+                        method: 'PATCH',
+                        headers: {
+                            'apikey': CONFIG.SUPABASE.KEY,
+                            'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            ...updates,
+                            updated_at: new Date().toISOString()
+                        })
+                    }
+                );
+                
+                if (!response.ok) throw new Error('Update failed');
+                return true;
+                
+            } catch (error) {
+                console.error('Update error:', error);
+                throw error;
+            }
+        }
+
+        // ----------------------------------------------------------------------
+        // ANNOTATION SYSTEM
+        // ----------------------------------------------------------------------
+        function showAnnotationModal(variantName, field, currentValue) {
+            const variant = STATE.variants.find(v => v.legacy_name === variantName);
+            if (!variant) return;
             
             STATE.annotationContext = { variant, field, currentValue };
             
@@ -1418,9 +2153,9 @@
             document.getElementById('annotationTitle').textContent = `Annotate ${variantName}`;
             document.getElementById('annotationField').textContent = fieldLabels[field] || field.replace(/_/g, ' ');
             
+            // Generate appropriate input based on field type
             let inputHTML = '';
             
-            // Generate appropriate input based on field type
             if (field === 'cftr_class') {
                 inputHTML = `
                     <div class="form-group">
@@ -1444,6 +2179,8 @@
                             <option value="standard" ${currentValue === 'standard' ? 'selected' : ''}>Standard</option>
                             <option value="exceptional" ${currentValue === 'exceptional' ? 'selected' : ''}>Exceptional Case</option>
                             <option value="true" ${currentValue === 'true' ? 'selected' : ''}>True Class I</option>
+                            <option value="complex" ${currentValue === 'complex' ? 'selected' : ''}>Complex</option>
+                            <option value="variable" ${currentValue === 'variable' ? 'selected' : ''}>Variable</option>
                         </select>
                     </div>
                 `;
@@ -1460,13 +2197,12 @@
                     </div>
                 `;
             } else if (field === 'therapy_responsive') {
-                const boolValue = currentValue === true || currentValue === 'true';
                 inputHTML = `
                     <div class="form-group">
                         <label class="form-label">Therapy Responsive</label>
                         <select id="annotationValue" class="form-control">
                             <option value="">Select</option>
-                            <option value="true" ${boolValue ? 'selected' : ''}>Yes</option>
+                            <option value="true" ${currentValue === true || currentValue === 'true' ? 'selected' : ''}>Yes</option>
                             <option value="false" ${currentValue === false || currentValue === 'false' ? 'selected' : ''}>No</option>
                         </select>
                     </div>
@@ -1485,33 +2221,23 @@
                         </select>
                     </div>
                 `;
-            } else if (field === 'final_determination') {
-                inputHTML = `
-                    <div class="form-group">
-                        <label class="form-label">Clinical Impact</label>
-                        <select id="annotationValue" class="form-control">
-                            <option value="">Select determination</option>
-                            <option value="CF-causing" ${currentValue === 'CF-causing' ? 'selected' : ''}>CF-causing</option>
-                            <option value="Non CF-causing" ${currentValue === 'Non CF-causing' ? 'selected' : ''}>Non CF-causing</option>
-                            <option value="Variant of unknown significance" ${currentValue === 'Variant of unknown significance' ? 'selected' : ''}>VUS</option>
-                            <option value="Likely CF-causing" ${currentValue === 'Likely CF-causing' ? 'selected' : ''}>Likely CF-causing</option>
-                        </select>
-                    </div>
-                `;
             } else {
                 inputHTML = `
                     <div class="form-group">
                         <label class="form-label">${fieldLabels[field] || field}</label>
-                        <textarea id="annotationValue" class="form-control font-mono" rows="3" placeholder="Enter value...">${escapeHTML(currentValue || '')}</textarea>
+                        <textarea id="annotationValue" 
+                                  class="form-control mono" 
+                                  rows="3"
+                                  placeholder="Enter value...">${escapeHTML(currentValue || '')}</textarea>
                     </div>
                 `;
             }
             
             document.getElementById('annotationContent').innerHTML = `
                 <div class="bg-gray-50 rounded-lg p-4 mb-4 border border-gray-200">
-                    <p class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">Current Value</p>
-                    <p class="font-mono text-sm ${!currentValue ? 'text-gray-400 italic' : ''}">
-                        ${currentValue ? escapeHTML(String(currentValue)) : 'Not specified'}
+                    <p class="caption mb-2">Current Value</p>
+                    <p class="mono text-sm ${!currentValue ? 'text-gray-400 italic' : ''}">
+                        ${currentValue ? escapeHTML(currentValue) : 'Not specified'}
                     </p>
                 </div>
                 ${inputHTML}
@@ -1520,24 +2246,13 @@
             document.getElementById('annotationModal').classList.remove('hidden');
         }
 
-        function closeAnnotationModal() {
-            document.getElementById('annotationModal').classList.add('hidden');
-            STATE.annotationContext = null;
-        }
-
-        function saveAnnotation() {
-            if (!STATE.annotationContext) {
-                showNotification('No annotation context found', 'error');
-                return;
-            }
+        async function saveAnnotation() {
+            if (!STATE.annotationContext) return;
             
             const { variant, field } = STATE.annotationContext;
             const input = document.getElementById('annotationValue');
             
-            if (!input) {
-                showNotification('Input field not found', 'error');
-                return;
-            }
+            if (!input) return;
             
             let newValue = input.value;
             
@@ -1547,69 +2262,70 @@
             }
             
             try {
-                // Update local state immediately for responsive UI
+                showNotification('Saving annotation...', 'info');
+                
+                await updateVariantRecord(variant.legacy_name, { [field]: newValue });
+                
+                // Update local state
                 STATE.variants = STATE.variants.map(v => 
                     v.legacy_name === variant.legacy_name ? { ...v, [field]: newValue } : v
                 );
                 
-                if (STATE.selectedVariant && STATE.selectedVariant.legacy_name === variant.legacy_name) {
+                if (STATE.selectedVariant?.legacy_name === variant.legacy_name) {
                     STATE.selectedVariant = { ...STATE.selectedVariant, [field]: newValue };
                     renderVariantDetails(STATE.selectedVariant);
                 }
                 
                 closeAnnotationModal();
-                showNotification(`✓ ${field.replace(/_/g, ' ')} updated successfully`, 'success');
+                showNotification('Annotation saved successfully', 'success');
                 
-                // Refresh views
-                renderVariantCatalog();
+                // Refresh view
                 applyFilterChain();
                 
             } catch (error) {
-                console.error('Save error:', error);
                 showNotification(`Failed to save: ${error.message}`, 'error');
             }
+        }
+
+        function closeAnnotationModal() {
+            document.getElementById('annotationModal').classList.add('hidden');
+            STATE.annotationContext = null;
         }
 
         // ----------------------------------------------------------------------
         // VIEW MANAGEMENT
         // ----------------------------------------------------------------------
-        function selectVariant(variantName) {
-            const variant = STATE.variants.find(v => v.legacy_name === variantName);
-            if (variant) {
-                renderVariantDetails(variant);
-                renderVariantCatalog();
-            }
-        }
-
-        function quickSearch(variantName) {
-            const searchInput = document.getElementById('searchInput');
-            if (searchInput) {
-                searchInput.value = variantName;
-                STATE.searchQuery = variantName;
-                applyFilterChain();
-                setTimeout(() => selectVariant(variantName), 100);
-            }
-        }
-
         function setDataView(mode) {
+            if (STATE.dataViewMode === mode) return;
+            
             STATE.dataViewMode = mode;
             STATE.currentPage = 1;
             
+            // Update tab UI
             ['all', 'complete', 'clinical'].forEach(m => {
                 const btn = document.getElementById(`${m}ViewBtn`);
-                if (btn) btn.classList.toggle('active', m === mode);
+                if (btn) {
+                    btn.classList.toggle('active', m === mode);
+                }
             });
             
             applyFilterChain();
             
-            const modeNames = { 'all': 'All Variants', 'complete': 'Complete Clinical', 'clinical': 'Clinical Data' };
+            const modeNames = {
+                'all': 'All Variants',
+                'complete': 'Complete Clinical Data',
+                'clinical': 'Clinical Data'
+            };
+            
             document.getElementById('currentModeText').textContent = modeNames[mode];
+            showNotification(`Showing ${modeNames[mode]}`, 'info', 2000);
         }
 
         function filterVariants(filter) {
             STATE.activeFilter = filter;
             STATE.currentPage = 1;
             
+            // Update filter buttons
             const filterAll = document.getElementById('filterAll');
             const filterMissing = document.getElementById('filterMissing');
             
@@ -1628,6 +2344,17 @@
             }
             
             applyFilterChain();
+        }
+
+        function refreshViewDescription() {
+            const modeNames = {
+                'all': 'All Variants',
+                'complete': 'Complete Clinical Data',
+                'clinical': 'Clinical Data'
+            };
+            
+            document.getElementById('currentModeText').textContent = modeNames[STATE.dataViewMode];
+            document.getElementById('currentCountText')?.remove();
         }
 
         // ----------------------------------------------------------------------
@@ -1685,16 +2412,21 @@
             const searchInput = document.getElementById('searchInput');
             if (!searchInput) return;
             
-            searchInput.addEventListener('input', function() {
+            searchInput.addEventListener('input', () => {
                 clearTimeout(STATE.searchTimeout);
-                STATE.searchTimeout = setTimeout(function() {
+                
+                STATE.searchTimeout = setTimeout(() => {
                     STATE.searchQuery = searchInput.value;
                     STATE.currentPage = 1;
                     applyFilterChain();
+                    
+                    if (STATE.searchQuery && STATE.filteredVariants.length) {
+                        showNotification(`Found ${STATE.filteredVariants.length} matching variants`, 'info', 2000);
+                    }
                 }, CONFIG.UI.SEARCH_DELAY);
             });
             
-            searchInput.addEventListener('keydown', function(e) {
+            searchInput.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
                     searchInput.value = '';
                     STATE.searchQuery = '';
@@ -1704,208 +2436,33 @@
         }
 
         // ----------------------------------------------------------------------
-        // IMPORT SYSTEM
+        // VARIANT SELECTION
         // ----------------------------------------------------------------------
-        function showImportModal() {
-            document.getElementById('importModal').classList.remove('hidden');
-            switchImportTab('json');
-        }
-
-        function closeImportModal() {
-            document.getElementById('importModal').classList.add('hidden');
-            clearImportForm();
-            clearManualForm();
-        }
-
-        function switchImportTab(tab) {
-            STATE.importTabActive = tab;
-            
-            const jsonTab = document.getElementById('jsonTabBtn');
-            const formTab = document.getElementById('formTabBtn');
-            const jsonPanel = document.getElementById('jsonImportPanel');
-            const formPanel = document.getElementById('formImportPanel');
-            
-            if (jsonTab && formTab && jsonPanel && formPanel) {
-                if (tab === 'json') {
-                    jsonTab.classList.add('active');
-                    formTab.classList.remove('active');
-                    jsonPanel.classList.remove('hidden');
-                    formPanel.classList.add('hidden');
-                } else {
-                    jsonTab.classList.remove('active');
-                    formTab.classList.add('active');
-                    jsonPanel.classList.add('hidden');
-                    formPanel.classList.remove('hidden');
-                }
+        function selectVariant(variantName) {
+            const variant = STATE.variants.find(v => v.legacy_name === variantName);
+            if (variant) {
+                renderVariantDetails(variant);
+                renderVariantCatalog(); // Refresh list to show selected state
             }
         }
 
-        function clearImportForm() {
-            const input = document.getElementById('jsonInput');
-            const results = document.getElementById('importResults');
-            const executeBtn = document.getElementById('executeImportBtn');
-            
-            if (input) input.value = '';
-            if (results) results.innerHTML = '';
-            if (executeBtn) executeBtn.disabled = true;
-            
-            STATE.validatedJson = null;
-        }
-
-        function clearManualForm() {
-            ['formLegacyName', 'formProteinName', 'formCdnaName', 'formDetermination', 'formClass', 'formEtiResponse'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.value = '';
-            });
-        }
-
-        function validateImport() {
-            const input = document.getElementById('jsonInput');
-            const results = document.getElementById('importResults');
-            const executeBtn = document.getElementById('executeImportBtn');
-            
-            if (!input || !results) return;
-            
-            try {
-                const jsonData = JSON.parse(input.value.trim());
+        function quickSearch(variantName) {
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.value = variantName;
+                STATE.searchQuery = variantName;
+                applyFilterChain();
                 
-                const requiredFields = ['variant_legacy_name', 'variant_protein_name', 'variant_cDNA_name', 'variant_final_determination'];
-                const missingFields = requiredFields.filter(field => !jsonData[field]);
-                
-                if (missingFields.length > 0) {
-                    throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
-                }
-                
-                STATE.validatedJson = jsonData;
-                
-                results.innerHTML = `
-                    <div class="bg-[#e3f9e9] border border-[#0e7b4e] rounded-lg p-4">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-full bg-[#0e7b4e]/10 flex items-center justify-center">
-                                <i class="fas fa-check-circle text-[#0e7b4e]"></i>
-                            </div>
-                            <div>
-                                <p class="font-medium text-[#0e7b4e]">✓ Valid JSON</p>
-                                <p class="text-sm text-gray-700 mt-1">Ready to import: <span class="font-mono font-medium">${jsonData.variant_legacy_name}</span></p>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                
-                if (executeBtn) executeBtn.disabled = false;
-                
-            } catch (error) {
-                results.innerHTML = `
-                    <div class="bg-[#fee2e2] border border-[#b91c1c] rounded-lg p-4">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-full bg-[#b91c1c]/10 flex items-center justify-center">
-                                <i class="fas fa-exclamation-circle text-[#b91c1c]"></i>
-                            </div>
-                            <div>
-                                <p class="font-medium text-[#b91c1c]">Invalid JSON</p>
-                                <p class="text-sm text-gray-700 mt-1">${escapeHTML(error.message)}</p>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                
-                if (executeBtn) executeBtn.disabled = true;
-                STATE.validatedJson = null;
+                // Auto-select the variant
+                setTimeout(() => {
+                    const variant = STATE.variants.find(v => v.legacy_name === variantName);
+                    if (variant) selectVariant(variantName);
+                }, 100);
             }
-        }
-
-        function executeJsonImport() {
-            if (!STATE.validatedJson) {
-                showNotification('Please validate JSON first', 'warning');
-                return;
-            }
-            
-            const variantName = STATE.validatedJson.variant_legacy_name;
-            
-            // Check if variant exists
-            const existing = STATE.variants.find(v => v.legacy_name === variantName);
-            
-            if (existing) {
-                // Update existing
-                STATE.variants = STATE.variants.map(v => 
-                    v.legacy_name === variantName ? {
-                        ...v,
-                        protein_name: STATE.validatedJson.variant_protein_name,
-                        cdna_name: STATE.validatedJson.variant_cDNA_name,
-                        final_determination: STATE.validatedJson.variant_final_determination
-                    } : v
-                );
-                showNotification(`✓ Updated variant ${variantName}`, 'success');
-            } else {
-                // Add new
-                const newVariant = {
-                    id: STATE.variants.length + 1,
-                    legacy_name: STATE.validatedJson.variant_legacy_name,
-                    protein_name: STATE.validatedJson.variant_protein_name,
-                    cdna_name: STATE.validatedJson.variant_cDNA_name,
-                    final_determination: STATE.validatedJson.variant_final_determination
-                };
-                STATE.variants.push(newVariant);
-                showNotification(`✓ Added new variant ${variantName}`, 'success');
-            }
-            
-            STATE.filteredVariants = [...STATE.variants];
-            applyFilterChain();
-            clearImportForm();
-            
-            setTimeout(() => closeImportModal(), 1500);
-        }
-
-        function submitManualForm() {
-            const legacyName = document.getElementById('formLegacyName')?.value.trim();
-            const proteinName = document.getElementById('formProteinName')?.value.trim();
-            const cdnaName = document.getElementById('formCdnaName')?.value.trim();
-            const determination = document.getElementById('formDetermination')?.value;
-            
-            if (!legacyName || !proteinName || !cdnaName || !determination) {
-                showNotification('Please fill in all required fields', 'warning');
-                return;
-            }
-            
-            const existing = STATE.variants.find(v => v.legacy_name === legacyName);
-            
-            if (existing) {
-                // Update existing
-                STATE.variants = STATE.variants.map(v => 
-                    v.legacy_name === legacyName ? {
-                        ...v,
-                        protein_name: proteinName,
-                        cdna_name: cdnaName,
-                        final_determination: determination,
-                        cftr_class: document.getElementById('formClass')?.value || v.cftr_class,
-                        eti_prediction: document.getElementById('formEtiResponse')?.value || v.eti_prediction
-                    } : v
-                );
-                showNotification(`✓ Updated variant ${legacyName}`, 'success');
-            } else {
-                // Add new
-                const newVariant = {
-                    id: STATE.variants.length + 1,
-                    legacy_name: legacyName,
-                    protein_name: proteinName,
-                    cdna_name: cdnaName,
-                    final_determination: determination,
-                    cftr_class: document.getElementById('formClass')?.value || null,
-                    eti_prediction: document.getElementById('formEtiResponse')?.value || null
-                };
-                STATE.variants.push(newVariant);
-                showNotification(`✓ Added new variant ${legacyName}`, 'success');
-            }
-            
-            STATE.filteredVariants = [...STATE.variants];
-            applyFilterChain();
-            clearManualForm();
-            
-            setTimeout(() => closeImportModal(), 1500);
         }
 
         // ----------------------------------------------------------------------
-        // DASHBOARD
+        // ANALYTICS DASHBOARD
         // ----------------------------------------------------------------------
         function showDashboard() {
             document.getElementById('dashboardModal').classList.remove('hidden');
@@ -1917,62 +2474,144 @@
         }
 
         function renderCharts() {
-            setTimeout(() => {
-                const classCtx = document.getElementById('classChart');
-                if (classCtx) {
-                    if (STATE.charts.classChart) STATE.charts.classChart.destroy();
-                    
-                    STATE.charts.classChart = new Chart(classCtx, {
-                        type: 'doughnut',
-                        data: {
-                            labels: ['Class I', 'Class II', 'Class III', 'Class IV', 'Class V'],
-                            datasets: [{
-                                data: [979, 532, 278, 156, 157],
-                                backgroundColor: ['#b91c1c', '#b45309', '#0f766e', '#1e40af', '#6d28d9'],
-                                borderWidth: 3,
-                                borderColor: 'white'
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: true,
-                            plugins: {
-                                legend: { position: 'bottom', labels: { font: { size: 11 } } }
-                            },
-                            cutout: '60%'
-                        }
-                    });
+            // Class distribution chart
+            const classCtx = document.getElementById('classChart');
+            if (classCtx) {
+                // Destroy existing chart if it exists
+                if (STATE.charts.classChart) {
+                    STATE.charts.classChart.destroy();
                 }
                 
-                const responseCtx = document.getElementById('responseChart');
-                if (responseCtx) {
-                    if (STATE.charts.responseChart) STATE.charts.responseChart.destroy();
-                    
-                    STATE.charts.responseChart = new Chart(responseCtx, {
-                        type: 'bar',
-                        data: {
-                            labels: ['Responsive', 'Non-responsive', 'Unknown'],
-                            datasets: [{
-                                label: 'Variants',
-                                data: [50, 1804, 248],
-                                backgroundColor: ['#0f766e', '#b91c1c', '#b45309'],
-                                borderRadius: 6
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: true,
-                            scales: {
-                                y: { beginAtZero: true, grid: { color: '#f3f4f6' } }
+                STATE.charts.classChart = new Chart(classCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Class I', 'Class II', 'Class III', 'Class IV', 'Class V'],
+                        datasets: [{
+                            data: [
+                                STATE.databaseStats.classI || 979,
+                                532, 278, 156, 157
+                            ],
+                            backgroundColor: [
+                                '#b91c1c',
+                                '#b45309',
+                                '#0f766e',
+                                '#1e40af',
+                                '#6d28d9'
+                            ],
+                            borderWidth: 3,
+                            borderColor: 'white',
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    font: {
+                                        family: 'Inter',
+                                        size: 11
+                                    },
+                                    padding: 15,
+                                    usePointStyle: true,
+                                    pointStyle: 'circle'
+                                }
                             },
-                            plugins: { legend: { display: false } }
-                        }
-                    });
+                            tooltip: {
+                                backgroundColor: 'white',
+                                titleColor: '#111827',
+                                bodyColor: '#4b5563',
+                                borderColor: '#e5e7eb',
+                                borderWidth: 1,
+                                padding: 12,
+                                titleFont: {
+                                    weight: '600'
+                                }
+                            }
+                        },
+                        cutout: '60%'
+                    }
+                });
+            }
+            
+            // ETI response chart
+            const responseCtx = document.getElementById('responseChart');
+            if (responseCtx) {
+                if (STATE.charts.responseChart) {
+                    STATE.charts.responseChart.destroy();
                 }
-            }, 100);
+                
+                STATE.charts.responseChart = new Chart(responseCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Responsive', 'Non-responsive', 'Unknown'],
+                        datasets: [{
+                            label: 'Variants',
+                            data: [
+                                STATE.databaseStats.responsive || 50,
+                                1804,
+                                248
+                            ],
+                            backgroundColor: [
+                                '#0f766e',
+                                '#b91c1c',
+                                '#b45309'
+                            ],
+                            borderRadius: 6,
+                            borderSkipped: false
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: '#f3f4f6'
+                                },
+                                ticks: {
+                                    font: {
+                                        family: 'Inter',
+                                        size: 11
+                                    }
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                },
+                                ticks: {
+                                    font: {
+                                        family: 'Inter',
+                                        size: 11,
+                                        weight: '500'
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                backgroundColor: 'white',
+                                titleColor: '#111827',
+                                bodyColor: '#4b5563',
+                                borderColor: '#e5e7eb',
+                                borderWidth: 1,
+                                padding: 12
+                            }
+                        }
+                    }
+                });
+            }
         }
 
         function exportReport() {
+            // Generate CSV report
             const headers = ['Legacy Name', 'Protein', 'cDNA', 'Determination', 'CFTR Class', 'ETI Response'];
             const rows = STATE.variants.map(v => [
                 v.legacy_name || '',
@@ -1983,7 +2622,9 @@
                 v.eti_prediction || ''
             ]);
             
-            const csv = [headers, ...rows].map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
+            const csv = [headers, ...rows].map(row => row.map(cell => 
+                `"${String(cell).replace(/"/g, '""')}"`
+            ).join(',')).join('\n');
             
             const blob = new Blob([csv], { type: 'text/csv' });
             const url = window.URL.createObjectURL(blob);
@@ -1997,7 +2638,7 @@
         }
 
         // ----------------------------------------------------------------------
-        // UTILITIES
+        // UI UTILITIES
         // ----------------------------------------------------------------------
         function updateStatsUI() {
             const currentVariants = STATE.filteredVariants;
@@ -2007,37 +2648,36 @@
             safeSetText('statExceptional', currentVariants.filter(v => v.class_subtype === 'exceptional').length.toLocaleString());
             safeSetText('statResponsive', currentVariants.filter(v => v.eti_prediction === 'responsive').length.toLocaleString());
             
+            // Update database stats
             safeSetText('completeCount', STATE.databaseStats.complete.toLocaleString());
             safeSetText('clinicalCount', STATE.databaseStats.clinical.toLocaleString());
             safeSetText('allCount', STATE.databaseStats.total.toLocaleString());
             safeSetText('databaseTotal', STATE.databaseStats.total.toLocaleString());
         }
 
-        function refreshViewDescription() {
-            const modeNames = { 'all': 'All Variants', 'complete': 'Complete Clinical Data', 'clinical': 'Clinical Data' };
-            safeSetText('currentModeText', modeNames[STATE.dataViewMode] || 'All Variants');
-        }
-
         function showLoadingState(message) {
             const container = document.getElementById('variantList');
             if (container) {
-                container.innerHTML = `<div class="p-12 text-center"><div class="w-12 h-12 border-4 border-[#0e7c7b] border-t-transparent rounded-full animate-spin mx-auto"></div><p class="mt-4 text-gray-700 font-medium">${message}</p></div>`;
+                container.innerHTML = `
+                    <div class="p-12 text-center">
+                        <div class="w-12 h-12 border-4 border-[#0e7c7b] border-t-transparent rounded-full animate-spin mx-auto"></div>
+                        <p class="mt-4 text-gray-700 font-medium">${message}</p>
+                        <p class="text-xs text-gray-500 mt-2">Establishing secure connection</p>
+                    </div>
+                `;
             }
         }
 
         function showNotification(message, type = 'info', duration = CONFIG.UI.NOTIFICATION_DURATION) {
-            let container = document.getElementById('notification-container');
-            if (!container) {
-                container = document.createElement('div');
-                container.id = 'notification-container';
-                container.className = 'fixed bottom-6 right-6 z-[2000] space-y-2';
-                document.body.appendChild(container);
-            }
-            
             const notification = document.createElement('div');
-            notification.className = `notification ${type}`;
+            notification.className = `notification ${type} animate-fade-in`;
             
-            const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle', info: 'fa-info-circle' };
+            const icons = {
+                success: 'fa-check-circle',
+                error: 'fa-exclamation-circle',
+                warning: 'fa-exclamation-triangle',
+                info: 'fa-info-circle'
+            };
             
             notification.innerHTML = `
                 <i class="fas ${icons[type] || icons.info}"></i>
@@ -2047,7 +2687,7 @@
                 </button>
             `;
             
-            container.appendChild(notification);
+            document.body.appendChild(notification);
             
             setTimeout(() => {
                 notification.style.opacity = '0';
@@ -2072,8 +2712,15 @@
             if (el) el.textContent = text;
         }
 
+        // ----------------------------------------------------------------------
+        // EVENT HANDLERS
+        // ----------------------------------------------------------------------
         function attachEventListeners() {
-            document.addEventListener('keydown', function(e) {
+            // Initialize search
+            initializeSearch();
+            
+            // Close modals on Escape key
+            document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
                     closeImportModal();
                     closeDashboard();
@@ -2081,7 +2728,8 @@
                 }
             });
             
-            document.addEventListener('click', function(e) {
+            // Close modals on overlay click
+            document.addEventListener('click', (e) => {
                 if (e.target.classList.contains('modal-overlay')) {
                     closeImportModal();
                     closeDashboard();
