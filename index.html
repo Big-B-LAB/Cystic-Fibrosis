@@ -8,189 +8,271 @@
     <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Tailwind & Charts -->
+    <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
         /* ============================================
-           IMPROVED TYPOGRAPHY & COLOR SYSTEM
+           Δ HELIX DESIGN SYSTEM 2.0
+           Scientific Precision • Clinical Excellence
         ============================================ */
+        
         :root {
-            /* Scientific Color Palette - Enhanced contrast */
-            --helix-dna: #0a3660;           /* Darker blue for better contrast */
-            --helix-dna-light: #1d6db0;
-            --helix-protein: #008a94;       /* More saturated teal */
-            --helix-protein-light: #00c4d4;
-            --helix-mutation: #c53030;      /* Deeper red for mutations */
-            --helix-mutation-light: #fc8181;
-            --helix-therapy: #2a7c6f;       /* Refined green */
-            --helix-therapy-light: #34c9b8;
-            --helix-warning: #dd6b20;       /* Warmer amber */
-            --helix-warning-light: #ffb067;
-            --helix-evidence: #6d4cac;      /* Richer purple */
-            --helix-evidence-light: #9477c2;
+            /* Core Scientific Palette */
+            --helix-dna: #0a2f4d;
+            --helix-dna-glow: #1e4a6b;
+            --helix-protein: #006d77;
+            --helix-protein-glow: #2c9a9e;
+            --helix-mutation: #9d1f1f;
+            --helix-mutation-glow: #c53030;
+            --helix-therapy: #1f5e4b;
+            --helix-therapy-glow: #2f8b70;
+            --helix-warning: #b45309;
+            --helix-warning-glow: #dd6b20;
+            --helix-evidence: #553c9a;
+            --helix-evidence-glow: #6b46c1;
             
-            /* Typography Scale - Scientific precision */
-            --text-micro: 0.6875rem;   /* 11px - tiny labels */
-            --text-tiny: 0.75rem;      /* 12px - annotations */
-            --text-small: 0.8125rem;   /* 13px - compact info */
-            --text-base: 0.875rem;     /* 14px - body text */
-            --text-lead: 1rem;         /* 16px - emphasized */
-            --text-subtitle: 1.125rem; /* 18px - section headers */
-            --text-title: 1.25rem;     /* 20px - card titles */
-            --text-headline: 1.5rem;   /* 24px - variant names */
-            --text-display: 2rem;      /* 32px - classification */
-            --text-hero: 2.5rem;       /* 40px - main stats */
+            /* Typography */
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-display: 'Space Grotesk', 'Inter', sans-serif;
+            --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
             
-            /* Spacing System */
-            --space-xxs: 0.25rem;
-            --space-xs: 0.5rem;
-            --space-sm: 0.75rem;
-            --space-md: 1rem;
-            --space-lg: 1.5rem;
-            --space-xl: 2rem;
-            --space-xxl: 3rem;
+            /* Spacing */
+            --space-1: 0.25rem;
+            --space-2: 0.5rem;
+            --space-3: 0.75rem;
+            --space-4: 1rem;
+            --space-5: 1.25rem;
+            --space-6: 1.5rem;
+            --space-8: 2rem;
+            --space-10: 2.5rem;
+            --space-12: 3rem;
         }
 
-        /* ============================================
-           ENHANCED BASE STYLES
-        ============================================ */
+        /* Base Styles */
         * {
-            -webkit-tap-highlight-color: transparent;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            font-size: var(--text-base);
+            font-family: var(--font-sans);
+            background: linear-gradient(145deg, #f8fafc 0%, #f1f5f9 100%);
+            color: #0f172a;
             line-height: 1.5;
-            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-            min-height: 100vh;
-            color: #1a202c;
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* ============================================
-           PROFESSIONAL HEADER - IMPROVED
-        ============================================ */
-        .professional-header {
-            background: linear-gradient(135deg, var(--helix-dna) 0%, #082b4d 100%);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 
-                0 2px 4px rgba(0, 0, 0, 0.1),
-                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        /* Glassmorphism Effects */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+            transition: all 0.2s ease;
+        }
+
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.95);
+            border-color: rgba(0, 109, 119, 0.2);
+            box-shadow: 0 8px 30px rgba(0, 109, 119, 0.08);
+            transform: translateY(-2px);
+        }
+
+        /* Professional Header */
+        .helix-header {
+            background: linear-gradient(135deg, var(--helix-dna) 0%, #0a2f4d 100%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             position: sticky;
             top: 0;
-            z-index: 1000;
+            z-index: 100;
             backdrop-filter: blur(10px);
         }
 
-        .header-glow {
+        .header-accent {
             position: absolute;
             bottom: 0;
             left: 0;
             right: 0;
-            height: 3px;
+            height: 2px;
             background: linear-gradient(90deg, 
                 var(--helix-protein) 0%,
                 var(--helix-therapy) 50%,
                 var(--helix-mutation) 100%);
-            opacity: 0.7;
+            opacity: 0.6;
         }
 
-        /* ============================================
-           IMPROVED CARDS - CLEAN & PROFESSIONAL
-        ============================================ */
-        .helix-card {
+        /* Scientific Typography */
+        .scientific-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #64748b;
+        }
+
+        .scientific-value {
+            font-family: var(--font-display);
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .mono-value {
+            font-family: var(--font-mono);
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        /* Stats Cards */
+        .stat-card {
+            padding: var(--space-5);
             background: white;
-            border-radius: 12px;
+            border-radius: 16px;
             border: 1px solid #e2e8f0;
-            box-shadow: 
-                0 1px 3px rgba(0, 0, 0, 0.04),
-                0 2px 6px rgba(0, 0, 0, 0.02);
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
             overflow: hidden;
         }
 
-        .helix-card:hover {
-            border-color: #cbd5e1;
-            box-shadow: 
-                0 4px 12px rgba(0, 0, 0, 0.06),
-                0 2px 4px rgba(0, 0, 0, 0.03);
-            transform: translateY(-1px);
-        }
-
-        /* ============================================
-           ENHANCED STATS CARDS
-        ============================================ */
-        .stat-card {
-            padding: var(--space-lg);
-            background: linear-gradient(135deg, #ffffff 0%, #fdfdfe 100%);
-            position: relative;
-        }
-
-        .stat-card::before {
+        .stat-card::after {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
             height: 3px;
-            background: linear-gradient(90deg, 
-                var(--helix-dna) 0%,
-                var(--helix-protein) 100%);
+            background: linear-gradient(90deg, var(--helix-dna), var(--helix-protein));
+            opacity: 0.8;
         }
 
         .stat-value {
-            font-family: 'Space Grotesk', system-ui, sans-serif;
-            font-size: var(--text-hero);
+            font-family: var(--font-display);
+            font-size: 2.25rem;
             font-weight: 700;
             line-height: 1;
-            margin-bottom: var(--space-xs);
             letter-spacing: -0.02em;
+            margin-bottom: var(--space-2);
         }
 
-        .stat-label {
-            font-size: var(--text-small);
-            color: #64748b;
+        /* View Toggle */
+        .view-toggle-group {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 40px;
+            padding: 4px;
+            display: inline-flex;
+        }
+
+        .view-toggle-btn {
+            padding: 0.625rem 1.25rem;
+            border-radius: 32px;
+            font-size: 0.875rem;
             font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
+            color: #64748b;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
-        /* ============================================
-           ENHANCED DATA POINTS - CLEAN & READABLE
-        ============================================ */
+        .view-toggle-btn.active {
+            background: var(--helix-protein);
+            color: white;
+            box-shadow: 0 4px 12px rgba(0, 109, 119, 0.2);
+        }
+
+        .view-toggle-btn:not(.active):hover {
+            background: #f1f5f9;
+            color: #334155;
+        }
+
+        /* Variant List */
+        .variant-list-container {
+            max-height: calc(100vh - 320px);
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e1 #f1f5f9;
+        }
+
+        .variant-list-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .variant-list-container::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+
+        .variant-list-container::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 20px;
+        }
+
+        .variant-item {
+            padding: var(--space-4);
+            border-bottom: 1px solid #f1f5f9;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            position: relative;
+        }
+
+        .variant-item:hover {
+            background: #f8fafc;
+        }
+
+        .variant-item.selected {
+            background: #f0f9ff;
+            border-left: 3px solid var(--helix-protein);
+        }
+
+        .variant-name {
+            font-family: var(--font-display);
+            font-weight: 600;
+            color: #0f172a;
+            font-size: 1rem;
+        }
+
+        /* Data Points */
         .data-point {
-            background: #ffffff;
-            padding: var(--space-md);
-            border-radius: 8px;
+            background: white;
+            padding: var(--space-4);
+            border-radius: 12px;
             border: 1px solid #e2e8f0;
             position: relative;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
+        }
+
+        .data-point:hover {
+            border-color: var(--helix-protein);
+            box-shadow: 0 4px 12px rgba(0, 109, 119, 0.04);
         }
 
         .data-point.missing {
             background: #fff7ed;
             border-color: #fed7aa;
-            animation: pulse-subtle 2s ease-in-out infinite;
-        }
-
-        @keyframes pulse-subtle {
-            0%, 100% { background-color: #fff7ed; }
-            50% { background-color: #ffedd5; }
         }
 
         .data-label {
-            font-size: var(--text-tiny);
-            color: #64748b;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
+            font-size: 0.7rem;
             font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: #64748b;
             margin-bottom: 0.25rem;
             display: flex;
             align-items: center;
@@ -198,31 +280,28 @@
         }
 
         .data-value {
-            font-size: var(--text-lead);
-            font-weight: 600;
-            color: #1e293b;
-            font-family: 'SF Mono', 'Monaco', 'Cascadia Code', monospace;
+            font-family: var(--font-mono);
+            font-weight: 500;
+            color: #0f172a;
             word-break: break-word;
         }
 
-        /* ============================================
-           ENHANCED ANNOTATION SYSTEM
-        ============================================ */
+        /* Annotation Trigger */
         .annotation-trigger {
             position: absolute;
             top: 0.75rem;
             right: 0.75rem;
             width: 28px;
             height: 28px;
-            border-radius: 6px;
+            border-radius: 8px;
             background: #f8fafc;
             border: 1px solid #e2e8f0;
             display: flex;
             align-items: center;
             justify-content: center;
+            color: #64748b;
             cursor: pointer;
-            transition: all 0.2s;
-            z-index: 2;
+            transition: all 0.2s ease;
             font-size: 0.75rem;
         }
 
@@ -233,244 +312,46 @@
             transform: scale(1.05);
         }
 
-        /* ============================================
-           IMPROVED BADGES - CLEAN & SCIENTIFIC
-        ============================================ */
+        /* Badges */
         .helix-badge {
             padding: 0.25rem 0.75rem;
-            border-radius: 6px;
-            font-size: var(--text-tiny);
+            border-radius: 20px;
+            font-size: 0.7rem;
             font-weight: 600;
             display: inline-flex;
             align-items: center;
             gap: 0.375rem;
             border: 1px solid;
-            letter-spacing: 0.025em;
             text-transform: uppercase;
+            letter-spacing: 0.04em;
         }
 
-        .helix-badge-class-i {
+        .badge-class-i {
             background: #fef2f2;
             color: var(--helix-mutation);
             border-color: #fecaca;
         }
 
-        .helix-badge-class-ii {
+        .badge-class-ii {
             background: #fffbeb;
             color: var(--helix-warning);
             border-color: #fed7aa;
         }
 
-        .helix-badge-class-iii {
+        .badge-class-iii {
             background: #f0fdf4;
             color: var(--helix-therapy);
             border-color: #bbf7d0;
         }
 
-        .helix-badge-exceptional {
-            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+        .badge-exceptional {
+            background: linear-gradient(135deg, #fef3c7, #fffbeb);
             color: var(--helix-warning);
             border-color: #fbbf24;
             border-width: 2px;
-            box-shadow: 0 1px 2px rgba(251, 191, 36, 0.1);
         }
 
-        /* ============================================
-           ENHANCED VIEW TOGGLE
-        ============================================ */
-        .view-toggle-container {
-            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            padding: var(--space-lg);
-        }
-
-        .view-toggle-btn {
-            flex: 1;
-            padding: var(--space-md);
-            border-radius: 8px;
-            border: 2px solid transparent;
-            background: white;
-            color: #64748b;
-            font-weight: 500;
-            font-size: var(--text-base);
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-
-        .view-toggle-btn.active {
-            border-color: var(--helix-protein);
-            background: var(--helix-protein);
-            color: white;
-            font-weight: 600;
-        }
-
-        /* ============================================
-           ENHANCED VARIANT LIST
-        ============================================ */
-        .variant-list-container {
-            max-height: calc(100vh - 400px);
-            overflow-y: auto;
-            scroll-behavior: smooth;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .variant-cell {
-            padding: var(--space-md);
-            border-bottom: 1px solid #f1f5f9;
-            cursor: pointer;
-            transition: all 0.2s;
-            position: relative;
-        }
-
-        .variant-cell:hover {
-            background: #f8fafc;
-        }
-
-        .variant-cell.selected {
-            background: #f0f9ff;
-            border-left: 3px solid var(--helix-protein);
-        }
-
-        .variant-name {
-            font-family: 'Space Grotesk', system-ui, sans-serif;
-            font-size: var(--text-lead);
-            font-weight: 600;
-            color: #1e293b;
-            letter-spacing: -0.01em;
-        }
-
-        .variant-subtitle {
-            font-size: var(--text-small);
-            color: #64748b;
-            font-family: 'SF Mono', 'Monaco', 'Cascadia Code', monospace;
-            margin-top: 0.125rem;
-        }
-
-        /* ============================================
-           ENHANCED SEARCH
-        ============================================ */
-        .search-container {
-            position: relative;
-            background: white;
-            border-radius: 8px;
-            border: 1px solid #e2e8f0;
-            transition: all 0.2s;
-        }
-
-        .search-container:focus-within {
-            border-color: var(--helix-protein);
-            box-shadow: 0 0 0 3px rgba(0, 168, 181, 0.1);
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 0.875rem 0.875rem 0.875rem 2.75rem;
-            border: none;
-            background: transparent;
-            font-size: var(--text-base);
-            font-weight: 500;
-            color: #1e293b;
-            outline: none;
-            border-radius: 8px;
-        }
-
-        /* ============================================
-           IMPROVED CLASSIFICATION DISPLAY
-        ============================================ */
-        .classification-display {
-            padding: var(--space-md);
-            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-            border-radius: 10px;
-            border: 1px solid #e2e8f0;
-            text-align: center;
-        }
-
-        .classification-value {
-            font-family: 'Space Grotesk', system-ui, sans-serif;
-            font-size: var(--text-display);
-            font-weight: 800;
-            line-height: 1;
-            margin-bottom: 0.25rem;
-            letter-spacing: -0.02em;
-        }
-
-        .classification-type {
-            font-size: var(--text-lead);
-            font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 0.125rem;
-        }
-
-        .classification-subtype {
-            font-size: var(--text-small);
-            color: #64748b;
-            font-style: italic;
-        }
-
-        /* ============================================
-           IMPROVED BUTTONS
-        ============================================ */
-        .action-button {
-            min-height: 44px;
-            min-width: 44px;
-            padding: 0.625rem 1.25rem;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: var(--text-base);
-            transition: all 0.2s;
-            border: none;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            cursor: pointer;
-        }
-
-        .action-button-primary {
-            background: linear-gradient(135deg, var(--helix-protein) 0%, var(--helix-protein-light) 100%);
-            color: white;
-            box-shadow: 0 2px 4px rgba(0, 168, 181, 0.2);
-        }
-
-        .action-button-primary:hover {
-            background: linear-gradient(135deg, var(--helix-protein-light) 0%, var(--helix-protein) 100%);
-            box-shadow: 0 4px 8px rgba(0, 168, 181, 0.3);
-            transform: translateY(-1px);
-        }
-
-        /* ============================================
-           ENHANCED EVIDENCE CHAIN
-        ============================================ */
-        .evidence-chain {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-        }
-
-        .evidence-step {
-            padding: 0.5rem 0.75rem;
-            background: #f8fafc;
-            border-radius: 6px;
-            font-family: 'SF Mono', 'Monaco', 'Cascadia Code', monospace;
-            font-size: var(--text-tiny);
-            color: #475569;
-            border: 1px solid #e2e8f0;
-        }
-
-        .evidence-arrow {
-            color: #cbd5e1;
-            font-size: 0.75rem;
-        }
-
-        /* ============================================
-           IMPROVED MODALS
-        ============================================ */
+        /* Modal System */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -478,13 +359,24 @@
             right: 0;
             bottom: 0;
             background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(4px);
-            z-index: 2000;
+            backdrop-filter: blur(8px);
+            z-index: 1000;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 1rem;
-            animation: fadeIn 0.2s ease-out;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 24px;
+            max-width: 800px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         @keyframes fadeIn {
@@ -492,557 +384,712 @@
             to { opacity: 1; }
         }
 
-        .modal-content {
-            background: white;
-            border-radius: 12px;
-            max-width: 500px;
-            width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            animation: slideUp 0.3s ease-out;
-        }
-
         @keyframes slideUp {
-            from { transform: translateY(20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        /* ============================================
-           IMPROVED NOTIFICATIONS
-        ============================================ */
-        .helix-notification {
+        /* Form Elements */
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+            background: white;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--helix-protein);
+            box-shadow: 0 0 0 4px rgba(0, 109, 119, 0.1);
+        }
+
+        .form-input.error {
+            border-color: var(--helix-mutation);
+            background: #fef2f2;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #475569;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Notifications */
+        .notification {
             position: fixed;
             bottom: 1.5rem;
             right: 1.5rem;
-            z-index: 3000;
             padding: 1rem 1.5rem;
-            border-radius: 8px;
+            border-radius: 16px;
             background: white;
             border-left: 4px solid;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            animation: slideInRight 0.3s ease-out;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            animation: slideInRight 0.3s ease;
+            max-width: 400px;
+            z-index: 2000;
             display: flex;
             align-items: center;
             gap: 0.75rem;
-            max-width: 400px;
         }
 
         @keyframes slideInRight {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+            from { opacity: 0; transform: translateX(100%); }
+            to { opacity: 1; transform: translateX(0); }
         }
 
-        /* ============================================
-           UTILITY CLASSES
-        ============================================ */
-        .missing-count-badge {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: var(--helix-warning);
-            color: white;
-            font-size: 0.7rem;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            margin-left: 0.5rem;
-            font-weight: 600;
+        /* Loading States */
+        .skeleton {
+            background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
         }
 
-        .section-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #f1f5f9;
-            color: var(--helix-dna);
-            font-size: 1rem;
-            margin-right: 0.75rem;
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
         }
 
-        /* ============================================
-           RESPONSIVE ENHANCEMENTS
-        ============================================ */
+        /* Responsive */
         @media (max-width: 768px) {
             .stat-value { font-size: 1.75rem; }
-            .classification-value { font-size: 1.5rem; }
-            .variant-name { font-size: 1rem; }
-            .view-toggle-buttons { flex-direction: column; }
-            .variant-list-container { max-height: 50vh; }
-            .action-button span:not(.fa) { display: none; }
-            .action-button { padding: 0.75rem; }
-        }
-
-        @media (max-width: 640px) {
-            :root {
-                --text-hero: 2rem;
-                --text-display: 1.75rem;
-                --text-headline: 1.25rem;
-            }
+            .view-toggle-group { flex-direction: column; width: 100%; }
+            .view-toggle-btn { justify-content: center; }
         }
     </style>
 </head>
-<body class="min-h-screen">
-    <!-- Professional Header -->
-    <header class="professional-header">
-        <div class="relative">
-            <div class="header-glow"></div>
-            <div class="container mx-auto px-4 sm:px-6 py-3">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center space-x-3">
-                        <div class="p-2 bg-white/10 rounded-lg backdrop-blur-sm">
-                            <i class="fas fa-dna text-white text-lg sm:text-xl"></i>
-                        </div>
-                        <div>
-                            <h1 class="text-base sm:text-lg font-bold text-white font-['Space_Grotesk'] tracking-tight">
-                                Δ Helix Intelligence
-                            </h1>
-                            <p class="text-xs text-white/80">
-                                CFTR Clinical Classification System
-                            </p>
-                        </div>
-                    </div>
-                    
-                    <div class="flex items-center space-x-2">
-                        <button onclick="showDashboard()" 
-                                class="action-button hidden sm:flex"
-                                style="background: rgba(255, 255, 255, 0.1); color: white; backdrop-filter: blur(10px);">
-                            <i class="fas fa-chart-network"></i>
-                            <span>Analytics</span>
-                        </button>
-                        <button onclick="showImportModal()" 
-                                class="action-button action-button-primary">
-                            <i class="fas fa-cloud-upload-alt"></i>
-                            <span class="hidden sm:inline">Import</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </header>
+<body>
 
-    <!-- Main Content -->
-    <main class="container mx-auto px-4 sm:px-6 py-6">
-        <!-- Enhanced Stats Bar -->
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
-            <div class="helix-card stat-card">
-                <div class="stat-value" id="statTotal">-</div>
-                <div class="stat-label">Total Variants</div>
-                <div class="text-xs text-gray-400 mt-1" id="statContext"></div>
-            </div>
-            <div class="helix-card stat-card">
-                <div class="stat-value" style="color: var(--helix-mutation);" id="statClassI">-</div>
-                <div class="stat-label">Class I Variants</div>
-                <div class="text-xs text-gray-400 mt-1">In current view</div>
-            </div>
-            <div class="helix-card stat-card">
-                <div class="stat-value" style="color: var(--helix-warning);" id="statExceptional">-</div>
-                <div class="stat-label">Exceptional Cases</div>
-                <div class="text-xs text-gray-400 mt-1">Special Class I variants</div>
-            </div>
-            <div class="helix-card stat-card">
-                <div class="stat-value" style="color: var(--helix-therapy);" id="statResponsive">-</div>
-                <div class="stat-label">ETI Responsive</div>
-                <div class="text-xs text-gray-400 mt-1">Responds to therapy</div>
-            </div>
-        </div>
-
-        <!-- View Toggle System -->
-        <div class="view-toggle-container helix-card mb-6 sm:mb-8">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-                <div class="flex items-center">
-                    <div class="section-icon">
-                        <i class="fas fa-eye"></i>
-                    </div>
-                    <div>
-                        <h3 class="font-semibold text-gray-800 text-lg">Data View Mode</h3>
-                        <div class="text-sm text-gray-600" id="viewDescription">
-                            <span class="font-medium" id="currentModeText">Complete Clinical Data</span> • 
-                            <span id="currentCountText">Loading...</span>
-                        </div>
-                    </div>
+<!-- ======================================================================
+     Δ HELIX HEADER - Scientific Excellence
+     ====================================================================== -->
+<header class="helix-header relative">
+    <div class="header-accent"></div>
+    <div class="container mx-auto px-4 sm:px-6 py-4">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <div class="p-2.5 bg-white/10 rounded-xl backdrop-blur-sm">
+                    <i class="fas fa-dna text-white text-xl sm:text-2xl"></i>
                 </div>
-                <div class="text-sm text-gray-500 bg-white/80 px-3 py-2 rounded-lg border border-gray-100">
-                    <i class="fas fa-database mr-1"></i>
-                    <span id="databaseTotal">2,102</span> total variants
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-bold text-white font-['Space_Grotesk'] tracking-tight">
+                        Δ Helix Intelligence
+                    </h1>
+                    <div class="flex items-center gap-2 mt-0.5">
+                        <span class="text-xs text-white/80">CFTR Clinical Classification</span>
+                        <span class="text-white/30">•</span>
+                        <span class="text-xs bg-white/10 px-2 py-0.5 rounded-full text-white/90" id="liveVersion">
+                            v5.0.0
+                        </span>
+                    </div>
                 </div>
             </div>
             
-            <div class="view-toggle-buttons flex gap-2">
-                <button onclick="setDataView('complete')" 
-                        class="view-toggle-btn active" 
-                        id="completeViewBtn">
-                    <i class="fas fa-check-circle"></i>
-                    <span>Complete Clinical</span>
-                    <span class="view-count bg-white/20 px-2 py-0.5 rounded-full text-xs ml-1" id="completeCount">1,002</span>
+            <div class="flex items-center gap-3">
+                <button onclick="showDashboard()" 
+                        class="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all">
+                    <i class="fas fa-chart-network"></i>
+                    <span class="text-sm font-medium">Analytics</span>
                 </button>
-                <button onclick="setDataView('clinical')" 
-                        class="view-toggle-btn" 
-                        id="clinicalViewBtn">
-                    <i class="fas fa-clipboard-check"></i>
-                    <span>Clinical Data</span>
-                    <span class="view-count bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full text-xs ml-1" id="clinicalCount">1,854</span>
-                </button>
-                <button onclick="setDataView('all')" 
-                        class="view-toggle-btn" 
-                        id="allViewBtn">
-                    <i class="fas fa-database"></i>
-                    <span>All Variants</span>
-                    <span class="view-count bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full text-xs ml-1" id="allCount">2,102</span>
+                <button onclick="showImportModal()" 
+                        class="flex items-center gap-2 px-5 py-2.5 bg-white text-helix-dna rounded-xl hover:bg-white/90 transition-all shadow-lg hover:shadow-xl font-medium">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <span class="text-sm sm:inline">Import</span>
                 </button>
             </div>
         </div>
+    </div>
+</header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
-            <!-- Left Panel - Variant Explorer -->
-            <div class="lg:col-span-1">
-                <div class="helix-card h-full flex flex-col">
-                    <div class="p-4 sm:p-5 border-b border-gray-100">
-                        <!-- Enhanced Search -->
-                        <div class="search-container mb-3">
-                            <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                            <input 
-                                type="text" 
-                                id="searchInput"
-                                class="search-input"
-                                placeholder="Search variants..."
-                                autocomplete="off"
-                            >
-                            <button class="search-clear absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 hidden" id="searchClear">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                        
-                        <!-- Quick Filters -->
-                        <div class="flex gap-2 mb-3">
-                            <button onclick="filterVariants('all')" 
-                                    class="flex-1 px-3 py-1.5 text-sm font-medium rounded-lg border border-gray-200 hover:border-helix-protein hover:text-helix-protein transition-all"
-                                    id="filterAll">
-                                All Variants
-                            </button>
-                            <button onclick="filterVariants('missing')" 
-                                    class="flex-1 px-3 py-1.5 text-sm font-medium rounded-lg border border-gray-200 hover:border-helix-warning hover:text-helix-warning transition-all"
-                                    id="filterMissing">
-                                Needs Annotation
-                            </button>
-                        </div>
+<!-- ======================================================================
+     MAIN APPLICATION
+     ====================================================================== -->
+<main class="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
 
-                        <!-- List Info -->
-                        <div class="text-xs text-gray-500">
-                            <i class="fas fa-list mr-1"></i>
-                            <span id="variantCount" class="font-semibold">0</span> variants
-                            <span id="viewBadge" class="ml-2 px-2 py-0.5 bg-helix-protein text-white rounded-full text-xs font-medium">
-                                Complete
-                            </span>
-                        </div>
-                    </div>
+    <!-- ======================================================================
+         DYNAMIC STATS DASHBOARD - LIVE FROM DATABASE
+         ====================================================================== -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div class="stat-card">
+            <div class="stat-value" id="statTotal">—</div>
+            <div class="scientific-label">Total Variants</div>
+            <div class="text-xs text-gray-500 mt-2 flex items-center gap-1">
+                <i class="fas fa-database text-helix-protein"></i>
+                <span id="statContext">Loading...</span>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-value" style="color: var(--helix-mutation);" id="statClassI">—</div>
+            <div class="scientific-label">Class I Variants</div>
+            <div class="text-xs text-gray-500 mt-2">
+                <span id="classIPercentage">—</span>% of current view
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-value" style="color: var(--helix-warning);" id="statExceptional">—</div>
+            <div class="scientific-label">Exceptional Cases</div>
+            <div class="text-xs text-gray-500 mt-2">
+                <span id="exceptionalPercentage">—</span>% of Class I
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-value" style="color: var(--helix-therapy);" id="statResponsive">—</div>
+            <div class="scientific-label">ETI Responsive</div>
+            <div class="text-xs text-gray-500 mt-2">
+                <span id="responsivePercentage">—</span>% of total
+            </div>
+        </div>
+    </div>
 
-                    <!-- Variant List -->
-                    <div class="variant-list-container flex-1" id="variantList">
-                        <div class="p-8">
-                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-helix-protein mx-auto"></div>
-                            <p class="mt-4 text-center text-gray-600">Loading variants...</p>
-                        </div>
-                    </div>
-
-                    <!-- Pagination -->
-                    <div class="p-4 border-t border-gray-100 flex justify-between items-center" id="paginationControls" style="display: none;">
-                        <button onclick="previousPage()" class="pagination-btn" id="prevBtn">
-                            <i class="fas fa-chevron-left"></i>
-                        </button>
-                        <span class="text-sm text-gray-600 font-medium">
-                            Page <span id="currentPage">1</span> of <span id="totalPages">1</span>
-                        </span>
-                        <button onclick="nextPage()" class="pagination-btn" id="nextBtn">
-                            <i class="fas fa-chevron-right"></i>
-                        </button>
-                    </div>
+    <!-- ======================================================================
+         VIEW TOGGLE - COMPLETE | CLINICAL | ALL
+         ====================================================================== -->
+    <div class="glass-card p-6 mb-8">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div class="flex items-center gap-3">
+                <div class="p-2.5 bg-helix-protein/10 rounded-xl">
+                    <i class="fas fa-eye text-helix-protein"></i>
+                </div>
+                <div>
+                    <h2 class="font-semibold text-gray-800">Data View Mode</h2>
+                    <p class="text-sm text-gray-500" id="viewDescription">
+                        <span id="currentModeText">Complete Clinical</span> • 
+                        <span id="currentCountText">— variants</span>
+                    </p>
                 </div>
             </div>
+            <div class="text-sm bg-gray-50 px-4 py-2 rounded-xl text-gray-600 border border-gray-200">
+                <i class="fas fa-calculator mr-2 text-helix-protein"></i>
+                <span id="databaseTotal">—</span> total in database
+            </div>
+        </div>
+        
+        <div class="view-toggle-group">
+            <button onclick="setDataView('complete')" id="completeViewBtn" class="view-toggle-btn active">
+                <i class="fas fa-check-circle"></i>
+                <span>Complete Clinical</span>
+                <span class="bg-white/20 px-2 py-0.5 rounded-full text-xs" id="completeCount">—</span>
+            </button>
+            <button onclick="setDataView('clinical')" id="clinicalViewBtn" class="view-toggle-btn">
+                <i class="fas fa-clipboard-check"></i>
+                <span>Clinical Data</span>
+                <span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full text-xs" id="clinicalCount">—</span>
+            </button>
+            <button onclick="setDataView('all')" id="allViewBtn" class="view-toggle-btn">
+                <i class="fas fa-database"></i>
+                <span>All Variants</span>
+                <span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full text-xs" id="allCount">—</span>
+            </button>
+        </div>
+    </div>
 
-            <!-- Right Panel - Variant Detail -->
-            <div class="lg:col-span-3">
-                <!-- Variant Header -->
-                <div id="variantHeader" class="helix-card mb-4 sm:mb-6 hidden">
-                    <div class="p-5 sm:p-6" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)">
-                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                            <div class="flex-1">
-                                <div class="flex items-center gap-3 mb-3 flex-wrap">
-                                    <h2 id="variantName" class="text-xl sm:text-2xl font-bold text-gray-800 font-['Space_Grotesk'] tracking-tight">
-                                        Select Variant
-                                    </h2>
-                                    <span id="dataCompleteness" class="text-sm"></span>
-                                </div>
-                                <div id="variantBadges" class="flex flex-wrap gap-1.5">
-                                    <!-- Badges load here -->
-                                </div>
-                            </div>
-                            
-                            <div class="classification-display min-w-[180px] mt-4 md:mt-0">
-                                <div class="text-xs text-gray-500 mb-1 uppercase tracking-wider font-semibold">
-                                    CFTR Classification
-                                </div>
-                                <div id="variantClass" class="classification-value">-</div>
-                                <div class="classification-type" id="classificationType">Select a variant</div>
-                                <div class="classification-subtype" id="classificationSubtype"></div>
-                            </div>
+    <!-- ======================================================================
+         MAIN GRID - VARIANT LIST + DETAIL VIEW
+         ====================================================================== -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- LEFT PANEL - VARIANT EXPLORER -->
+        <div class="lg:col-span-4">
+            <div class="glass-card h-full flex flex-col">
+                <div class="p-5 border-b border-gray-100">
+                    <!-- Search -->
+                    <div class="relative mb-4">
+                        <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                        <input 
+                            type="text" 
+                            id="searchInput"
+                            class="form-input pl-10"
+                            placeholder="Search by name, protein, cDNA..."
+                            autocomplete="off"
+                        >
+                        <button class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 hidden" id="searchClear">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Quick Filters -->
+                    <div class="flex gap-2 mb-4">
+                        <button onclick="filterVariants('all')" 
+                                id="filterAll"
+                                class="flex-1 px-3 py-2 text-sm font-medium rounded-lg border border-gray-200 hover:border-helix-protein hover:text-helix-protein transition-all">
+                            <i class="fas fa-list-ul mr-1"></i>
+                            All
+                        </button>
+                        <button onclick="filterVariants('missing')" 
+                                id="filterMissing"
+                                class="flex-1 px-3 py-2 text-sm font-medium rounded-lg border border-gray-200 hover:border-helix-warning hover:text-helix-warning transition-all">
+                            <i class="fas fa-exclamation-triangle mr-1"></i>
+                            Needs Annotation
+                        </button>
+                    </div>
+                    
+                    <!-- List Metadata -->
+                    <div class="flex items-center justify-between text-xs">
+                        <div class="text-gray-500">
+                            <i class="fas fa-dna mr-1"></i>
+                            <span id="variantCount" class="font-semibold text-gray-700">—</span> variants
+                        </div>
+                        <div id="viewBadge" class="px-2 py-1 bg-helix-protein text-white rounded-full text-xs font-medium">
+                            Complete
                         </div>
                     </div>
                 </div>
-
-                <!-- Variant Content -->
-                <div id="variantContent" class="hidden">
-                    <!-- Nomenclature Section -->
-                    <div class="helix-card mb-4 sm:mb-6 p-4 sm:p-5">
-                        <h3 class="font-semibold text-gray-800 mb-3 flex items-center text-lg">
-                            <div class="section-icon">
-                                <i class="fas fa-tag"></i>
+                
+                <!-- Variant List Container -->
+                <div class="variant-list-container flex-1" id="variantList">
+                    <div class="p-8 text-center">
+                        <div class="inline-block animate-spin rounded-full h-8 w-8 border-3 border-helix-protein border-t-transparent"></div>
+                        <p class="mt-3 text-sm text-gray-500">Loading variants...</p>
+                    </div>
+                </div>
+                
+                <!-- Pagination -->
+                <div class="p-4 border-t border-gray-100 flex justify-between items-center" id="paginationControls" style="display: none;">
+                    <button onclick="previousPage()" 
+                            id="prevBtn"
+                            class="px-4 py-2 text-sm font-medium text-gray-600 hover:text-helix-protein disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i class="fas fa-chevron-left mr-1"></i>
+                        Previous
+                    </button>
+                    <span class="text-sm text-gray-600">
+                        Page <span id="currentPage">1</span> of <span id="totalPages">1</span>
+                    </span>
+                    <button onclick="nextPage()" 
+                            id="nextBtn"
+                            class="px-4 py-2 text-sm font-medium text-gray-600 hover:text-helix-protein disabled:opacity-50 disabled:cursor-not-allowed">
+                        Next
+                        <i class="fas fa-chevron-right ml-1"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- RIGHT PANEL - VARIANT DETAIL INTELLIGENCE -->
+        <div class="lg:col-span-8">
+            <!-- Selected Variant View -->
+            <div id="variantDetailView" class="hidden">
+                <!-- Header -->
+                <div class="glass-card p-6 mb-6">
+                    <div class="flex flex-col lg:flex-row justify-between gap-6">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-3 mb-3">
+                                <h2 id="detailVariantName" class="text-2xl font-bold font-['Space_Grotesk'] text-gray-800 tracking-tight">
+                                    Select a variant
+                                </h2>
+                                <span id="dataCompletenessBadge"></span>
+                            </div>
+                            <div id="variantBadges" class="flex flex-wrap gap-2">
+                                <!-- Badges injected here -->
+                            </div>
+                        </div>
+                        
+                        <!-- Classification Display -->
+                        <div class="bg-gradient-to-br from-gray-50 to-white p-5 rounded-xl border border-gray-200 min-w-[200px]">
+                            <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                                CFTR Classification
+                            </div>
+                            <div id="variantClass" class="text-3xl font-bold font-['Space_Grotesk'] mb-1">—</div>
+                            <div id="classificationType" class="font-medium text-gray-800">—</div>
+                            <div id="classificationSubtype" class="text-xs text-gray-500 mt-1">—</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Data Grid -->
+                <div class="space-y-6">
+                    <!-- Nomenclature -->
+                    <div class="glass-card p-6">
+                        <h3 class="flex items-center gap-2 font-semibold text-gray-800 mb-4">
+                            <div class="p-1.5 bg-helix-dna/10 rounded-lg">
+                                <i class="fas fa-tag text-helix-dna text-sm"></i>
                             </div>
                             Genetic Nomenclature
-                            <span id="nomenclatureMissing" class="ml-2 missing-count-badge hidden"></span>
+                            <span id="nomenclatureMissingBadge" class="hidden"></span>
                         </h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3" id="nomenclatureGrid">
-                            <!-- Filled dynamically -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="nomenclatureGrid">
+                            <!-- Data points injected -->
                         </div>
                     </div>
-
-                    <!-- Clinical Decision Grid -->
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
-                        <!-- Clinical Impact -->
-                        <div class="helix-card p-4 sm:p-5">
-                            <h3 class="font-semibold text-gray-800 mb-3 flex items-center text-lg">
-                                <div class="section-icon" style="background: #fef2f2; color: var(--helix-mutation);">
-                                    <i class="fas fa-stethoscope"></i>
+                    
+                    <!-- Clinical Intelligence Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Clinical Classification -->
+                        <div class="glass-card p-6">
+                            <h3 class="flex items-center gap-2 font-semibold text-gray-800 mb-4">
+                                <div class="p-1.5 bg-helix-mutation/10 rounded-lg">
+                                    <i class="fas fa-stethoscope text-helix-mutation text-sm"></i>
                                 </div>
-                                Clinical Classification
-                                <span id="classificationMissing" class="ml-2 missing-count-badge hidden"></span>
+                                Clinical Impact
                             </h3>
-                            <div id="clinicalImpact" class="space-y-3">
-                                <!-- Filled dynamically -->
+                            <div class="space-y-4" id="clinicalImpactGrid">
+                                <!-- Data points injected -->
                             </div>
                         </div>
-
+                        
                         <!-- Therapeutic Prediction -->
-                        <div class="helix-card p-4 sm:p-5">
-                            <h3 class="font-semibold text-gray-800 mb-3 flex items-center text-lg">
-                                <div class="section-icon" style="background: #f0fdf4; color: var(--helix-therapy);">
-                                    <i class="fas fa-prescription-bottle-alt"></i>
+                        <div class="glass-card p-6">
+                            <h3 class="flex items-center gap-2 font-semibold text-gray-800 mb-4">
+                                <div class="p-1.5 bg-helix-therapy/10 rounded-lg">
+                                    <i class="fas fa-prescription-bottle-alt text-helix-therapy text-sm"></i>
                                 </div>
-                                Therapeutic Prediction
-                                <span id="therapyMissing" class="ml-2 missing-count-badge hidden"></span>
+                                ETI Response
                             </h3>
-                            <div id="therapeuticPrediction" class="space-y-3">
-                                <!-- Filled dynamically -->
+                            <div class="space-y-4" id="therapeuticPredictionGrid">
+                                <!-- Data points injected -->
                             </div>
                         </div>
-
+                        
                         <!-- Evidence Quality -->
-                        <div class="helix-card p-4 sm:p-5">
-                            <h3 class="font-semibold text-gray-800 mb-3 flex items-center text-lg">
-                                <div class="section-icon" style="background: #f5f3ff; color: var(--helix-evidence);">
-                                    <i class="fas fa-chart-line"></i>
+                        <div class="glass-card p-6">
+                            <h3 class="flex items-center gap-2 font-semibold text-gray-800 mb-4">
+                                <div class="p-1.5 bg-helix-evidence/10 rounded-lg">
+                                    <i class="fas fa-microscope text-helix-evidence text-sm"></i>
                                 </div>
-                                Evidence Quality
-                                <span id="evidenceMissing" class="ml-2 missing-count-badge hidden"></span>
+                                Evidence
                             </h3>
-                            <div id="evidenceQuality" class="space-y-3">
-                                <!-- Filled dynamically -->
+                            <div class="space-y-4" id="evidenceQualityGrid">
+                                <!-- Data points injected -->
                             </div>
                         </div>
                     </div>
-
-                    <!-- Evidence Sources -->
-                    <div class="helix-card p-4 sm:p-5">
-                        <h3 class="font-semibold text-gray-800 mb-3 flex items-center text-lg">
-                            <div class="section-icon">
-                                <i class="fas fa-microscope"></i>
+                    
+                    <!-- Evidence Chain -->
+                    <div class="glass-card p-6">
+                        <h3 class="flex items-center gap-2 font-semibold text-gray-800 mb-4">
+                            <div class="p-1.5 bg-gray-100 rounded-lg">
+                                <i class="fas fa-link text-gray-600 text-sm"></i>
                             </div>
                             Evidence Chain
                         </h3>
-                        <div id="evidenceChain" class="evidence-chain">
-                            <!-- Evidence loads here -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Empty State -->
-                <div id="emptyState" class="helix-card p-6 sm:p-8 text-center">
-                    <div class="max-w-md mx-auto">
-                        <div class="p-4 bg-helix-protein/10 rounded-xl inline-block mb-4">
-                            <i class="fas fa-dna text-helix-protein text-3xl"></i>
-                        </div>
-                        <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-2">
-                            No Variant Selected
-                        </h3>
-                        <p class="text-gray-600 mb-6 text-sm sm:text-base">
-                            Select a variant from the list to view clinical intelligence. 
-                            Variants with missing data can be annotated for clinical use.
-                        </p>
-                        <div class="flex flex-wrap justify-center gap-2">
-                            <button onclick="quickSearch('G542X')" 
-                                    class="px-3 sm:px-4 py-2 bg-gradient-to-r from-helix-mutation to-helix-mutation-light text-white rounded-lg hover:opacity-90 transition-all font-medium text-sm">
-                                <i class="fas fa-ban mr-1"></i>
-                                G542X
-                            </button>
-                            <button onclick="quickSearch('F508del')" 
-                                    class="px-3 sm:px-4 py-2 bg-gradient-to-r from-helix-dna to-helix-dna-light text-white rounded-lg hover:opacity-90 transition-all font-medium text-sm">
-                                <i class="fas fa-cog mr-1"></i>
-                                F508del
-                            </button>
-                            <button onclick="quickSearch('R334W')" 
-                                    class="px-3 sm:px-4 py-2 bg-gradient-to-r from-helix-warning to-helix-warning-light text-white rounded-lg hover:opacity-90 transition-all font-medium text-sm">
-                                <i class="fas fa-bolt mr-1"></i>
-                                R334W
-                            </button>
-                            <button onclick="quickSearch('W1282X')" 
-                                    class="px-3 sm:px-4 py-2 bg-gradient-to-r from-helix-therapy to-helix-therapy-light text-white rounded-lg hover:opacity-90 transition-all font-medium text-sm">
-                                <i class="fas fa-door-open mr-1"></i>
-                                W1282X
-                            </button>
+                        <div id="evidenceChain" class="flex flex-wrap items-center gap-2">
+                            <!-- Evidence chain injected -->
                         </div>
                     </div>
                 </div>
             </div>
+            
+            <!-- Empty State -->
+            <div id="emptyState" class="glass-card p-12 text-center">
+                <div class="max-w-md mx-auto">
+                    <div class="p-4 bg-gradient-to-br from-helix-protein/10 to-helix-protein/5 rounded-2xl inline-block mb-6">
+                        <i class="fas fa-dna text-helix-protein text-4xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">No Variant Selected</h3>
+                    <p class="text-gray-600 mb-8">
+                        Select a variant from the list to view comprehensive clinical intelligence.
+                        Variants with missing data can be annotated directly in the interface.
+                    </p>
+                    <div class="flex flex-wrap justify-center gap-3">
+                        <button onclick="quickSearch('F508del')" 
+                                class="px-4 py-2 bg-gradient-to-r from-helix-dna to-helix-dna-glow text-white rounded-xl hover:shadow-lg transition-all font-medium text-sm">
+                            <i class="fas fa-cog mr-2"></i>
+                            F508del
+                        </button>
+                        <button onclick="quickSearch('G542X')" 
+                                class="px-4 py-2 bg-gradient-to-r from-helix-mutation to-helix-mutation-glow text-white rounded-xl hover:shadow-lg transition-all font-medium text-sm">
+                            <i class="fas fa-ban mr-2"></i>
+                            G542X
+                        </button>
+                        <button onclick="quickSearch('W1282X')" 
+                                class="px-4 py-2 bg-gradient-to-r from-helix-therapy to-helix-therapy-glow text-white rounded-xl hover:shadow-lg transition-all font-medium text-sm">
+                            <i class="fas fa-door-open mr-2"></i>
+                            W1282X
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
-    </main>
+    </div>
+</main>
 
-    <!-- Import Modal -->
-    <div id="importModal" class="modal-overlay hidden">
-        <div class="modal-content">
-            <div class="p-5 sm:p-6">
-                <div class="flex justify-between items-center mb-5">
-                    <h3 class="text-lg font-semibold text-gray-800">Import Clinical Data</h3>
-                    <button onclick="closeImportModal()" class="text-gray-400 hover:text-gray-600">
-                        <i class="fas fa-times"></i>
+<!-- ======================================================================
+     ADVANCED IMPORT MODAL - JSON + FORM ENTRY
+     Professional data import with real-time feedback
+     ====================================================================== -->
+<div id="importModal" class="modal-overlay hidden">
+    <div class="modal-content">
+        <div class="p-6 sm:p-8">
+            <!-- Header -->
+            <div class="flex justify-between items-start mb-6">
+                <div class="flex items-center gap-4">
+                    <div class="p-3 bg-gradient-to-br from-helix-protein/20 to-helix-protein/5 rounded-2xl">
+                        <i class="fas fa-cloud-upload-alt text-helix-protein text-2xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-800 font-['Space_Grotesk']">Import Clinical Data</h3>
+                        <p class="text-sm text-gray-500 mt-1">Add new variants or update existing records</p>
+                    </div>
+                </div>
+                <button onclick="closeImportModal()" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                    <i class="fas fa-times text-gray-400 hover:text-gray-600"></i>
+                </button>
+            </div>
+            
+            <!-- Tab Navigation -->
+            <div class="border-b border-gray-200 mb-6">
+                <div class="flex gap-6">
+                    <button id="jsonTabBtn" onclick="switchImportTab('json')" 
+                            class="import-tab-active px-1 py-3 text-sm font-medium border-b-2 border-helix-protein text-helix-protein flex items-center gap-2">
+                        <i class="fas fa-code"></i>
+                        JSON Import
+                    </button>
+                    <button id="formTabBtn" onclick="switchImportTab('form')" 
+                            class="import-tab px-1 py-3 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 flex items-center gap-2">
+                        <i class="fas fa-pencil-alt"></i>
+                        Manual Entry
                     </button>
                 </div>
-                
-                <div class="mb-5">
-                    <div class="flex items-center mb-2">
-                        <i class="fas fa-info-circle text-helix-protein mr-2"></i>
-                        <span class="text-sm text-gray-600">Supported format:</span>
-                    </div>
-                    <pre class="text-xs bg-gray-50 p-3 rounded-lg overflow-auto border border-gray-200">
+            </div>
+            
+            <!-- JSON Import Panel -->
+            <div id="jsonImportPanel">
+                <div class="bg-gradient-to-r from-gray-50 to-white p-4 rounded-xl border border-gray-200 mb-5">
+                    <div class="flex gap-3">
+                        <div class="p-1.5 bg-helix-dna/10 rounded-lg h-fit">
+                            <i class="fas fa-info-circle text-helix-dna text-xs"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">Supported Format</h4>
+                            <pre class="text-xs bg-gray-900 text-gray-100 p-4 rounded-xl overflow-x-auto font-mono border border-gray-700">
 {
   "variant_legacy_name": "G542X",
   "variant_protein_name": "p.Gly542X",
-  "variant_cDNA_name": "c.1624G>T",
+  "variant_cDNA_name": "c.1624G>T", 
   "variant_final_determination": "CF-causing"
 }</pre>
+                            <p class="text-xs text-gray-500 mt-2">
+                                <i class="fas fa-check-circle text-green-500 mr-1"></i>
+                                Required fields: legacy_name, protein_name, cdna_name, final_determination
+                            </p>
+                        </div>
+                    </div>
                 </div>
                 
-                <textarea id="jsonInput" 
-                          class="w-full h-40 font-mono text-sm p-3 border border-gray-300 rounded-lg mb-4 focus:ring-2 focus:ring-helix-protein focus:border-helix-protein"
-                          placeholder='Paste JSON data here...'
-                          spellcheck="false"></textarea>
+                <div class="mb-5">
+                    <label class="form-label">
+                        <i class="fas fa-brackets-curly mr-1"></i>
+                        JSON Data
+                    </label>
+                    <textarea 
+                        id="jsonInput" 
+                        class="form-input font-mono text-sm h-40"
+                        placeholder='Paste your JSON here...'
+                        spellcheck="false"
+                    ></textarea>
+                </div>
                 
-                <div class="flex justify-end space-x-2">
-                    <button onclick="closeImportModal()" class="action-button" style="background: transparent; color: var(--helix-dna); border: 1px solid rgba(10, 54, 96, 0.2);">
+                <div class="flex justify-end gap-3">
+                    <button onclick="closeImportModal()" 
+                            class="px-5 py-2.5 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium">
                         Cancel
                     </button>
-                    <button onclick="validateImport()" class="action-button action-button-primary">
-                        <i class="fas fa-cloud-upload-alt mr-2"></i>
-                        Import Data
+                    <button onclick="processJsonImport()" 
+                            class="px-6 py-2.5 bg-gradient-to-r from-helix-protein to-helix-protein-glow text-white rounded-xl hover:shadow-lg transition-all text-sm font-medium flex items-center gap-2">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        Import & Validate
                     </button>
                 </div>
-                
-                <div id="importResults" class="mt-5 space-y-3"></div>
             </div>
-        </div>
-    </div>
-
-    <!-- Annotation Modal -->
-    <div id="annotationModal" class="modal-overlay hidden">
-        <div class="modal-content">
-            <div class="p-5 sm:p-6">
-                <div class="flex justify-between items-center mb-5">
+            
+            <!-- Form Entry Panel (Hidden by default) -->
+            <div id="formImportPanel" class="hidden">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
                     <div>
-                        <h3 class="text-lg font-semibold text-gray-800" id="annotationTitle">Annotate Data</h3>
-                        <p class="text-sm text-gray-600" id="annotationField">Field name</p>
+                        <label class="form-label">
+                            <i class="fas fa-tag mr-1"></i>
+                            Legacy Name *
+                        </label>
+                        <input 
+                            type="text" 
+                            id="formLegacyName"
+                            class="form-input"
+                            placeholder="e.g., G542X, F508del"
+                        >
                     </div>
-                    <button onclick="closeAnnotationModal()" class="text-gray-400 hover:text-gray-600">
-                        <i class="fas fa-times"></i>
-                    </button>
+                    <div>
+                        <label class="form-label">
+                            <i class="fas fa-dna mr-1"></i>
+                            Protein Name *
+                        </label>
+                        <input 
+                            type="text" 
+                            id="formProteinName"
+                            class="form-input"
+                            placeholder="e.g., p.Gly542X"
+                        >
+                    </div>
+                    <div>
+                        <label class="form-label">
+                            <i class="fas fa-code mr-1"></i>
+                            cDNA Name *
+                        </label>
+                        <input 
+                            type="text" 
+                            id="formCdnaName"
+                            class="form-input"
+                            placeholder="e.g., c.1624G>T"
+                        >
+                    </div>
+                    <div>
+                        <label class="form-label">
+                            <i class="fas fa-exclamation-triangle mr-1"></i>
+                            Clinical Impact *
+                        </label>
+                        <select id="formFinalDetermination" class="form-input">
+                            <option value="">Select determination</option>
+                            <option value="CF-causing">CF-causing</option>
+                            <option value="Probably responsive to ETI">Probably responsive to ETI</option>
+                            <option value="Unknown">Unknown</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label">
+                            <i class="fas fa-flask mr-1"></i>
+                            CFTR Class
+                        </label>
+                        <select id="formCftrClass" class="form-input">
+                            <option value="">Select class (optional)</option>
+                            <option value="I">Class I</option>
+                            <option value="II">Class II</option>
+                            <option value="III">Class III</option>
+                            <option value="IV">Class IV</option>
+                            <option value="V">Class V</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label">
+                            <i class="fas fa-chart-line mr-1"></i>
+                            ETI Prediction
+                        </label>
+                        <select id="formEtiPrediction" class="form-input">
+                            <option value="">Select response (optional)</option>
+                            <option value="responsive">Responsive</option>
+                            <option value="non_responsive">Non-responsive</option>
+                            <option value="unknown">Unknown</option>
+                        </select>
+                    </div>
                 </div>
                 
-                <div id="annotationContent" class="space-y-4">
-                    <!-- Content loads dynamically -->
-                </div>
-                
-                <div class="flex justify-end space-x-2 mt-6">
-                    <button onclick="closeAnnotationModal()" class="action-button" style="background: transparent; color: var(--helix-dna); border: 1px solid rgba(10, 54, 96, 0.2);">
+                <div class="flex justify-end gap-3">
+                    <button onclick="closeImportModal()" 
+                            class="px-5 py-2.5 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium">
                         Cancel
                     </button>
-                    <button onclick="saveAnnotation()" class="action-button action-button-primary">
-                        <i class="fas fa-save mr-2"></i>
-                        Save Annotation
+                    <button onclick="processFormImport()" 
+                            class="px-6 py-2.5 bg-gradient-to-r from-helix-protein to-helix-protein-glow text-white rounded-xl hover:shadow-lg transition-all text-sm font-medium flex items-center gap-2">
+                        <i class="fas fa-save"></i>
+                        Submit Variant
                     </button>
                 </div>
             </div>
+            
+            <!-- Import Results Container -->
+            <div id="importResults" class="mt-6 space-y-3"></div>
         </div>
     </div>
+</div>
 
-    <!-- Dashboard Modal -->
-    <div id="dashboardModal" class="modal-overlay hidden">
-        <div class="modal-content" style="max-width: 800px;">
-            <div class="p-5 sm:p-6">
-                <div class="flex justify-between items-center mb-5">
-                    <h3 class="text-xl font-bold text-gray-800">Δ Helix Analytics</h3>
-                    <button onclick="closeDashboard()" class="text-gray-400 hover:text-gray-600">
-                        <i class="fas fa-times"></i>
-                    </button>
+<!-- ======================================================================
+     ANNOTATION MODAL
+     ====================================================================== -->
+<div id="annotationModal" class="modal-overlay hidden">
+    <div class="modal-content">
+        <div class="p-6 sm:p-8">
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <h3 class="text-xl font-bold text-gray-800 font-['Space_Grotesk']" id="annotationTitle">Annotate Data</h3>
+                    <p class="text-sm text-gray-500 mt-1" id="annotationField">Field name</p>
                 </div>
-                
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                    <div class="helix-card p-4">
-                        <h4 class="font-semibold text-gray-700 mb-3">Classification Distribution</h4>
-                        <canvas id="classChart" height="200"></canvas>
-                    </div>
-                    
-                    <div class="helix-card p-4">
-                        <h4 class="font-semibold text-gray-700 mb-3">ETI Response Prediction</h4>
-                        <canvas id="responseChart" height="200"></canvas>
-                    </div>
-                </div>
-                
-                <div class="mt-5">
-                    <button onclick="exportReport()" class="action-button action-button-primary">
-                        <i class="fas fa-download mr-2"></i>
-                        Export Analytics Report
-                    </button>
-                </div>
+                <button onclick="closeAnnotationModal()" class="p-2 hover:bg-gray-100 rounded-lg">
+                    <i class="fas fa-times text-gray-400 hover:text-gray-600"></i>
+                </button>
+            </div>
+            
+            <div id="annotationContent" class="space-y-5">
+                <!-- Dynamic content -->
+            </div>
+            
+            <div class="flex justify-end gap-3 mt-8">
+                <button onclick="closeAnnotationModal()" 
+                        class="px-5 py-2.5 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50">
+                    Cancel
+                </button>
+                <button onclick="saveAnnotation()" 
+                        class="px-6 py-2.5 bg-gradient-to-r from-helix-protein to-helix-protein-glow text-white rounded-xl hover:shadow-lg flex items-center gap-2">
+                    <i class="fas fa-save"></i>
+                    Save Annotation
+                </button>
             </div>
         </div>
     </div>
-    
-    <!-- COMPLETE JAVASCRIPT IMPLEMENTATION -->
-   <script>
-// ======================================================================
-// Δ HELIX | CFTR CLINICAL INTELLIGENCE SYSTEM
-// ======================================================================
-// VERSION: 5.0.0
-// LAST UPDATED: 2026-02-11
-// 
-// ARCHITECTURE:
-// 1. CONFIGURATION          - System constants & endpoints
-// 2. STATE MANAGEMENT       - Single source of truth
-// 3. INITIALIZATION         - App bootstrap & lifecycle
-// 4. DATABASE OPERATIONS    - Supabase interactions
-// 5. FILTER ENGINE          - Search, view modes, filtering
-// 6. RENDER ENGINE          - UI rendering components
-// 7. VIEW MANAGEMENT        - Toggle systems & displays
-// 8. ANNOTATION SYSTEM      - Data annotation workflows
-// 9. CHART ENGINE           - Analytics visualization
-// 10. UTILITIES            - Helpers, notifications, exports
-// 11. EVENT HANDLERS       - User interactions
-// 12. WINDOW EXPORTS       - Global function registry
-// ======================================================================
+</div>
 
+<!-- ======================================================================
+     DASHBOARD MODAL - ANALYTICS
+     ====================================================================== -->
+<div id="dashboardModal" class="modal-overlay hidden">
+    <div class="modal-content" style="max-width: 900px;">
+        <div class="p-6 sm:p-8">
+            <div class="flex justify-between items-start mb-6">
+                <div class="flex items-center gap-4">
+                    <div class="p-3 bg-gradient-to-br from-helix-evidence/20 to-helix-evidence/5 rounded-2xl">
+                        <i class="fas fa-chart-network text-helix-evidence text-2xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-800 font-['Space_Grotesk']">Δ Helix Analytics</h3>
+                        <p class="text-sm text-gray-500 mt-1">Real-time variant intelligence</p>
+                    </div>
+                </div>
+                <button onclick="closeDashboard()" class="p-2 hover:bg-gray-100 rounded-lg">
+                    <i class="fas fa-times text-gray-400 hover:text-gray-600"></i>
+                </button>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="glass-card p-5">
+                    <h4 class="font-semibold text-gray-700 mb-4 flex items-center gap-2">
+                        <div class="w-2 h-2 bg-helix-mutation rounded-full"></div>
+                        Classification Distribution
+                    </h4>
+                    <canvas id="classChart" height="200"></canvas>
+                </div>
+                
+                <div class="glass-card p-5">
+                    <h4 class="font-semibold text-gray-700 mb-4 flex items-center gap-2">
+                        <div class="w-2 h-2 bg-helix-therapy rounded-full"></div>
+                        ETI Response Prediction
+                    </h4>
+                    <canvas id="responseChart" height="200"></canvas>
+                </div>
+            </div>
+            
+            <div class="mt-6 flex justify-end">
+                <button onclick="exportReport()" 
+                        class="px-5 py-2.5 bg-gradient-to-r from-helix-dna to-helix-dna-glow text-white rounded-xl hover:shadow-lg transition-all text-sm font-medium flex items-center gap-2">
+                    <i class="fas fa-download"></i>
+                    Export Analytics Report
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ======================================================================
+     Δ HELIX JAVASCRIPT ENGINE
+     Professional, Modular, Production-Ready
+     ====================================================================== -->
+<script>
 // ======================================================================
-// 1. ⚙️ CONFIGURATION - SYSTEM CONSTANTS
+// 1. 🚀 CONFIGURATION - NO HARDCODED NUMBERS
 // ======================================================================
 const CONFIG = {
     SUPABASE: {
@@ -1052,17 +1099,16 @@ const CONFIG = {
     UI: {
         ITEMS_PER_PAGE: 15,
         SEARCH_DELAY: 300,
-        NOTIFICATION_DURATION: 3000
+        NOTIFICATION_DURATION: 4000
     },
-    VERSION: 'Δ5.0.0',
-    RELEASE_DATE: '2026-02-11'
+    VERSION: '5.0.0'
 };
 
 // ======================================================================
-// 2. 🗂️ STATE MANAGEMENT - SINGLE SOURCE OF TRUTH
+// 2. 📊 STATE MANAGEMENT - SINGLE SOURCE OF TRUTH
 // ======================================================================
 const STATE = {
-    // Data Collections
+    // Data
     variants: [],
     filteredVariants: [],
     selectedVariant: null,
@@ -1073,182 +1119,153 @@ const STATE = {
     searchQuery: '',
     dataViewMode: 'all',
     
-    // Metadata
-    annotationContext: null,
-    charts: {},
+    // Metadata - Dynamically updated from database
     databaseStats: {
-        total: 2102,
-        complete: 1002,
-        clinical: 1854,
-        classI: 979,
-        exceptional: 21,
-        responsive: 50
+        total: 0,
+        complete: 0,
+        clinical: 0,
+        classI: 0,
+        exceptional: 0,
+        responsive: 0
     },
     
-    // System Flags
+    // System
+    annotationContext: null,
+    charts: {},
     initialized: false,
-    searchTimeout: null
+    searchTimeout: null,
+    
+    // Import Queue
+    importQueue: []
 };
 
 // ======================================================================
-// 3. 🚀 INITIALIZATION - APP BOOTSTRAP
+// 3. 🎯 INITIALIZATION - LIVE FROM DATABASE
 // ======================================================================
-document.addEventListener('DOMContentLoaded', bootstrapApp);
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log(`🚀 Δ Helix v${CONFIG.VERSION} initializing...`);
+    showLoadingState();
+    await initializeApp();
+});
 
-async function bootstrapApp() {
+async function initializeApp() {
     try {
-        console.log(`🚀 Δ Helix v${CONFIG.VERSION} initializing...`);
-        
-        validateDOMElements();
-        showLoadingState('Establishing secure connection...');
-        
-        // Parallel initialization for speed
+        // Load real data from Supabase
         await Promise.all([
-            fetchDatabaseStatistics(),
-            loadVariantCatalog()
+            fetchDatabaseStats(),
+            loadVariants()
         ]);
         
+        // Setup systems
         attachEventListeners();
         initializeSearchEngine();
-        synchronizeViewUI();
+        
+        // Initial render
+        applyFilterChain();
+        updateUIFromState();
         
         STATE.initialized = true;
-        
-        console.log('✅ Δ Helix initialized successfully!');
-        emitNotification('System ready • ' + STATE.variants.length + ' variants loaded', 'success');
+        console.log('✅ Δ Helix ready -', STATE.variants.length, 'variants loaded');
+        showNotification(`System ready • ${STATE.variants.length} variants loaded`, 'success');
         
     } catch (error) {
         console.error('❌ Initialization failed:', error);
-        emitNotification('System initialization failed: ' + error.message, 'error');
-        renderErrorState(error.message);
+        showNotification('Failed to initialize: ' + error.message, 'error');
     }
 }
 
-function validateDOMElements() {
-    const requiredIds = [
-        'statTotal', 'statClassI', 'statExceptional', 'statResponsive',
-        'completeCount', 'clinicalCount', 'allCount', 'databaseTotal',
-        'variantList', 'variantHeader', 'variantContent', 'emptyState'
-    ];
-    
-    requiredIds.forEach(id => {
-        if (!document.getElementById(id)) {
-            console.warn(`⚠️ DOM element '#${id}' not found - verify HTML structure`);
-        }
-    });
-}
-
 // ======================================================================
-// 4. 📊 DATABASE OPERATIONS - SUPABASE INTEGRATION
+// 4. 💾 DATABASE OPERATIONS - LIVE DATA ONLY
 // ======================================================================
-async function fetchDatabaseStatistics() {
+async function fetchDatabaseStats() {
     try {
-        console.log('📊 Retrieving database statistics...');
-        
         const endpoints = [
             { key: 'total', url: '/variants?select=count' },
-            { key: 'complete', url: '/variants?cftr_class=not.is.null&eti_prediction=not.is.null&class_confidence=not.is.null&select=count' },
-            { key: 'clinical', url: '/variants?or=(cftr_class.not.is.null,eti_prediction.not.is.null)&select=count' },
+            { key: 'complete', url: '/variants?data_status=eq.complete_clinical&select=count' },
+            { key: 'clinical', url: '/variants?or=(data_status.eq.complete_clinical,data_status.eq.partial_clinical)&select=count' },
             { key: 'classI', url: '/variants?cftr_class=eq.I&select=count' },
             { key: 'exceptional', url: '/variants?class_subtype=eq.exceptional&select=count' },
             { key: 'responsive', url: '/variants?eti_prediction=eq.responsive&select=count' }
         ];
         
         const responses = await Promise.all(
-            endpoints.map(endpoint => 
-                fetch(`${CONFIG.SUPABASE.URL}/rest/v1${endpoint.url}`, {
-                    headers: {
-                        'apikey': CONFIG.SUPABASE.KEY,
-                        'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`
-                    }
-                })
-            )
+            endpoints.map(e => fetch(`${CONFIG.SUPABASE.URL}/rest/v1${e.url}`, {
+                headers: {
+                    'apikey': CONFIG.SUPABASE.KEY,
+                    'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`
+                }
+            }))
         );
         
-        const results = await Promise.all(responses.map(res => res.json()));
+        const results = await Promise.all(responses.map(r => r.json()));
         
         STATE.databaseStats = {
-            total: results[0][0]?.count || 2102,
-            complete: results[1][0]?.count || 1002,
-            clinical: results[2][0]?.count || 1854,
-            classI: results[3][0]?.count || 979,
-            exceptional: results[4][0]?.count || 21,
-            responsive: results[5][0]?.count || 50
+            total: results[0][0]?.count || 0,
+            complete: results[1][0]?.count || 0,
+            clinical: results[2][0]?.count || 0,
+            classI: results[3][0]?.count || 0,
+            exceptional: results[4][0]?.count || 0,
+            responsive: results[5][0]?.count || 0
         };
         
-        renderDatabaseStatistics();
+        updateStatsUI();
         
     } catch (error) {
-        console.warn('⚠️ Using default statistics (Supabase unavailable):', error);
-        renderDatabaseStatistics();
+        console.warn('⚠️ Stats fetch failed, using query counts');
+        // Fallback to counting from loaded variants
+        if (STATE.variants.length) {
+            STATE.databaseStats.total = STATE.variants.length;
+            STATE.databaseStats.complete = STATE.variants.filter(v => v.data_status === 'complete_clinical').length;
+            STATE.databaseStats.clinical = STATE.variants.filter(v => 
+                v.data_status === 'complete_clinical' || v.data_status === 'partial_clinical'
+            ).length;
+            STATE.databaseStats.classI = STATE.variants.filter(v => v.cftr_class === 'I').length;
+            STATE.databaseStats.exceptional = STATE.variants.filter(v => v.class_subtype === 'exceptional').length;
+            STATE.databaseStats.responsive = STATE.variants.filter(v => v.eti_prediction === 'responsive').length;
+            updateStatsUI();
+        }
     }
 }
 
-async function loadVariantCatalog() {
+async function loadVariants() {
     try {
-        console.log('🧬 Loading variant catalog...');
-        
         const response = await fetch(
             `${CONFIG.SUPABASE.URL}/rest/v1/clinical_variants?select=*&order=legacy_name.asc`,
             {
                 headers: {
                     'apikey': CONFIG.SUPABASE.KEY,
-                    'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`,
-                    'Content-Type': 'application/json'
+                    'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`
                 }
             }
         );
         
-        if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
         
         STATE.variants = await response.json();
-        console.log(`✅ Loaded ${STATE.variants.length} unique variants`);
+        console.log(`✅ Loaded ${STATE.variants.length} variants`);
         
-        applyFilterChain();
-        updateAnalyticsDashboard();
-        refreshViewDescription();
-        
-    } catch (error) {
-        console.error('❌ Variant loading failed:', error);
-        emitNotification(`Database connection failed: ${error.message}`, 'error');
-        renderErrorState('Unable to connect to variant database');
-    }
-}
-
-async function updateVariantRecord(variantId, field, value) {
-    try {
-        const response = await fetch(
-            `${CONFIG.SUPABASE.URL}/rest/v1/variants?id=eq.${variantId}`,
-            {
-                method: 'PATCH',
-                headers: {
-                    'apikey': CONFIG.SUPABASE.KEY,
-                    'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    [field]: value,
-                    updated_at: new Date().toISOString()
-                })
-            }
-        );
-        
-        if (!response.ok) throw new Error(`Update failed: ${response.status}`);
-        return true;
+        // Update UI counts
+        document.querySelectorAll('[id$="Count"]').forEach(el => {
+            if (el.id === 'completeCount') el.textContent = STATE.variants.filter(v => v.data_status === 'complete_clinical').length;
+            if (el.id === 'clinicalCount') el.textContent = STATE.variants.filter(v => v.data_status === 'complete_clinical' || v.data_status === 'partial_clinical').length;
+            if (el.id === 'allCount') el.textContent = STATE.variants.length;
+            if (el.id === 'databaseTotal') el.textContent = STATE.variants.length.toLocaleString();
+        });
         
     } catch (error) {
-        console.error('❌ Database update failed:', error);
+        console.error('❌ Failed to load variants:', error);
+        showNotification('Database connection failed', 'error');
         throw error;
     }
 }
 
 // ======================================================================
-// 5. 🔍 FILTER ENGINE - SEARCH, VIEWS, FILTERS
+// 5. 🔍 FILTER ENGINE - FIXED FOR data_status COLUMN
 // ======================================================================
 function applyFilterChain() {
     let filtered = [...STATE.variants];
     
-    // Stage 1: Apply text search
+    // Search filter
     if (STATE.searchQuery) {
         const query = STATE.searchQuery.toLowerCase();
         filtered = filtered.filter(v => 
@@ -1258,186 +1275,89 @@ function applyFilterChain() {
         );
     }
     
-    // Stage 2: Apply view mode filter (CRITICAL - This ensures variants appear!)
+    // View mode filter - CLEAN, SIMPLE, WORKS
     if (STATE.dataViewMode === 'complete') {
-        filtered = filtered.filter(v => 
-            v && (
-                v.data_status === 'complete_clinical' ||
-                v.data_status === 'complete_clinical' ||
-                (v.cftr_class && v.eti_prediction)
-            )
-        );
+        filtered = filtered.filter(v => v?.data_status === 'complete_clinical');
     } else if (STATE.dataViewMode === 'clinical') {
         filtered = filtered.filter(v => 
-            v && (
-                v.data_status === 'complete_clinical' || 
-                v.data_status === 'partial_clinical' ||
-                v.cftr_class || 
-                v.eti_prediction
-            )
+            v?.data_status === 'complete_clinical' || 
+            v?.data_status === 'partial_clinical'
         );
     }
-    // 'all' mode - no filter, ALL variants shown!
+    // 'all' mode - no filter
     
-    // Stage 3: Apply missing data filter
+    // Missing data filter
     if (STATE.activeFilter === 'missing') {
-        filtered = filtered.filter(v => hasMissingCriticalData(v));
+        filtered = filtered.filter(v => {
+            const critical = ['cftr_class', 'eti_prediction', 'class_confidence'];
+            return critical.some(f => !v[f] || v[f] === 'null');
+        });
     }
     
     STATE.filteredVariants = filtered;
     STATE.currentPage = 1;
     
-    renderVariantCatalog();
-    refreshPagination();
-    synchronizeFilterUI();
-    refreshVariantCounter();
-    refreshViewStatistics();
-    synchronizeViewUI();
-}
-
-function hasMissingCriticalData(variant) {
-    const criticalFields = ['cftr_class', 'eti_prediction', 'class_confidence'];
-    return criticalFields.some(field => 
-        !variant[field] || 
-        variant[field] === 'null' || 
-        variant[field] === 'undefined'
-    );
-}
-
-function countMissingFields(variant, fields) {
-    return fields.filter(field => 
-        !variant[field] || 
-        variant[field] === 'null' || 
-        variant[field] === 'undefined'
-    ).length;
-}
-
-function initializeSearchEngine() {
-    const searchInput = document.getElementById('searchInput');
-    const searchClear = document.getElementById('searchClear');
-    
-    if (!searchInput) return;
-    
-    searchInput.addEventListener('input', () => {
-        clearTimeout(STATE.searchTimeout);
-        
-        if (searchClear) {
-            searchClear.classList.toggle('hidden', searchInput.value.length === 0);
-        }
-        
-        STATE.searchTimeout = setTimeout(() => {
-            STATE.searchQuery = searchInput.value;
-            applyFilterChain();
-            
-            if (STATE.searchQuery && STATE.filteredVariants.length) {
-                emitNotification(`Found ${STATE.filteredVariants.length} matching variants`, 'info', 1500);
-            }
-        }, CONFIG.UI.SEARCH_DELAY);
-    });
-    
-    if (searchClear) {
-        searchClear.addEventListener('click', () => {
-            searchInput.value = '';
-            searchClear.classList.add('hidden');
-            STATE.searchQuery = '';
-            applyFilterChain();
-            searchInput.focus();
-        });
-    }
-    
-    searchInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            searchInput.value = '';
-            STATE.searchQuery = '';
-            applyFilterChain();
-            if (searchClear) searchClear.classList.add('hidden');
-        }
-    });
+    renderVariantList();
+    updatePagination();
+    updateStatsFromView();
 }
 
 // ======================================================================
-// 6. 🎨 RENDER ENGINE - UI COMPONENTS
+// 6. 🎨 RENDER ENGINE
 // ======================================================================
-function renderVariantCatalog() {
+function renderVariantList() {
     const container = document.getElementById('variantList');
     if (!container) return;
     
-    const startIndex = (STATE.currentPage - 1) * CONFIG.UI.ITEMS_PER_PAGE;
-    const endIndex = startIndex + CONFIG.UI.ITEMS_PER_PAGE;
-    const pageVariants = STATE.filteredVariants.slice(startIndex, endIndex);
+    const start = (STATE.currentPage - 1) * CONFIG.UI.ITEMS_PER_PAGE;
+    const end = start + CONFIG.UI.ITEMS_PER_PAGE;
+    const pageVariants = STATE.filteredVariants.slice(start, end);
     
     if (pageVariants.length === 0) {
         container.innerHTML = `
             <div class="p-12 text-center">
-                <div class="p-4 bg-gray-50 rounded-full inline-flex mb-4">
-                    <i class="fas fa-dna text-gray-400 text-2xl"></i>
+                <div class="p-4 bg-gray-100 rounded-full inline-flex mb-4">
+                    <i class="fas fa-dna text-gray-400 text-3xl"></i>
                 </div>
                 <p class="text-gray-700 font-medium">No variants found</p>
-                <p class="text-xs text-gray-500 mt-2 max-w-xs mx-auto">
-                    ${STATE.searchQuery 
-                        ? 'Try adjusting your search terms' 
-                        : STATE.activeFilter === 'missing'
-                            ? 'All variants have complete data'
-                            : 'No variants match current filters'}
+                <p class="text-sm text-gray-500 mt-2 max-w-xs mx-auto">
+                    ${STATE.searchQuery ? 'Try adjusting your search' : 'No variants match current filters'}
                 </p>
             </div>
         `;
         return;
     }
     
-    container.innerHTML = pageVariants.map(variant => {
-        const isSelected = STATE.selectedVariant?.id === variant.id;
-        const missingCount = countMissingFields(variant, ['cftr_class', 'eti_prediction', 'class_confidence']);
-        const hasMissing = missingCount > 0;
+    container.innerHTML = pageVariants.map(v => {
+        const isSelected = STATE.selectedVariant?.id === v.id;
+        const missingCount = ['cftr_class', 'eti_prediction', 'class_confidence']
+            .filter(f => !v[f] || v[f] === 'null').length;
         
-        let classBadgeHTML = '';
-        if (variant.cftr_class || variant.class_subtype) {
-            const isExceptional = variant.class_subtype === 'exceptional';
-            const isTrueClassI = variant.class_subtype === 'true';
-            const classValue = variant.cftr_class || 'I';
-            
-            let badgeClass = 'helix-badge';
-            let badgeIcon = 'fa-dna';
-            let badgeText = '';
-            
-            if (isExceptional) {
-                badgeClass += ' helix-badge-exceptional';
-                badgeIcon = 'fa-bolt';
-                badgeText = 'Exceptional';
-            } else if (isTrueClassI) {
-                badgeClass += ' helix-badge-true';
-                badgeIcon = 'fa-dna';
-                badgeText = 'True Class I';
-            } else {
-                badgeClass += ` helix-badge-class-${classValue.toLowerCase()}`;
-                badgeText = `Class ${classValue}`;
-            }
-            
-            classBadgeHTML = `
-                <span class="${badgeClass}">
-                    <i class="fas ${badgeIcon}"></i>
-                    ${badgeText}
-                </span>
-            `;
+        let badge = '';
+        if (v.cftr_class) {
+            badge = `<span class="helix-badge badge-class-${v.cftr_class.toLowerCase()}">
+                        <i class="fas fa-dna"></i> Class ${v.cftr_class}
+                     </span>`;
+        } else if (v.class_subtype === 'exceptional') {
+            badge = `<span class="helix-badge badge-exceptional">
+                        <i class="fas fa-bolt"></i> Exceptional
+                     </span>`;
         }
         
         return `
-            <div class="variant-cell ${isSelected ? 'selected' : ''}" 
-                 onclick="selectVariant('${variant.legacy_name}')">
+            <div class="variant-item ${isSelected ? 'selected' : ''}" 
+                 onclick="selectVariant('${v.legacy_name}')">
                 <div class="flex justify-between items-start mb-2">
-                    <div class="flex-1">
-                        <h4 class="variant-name">${escapeHTML(variant.legacy_name)}</h4>
-                        ${variant.protein_name ? `
-                            <div class="variant-subtitle">${escapeHTML(variant.protein_name)}</div>
-                        ` : ''}
+                    <div>
+                        <div class="variant-name">${escapeHTML(v.legacy_name)}</div>
+                        ${v.protein_name ? `<div class="text-xs text-gray-500 mt-0.5 font-mono">${escapeHTML(v.protein_name)}</div>` : ''}
                     </div>
-                    ${classBadgeHTML}
+                    ${badge}
                 </div>
-                
-                <div class="flex justify-between items-center text-xs text-gray-500">
-                    <span>${variant.final_determination || 'Clinical impact not specified'}</span>
-                    ${hasMissing ? `
-                        <span class="missing-count-badge" title="${missingCount} missing data fields">
+                <div class="flex justify-between items-center text-xs">
+                    <span class="text-gray-600">${v.final_determination || 'Clinical impact not specified'}</span>
+                    ${missingCount > 0 ? `
+                        <span class="px-1.5 py-0.5 bg-helix-warning text-white rounded-full text-xs font-bold">
                             ${missingCount}
                         </span>
                     ` : ''}
@@ -1447,297 +1367,8 @@ function renderVariantCatalog() {
     }).join('');
 }
 
-function renderVariantDetails(variant) {
-    if (!variant) return;
-    
-    // Unhide containers
-    const header = document.getElementById('variantHeader');
-    const content = document.getElementById('variantContent');
-    const emptyState = document.getElementById('emptyState');
-    
-    if (header) header.classList.remove('hidden');
-    if (content) content.classList.remove('hidden');
-    if (emptyState) emptyState.classList.add('hidden');
-    
-    // Calculate state
-    const isExceptional = variant.class_subtype === 'exceptional';
-    const isTrueClassI = variant.class_subtype === 'true';
-    const isResponsive = variant.eti_prediction === 'responsive';
-    const missingCount = countMissingFields(variant, [
-        'cftr_class', 'eti_prediction', 'class_confidence', 'eti_evidence_level'
-    ]);
-    
-    // ========== CLASSIFICATION DISPLAY ==========
-    let displayClass = variant.cftr_class || (isExceptional || isTrueClassI ? 'I' : '-');
-    let classificationType = 'Unknown Classification';
-    let classificationSubtype = '';
-    let classColor = 'var(--helix-dna)';
-    
-    if (variant.cftr_class || isExceptional || isTrueClassI) {
-        const classValue = variant.cftr_class || 'I';
-        
-        const colorMap = {
-            'I': 'var(--helix-mutation)',
-            'II': 'var(--helix-warning)',
-            'III': 'var(--helix-therapy)',
-            'IV': 'var(--helix-dna)',
-            'V': 'var(--helix-evidence)'
-        };
-        classColor = colorMap[classValue] || 'var(--helix-dna)';
-        
-        if (isExceptional) {
-            classificationType = 'Exceptional Case';
-            classificationSubtype = 'Modified Class I - Special consideration for ETI';
-            classColor = 'var(--helix-warning)';
-        } else if (isTrueClassI) {
-            classificationType = 'True Class I';
-            classificationSubtype = 'Standard nonsense/frameshift mutation';
-            classColor = 'var(--helix-mutation)';
-        } else {
-            classificationType = `Class ${variant.cftr_class}`;
-            classificationSubtype = variant.class_subtype 
-                ? `${variant.class_subtype.charAt(0).toUpperCase() + variant.class_subtype.slice(1)} subtype`
-                : 'Standard classification';
-        }
-    }
-    
-    safeSetText('variantName', variant.legacy_name);
-    safeSetText('variantClass', displayClass);
-    
-    const classEl = document.getElementById('variantClass');
-    if (classEl) classEl.style.color = classColor;
-    
-    safeSetText('classificationType', classificationType);
-    safeSetText('classificationSubtype', classificationSubtype);
-    
-    // ========== DATA COMPLETENESS BADGE ==========
-    const completenessEl = document.getElementById('dataCompleteness');
-    if (completenessEl) {
-        completenessEl.innerHTML = missingCount > 0 
-            ? `<span class="px-2 py-1 bg-helix-warning text-white text-xs rounded-full font-medium">
-                ${missingCount} missing ${missingCount === 1 ? 'field' : 'fields'}
-               </span>`
-            : `<span class="px-2 py-1 bg-helix-therapy text-white text-xs rounded-full font-medium">
-                Complete clinical dataset
-               </span>`;
-    }
-    
-    // ========== BADGES ==========
-    const badges = [];
-    
-    if (displayClass !== '-') {
-        if (isExceptional) {
-            badges.push(`
-                <span class="helix-badge helix-badge-exceptional">
-                    <i class="fas fa-bolt"></i>
-                    Exceptional Case
-                </span>
-            `);
-        } else if (isTrueClassI) {
-            badges.push(`
-                <span class="helix-badge helix-badge-true">
-                    <i class="fas fa-dna"></i>
-                    True Class I
-                </span>
-            `);
-        } else if (variant.cftr_class) {
-            badges.push(`
-                <span class="helix-badge helix-badge-class-${variant.cftr_class.toLowerCase()}">
-                    <i class="fas fa-dna"></i>
-                    Class ${variant.cftr_class}
-                </span>
-            `);
-        }
-    }
-    
-    if (variant.final_determination === 'CF-causing') {
-        badges.push(`
-            <span class="helix-badge" style="background: #fef2f2; color: var(--helix-mutation); border-color: #fecaca;">
-                <i class="fas fa-exclamation-triangle"></i>
-                CF-causing
-            </span>
-        `);
-    }
-    
-    if (variant.eti_prediction) {
-        const isResp = variant.eti_prediction === 'responsive';
-        badges.push(`
-            <span class="helix-badge" style="background: ${isResp ? '#f0fdf4' : '#fef2f2'}; 
-                                            color: ${isResp ? 'var(--helix-therapy)' : 'var(--helix-mutation)'}; 
-                                            border-color: ${isResp ? '#bbf7d0' : '#fecaca'};">
-                <i class="fas ${isResp ? 'fa-check' : 'fa-times'}"></i>
-                ETI ${variant.eti_prediction}
-            </span>
-        `);
-    }
-    
-    const badgeContainer = document.getElementById('variantBadges');
-    if (badgeContainer) badgeContainer.innerHTML = badges.join('');
-    
-    // ========== DATA SECTIONS ==========
-    renderNomenclatureSection(variant);
-    renderClassificationSection(variant);
-    renderTherapySection(variant);
-    renderEvidenceSection(variant);
-}
-
-function renderNomenclatureSection(variant) {
-    const grid = document.getElementById('nomenclatureGrid');
-    if (!grid) return;
-    
-    grid.innerHTML = [
-        createDataPoint('Legacy Name', variant.legacy_name, 'legacy_name', variant, 'nomenclature'),
-        createDataPoint('Protein Notation', variant.protein_name, 'protein_name', variant, 'nomenclature'),
-        createDataPoint('cDNA Notation', variant.cdna_name, 'cdna_name', variant, 'nomenclature')
-    ].join('');
-}
-
-function renderClassificationSection(variant) {
-    const container = document.getElementById('clinicalImpact');
-    if (!container) return;
-    
-    container.innerHTML = [
-        createDataPoint('CFTR Class', variant.cftr_class, 'cftr_class', variant, 'classification'),
-        createDataPoint('Subtype', variant.class_subtype, 'class_subtype', variant, 'classification'),
-        createDataPoint('Clinical Impact', variant.final_determination, 'final_determination', variant, 'classification'),
-        createDataPoint('Confidence', variant.class_confidence, 'class_confidence', variant, 'classification')
-    ].join('');
-}
-
-function renderTherapySection(variant) {
-    const container = document.getElementById('therapeuticPrediction');
-    if (!container) return;
-    
-    container.innerHTML = [
-        createDataPoint('ETI Response', variant.eti_prediction, 'eti_prediction', variant, 'therapy'),
-        createDataPoint('Recommendation', variant.eti_recommendation, 'eti_recommendation', variant, 'therapy'),
-        createDataPoint('Responsive', variant.therapy_responsive !== null 
-            ? (variant.therapy_responsive ? 'Yes' : 'No') 
-            : null, 'therapy_responsive', variant, 'therapy')
-    ].join('');
-}
-
-function renderEvidenceSection(variant) {
-    const container = document.getElementById('evidenceQuality');
-    if (!container) return;
-    
-    container.innerHTML = [
-        createDataPoint('Evidence Level', variant.eti_evidence_level, 'eti_evidence_level', variant, 'evidence'),
-        createDataPoint('Last Update', variant.last_evidence_update 
-            ? new Date(variant.last_evidence_update).toLocaleDateString() 
-            : null, 'last_evidence_update', variant, 'evidence'),
-        createDataPoint('Data Status', variant.changed_prev, 'changed_prev', variant, 'evidence')
-    ].join('');
-    
-    // Evidence chain
-    const chainContainer = document.getElementById('evidenceChain');
-    if (chainContainer && variant.source_summary) {
-        const parts = variant.source_summary.split('_');
-        chainContainer.innerHTML = parts.map((part, i) => `
-            <span class="evidence-step">${escapeHTML(part)}</span>
-            ${i < parts.length - 1 ? '<i class="fas fa-arrow-right evidence-arrow"></i>' : ''}
-        `).join('');
-    }
-}
-
-function createDataPoint(label, value, field, variant, section) {
-    const isMissing = !value || value === 'null' || value === 'undefined';
-    const displayValue = isMissing ? 'Not specified' : escapeHTML(String(value));
-    
-    return `
-        <div class="data-point ${isMissing ? 'missing' : ''}">
-            <div class="annotation-trigger" onclick="showAnnotationModal('${variant.legacy_name}', '${field}', ${JSON.stringify(value || '')})">
-                <i class="fas ${isMissing ? 'fa-plus' : 'fa-pencil-alt'}"></i>
-            </div>
-            
-            <div class="data-label">
-                <i class="fas fa-tag text-xs"></i>
-                ${label}
-            </div>
-            <div class="data-value ${isMissing ? 'text-helix-warning' : ''}">
-                ${displayValue}
-            </div>
-        </div>
-    `;
-}
-
 // ======================================================================
-// 7. 👁️ VIEW MANAGEMENT - TOGGLE SYSTEMS & DISPLAYS
-// ======================================================================
-function setDataView(mode) {
-    if (STATE.dataViewMode === mode) return;
-    
-    STATE.dataViewMode = mode;
-    synchronizeViewUI();
-    applyFilterChain(); // CRITICAL - This refreshes the variant list!
-    
-    const messages = {
-        'complete': `Showing complete clinical variants (${STATE.databaseStats.complete})`,
-        'clinical': `Showing clinical data variants (${STATE.databaseStats.clinical})`,
-        'all': `Showing ALL variants (${STATE.databaseStats.total})`
-    };
-    
-    emitNotification(messages[mode], 'info');
-    refreshViewDescription();
-}
-
-function synchronizeViewUI() {
-    ['complete', 'clinical', 'all'].forEach(view => {
-        const btn = document.getElementById(`${view}ViewBtn`);
-        if (btn) btn.classList.toggle('active', STATE.dataViewMode === view);
-    });
-    
-    const badge = document.getElementById('viewBadge');
-    if (badge) {
-        const labels = { complete: 'Complete', clinical: 'Clinical', all: 'All' };
-        badge.textContent = labels[STATE.dataViewMode] || 'All';
-        
-        const colors = {
-            complete: 'bg-helix-protein',
-            clinical: 'bg-helix-dna',
-            all: 'bg-gray-600'
-        };
-        badge.className = `ml-2 px-2 py-0.5 ${colors[STATE.dataViewMode] || 'bg-gray-600'} text-white rounded-full text-xs font-medium`;
-    }
-}
-
-function refreshViewDescription() {
-    const modeDisplay = {
-        'complete': 'Complete Clinical Data',
-        'clinical': 'Clinical Data (Complete + Partial)',
-        'all': 'All Variants'
-    };
-    
-    safeSetText('currentModeText', modeDisplay[STATE.dataViewMode] || 'All Variants');
-    safeSetText('currentCountText', `${STATE.filteredVariants.length.toLocaleString()} variants`);
-}
-
-function filterVariants(filter) {
-    STATE.activeFilter = filter;
-    applyFilterChain();
-}
-
-function synchronizeFilterUI() {
-    const filterMap = { 'all': 'filterAll', 'missing': 'filterMissing' };
-    
-    Object.entries(filterMap).forEach(([filterValue, elementId]) => {
-        const element = document.getElementById(elementId);
-        if (element) {
-            if (STATE.activeFilter === filterValue) {
-                element.style.borderColor = filterValue === 'missing' ? 'var(--helix-warning)' : 'var(--helix-protein)';
-                element.style.color = filterValue === 'missing' ? 'var(--helix-warning)' : 'var(--helix-protein)';
-                element.style.fontWeight = '600';
-            } else {
-                element.style.borderColor = '';
-                element.style.color = '';
-                element.style.fontWeight = '';
-            }
-        }
-    });
-}
-
-// ======================================================================
-// 8. 📝 ANNOTATION SYSTEM - DATA ENRICHMENT WORKFLOW
+// 7. 📝 ANNOTATION SYSTEM
 // ======================================================================
 function showAnnotationModal(variantName, field, currentValue) {
     const variant = STATE.variants.find(v => v.legacy_name === variantName);
@@ -1755,43 +1386,26 @@ function showAnnotationModal(variantName, field, currentValue) {
         'class_confidence': 'Confidence Level',
         'eti_prediction': 'ETI Response',
         'eti_recommendation': 'Therapy Recommendation',
-        'therapy_responsive': 'Therapy Responsive',
-        'eti_evidence_level': 'Evidence Level',
-        'last_evidence_update': 'Last Evidence Update',
-        'changed_prev': 'Data Status'
+        'therapy_responsive': 'Therapy Responsive'
     };
     
-    safeSetText('annotationTitle', `Annotate ${variantName}`);
-    safeSetText('annotationField', fieldLabels[field] || field.replace(/_/g, ' '));
+    document.getElementById('annotationTitle').textContent = `Annotate ${variantName}`;
+    document.getElementById('annotationField').textContent = fieldLabels[field] || field;
     
-    // Generate appropriate input field
     let inputHTML = '';
     
     if (field === 'cftr_class') {
         inputHTML = `
-            <select id="annotationValue" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-helix-protein focus:border-helix-protein">
+            <select id="annotationValue" class="form-input">
                 <option value="">Select Class</option>
-                <option value="I" ${currentValue === 'I' ? 'selected' : ''}>Class I</option>
-                <option value="II" ${currentValue === 'II' ? 'selected' : ''}>Class II</option>
-                <option value="III" ${currentValue === 'III' ? 'selected' : ''}>Class III</option>
-                <option value="IV" ${currentValue === 'IV' ? 'selected' : ''}>Class IV</option>
-                <option value="V" ${currentValue === 'V' ? 'selected' : ''}>Class V</option>
-            </select>
-        `;
-    } else if (field === 'class_subtype') {
-        inputHTML = `
-            <select id="annotationValue" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-helix-protein focus:border-helix-protein">
-                <option value="">Select Subtype</option>
-                <option value="standard" ${currentValue === 'standard' ? 'selected' : ''}>Standard</option>
-                <option value="exceptional" ${currentValue === 'exceptional' ? 'selected' : ''}>Exceptional Case</option>
-                <option value="true" ${currentValue === 'true' ? 'selected' : ''}>True Class I</option>
-                <option value="complex" ${currentValue === 'complex' ? 'selected' : ''}>Complex</option>
-                <option value="variable" ${currentValue === 'variable' ? 'selected' : ''}>Variable</option>
+                ${['I','II','III','IV','V'].map(c => 
+                    `<option value="${c}" ${currentValue === c ? 'selected' : ''}>Class ${c}</option>`
+                ).join('')}
             </select>
         `;
     } else if (field === 'eti_prediction') {
         inputHTML = `
-            <select id="annotationValue" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-helix-protein focus:border-helix-protein">
+            <select id="annotationValue" class="form-input">
                 <option value="">Select Response</option>
                 <option value="responsive" ${currentValue === 'responsive' ? 'selected' : ''}>Responsive</option>
                 <option value="non_responsive" ${currentValue === 'non_responsive' ? 'selected' : ''}>Non-responsive</option>
@@ -1800,32 +1414,24 @@ function showAnnotationModal(variantName, field, currentValue) {
         `;
     } else {
         inputHTML = `
-            <textarea id="annotationValue" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-helix-protein focus:border-helix-protein" rows="3">${escapeHTML(currentValue || '')}</textarea>
+            <textarea id="annotationValue" class="form-input font-mono" rows="3">${escapeHTML(currentValue || '')}</textarea>
         `;
     }
     
-    const content = document.getElementById('annotationContent');
-    if (content) {
-        content.innerHTML = `
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">
-                    Current Value:
-                </label>
-                <div class="p-3 bg-gray-50 rounded-lg border border-gray-200 text-sm">
-                    ${currentValue ? escapeHTML(currentValue) : '<span class="text-gray-400 italic">Not specified</span>'}
-                </div>
+    document.getElementById('annotationContent').innerHTML = `
+        <div>
+            <label class="form-label">Current Value</label>
+            <div class="p-3 bg-gray-50 rounded-lg border border-gray-200 text-sm">
+                ${currentValue ? escapeHTML(currentValue) : '<span class="text-gray-400 italic">Not specified</span>'}
             </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">
-                    New Value:
-                </label>
-                ${inputHTML}
-            </div>
-        `;
-    }
+        </div>
+        <div>
+            <label class="form-label">New Value</label>
+            ${inputHTML}
+        </div>
+    `;
     
-    const modal = document.getElementById('annotationModal');
-    if (modal) modal.classList.remove('hidden');
+    document.getElementById('annotationModal').classList.remove('hidden');
 }
 
 async function saveAnnotation() {
@@ -1833,15 +1439,30 @@ async function saveAnnotation() {
     
     const { variant, field } = STATE.annotationContext;
     const input = document.getElementById('annotationValue');
-    
     if (!input) return;
     
     const newValue = input.value;
     
     try {
-        emitNotification('Saving annotation...', 'info', 2000);
+        showNotification('Saving annotation...', 'info');
         
-        await updateVariantRecord(variant.id, field, newValue);
+        const response = await fetch(
+            `${CONFIG.SUPABASE.URL}/rest/v1/variants?id=eq.${variant.id}`,
+            {
+                method: 'PATCH',
+                headers: {
+                    'apikey': CONFIG.SUPABASE.KEY,
+                    'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    [field]: newValue,
+                    updated_at: new Date().toISOString()
+                })
+            }
+        );
+        
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
         
         // Update local state
         STATE.variants = STATE.variants.map(v => 
@@ -1854,184 +1475,444 @@ async function saveAnnotation() {
         }
         
         closeAnnotationModal();
-        emitNotification('Annotation saved successfully', 'success');
-        applyFilterChain(); // Refresh view with new data
-        updateAnalyticsDashboard();
+        showNotification('Annotation saved successfully', 'success');
+        applyFilterChain();
+        fetchDatabaseStats(); // Refresh stats
         
     } catch (error) {
-        emitNotification(`Failed to save: ${error.message}`, 'error');
+        showNotification(`Failed to save: ${error.message}`, 'error');
     }
 }
 
-function closeAnnotationModal() {
-    const modal = document.getElementById('annotationModal');
-    if (modal) modal.classList.add('hidden');
-    STATE.annotationContext = null;
+// ======================================================================
+// 8. 📤 IMPORT SYSTEM - PROFESSIONAL GRADE
+// ======================================================================
+function showImportModal() {
+    document.getElementById('importModal').classList.remove('hidden');
+    document.getElementById('jsonImportPanel').classList.remove('hidden');
+    document.getElementById('formImportPanel').classList.add('hidden');
+    
+    // Reset tabs
+    document.getElementById('jsonTabBtn').className = 'import-tab-active px-1 py-3 text-sm font-medium border-b-2 border-helix-protein text-helix-protein flex items-center gap-2';
+    document.getElementById('formTabBtn').className = 'import-tab px-1 py-3 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 flex items-center gap-2';
+    
+    // Clear inputs
+    document.getElementById('jsonInput').value = '';
+    document.getElementById('importResults').innerHTML = '';
 }
 
-// ======================================================================
-// 9. 📈 CHART ENGINE - ANALYTICS VISUALIZATION
-// ======================================================================
-function showDashboard() {
-    const modal = document.getElementById('dashboardModal');
-    if (modal) {
-        modal.classList.remove('hidden');
-        renderAnalyticsCharts();
+function switchImportTab(tab) {
+    const jsonPanel = document.getElementById('jsonImportPanel');
+    const formPanel = document.getElementById('formImportPanel');
+    const jsonTab = document.getElementById('jsonTabBtn');
+    const formTab = document.getElementById('formTabBtn');
+    
+    if (tab === 'json') {
+        jsonPanel.classList.remove('hidden');
+        formPanel.classList.add('hidden');
+        jsonTab.className = 'import-tab-active px-1 py-3 text-sm font-medium border-b-2 border-helix-protein text-helix-protein flex items-center gap-2';
+        formTab.className = 'import-tab px-1 py-3 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 flex items-center gap-2';
+    } else {
+        jsonPanel.classList.add('hidden');
+        formPanel.classList.remove('hidden');
+        formTab.className = 'import-tab-active px-1 py-3 text-sm font-medium border-b-2 border-helix-protein text-helix-protein flex items-center gap-2';
+        jsonTab.className = 'import-tab px-1 py-3 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 flex items-center gap-2';
     }
 }
 
-function closeDashboard() {
-    const modal = document.getElementById('dashboardModal');
-    if (modal) modal.classList.add('hidden');
-}
-
-function renderAnalyticsCharts() {
-    // Class distribution chart
-    const classCtx = document.getElementById('classChart');
-    if (classCtx && !STATE.charts.classChart) {
-        STATE.charts.classChart = new Chart(classCtx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Class I', 'Class II', 'Class III', 'Class IV', 'Class V'],
-                datasets: [{
-                    data: [
-                        STATE.databaseStats.classI,
-                        8, 12, 1, 8
-                    ],
-                    backgroundColor: [
-                        'var(--helix-mutation)',
-                        'var(--helix-warning)',
-                        'var(--helix-therapy)',
-                        'var(--helix-dna)',
-                        'var(--helix-evidence)'
-                    ],
-                    borderWidth: 2,
-                    borderColor: 'white'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            font: { family: 'Inter', size: 12 },
-                            padding: 15,
-                            usePointStyle: true,
-                            pointStyle: 'circle'
-                        }
-                    },
-                    tooltip: {
-                        backgroundColor: 'white',
-                        titleColor: '#1e293b',
-                        bodyColor: '#475569',
-                        borderColor: '#e2e8f0',
-                        borderWidth: 1,
-                        padding: 12,
-                        boxPadding: 6
-                    }
-                }
-            }
-        });
+async function processJsonImport() {
+    const jsonInput = document.getElementById('jsonInput');
+    const resultsDiv = document.getElementById('importResults');
+    
+    if (!jsonInput.value.trim()) {
+        resultsDiv.innerHTML = `
+            <div class="p-4 bg-red-50 text-red-800 rounded-xl border border-red-200">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span class="font-medium">No JSON data provided</span>
+                </div>
+            </div>
+        `;
+        return;
     }
     
-    // ETI response chart
-    const responseCtx = document.getElementById('responseChart');
-    if (responseCtx && !STATE.charts.responseChart) {
-        STATE.charts.responseChart = new Chart(responseCtx, {
-            type: 'bar',
-            data: {
-                labels: ['Responsive', 'Non-responsive', 'Unknown'],
-                datasets: [{
-                    label: 'ETI Response Prediction',
-                    data: [
-                        STATE.databaseStats.responsive,
-                        1804,
-                        248
-                    ],
-                    backgroundColor: [
-                        'var(--helix-therapy)',
-                        'var(--helix-mutation)',
-                        'var(--helix-warning)'
-                    ],
-                    borderRadius: 6
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: { color: '#f1f5f9' },
-                        ticks: { font: { family: 'Inter', size: 11 } }
+    try {
+        const data = JSON.parse(jsonInput.value);
+        
+        // Validate required fields
+        const required = ['variant_legacy_name', 'variant_protein_name', 'variant_cDNA_name', 'variant_final_determination'];
+        const missing = required.filter(f => !data[f]);
+        
+        if (missing.length > 0) {
+            throw new Error(`Missing required fields: ${missing.join(', ')}`);
+        }
+        
+        // Show processing
+        resultsDiv.innerHTML = `
+            <div class="p-4 bg-blue-50 text-blue-800 rounded-xl border border-blue-200">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <span class="font-medium">Processing import...</span>
+                </div>
+            </div>
+        `;
+        
+        // Check if variant exists
+        const checkResponse = await fetch(
+            `${CONFIG.SUPABASE.URL}/rest/v1/variants?legacy_name=eq.${encodeURIComponent(data.variant_legacy_name)}&select=legacy_name`,
+            { headers: { 'apikey': CONFIG.SUPABASE.KEY, 'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}` } }
+        );
+        
+        const existing = await checkResponse.json();
+        const exists = existing.length > 0;
+        
+        if (exists) {
+            resultsDiv.innerHTML = `
+                <div class="p-4 bg-yellow-50 text-yellow-800 rounded-xl border border-yellow-200">
+                    <div class="flex items-start gap-3">
+                        <i class="fas fa-exclamation-triangle mt-0.5"></i>
+                        <div>
+                            <span class="font-medium">Variant already exists</span>
+                            <p class="text-sm mt-1">"${data.variant_legacy_name}" is already in the database. Skipped import.</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else {
+            // Insert new variant
+            const insertResponse = await fetch(
+                `${CONFIG.SUPABASE.URL}/rest/v1/variants`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'apikey': CONFIG.SUPABASE.KEY,
+                        'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=representation'
                     },
-                    x: {
-                        grid: { display: false },
-                        ticks: { font: { family: 'Inter', size: 11 } }
-                    }
+                    body: JSON.stringify({
+                        legacy_name: data.variant_legacy_name,
+                        protein_name: data.variant_protein_name,
+                        cdna_name: data.variant_cDNA_name,
+                        final_determination: data.variant_final_determination,
+                        data_status: 'minimal', // Default until annotated
+                        source_summary: 'Manual_Import',
+                        created_at: new Date().toISOString(),
+                        updated_at: new Date().toISOString()
+                    })
+                }
+            );
+            
+            if (!insertResponse.ok) throw new Error(`Insert failed: ${insertResponse.status}`);
+            
+            const newVariant = await insertResponse.json();
+            
+            resultsDiv.innerHTML = `
+                <div class="p-4 bg-green-50 text-green-800 rounded-xl border border-green-200">
+                    <div class="flex items-start gap-3">
+                        <i class="fas fa-check-circle mt-0.5"></i>
+                        <div>
+                            <span class="font-medium">Import Successful</span>
+                            <p class="text-sm mt-1">Added "${data.variant_legacy_name}" to database</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Reload variants
+            await loadVariants();
+            applyFilterChain();
+            fetchDatabaseStats();
+        }
+        
+    } catch (error) {
+        resultsDiv.innerHTML = `
+            <div class="p-4 bg-red-50 text-red-800 rounded-xl border border-red-200">
+                <div class="flex items-start gap-3">
+                    <i class="fas fa-exclamation-circle mt-0.5"></i>
+                    <div>
+                        <span class="font-medium">Import Failed</span>
+                        <p class="text-sm mt-1 font-mono">${escapeHTML(error.message)}</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+}
+
+async function processFormImport() {
+    // Get form values
+    const legacyName = document.getElementById('formLegacyName').value.trim();
+    const proteinName = document.getElementById('formProteinName').value.trim();
+    const cdnaName = document.getElementById('formCdnaName').value.trim();
+    const finalDet = document.getElementById('formFinalDetermination').value;
+    const cftrClass = document.getElementById('formCftrClass').value;
+    const etiPrediction = document.getElementById('formEtiPrediction').value;
+    
+    // Validate required
+    if (!legacyName || !proteinName || !cdnaName || !finalDet) {
+        showNotification('Please fill all required fields', 'error');
+        return;
+    }
+    
+    try {
+        showNotification('Processing...', 'info');
+        
+        // Check if exists
+        const checkResponse = await fetch(
+            `${CONFIG.SUPABASE.URL}/rest/v1/variants?legacy_name=eq.${encodeURIComponent(legacyName)}&select=legacy_name`,
+            { headers: { 'apikey': CONFIG.SUPABASE.KEY, 'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}` } }
+        );
+        
+        const existing = await checkResponse.json();
+        
+        if (existing.length > 0) {
+            showNotification(`Variant "${legacyName}" already exists`, 'warning');
+            return;
+        }
+        
+        // Insert
+        const insertResponse = await fetch(
+            `${CONFIG.SUPABASE.URL}/rest/v1/variants`,
+            {
+                method: 'POST',
+                headers: {
+                    'apikey': CONFIG.SUPABASE.KEY,
+                    'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`,
+                    'Content-Type': 'application/json',
+                    'Prefer': 'return=representation'
                 },
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        backgroundColor: 'white',
-                        titleColor: '#1e293b',
-                        bodyColor: '#475569',
-                        borderColor: '#e2e8f0',
-                        borderWidth: 1,
-                        padding: 12
-                    }
-                }
+                body: JSON.stringify({
+                    legacy_name: legacyName,
+                    protein_name: proteinName,
+                    cdna_name: cdnaName,
+                    final_determination: finalDet,
+                    cftr_class: cftrClass || null,
+                    eti_prediction: etiPrediction || null,
+                    data_status: 'minimal',
+                    source_summary: 'Manual_Form_Import',
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                })
             }
-        });
+        );
+        
+        if (!insertResponse.ok) throw new Error(`Insert failed: ${insertResponse.status}`);
+        
+        showNotification(`Successfully added ${legacyName}`, 'success');
+        closeImportModal();
+        
+        // Reload data
+        await loadVariants();
+        applyFilterChain();
+        fetchDatabaseStats();
+        
+    } catch (error) {
+        showNotification(`Import failed: ${error.message}`, 'error');
     }
 }
 
-function updateAnalyticsDashboard() {
-    const currentVariants = STATE.filteredVariants;
+function closeImportModal() {
+    document.getElementById('importModal').classList.add('hidden');
+    document.getElementById('jsonInput').value = '';
+    document.getElementById('importResults').innerHTML = '';
     
-    safeSetText('statTotal', currentVariants.length.toLocaleString());
-    safeSetText('statClassI', currentVariants.filter(v => v.cftr_class === 'I').length.toLocaleString());
-    safeSetText('statExceptional', currentVariants.filter(v => v.class_subtype === 'exceptional').length.toLocaleString());
-    safeSetText('statResponsive', currentVariants.filter(v => v.eti_prediction === 'responsive').length.toLocaleString());
-    
-    const contextMap = {
-        'complete': 'Complete clinical data only',
-        'clinical': 'Clinical data (complete + partial)',
-        'all': 'All variants in database'
-    };
-    safeSetText('statContext', contextMap[STATE.dataViewMode] || '');
-}
-
-function renderDatabaseStatistics() {
-    safeSetText('completeCount', STATE.databaseStats.complete.toLocaleString());
-    safeSetText('clinicalCount', STATE.databaseStats.clinical.toLocaleString());
-    safeSetText('allCount', STATE.databaseStats.total.toLocaleString());
-    safeSetText('databaseTotal', STATE.databaseStats.total.toLocaleString());
-}
-
-function refreshVariantCounter() {
-    safeSetText('variantCount', STATE.filteredVariants.length.toLocaleString());
-}
-
-function refreshViewStatistics() {
-    updateAnalyticsDashboard();
+    // Clear form
+    ['formLegacyName', 'formProteinName', 'formCdnaName', 'formFinalDetermination', 'formCftrClass', 'formEtiPrediction']
+        .forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = '';
+        });
 }
 
 // ======================================================================
-// 10. 🧰 UTILITIES - HELPERS & NOTIFICATIONS
+// 9. 📈 VIEW MANAGEMENT
+// ======================================================================
+function setDataView(mode) {
+    if (STATE.dataViewMode === mode) return;
+    
+    STATE.dataViewMode = mode;
+    
+    // Update UI
+    ['complete', 'clinical', 'all'].forEach(v => {
+        const btn = document.getElementById(`${v}ViewBtn`);
+        if (btn) btn.classList.toggle('active', v === mode);
+    });
+    
+    // Update badge
+    const badge = document.getElementById('viewBadge');
+    if (badge) {
+        const labels = { complete: 'Complete', clinical: 'Clinical', all: 'All' };
+        badge.textContent = labels[mode];
+        badge.className = `px-2 py-1 rounded-full text-xs font-medium ${
+            mode === 'complete' ? 'bg-helix-protein' : 
+            mode === 'clinical' ? 'bg-helix-dna' : 'bg-gray-600'
+        } text-white`;
+    }
+    
+    applyFilterChain();
+    
+    const counts = {
+        complete: STATE.databaseStats.complete,
+        clinical: STATE.databaseStats.clinical,
+        all: STATE.databaseStats.total
+    };
+    
+    showNotification(`Showing ${mode} view (${counts[mode] || 0} variants)`, 'info');
+}
+
+function filterVariants(filter) {
+    STATE.activeFilter = filter;
+    
+    // Update UI
+    ['all', 'missing'].forEach(f => {
+        const btn = document.getElementById(`filter${f.charAt(0).toUpperCase() + f.slice(1)}`);
+        if (btn) {
+            if (f === filter) {
+                btn.style.borderColor = f === 'missing' ? 'var(--helix-warning)' : 'var(--helix-protein)';
+                btn.style.color = f === 'missing' ? 'var(--helix-warning)' : 'var(--helix-protein)';
+                btn.style.fontWeight = '600';
+            } else {
+                btn.style.borderColor = '';
+                btn.style.color = '';
+                btn.style.fontWeight = '';
+            }
+        }
+    });
+    
+    applyFilterChain();
+}
+
+// ======================================================================
+// 10. 🧰 UTILITIES
 // ======================================================================
 function selectVariant(variantName) {
     const variant = STATE.variants.find(v => v.legacy_name === variantName);
     if (!variant) {
-        emitNotification(`Variant ${variantName} not found`, 'warning');
+        showNotification(`Variant ${variantName} not found`, 'warning');
         return;
     }
     
     STATE.selectedVariant = variant;
     renderVariantDetails(variant);
-    renderVariantCatalog(); // Refresh list to show selected state
+    renderVariantList();
+}
+
+function renderVariantDetails(variant) {
+    // Show detail view, hide empty state
+    document.getElementById('variantDetailView').classList.remove('hidden');
+    document.getElementById('emptyState').classList.add('hidden');
+    
+    // Basic info
+    document.getElementById('detailVariantName').textContent = variant.legacy_name;
+    
+    // Classification
+    let displayClass = variant.cftr_class || 
+                      (variant.class_subtype === 'exceptional' || variant.class_subtype === 'true' ? 'I' : '-');
+    document.getElementById('variantClass').textContent = displayClass;
+    document.getElementById('classificationType').textContent = 
+        variant.class_subtype === 'exceptional' ? 'Exceptional Case' :
+        variant.class_subtype === 'true' ? 'True Class I' :
+        variant.cftr_class ? `Class ${variant.cftr_class}` : 'Unclassified';
+    document.getElementById('classificationSubtype').textContent = 
+        variant.class_subtype ? variant.class_subtype : 'Standard classification';
+    
+    // Missing count
+    const missingCount = ['cftr_class', 'eti_prediction', 'class_confidence']
+        .filter(f => !variant[f]).length;
+    
+    document.getElementById('dataCompletenessBadge').innerHTML = missingCount > 0 ?
+        `<span class="px-2 py-1 bg-helix-warning text-white text-xs rounded-full">${missingCount} missing fields</span>` :
+        `<span class="px-2 py-1 bg-helix-therapy text-white text-xs rounded-full">Complete data</span>`;
+    
+    // Badges
+    const badges = [];
+    if (variant.cftr_class) {
+        badges.push(`<span class="helix-badge badge-class-${variant.cftr_class.toLowerCase()}">
+            <i class="fas fa-dna"></i> Class ${variant.cftr_class}
+        </span>`);
+    }
+    if (variant.class_subtype === 'exceptional') {
+        badges.push(`<span class="helix-badge badge-exceptional">
+            <i class="fas fa-bolt"></i> Exceptional
+        </span>`);
+    }
+    if (variant.final_determination === 'CF-causing') {
+        badges.push(`<span class="helix-badge" style="background: #fef2f2; color: #991b1b; border-color: #fecaca;">
+            <i class="fas fa-exclamation-triangle"></i> CF-causing
+        </span>`);
+    }
+    if (variant.eti_prediction) {
+        const isResp = variant.eti_prediction === 'responsive';
+        badges.push(`<span class="helix-badge" style="background: ${isResp ? '#f0fdf4' : '#fef2f2'}; 
+            color: ${isResp ? '#166534' : '#991b1b'}; border-color: ${isResp ? '#bbf7d0' : '#fecaca'};">
+            <i class="fas ${isResp ? 'fa-check' : 'fa-times'}"></i> ETI ${variant.eti_prediction}
+        </span>`);
+    }
+    document.getElementById('variantBadges').innerHTML = badges.join('');
+    
+    // Data sections
+    renderDataSections(variant);
+}
+
+function renderDataSections(variant) {
+    // Nomenclature
+    document.getElementById('nomenclatureGrid').innerHTML = [
+        { label: 'Legacy Name', value: variant.legacy_name, field: 'legacy_name' },
+        { label: 'Protein Notation', value: variant.protein_name, field: 'protein_name' },
+        { label: 'cDNA Notation', value: variant.cdna_name, field: 'cdna_name' }
+    ].map(d => createDataPoint(d.label, d.value, d.field, variant)).join('');
+    
+    // Clinical Impact
+    document.getElementById('clinicalImpactGrid').innerHTML = [
+        { label: 'CFTR Class', value: variant.cftr_class, field: 'cftr_class' },
+        { label: 'Subtype', value: variant.class_subtype, field: 'class_subtype' },
+        { label: 'Clinical Impact', value: variant.final_determination, field: 'final_determination' },
+        { label: 'Confidence', value: variant.class_confidence, field: 'class_confidence' }
+    ].map(d => createDataPoint(d.label, d.value, d.field, variant)).join('');
+    
+    // Therapeutic
+    document.getElementById('therapeuticPredictionGrid').innerHTML = [
+        { label: 'ETI Response', value: variant.eti_prediction, field: 'eti_prediction' },
+        { label: 'Recommendation', value: variant.eti_recommendation, field: 'eti_recommendation' },
+        { label: 'Responsive', value: variant.therapy_responsive ? 'Yes' : 'No', field: 'therapy_responsive' }
+    ].map(d => createDataPoint(d.label, d.value, d.field, variant)).join('');
+    
+    // Evidence
+    document.getElementById('evidenceQualityGrid').innerHTML = [
+        { label: 'Evidence Level', value: variant.eti_evidence_level, field: 'eti_evidence_level' },
+        { label: 'Last Update', value: variant.last_evidence_update ? 
+            new Date(variant.last_evidence_update).toLocaleDateString() : null, 
+            field: 'last_evidence_update' },
+        { label: 'Data Status', value: variant.changed_prev, field: 'changed_prev' }
+    ].map(d => createDataPoint(d.label, d.value, d.field, variant)).join('');
+    
+    // Evidence chain
+    if (variant.source_summary) {
+        const parts = variant.source_summary.split('_');
+        document.getElementById('evidenceChain').innerHTML = parts.map((p, i) => `
+            <span class="evidence-step">${escapeHTML(p)}</span>
+            ${i < parts.length - 1 ? '<i class="fas fa-arrow-right text-gray-300 text-xs"></i>' : ''}
+        `).join('');
+    }
+}
+
+function createDataPoint(label, value, field, variant) {
+    const isMissing = !value || value === 'null' || value === 'undefined';
+    return `
+        <div class="data-point ${isMissing ? 'missing' : ''}">
+            <div class="annotation-trigger" onclick="showAnnotationModal('${variant.legacy_name}', '${field}', ${JSON.stringify(value || '')})">
+                <i class="fas ${isMissing ? 'fa-plus' : 'fa-pencil-alt'}"></i>
+            </div>
+            <div class="data-label">
+                <i class="fas fa-tag"></i>
+                ${label}
+            </div>
+            <div class="data-value ${isMissing ? 'text-helix-warning' : ''}">
+                ${isMissing ? 'Not specified' : escapeHTML(String(value))}
+            </div>
+        </div>
+    `;
 }
 
 function quickSearch(variantName) {
@@ -2041,7 +1922,6 @@ function quickSearch(variantName) {
         STATE.searchQuery = variantName;
         applyFilterChain();
         
-        // Auto-select the variant
         setTimeout(() => {
             const variant = STATE.variants.find(v => v.legacy_name === variantName);
             if (variant) selectVariant(variantName);
@@ -2049,6 +1929,113 @@ function quickSearch(variantName) {
     }
 }
 
+// ======================================================================
+// 11. 📊 STATS UI - DYNAMIC FROM DATABASE
+// ======================================================================
+function updateStatsUI() {
+    const s = STATE.databaseStats;
+    
+    safeSetText('statTotal', s.total.toLocaleString());
+    safeSetText('statClassI', s.classI.toLocaleString());
+    safeSetText('statExceptional', s.exceptional.toLocaleString());
+    safeSetText('statResponsive', s.responsive.toLocaleString());
+    safeSetText('databaseTotal', s.total.toLocaleString());
+    safeSetText('completeCount', s.complete.toLocaleString());
+    safeSetText('clinicalCount', s.clinical.toLocaleString());
+    safeSetText('allCount', s.total.toLocaleString());
+    
+    // Percentages
+    if (s.total > 0) {
+        safeSetText('classIPercentage', ((s.classI / s.total) * 100).toFixed(1));
+        safeSetText('responsivePercentage', ((s.responsive / s.total) * 100).toFixed(1));
+    }
+    if (s.classI > 0) {
+        safeSetText('exceptionalPercentage', ((s.exceptional / s.classI) * 100).toFixed(1));
+    }
+    
+    safeSetText('statContext', 
+        STATE.dataViewMode === 'complete' ? 'Complete clinical only' :
+        STATE.dataViewMode === 'clinical' ? 'Complete + Partial' : 'All variants'
+    );
+}
+
+function updateStatsFromView() {
+    const current = STATE.filteredVariants;
+    const total = current.length;
+    const classI = current.filter(v => v.cftr_class === 'I').length;
+    const exceptional = current.filter(v => v.class_subtype === 'exceptional').length;
+    const responsive = current.filter(v => v.eti_prediction === 'responsive').length;
+    
+    safeSetText('statTotal', total.toLocaleString());
+    safeSetText('statClassI', classI.toLocaleString());
+    safeSetText('statExceptional', exceptional.toLocaleString());
+    safeSetText('statResponsive', responsive.toLocaleString());
+    safeSetText('variantCount', total.toLocaleString());
+    safeSetText('currentCountText', `${total.toLocaleString()} variants`);
+    
+    const modeDisplay = {
+        'complete': 'Complete Clinical Data',
+        'clinical': 'Clinical Data (Complete + Partial)',
+        'all': 'All Variants'
+    };
+    safeSetText('currentModeText', modeDisplay[STATE.dataViewMode]);
+}
+
+function updateUIFromState() {
+    updateStatsUI();
+    updateStatsFromView();
+}
+
+// ======================================================================
+// 12. 🔄 PAGINATION
+// ======================================================================
+function updatePagination() {
+    const totalPages = Math.ceil(STATE.filteredVariants.length / CONFIG.UI.ITEMS_PER_PAGE);
+    const pagination = document.getElementById('paginationControls');
+    
+    if (pagination) {
+        if (totalPages > 1) {
+            pagination.style.display = 'flex';
+            safeSetText('currentPage', STATE.currentPage);
+            safeSetText('totalPages', totalPages);
+            
+            const prev = document.getElementById('prevBtn');
+            const next = document.getElementById('nextBtn');
+            
+            if (prev) {
+                prev.disabled = STATE.currentPage === 1;
+                prev.style.opacity = STATE.currentPage === 1 ? '0.5' : '1';
+            }
+            if (next) {
+                next.disabled = STATE.currentPage === totalPages;
+                next.style.opacity = STATE.currentPage === totalPages ? '0.5' : '1';
+            }
+        } else {
+            pagination.style.display = 'none';
+        }
+    }
+}
+
+function previousPage() {
+    if (STATE.currentPage > 1) {
+        STATE.currentPage--;
+        renderVariantList();
+        updatePagination();
+    }
+}
+
+function nextPage() {
+    const totalPages = Math.ceil(STATE.filteredVariants.length / CONFIG.UI.ITEMS_PER_PAGE);
+    if (STATE.currentPage < totalPages) {
+        STATE.currentPage++;
+        renderVariantList();
+        updatePagination();
+    }
+}
+
+// ======================================================================
+// 13. 🔧 UTILITIES
+// ======================================================================
 function escapeHTML(str) {
     if (!str) return '';
     return String(str)
@@ -2059,49 +2046,30 @@ function escapeHTML(str) {
         .replace(/'/g, '&#039;');
 }
 
-function safeSetText(elementId, text) {
-    const element = document.getElementById(elementId);
-    if (element) element.textContent = text;
+function safeSetText(id, text) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = text;
 }
 
-function showLoadingState(message = 'Loading...') {
+function showLoadingState() {
     const list = document.getElementById('variantList');
     if (list) {
         list.innerHTML = `
             <div class="p-12 text-center">
-                <div class="animate-spin rounded-full h-10 w-10 border-3 border-helix-protein border-t-transparent mx-auto"></div>
-                <p class="mt-4 text-gray-600 font-medium">${message}</p>
-                <p class="text-xs text-gray-500 mt-2">Establishing secure connection</p>
+                <div class="inline-block animate-spin rounded-full h-10 w-10 border-4 border-helix-protein border-t-transparent"></div>
+                <p class="mt-4 text-gray-600 font-medium">Loading clinical data...</p>
+                <p class="text-xs text-gray-500 mt-2">Connecting to Δ Helix database</p>
             </div>
         `;
     }
 }
 
-function renderErrorState(message) {
-    const list = document.getElementById('variantList');
-    if (list) {
-        list.innerHTML = `
-            <div class="p-12 text-center">
-                <div class="p-4 bg-red-50 rounded-full inline-flex mb-4">
-                    <i class="fas fa-exclamation-triangle text-red-500 text-2xl"></i>
-                </div>
-                <p class="text-red-600 font-semibold">Connection Error</p>
-                <p class="text-sm text-gray-600 mt-2 max-w-xs mx-auto">${message}</p>
-                <button onclick="location.reload()" class="mt-6 px-5 py-2.5 bg-helix-protein text-white rounded-lg hover:bg-opacity-90 font-medium transition-all">
-                    <i class="fas fa-redo mr-2"></i>
-                    Retry Connection
-                </button>
-            </div>
-        `;
-    }
-}
-
-function emitNotification(message, type = 'info', duration = CONFIG.UI.NOTIFICATION_DURATION) {
+function showNotification(message, type = 'info', duration = 4000) {
     let container = document.getElementById('notification-container');
     if (!container) {
         container = document.createElement('div');
         container.id = 'notification-container';
-        container.className = 'fixed bottom-5 right-5 z-[3000] space-y-2';
+        container.className = 'fixed bottom-5 right-5 z-50 space-y-2';
         document.body.appendChild(container);
     }
     
@@ -2115,7 +2083,7 @@ function emitNotification(message, type = 'info', duration = CONFIG.UI.NOTIFICAT
     const style = styles[type] || styles.info;
     
     const notification = document.createElement('div');
-    notification.className = 'flex items-center gap-3 px-5 py-3 rounded-lg shadow-lg border-l-4 animate-slideInRight';
+    notification.className = 'notification';
     notification.style.backgroundColor = style.bg;
     notification.style.color = style.text;
     notification.style.borderLeftColor = style.text;
@@ -2124,8 +2092,8 @@ function emitNotification(message, type = 'info', duration = CONFIG.UI.NOTIFICAT
     
     notification.innerHTML = `
         <i class="fas ${style.icon}"></i>
-        <span class="font-medium text-sm">${message}</span>
-        <button onclick="this.parentElement.remove()" class="ml-2 opacity-60 hover:opacity-100">
+        <span class="font-medium">${message}</span>
+        <button onclick="this.parentElement.remove()" class="ml-auto opacity-60 hover:opacity-100">
             <i class="fas fa-times"></i>
         </button>
     `;
@@ -2135,126 +2103,79 @@ function emitNotification(message, type = 'info', duration = CONFIG.UI.NOTIFICAT
     setTimeout(() => {
         notification.style.opacity = '0';
         notification.style.transform = 'translateX(100%)';
-        notification.style.transition = 'all 0.3s ease';
         setTimeout(() => notification.remove(), 300);
     }, duration);
 }
 
 // ======================================================================
-// 11. 🔄 PAGINATION - PAGE NAVIGATION
+// 14. 📊 DASHBOARD & CHARTS
 // ======================================================================
-function refreshPagination() {
-    const totalPages = Math.ceil(STATE.filteredVariants.length / CONFIG.UI.ITEMS_PER_PAGE);
-    const pagination = document.getElementById('paginationControls');
+function showDashboard() {
+    document.getElementById('dashboardModal').classList.remove('hidden');
+    renderCharts();
+}
+
+function closeDashboard() {
+    document.getElementById('dashboardModal').classList.add('hidden');
+}
+
+function renderCharts() {
+    const s = STATE.databaseStats;
     
-    if (!pagination) return;
-    
-    if (totalPages > 1) {
-        pagination.style.display = 'flex';
-        safeSetText('currentPage', STATE.currentPage);
-        safeSetText('totalPages', totalPages);
-        
-        const prevBtn = document.getElementById('prevBtn');
-        const nextBtn = document.getElementById('nextBtn');
-        
-        if (prevBtn) {
-            prevBtn.disabled = STATE.currentPage === 1;
-            prevBtn.style.opacity = STATE.currentPage === 1 ? '0.5' : '1';
-            prevBtn.style.cursor = STATE.currentPage === 1 ? 'not-allowed' : 'pointer';
-        }
-        
-        if (nextBtn) {
-            nextBtn.disabled = STATE.currentPage === totalPages;
-            nextBtn.style.opacity = STATE.currentPage === totalPages ? '0.5' : '1';
-            nextBtn.style.cursor = STATE.currentPage === totalPages ? 'not-allowed' : 'pointer';
-        }
-    } else {
-        pagination.style.display = 'none';
+    // Class distribution
+    const classCtx = document.getElementById('classChart');
+    if (classCtx && !STATE.charts.classChart) {
+        STATE.charts.classChart = new Chart(classCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Class I', 'Class II', 'Class III', 'Class IV', 'Class V'],
+                datasets: [{
+                    data: [s.classI, 8, 12, 1, 8],
+                    backgroundColor: [
+                        'var(--helix-mutation)',
+                        'var(--helix-warning)',
+                        'var(--helix-therapy)',
+                        'var(--helix-dna)',
+                        'var(--helix-evidence)'
+                    ],
+                    borderWidth: 2,
+                    borderColor: 'white'
+                }]
+            }
+        });
     }
-}
-
-function previousPage() {
-    if (STATE.currentPage > 1) {
-        STATE.currentPage--;
-        renderVariantCatalog();
-        refreshPagination();
+    
+    // ETI response
+    const respCtx = document.getElementById('responseChart');
+    if (respCtx && !STATE.charts.responseChart) {
+        STATE.charts.responseChart = new Chart(respCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Responsive', 'Non-responsive', 'Unknown'],
+                datasets: [{
+                    label: 'ETI Response',
+                    data: [s.responsive, 1804, 248],
+                    backgroundColor: [
+                        'var(--helix-therapy)',
+                        'var(--helix-mutation)',
+                        'var(--helix-warning)'
+                    ],
+                    borderRadius: 6
+                }]
+            }
+        });
     }
-}
-
-function nextPage() {
-    const totalPages = Math.ceil(STATE.filteredVariants.length / CONFIG.UI.ITEMS_PER_PAGE);
-    if (STATE.currentPage < totalPages) {
-        STATE.currentPage++;
-        renderVariantCatalog();
-        refreshPagination();
-    }
-}
-
-// ======================================================================
-// 12. 📤 IMPORT SYSTEM - DATA UPLOAD
-// ======================================================================
-function showImportModal() {
-    const modal = document.getElementById('importModal');
-    if (modal) modal.classList.remove('hidden');
-}
-
-function closeImportModal() {
-    const modal = document.getElementById('importModal');
-    if (modal) modal.classList.add('hidden');
-    
-    const input = document.getElementById('jsonInput');
-    if (input) input.value = '';
-    
-    const results = document.getElementById('importResults');
-    if (results) results.innerHTML = '';
-}
-
-function validateImport() {
-    const input = document.getElementById('jsonInput');
-    const results = document.getElementById('importResults');
-    
-    if (!input || !results) return;
-    
-    try {
-        const data = JSON.parse(input.value);
-        results.innerHTML = `
-            <div class="p-4 bg-green-50 text-green-800 rounded-lg border border-green-200">
-                <div class="flex items-center">
-                    <i class="fas fa-check-circle mr-2"></i>
-                    <span class="font-medium">Valid JSON structure</span>
-                </div>
-                <div class="text-sm mt-2 opacity-80">
-                    Ready to import ${Object.keys(data).length} fields
-                </div>
-            </div>
-        `;
-    } catch (error) {
-        results.innerHTML = `
-            <div class="p-4 bg-red-50 text-red-800 rounded-lg border border-red-200">
-                <div class="flex items-center">
-                    <i class="fas fa-exclamation-circle mr-2"></i>
-                    <span class="font-medium">Invalid JSON</span>
-                </div>
-                <div class="text-sm mt-2 opacity-80">
-                    ${escapeHTML(error.message)}
-                </div>
-            </div>
-        `;
-    }
-}
-
-function executeImport() {
-    emitNotification('Import functionality will be available in v5.1.0', 'info');
 }
 
 function exportReport() {
-    emitNotification('Export feature coming soon', 'info');
+    showNotification('Analytics export will be available in v5.1.0', 'info');
 }
 
 // ======================================================================
-// 13. 🎯 EVENT HANDLERS - USER INTERACTIONS
+// 15. 🎯 EVENT LISTENERS
 // ======================================================================
 function attachEventListeners() {
+    // Escape key
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             closeImportModal();
@@ -2263,7 +2184,7 @@ function attachEventListeners() {
         }
     });
     
-    // Click outside to close modals
+    // Click outside modals
     document.addEventListener('click', (e) => {
         if (e.target.classList.contains('modal-overlay')) {
             closeImportModal();
@@ -2273,8 +2194,38 @@ function attachEventListeners() {
     });
 }
 
+function initializeSearchEngine() {
+    const input = document.getElementById('searchInput');
+    const clear = document.getElementById('searchClear');
+    
+    if (!input) return;
+    
+    input.addEventListener('input', () => {
+        clearTimeout(STATE.searchTimeout);
+        
+        if (clear) {
+            clear.classList.toggle('hidden', !input.value);
+        }
+        
+        STATE.searchTimeout = setTimeout(() => {
+            STATE.searchQuery = input.value;
+            applyFilterChain();
+        }, CONFIG.UI.SEARCH_DELAY);
+    });
+    
+    if (clear) {
+        clear.addEventListener('click', () => {
+            input.value = '';
+            clear.classList.add('hidden');
+            STATE.searchQuery = '';
+            applyFilterChain();
+            input.focus();
+        });
+    }
+}
+
 // ======================================================================
-// 14. 🌐 WINDOW EXPORTS - GLOBAL FUNCTION REGISTRY
+// 16. 🌐 WINDOW EXPORTS
 // ======================================================================
 window.selectVariant = selectVariant;
 window.filterVariants = filterVariants;
@@ -2284,8 +2235,9 @@ window.previousPage = previousPage;
 window.nextPage = nextPage;
 window.showImportModal = showImportModal;
 window.closeImportModal = closeImportModal;
-window.validateImport = validateImport;
-window.executeImport = executeImport;
+window.switchImportTab = switchImportTab;
+window.processJsonImport = processJsonImport;
+window.processFormImport = processFormImport;
 window.showDashboard = showDashboard;
 window.closeDashboard = closeDashboard;
 window.exportReport = exportReport;
@@ -2294,10 +2246,10 @@ window.closeAnnotationModal = closeAnnotationModal;
 window.saveAnnotation = saveAnnotation;
 
 // ======================================================================
-// 15. 🏁 INITIALIZATION TRIGGER
+// 17. 🏁 INITIALIZE
 // ======================================================================
-// Small delay ensures DOM is fully parsed
-setTimeout(bootstrapApp, 50);
+// Everything starts from DOMContentLoaded event above
 </script>
+
 </body>
 </html>
