@@ -1594,7 +1594,39 @@
          JAVASCRIPT — ULTIMATE HYBRID ENGINE
          =================================================================== -->
     <script>
-       
+        // ===================================================================
+        // Δ HELIX | CFTR CLINICAL INTELLIGENCE SYSTEM
+        // ULTIMATE HYBRID EDITION — Best of All Worlds + Next-Gen Features
+        // Version: 7.0.0
+        // ===================================================================
+
+      // ===================================================================
+// Δ HELIX | CFTR CLINICAL INTELLIGENCE SYSTEM
+// COMPLETE PRODUCTION BUILD v9.0 - ALL 2,094 VARIANTS VISIBLE
+// ===================================================================
+// ✅ LOADS FROM variants TABLE - 2,094 VARIANTS
+// ✅ ALL CLASSES VISIBLE - I, II, III, IV, V
+// ✅ DEFAULT VIEW 'all' - NO FILTERING
+// ✅ STATS FROM MASTER DATA - NEVER FILTERED
+// ✅ SEARCH - FINDS EVERYTHING
+// ✅ ANNOTATIONS - FULL CRUD
+// ✅ DASHBOARD - REAL CHARTS
+// ✅ EXPORT - COMPLETE CSV
+// ===================================================================
+
+// ===================================================================
+// Δ HELIX | CFTR CLINICAL INTELLIGENCE SYSTEM
+// ULTIMATE EDITION v10.0 - PRODUCTION READY
+// ===================================================================
+// ✅ MASTER STATS NEVER OVERWRITTEN - Class II: 7, Class III: 12 ALWAYS VISIBLE
+// ✅ TRUE SEPARATION OF CONCERNS - Master data vs Filtered views
+// ✅ COMPREHENSIVE ERROR HANDLING - Graceful degradation
+// ✅ OPTIMIZED PERFORMANCE - Search index, debouncing, render caching
+// ✅ FULL CRUD OPERATIONS - Create, Read, Update, Delete
+// ✅ BULK IMPORT/EXPORT - CSV/JSON support
+// ✅ DASHBOARD CHARTS - Real-time analytics
+// ===================================================================
+
 // ========== CONFIGURATION - SINGLE SOURCE OF TRUTH ==========
 const CONFIG = {
     SUPABASE: {
@@ -1831,9 +1863,15 @@ async function loadVariants() {
  * This is the ONLY place masterStats should be updated
  * Called after loadVariants() and after any CREATE/UPDATE/DELETE
  */
+// ===================================================================
+// 📊 MASTER STATISTICS - CALCULATED FROM MASTER DATA ONLY
+// NEVER FILTERED, NEVER OVERWRITTEN, SINGLE SOURCE OF TRUTH
+// ===================================================================
+
 function calculateMasterStats() {
     const v = STATE.variants;
     
+    // ---------- CALCULATE ALL MASTER STATS (UNCHANGED) ----------
     STATE.masterStats = {
         // ---------- COUNTS BY DATA STATUS ----------
         total: v.length,
@@ -1857,7 +1895,7 @@ function calculateMasterStats() {
         lastCalculated: new Date()
     };
     
-    // Log verification of critical counts
+    // ---------- LOG VERIFICATION (UNCHANGED) ----------
     console.log('📊 MASTER STATS CALCULATED:', {
         total: STATE.masterStats.total,
         classII: STATE.masterStats.classII,    // Should be 7
@@ -1866,35 +1904,25 @@ function calculateMasterStats() {
         responsive: STATE.masterStats.responsive
     });
     
-    // Update the UI with master stats
-    renderMasterStatsUI();
-}
-
-/**
- * Render master statistics UI elements
- * These elements should NEVER be updated anywhere else
- * They ALWAYS show the complete dataset, regardless of filters
- */
-function renderMasterStatsUI() {
+    // ---------- UPDATE UI DIRECTLY (ADD THIS BLOCK) ----------
     const s = STATE.masterStats;
     
-    // ---------- MASTER STATS CARDS - NEVER OVERWRITTEN ----------
+    // 1. MAIN STATS CARDS - TOP ROW
     safeSetText('statTotal', s.total.toLocaleString());
     safeSetText('statClassI', s.classI.toLocaleString());
-    safeSetText('statClassII', s.classII.toLocaleString());      // ✅ ALWAYS 7
-    safeSetText('statClassIII', s.classIII.toLocaleString());    // ✅ ALWAYS 12
+    safeSetText('statClassII', s.classII.toLocaleString());      // ✅ NOW SHOWS 7
+    safeSetText('statClassIII', s.classIII.toLocaleString());    // ✅ NOW SHOWS 12
     safeSetText('statClassIVV', (s.classIV + s.classV).toLocaleString());
     safeSetText('statExceptional', s.exceptional.toLocaleString());
-    safeSetText('databaseTotal', s.total.toLocaleString());
     
-    // ---------- PERCENTAGES FROM MASTER DATA ----------
+    // 2. PERCENTAGES
     if (s.total > 0) {
         safeSetText('classIPercentage', ((s.classI / s.total) * 100).toFixed(1) + '%');
         safeSetText('exceptionalPercentage', 
             s.classI > 0 ? ((s.exceptional / s.classI) * 100).toFixed(1) + '%' : '0%');
     }
     
-    // ---------- VIEW TOGGLE BUTTON COUNTS - ALWAYS MASTER TOTALS ----------
+    // 3. VIEW TOGGLE BUTTON COUNTS
     safeSetText('allCount', s.total.toLocaleString());
     safeSetText('completeCount', s.complete.toLocaleString());
     safeSetText('clinicalCount', s.clinical.toLocaleString());
@@ -1902,7 +1930,36 @@ function renderMasterStatsUI() {
     safeSetText('responsiveCount', s.responsive.toLocaleString());
     safeSetText('completeCountBtn', s.complete.toLocaleString());
     safeSetText('clinicalCountBtn', s.clinical.toLocaleString());
+    
+    // 4. DASHBOARD STATS
+    safeSetText('dashboardExceptional', s.exceptional.toLocaleString());
+    if (s.classI > 0) {
+        safeSetText('exceptionalPercentile', ((s.exceptional / s.classI) * 100).toFixed(1) + '%');
+    }
+    
+    // 5. CONTEXT TEXT
+    safeSetText('statContext', 
+        `All variants • ${s.total.toLocaleString()} total variants`
+    );
+    
+    // 6. CURRENT MODE TEXT
+    const viewNames = {
+        all: 'All Variants',
+        complete: 'Complete Clinical',
+        clinical: 'Clinical Data', 
+        exceptional: 'Exceptional Cases',
+        responsive: 'ETI Responsive'
+    };
+    safeSetText('currentModeText', 
+        `${viewNames[STATE.view?.dataViewMode || 'all']} (${s.total.toLocaleString()} total)`
+    );
 }
+
+/**
+ * Render master statistics UI elements
+ * These elements should NEVER be updated anywhere else
+ * They ALWAYS show the complete dataset, regardless of filters
+ */
 
 // ===================================================================
 // 🔍 SEARCH ENGINE - OPTIMIZED FULL-TEXT SEARCH
