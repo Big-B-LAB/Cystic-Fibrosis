@@ -1684,9 +1684,9 @@ async function loadVariants() {
         const response = await fetch(
             `${CONFIG.SUPABASE.URL}/rest/v1/variants?select=*&order=legacy_name.asc`,
             {
-                headers: {
-                    'apikey': CONFIG.SUPABASE.KEY,
-                    'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`,
+               headers: {
+    'apikey': CONFIG.SUPABASE.KEY,
+    'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`,  // This works with both formats
                     'Content-Type': 'application/json',
                     'Prefer': 'return=representation'
                 }
@@ -2249,8 +2249,9 @@ async function updateVariantRecord(id, field, val) {
         const r = await fetch(`${CONFIG.SUPABASE.URL}/rest/v1/variants?id=eq.${id}`, {
             method: 'PATCH',
             headers: {
-                'apikey': CONFIG.SUPABASE.KEY,
-                'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`,
+    'apikey': CONFIG.SUPABASE.KEY,
+    'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`,  // This works with both formats
+            
                 'Content-Type': 'application/json',
                 'Prefer': 'return=minimal'
             },
@@ -2271,21 +2272,34 @@ async function updateVariantRecord(id, field, val) {
 
 async function deleteVariantRecord(id) {
     try {
-        const r = await fetch(`${CONFIG.SUPABASE.URL}/rest/v1/variants?id=eq.${id}`, {
-            method: 'DELETE',
-            headers: { 'apikey': CONFIG.SUPABASE.KEY, 'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}` }
-        });
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        const response = await fetch(
+            `${CONFIG.SUPABASE.URL}/rest/v1/variants?id=eq.${id}`,
+            {
+                method: 'DELETE',
+                headers: { 
+                    'apikey': CONFIG.SUPABASE.KEY,
+                    'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`
+                }
+            }
+        );
         
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        
+        // Update local state
         STATE.variants = STATE.variants.filter(v => v.id !== id);
         STATE.filteredVariants = STATE.filteredVariants.filter(v => v.id !== id);
         STATE.variantsById.delete(id);
         STATE.variantsByLegacyName = new Map(STATE.variants.map(v => [v.legacy_name, v]));
         
+        // Rebuild search index and stats
         buildSearchIndex();
         calculateDatabaseStats();
+        
         return true;
-    } catch (e) { console.error(e); return false; }
+    } catch (error) {
+        console.error('❌ Delete failed:', error);
+        return false;
+    }
 }
 
 // ========== ANNOTATION SYSTEM ==========
