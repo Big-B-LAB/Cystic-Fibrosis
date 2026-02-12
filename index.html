@@ -1089,7 +1089,7 @@
                     <div class="flex items-center gap-3 px-4 py-2.5 bg-gray-50/80 rounded-xl border border-gray-200">
     <i class="fas fa-database text-gray-500"></i>
     <span class="text-sm font-semibold text-gray-800">
-        <span id="statTotal">—</span> total variants   <!-- 🔥 DUPLICATE ID! -->
+        <span id="viewTotal">—</span> total variants   <!-- ✅ CHANGED TO viewTotal -->
     </span>
     <span class="w-px h-6 bg-gray-300"></span>
     <span class="text-sm font-medium text-gray-600">
@@ -2395,6 +2395,7 @@ function renderViewUI() {
     // ---------- FILTERED COUNTS (VIEW-SPECIFIC) ----------
     safeSetText('variantCount', f.length.toLocaleString());
     safeSetText('variantCountHeader', f.length.toLocaleString());
+    safeSetText('viewTotal', f.length.toLocaleString());
     
     // ---------- VIEW BADGE ----------
     const viewNames = { 
