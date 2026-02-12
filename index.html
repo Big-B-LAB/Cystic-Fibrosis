@@ -3372,7 +3372,7 @@ async function executeJsonImport() {
         STATE.view.dataViewMode = 'all';
         STATE.view.activeFilter = 'all';
         
-        renderMasterStatsUI();
+        calculateMasterStats();
         applyFilterChain();
         
         clearImportForm();
