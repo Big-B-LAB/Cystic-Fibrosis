@@ -1754,26 +1754,40 @@ async function loadVariants() {
     try {
         showLoadingState('🔬 Initializing Δ Helix Clinical Intelligence...');
         
-        const response = await fetch(
-            `${CONFIG.SUPABASE.URL}/rest/v1/variants?select=*&order=legacy_name.asc`,
-            {
-                headers: {
-                    'apikey': CONFIG.SUPABASE.KEY,
-                    'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`,
-                    'Content-Type': 'application/json',
-                    'Prefer': 'return=representation'
+        // ---------- LOAD ALL VARIANTS WITH PAGINATION ----------
+        let allVariants = [];
+        let offset = 0;
+        const limit = 1000;
+        let hasMore = true;
+        
+        while (hasMore) {
+            const response = await fetch(
+                `${CONFIG.SUPABASE.URL}/rest/v1/variants?select=*&order=legacy_name.asc&limit=${limit}&offset=${offset}`,
+                {
+                    headers: {
+                        'apikey': CONFIG.SUPABASE.KEY,
+                        'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=representation'
+                    }
                 }
+            );
+            
+            STATE.system.apiCalls++;
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
-        );
-        
-        STATE.system.apiCalls++;
-        
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            
+            const data = await response.json();
+            allVariants = [...allVariants, ...data];
+            
+            hasMore = data.length === limit;
+            offset += limit;
         }
         
         // ---------- LOAD MASTER DATA ----------
-        STATE.variants = await response.json();
+        STATE.variants = allVariants;
         
         // ---------- BUILD LOOKUP MAPS (O(1) ACCESS) ----------
         STATE.variantsById = new Map(STATE.variants.map(v => [v.id, v]));
@@ -1853,9 +1867,6 @@ async function loadVariants() {
         return false;
     }
 }
-// ===================================================================
-// 📊 MASTER STATISTICS - CALCULATED FROM MASTER DATA ONLY
-// NEVER FILTERED, NEVER OVERWRITTEN, SINGLE SOURCE OF TRUTH
 // ===================================================================
 
 /**
