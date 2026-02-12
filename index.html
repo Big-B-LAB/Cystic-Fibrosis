@@ -3321,7 +3321,14 @@ function validateImport() {
         STATE.ui.validatedJson = null;
     }
 }
+// ===================================================================
+// 📥 IMPORT SYSTEM - ENHANCED WITH DUPLICATE DETECTION & BULK SUPPORT
+// ===================================================================
 
+/**
+ * Execute JSON import with duplicate detection and bulk support
+ * Supports single JSON object OR array of JSON objects
+ */
 async function executeJsonImport() {
     if (!STATE.ui.validatedJson) {
         showNotification('Please validate JSON first', 'warning');
@@ -3333,68 +3340,300 @@ async function executeJsonImport() {
     
     try {
         btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Importing...';
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
         
-        const data = STATE.ui.validatedJson;
-        const name = data.variant_legacy_name;
-        const exists = STATE.variants.some(v => v.legacy_name === name);
+        // ---------- HANDLE BOTH SINGLE OBJECT AND ARRAY ----------
+        const importData = Array.isArray(STATE.ui.validatedJson) 
+            ? STATE.ui.validatedJson 
+            : [STATE.ui.validatedJson];
         
-        if (exists) {
-            // Update existing variant
-            const variant = STATE.variants.find(v => v.legacy_name === name);
-            
-            await updateVariantField(variant.id, 'protein_name', data.variant_protein_name);
-            await updateVariantField(variant.id, 'cdna_name', data.variant_cDNA_name);
-            await updateVariantField(variant.id, 'final_determination', data.variant_final_determination);
-            
-            if (data.cftr_class) await updateVariantField(variant.id, 'cftr_class', data.cftr_class);
-            if (data.eti_prediction) await updateVariantField(variant.id, 'eti_prediction', data.eti_prediction);
-            
-            showNotification(`✓ Updated ${name}`, 'success');
-        } else {
-            // Create new variant
-            const newVariant = {
-                id: STATE.variants.length + 1, // Temporary ID
-                legacy_name: data.variant_legacy_name,
-                protein_name: data.variant_protein_name,
-                cdna_name: data.variant_cDNA_name,
-                final_determination: data.variant_final_determination,
-                cftr_class: data.cftr_class || null,
-                eti_prediction: data.eti_prediction || null,
-                data_status: 'minimal',
-                source_summary: 'Manual_JSON_Import',
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString()
-            };
-            
-            STATE.variants.push(newVariant);
-            STATE.variantsByLegacyName.set(newVariant.legacy_name, newVariant);
-            STATE.variantsById.set(newVariant.id, newVariant);
-            
-            showNotification(`✓ Added ${name}`, 'success');
+        // ---------- TRACK RESULTS ----------
+        const results = {
+            total: importData.length,
+            added: [],
+            updated: [],
+            skipped: [],
+            errors: []
+        };
+        
+        // ---------- PROCESS EACH VARIANT ----------
+        for (const data of importData) {
+            try {
+                // Validate required fields
+                const required = ['variant_legacy_name', 'variant_protein_name', 
+                                 'variant_cDNA_name', 'variant_final_determination'];
+                const missing = required.filter(f => !data[f]);
+                
+                if (missing.length) {
+                    results.errors.push({
+                        name: data.variant_legacy_name || 'UNKNOWN',
+                        reason: `Missing fields: ${missing.join(', ')}`
+                    });
+                    continue;
+                }
+                
+                const name = data.variant_legacy_name;
+                
+                // ---------- CHECK FOR EXISTING VARIANT (CASE-INSENSITIVE) ----------
+                const existingVariant = STATE.variants.find(v => 
+                    v.legacy_name && v.legacy_name.toLowerCase() === name.toLowerCase()
+                );
+                
+                if (existingVariant) {
+                    // ---------- VARIANT EXISTS - ASK USER WHAT TO DO ----------
+                    const shouldUpdate = await promptUserForDuplicateAction(name, existingVariant);
+                    
+                    if (shouldUpdate === 'skip') {
+                        results.skipped.push(name);
+                        continue;
+                    } else if (shouldUpdate === 'update') {
+                        // Update existing variant
+                        await updateVariantField(existingVariant.id, 'protein_name', data.variant_protein_name);
+                        await updateVariantField(existingVariant.id, 'cdna_name', data.variant_cDNA_name);
+                        await updateVariantField(existingVariant.id, 'final_determination', data.variant_final_determination);
+                        
+                        if (data.cftr_class) await updateVariantField(existingVariant.id, 'cftr_class', data.cftr_class);
+                        if (data.eti_prediction) await updateVariantField(existingVariant.id, 'eti_prediction', data.eti_prediction);
+                        
+                        results.updated.push(name);
+                        continue;
+                    }
+                }
+                
+                // ---------- CREATE NEW VARIANT IN SUPABASE ----------
+                const insertResponse = await fetch(`${CONFIG.SUPABASE.URL}/rest/v1/variants`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': CONFIG.SUPABASE.KEY,
+                        'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=representation'
+                    },
+                    body: JSON.stringify({
+                        legacy_name: data.variant_legacy_name,
+                        protein_name: data.variant_protein_name,
+                        cdna_name: data.variant_cDNA_name,
+                        final_determination: data.variant_final_determination,
+                        cftr_class: data.cftr_class || null,
+                        eti_prediction: data.eti_prediction || null,
+                        data_status: 'minimal',
+                        source_summary: 'Manual_JSON_Import',
+                        created_at: new Date().toISOString(),
+                        updated_at: new Date().toISOString()
+                    })
+                });
+                
+                if (!insertResponse.ok) {
+                    throw new Error(`HTTP ${insertResponse.status}`);
+                }
+                
+                const insertedData = await insertResponse.json();
+                const savedVariant = insertedData[0];
+                
+                // ---------- ADD TO LOCAL STATE WITH REAL ID ----------
+                const newVariant = {
+                    id: savedVariant.id,
+                    legacy_name: savedVariant.legacy_name,
+                    protein_name: savedVariant.protein_name,
+                    cdna_name: savedVariant.cdna_name,
+                    final_determination: savedVariant.final_determination,
+                    cftr_class: savedVariant.cftr_class,
+                    eti_prediction: savedVariant.eti_prediction,
+                    class_subtype: savedVariant.class_subtype,
+                    class_confidence: savedVariant.class_confidence,
+                    data_status: savedVariant.data_status,
+                    source_summary: savedVariant.source_summary,
+                    created_at: savedVariant.created_at,
+                    updated_at: savedVariant.updated_at
+                };
+                
+                STATE.variants.push(newVariant);
+                STATE.variantsByLegacyName.set(newVariant.legacy_name, newVariant);
+                STATE.variantsById.set(newVariant.id, newVariant);
+                
+                results.added.push(name);
+                
+            } catch (error) {
+                console.error('❌ Import failed for variant:', error);
+                results.errors.push({
+                    name: data.variant_legacy_name || 'UNKNOWN',
+                    reason: error.message
+                });
+            }
         }
         
-        // Rebuild indexes and recalc stats
-        buildSearchIndex();
-        calculateMasterStats();
+        // ---------- REBUILD INDEXES AND RECALC STATS ----------
+        if (results.added.length > 0 || results.updated.length > 0) {
+            buildSearchIndex();
+            calculateMasterStats();
+            
+            // Refresh views
+            STATE.view.filteredVariants = [...STATE.variants];
+            STATE.view.dataViewMode = 'all';
+            STATE.view.activeFilter = 'all';
+            
+            applyFilterChain();
+        }
         
-        // Refresh views
-        STATE.view.filteredVariants = [...STATE.variants];
-        STATE.view.dataViewMode = 'all';
-        STATE.view.activeFilter = 'all';
+        // ---------- SHOW IMPORT SUMMARY ----------
+        showImportSummary(results);
         
-        calculateMasterStats();
-        applyFilterChain();
-        
+        // ---------- CLEANUP ----------
         clearImportForm();
-        setTimeout(closeImportModal, 1500);
+        
+        if (importData.length === 1) {
+            setTimeout(closeImportModal, 2500);
+        }
         
     } catch (error) {
         console.error('❌ Import failed:', error);
         showNotification(`Import failed: ${error.message}`, 'error');
-        
+    } finally {
         btn.disabled = false;
         btn.innerHTML = originalHTML;
+        STATE.ui.validatedJson = null;
+    }
+}
+
+/**
+ * Prompt user for action on duplicate variant
+ * @returns {Promise<string>} 'update', 'skip', or null
+ */
+async function promptUserForDuplicateAction(name, existingVariant) {
+    return new Promise((resolve) => {
+        // Create modal content
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.style.zIndex = '100000';
+        
+        modal.innerHTML = `
+            <div class="modal" style="max-width: 500px;">
+                <div class="modal-header">
+                    <h3 class="heading-3 text-gray-900 flex items-center gap-2">
+                        <i class="fas fa-exclamation-triangle text-[#b45309]"></i>
+                        Duplicate Variant Detected
+                    </h3>
+                    <button onclick="this.closest('.modal-overlay').remove()" class="w-9 h-9 rounded-xl hover:bg-gray-200">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="bg-[#ffedd5] rounded-xl p-5 border border-[#b45309]/20">
+                        <p class="text-sm font-medium text-[#b45309] mb-2">${escapeHTML(name)} already exists</p>
+                        <div class="grid grid-cols-2 gap-3 mt-3 text-sm">
+                            <div>
+                                <p class="text-xs font-bold text-gray-500">Current Class:</p>
+                                <p class="font-mono">${escapeHTML(existingVariant.cftr_class || 'Not set')}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold text-gray-500">Current ETI:</p>
+                                <p class="font-mono">${escapeHTML(existingVariant.eti_prediction || 'Not set')}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-700 mt-4 mb-4">How would you like to proceed?</p>
+                </div>
+                <div class="modal-footer">
+                    <button onclick="this.closest('.modal-overlay').remove(); resolve('skip')" 
+                            class="btn btn-secondary">
+                        <i class="fas fa-ban mr-1"></i> Skip
+                    </button>
+                    <button onclick="this.closest('.modal-overlay').remove(); resolve('update')" 
+                            class="btn btn-primary">
+                        <i class="fas fa-sync-alt mr-1"></i> Update Existing
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Expose resolve function to window
+        window.resolve = resolve;
+    });
+}
+
+/**
+ * Show import summary results
+ */
+function showImportSummary(results) {
+    const resultsDiv = document.getElementById('importResults');
+    if (!resultsDiv) return;
+    
+    const hasSuccess = results.added.length > 0 || results.updated.length > 0;
+    const hasIssues = results.skipped.length > 0 || results.errors.length > 0;
+    
+    let summaryHtml = `
+        <div class="bg-white rounded-xl p-5 border-2 ${hasSuccess ? 'border-[#0e7b4e]' : 'border-gray-200'} shadow-sm mt-4">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-xl ${hasSuccess ? 'bg-[#e3f9e9]' : 'bg-gray-100'} flex items-center justify-center">
+                    <i class="fas ${hasSuccess ? 'fa-check-circle text-[#0e7b4e]' : 'fa-info-circle text-gray-600'}"></i>
+                </div>
+                <div>
+                    <p class="font-bold text-gray-900">Import Summary</p>
+                    <p class="text-xs text-gray-500">${results.total} variant(s) processed</p>
+                </div>
+            </div>
+            
+            <div class="space-y-2 text-sm">
+                ${results.added.length > 0 ? `
+                    <div class="flex items-center gap-2 text-[#0e7b4e]">
+                        <i class="fas fa-plus-circle w-4"></i>
+                        <span class="font-medium">Added:</span>
+                        <span class="font-mono text-xs">${results.added.join(', ')}</span>
+                    </div>
+                ` : ''}
+                
+                ${results.updated.length > 0 ? `
+                    <div class="flex items-center gap-2 text-[#0e7c7b]">
+                        <i class="fas fa-sync-alt w-4"></i>
+                        <span class="font-medium">Updated:</span>
+                        <span class="font-mono text-xs">${results.updated.join(', ')}</span>
+                    </div>
+                ` : ''}
+                
+                ${results.skipped.length > 0 ? `
+                    <div class="flex items-center gap-2 text-[#b45309]">
+                        <i class="fas fa-ban w-4"></i>
+                        <span class="font-medium">Skipped (already exist):</span>
+                        <span class="font-mono text-xs">${results.skipped.join(', ')}</span>
+                    </div>
+                ` : ''}
+                
+                ${results.errors.length > 0 ? `
+                    <div class="flex items-start gap-2 text-[#b91c1c]">
+                        <i class="fas fa-exclamation-circle w-4 mt-0.5"></i>
+                        <div>
+                            <span class="font-medium">Errors:</span>
+                            ${results.errors.map(e => `
+                                <div class="text-xs mt-1">${escapeHTML(e.name)}: ${escapeHTML(e.reason)}</div>
+                            `).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+            </div>
+        </div>
+    `;
+    
+    // Append to existing results
+    const existing = resultsDiv.innerHTML;
+    resultsDiv.innerHTML = existing + summaryHtml;
+    
+    // Show global notification for single imports
+    if (results.total === 1) {
+        if (results.added.length === 1) {
+            showNotification(`✓ Added ${results.added[0]}`, 'success');
+        } else if (results.updated.length === 1) {
+            showNotification(`✓ Updated ${results.updated[0]}`, 'success');
+        } else if (results.skipped.length === 1) {
+            showNotification(`⏭️ Skipped ${results.skipped[0]} (already exists)`, 'warning');
+        }
+    } else {
+        // Bulk import summary notification
+        const totalSuccess = results.added.length + results.updated.length;
+        if (totalSuccess > 0) {
+            showNotification(`✓ Imported ${totalSuccess} of ${results.total} variants`, 'success', 5000);
+        }
     }
 }
 
