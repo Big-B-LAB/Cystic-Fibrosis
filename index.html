@@ -15,9 +15,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-  <style>
+    <style>
         /* ===================================================================
            Δ HELIX — ULTIMATE HYBRID SYSTEM
+           Best of V1 + V2 + V3 + NEXT-GEN FEATURES
            Scientific precision • Clinical intelligence • Zero compromise
            =================================================================== */
         
@@ -70,27 +71,27 @@
             --font-mono: 'JetBrains Mono', 'SF Mono', Monaco, 'Cascadia Code', monospace;
             
             /* Type scale — PRECISE */
-            --text-2xs: 0.625rem;
-            --text-xs: 0.75rem;
-            --text-sm: 0.875rem;
-            --text-base: 1rem;
-            --text-lg: 1.125rem;
-            --text-xl: 1.25rem;
-            --text-2xl: 1.5rem;
-            --text-3xl: 1.875rem;
-            --text-4xl: 2.25rem;
+            --text-2xs: 0.625rem;  /* 10px */
+            --text-xs: 0.75rem;     /* 12px */
+            --text-sm: 0.875rem;    /* 14px */
+            --text-base: 1rem;      /* 16px */
+            --text-lg: 1.125rem;    /* 18px */
+            --text-xl: 1.25rem;     /* 20px */
+            --text-2xl: 1.5rem;     /* 24px */
+            --text-3xl: 1.875rem;   /* 30px */
+            --text-4xl: 2.25rem;    /* 36px */
             
             /* Spacing — 8-point system */
             --space-0: 0rem;
-            --space-1: 0.25rem;
-            --space-2: 0.5rem;
-            --space-3: 0.75rem;
-            --space-4: 1rem;
-            --space-5: 1.25rem;
-            --space-6: 1.5rem;
-            --space-8: 2rem;
-            --space-10: 2.5rem;
-            --space-12: 3rem;
+            --space-1: 0.25rem;     /* 4px */
+            --space-2: 0.5rem;      /* 8px */
+            --space-3: 0.75rem;     /* 12px */
+            --space-4: 1rem;        /* 16px */
+            --space-5: 1.25rem;     /* 20px */
+            --space-6: 1.5rem;      /* 24px */
+            --space-8: 2rem;        /* 32px */
+            --space-10: 2.5rem;     /* 40px */
+            --space-12: 3rem;       /* 48px */
             
             /* Shadows — DEPTH */
             --shadow-xs: 0 1px 2px rgba(0,0,0,0.02);
@@ -101,12 +102,12 @@
             --shadow-xl: 0 20px 30px -8px rgba(0,0,0,0.1);
             
             /* Radius — CONSISTENT */
-            --radius-sm: 0.375rem;
-            --radius: 0.5rem;
-            --radius-md: 0.75rem;
-            --radius-lg: 1rem;
-            --radius-xl: 1.25rem;
-            --radius-2xl: 1.5rem;
+            --radius-sm: 0.375rem;   /* 6px */
+            --radius: 0.5rem;        /* 8px */
+            --radius-md: 0.75rem;    /* 12px */
+            --radius-lg: 1rem;       /* 16px */
+            --radius-xl: 1.25rem;    /* 20px */
+            --radius-2xl: 1.5rem;    /* 24px */
             --radius-full: 9999px;
             
             /* Transitions */
@@ -212,14 +213,6 @@
             padding: var(--space-6);
         }
 
-        /* ========== FLEXIBLE CARD BODY FOR VARIANT EXPLORER ========== */
-        .card-body.flex-1 {
-            display: flex !important;
-            flex-direction: column !important;
-            min-height: 0 !important;
-            padding: var(--space-4);
-        }
-
         /* ========== VARIANT PILL — ICONIC ========== */
         .variant-pill {
             display: inline-flex;
@@ -279,40 +272,37 @@
             opacity: 0.95;
             font-weight: 500;
         }
+/* ========== PAGINATION POLISH ========== */
+#paginationControls {
+    border-top: 1px solid #e2e8f0;
+    background: linear-gradient(to bottom, #ffffff, #f9fafb);
+    transition: opacity 0.2s ease;
+}
 
-        /* ========== PAGINATION POLISH ========== */
-        #paginationControls {
-            border-top: 1px solid #e2e8f0;
-            background: linear-gradient(to bottom, #ffffff, #f9fafb);
-            transition: opacity 0.2s ease;
-            flex-shrink: 0;
-        }
+#paginationControls button {
+    min-width: 70px;
+    transition: all 0.2s ease;
+}
 
-        #paginationControls button {
-            min-width: 70px;
-            transition: all 0.2s ease;
-        }
+#paginationControls button:hover:not(:disabled) {
+    background: var(--color-accent);
+    color: white;
+    border-color: var(--color-accent);
+}
 
-        #paginationControls button:hover:not(:disabled) {
-            background: var(--color-accent);
-            color: white;
-            border-color: var(--color-accent);
-        }
+#paginationControls button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
 
-        #paginationControls button:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-        }
-
-        #paginationControls span {
-            font-family: var(--font-mono);
-            background: white;
-            padding: 0.25rem 0.75rem;
-            border-radius: var(--radius-full);
-            border: 1px solid #e2e8f0;
-            box-shadow: var(--shadow-xs);
-        }
-
+#paginationControls span {
+    font-family: var(--font-mono);
+    background: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-full);
+    border: 1px solid #e2e8f0;
+    box-shadow: var(--shadow-xs);
+}
         /* ========== DATA POINT — ULTIMATE ========== */
         .data-point {
             position: relative;
@@ -362,7 +352,7 @@
             line-height: 1.5;
         }
 
-        /* ========== ANNOTATION TRIGGER ========== */
+        /* ANNOTATION TRIGGER — ALWAYS VISIBLE, BEAUTIFUL */
         .annotation-trigger {
             position: absolute;
             top: var(--space-2);
@@ -462,14 +452,13 @@
             color: #d97706;
         }
 
-        /* ========== VARIANT LIST — FLEXBOX VERSION ========== */
+        /* ========== VARIANT LIST — PERFECTED ========== */
         .variant-list {
-            flex: 1 1 auto;
+            max-height: calc(100vh - 450px);
             overflow-y: auto;
-            min-height: 0;
-            scrollbar-width: thin;
-            scrollbar-color: #b45309 #f1f5f9;
             scroll-behavior: smooth;
+            scrollbar-width: thin;
+            scrollbar-color: var(--color-accent-light) #f1f5f9;
         }
 
         .variant-list::-webkit-scrollbar {
@@ -482,13 +471,12 @@
         }
 
         .variant-list::-webkit-scrollbar-thumb {
-            background: #b45309;
+            background: var(--color-accent-light);
             border-radius: var(--radius-full);
-            opacity: 0.7;
         }
 
         .variant-list::-webkit-scrollbar-thumb:hover {
-            background: #9a3412;
+            background: var(--color-accent);
         }
 
         .variant-item {
@@ -506,19 +494,6 @@
         .variant-item.selected {
             background: linear-gradient(145deg, #f0fdfa, #e6f7f5);
             border-left: 4px solid var(--color-accent);
-            scroll-margin: 8px;
-            animation: highlight-pulse 1.5s ease;
-        }
-
-        @keyframes highlight-pulse {
-            0%, 100% { 
-                background: linear-gradient(145deg, #f0fdfa, #e6f7f5); 
-                box-shadow: inset 0 0 0 0 rgba(14,124,123,0.1);
-            }
-            50% { 
-                background: linear-gradient(145deg, #ffffff, #f0fdfa);
-                box-shadow: inset 0 0 0 2px rgba(14,124,123,0.2);
-            }
         }
 
         .variant-name {
@@ -546,7 +521,7 @@
             border-bottom: 2px solid var(--color-accent);
         }
 
-        /* ========== NOMENCLATURE GRID ========== */
+        /* ========== NOMENCLATURE GRID — COMPACT, ELEGANT ========== */
         .nomenclature-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -612,7 +587,6 @@
         /* ========== SEARCH — ELEVATED ========== */
         .search-wrapper {
             position: relative;
-            flex-shrink: 0;
         }
 
         .search-input {
@@ -629,8 +603,8 @@
 
         .search-input:focus {
             outline: none;
-            border-color: #b45309;
-            box-shadow: 0 0 0 4px rgba(180,83,9,0.15);
+            border-color: var(--color-accent);
+            box-shadow: 0 0 0 4px rgba(14,124,123,0.1);
         }
 
         .search-icon {
@@ -638,7 +612,7 @@
             left: var(--space-3);
             top: 50%;
             transform: translateY(-50%);
-            color: #b45309;
+            color: #94a3b8;
             font-size: 1rem;
         }
 
@@ -647,7 +621,7 @@
             right: var(--space-3);
             top: 50%;
             transform: translateY(-50%);
-            color: #b45309;
+            color: #94a3b8;
             background: transparent;
             border: none;
             cursor: pointer;
@@ -661,21 +635,6 @@
         .search-clear:hover {
             background: #f1f5f9;
             color: #475569;
-        }
-
-        /* Search focus glow class */
-        .search-input-focused {
-            border-color: #b45309 !important;
-            box-shadow: 0 0 0 4px rgba(180, 83, 9, 0.15) !important;
-        }
-
-        /* Search hint */
-        .search-hint {
-            font-size: 0.7rem;
-            color: #b45309;
-            margin-top: 0.25rem;
-            margin-left: 0.75rem;
-            opacity: 0.8;
         }
 
         /* ========== MODAL — CINEMATIC ========== */
@@ -752,7 +711,7 @@
             backdrop-filter: blur(8px);
         }
 
-        /* ========== FORM ELEMENTS ========== */
+        /* ========== FORM ELEMENTS — POLISHED ========== */
         .form-group {
             margin-bottom: var(--space-5);
         }
@@ -797,7 +756,7 @@
             padding-right: var(--space-10);
         }
 
-        /* ========== BUTTONS ========== */
+        /* ========== BUTTONS — ULTRA-RESPONSIVE ========== */
         .btn {
             display: inline-flex;
             align-items: center;
@@ -813,10 +772,6 @@
             min-height: 44px;
             letter-spacing: 0.01em;
             box-shadow: var(--shadow-xs);
-        }
-
-        .btn i:first-child {
-            margin-right: 0.25rem;
         }
 
         .btn-primary {
@@ -877,7 +832,7 @@
             color: #991b1b;
         }
 
-        /* ========== MISSING COUNT ========== */
+        /* ========== MISSING COUNT — PROMINENT ========== */
         .missing-count {
             display: inline-flex;
             align-items: center;
@@ -893,7 +848,7 @@
             box-shadow: 0 2px 6px rgba(180,83,9,0.3);
         }
 
-        /* ========== EVIDENCE CHAIN ========== */
+        /* ========== EVIDENCE CHAIN — ELEGANT ========== */
         .evidence-step {
             padding: 0.375rem 1rem;
             background: #f8fafc;
@@ -917,7 +872,7 @@
             font-size: 0.75rem;
         }
 
-        /* ========== NOTIFICATION TOAST ========== */
+        /* ========== NOTIFICATION — TOAST OF EXCELLENCE ========== */
         .notification {
             position: fixed;
             bottom: var(--space-6);
@@ -953,7 +908,7 @@
         .notification.warning { border-left-color: var(--color-warning); }
         .notification.info { border-left-color: var(--color-primary); }
 
-        /* ========== UTILITIES ========== */
+        /* ========== UTILITIES — COMPREHENSIVE ========== */
         .hidden { display: none !important; }
         .invisible { visibility: hidden !important; }
         .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; }
@@ -974,9 +929,6 @@
             .variant-pill { padding: 0.5rem 1rem; }
             .view-toggle { flex-wrap: wrap; }
             .modal { margin: var(--space-2); }
-            .variant-list {
-                max-height: 350px;
-            }
         }
 
         /* ========== ANIMATIONS ========== */
@@ -1001,6 +953,127 @@
         @media print {
             .no-print { display: none !important; }
             .card { break-inside: avoid; border: 1px solid #ddd; }
+        }
+        /* ========== FIXED VARIANT LIST — PERFECT HEIGHT ========== */
+.variant-list {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    min-height: 0;
+    scrollbar-width: thin;
+    scrollbar-color: #b45309 #f1f5f9;
+}
+
+.variant-list::-webkit-scrollbar {
+    width: 5px;
+}
+
+.variant-list::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: var(--radius-full);
+}
+
+.variant-list::-webkit-scrollbar-thumb {
+    background: #b45309;
+    border-radius: var(--radius-full);
+    opacity: 0.7;
+}
+
+.variant-list::-webkit-scrollbar-thumb:hover {
+    background: #9a3412;
+}
+
+/* Search focus glow */
+.search-input-focused {
+    border-color: #b45309 !important;
+    box-shadow: 0 0 0 4px rgba(180, 83, 9, 0.15) !important;
+}
+
+/* Remove duplicate icons in filter buttons */
+.btn i:first-child {
+    margin-right: 0.25rem;
+}
+
+/* Ensure card body uses flex properly */
+.card-body.flex-1 {
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
+}
+
+        /* ========== FIXED VARIANT LIST — PERFECT HEIGHT ========== */
+        .variant-list {
+            flex: 1 1 auto;
+            overflow-y: auto;
+            min-height: 0;
+            scrollbar-width: thin;
+            scrollbar-color: #b45309 #f1f5f9;
+        }
+
+        .variant-list::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .variant-list::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: var(--radius-full);
+        }
+
+        .variant-list::-webkit-scrollbar-thumb {
+            background: #b45309;
+            border-radius: var(--radius-full);
+            opacity: 0.7;
+        }
+
+        .variant-list::-webkit-scrollbar-thumb:hover {
+            background: #9a3412;
+        }
+
+        /* Search focus glow */
+        .search-input-focused {
+            border-color: #b45309 !important;
+            box-shadow: 0 0 0 4px rgba(180, 83, 9, 0.15) !important;
+        }
+
+        /* Remove duplicate icons in filter buttons */
+        .btn i:first-child {
+            margin-right: 0.25rem;
+        }
+
+        /* Ensure card body uses flex properly */
+        .card-body.flex-1 {
+            display: flex !important;
+            flex-direction: column !important;
+            min-height: 0 !important;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .variant-list {
+                max-height: 350px;
+            }
+        }
+                /* ========== BONUS: SMOOTH SCROLL FOR SELECTED VARIANTS ========== */
+        .variant-item.selected {
+            background: linear-gradient(145deg, #f0fdfa, #e6f7f5);
+            border-left: 4px solid var(--color-accent);
+            scroll-margin: 8px; /* Adds padding when scrolled to */
+            animation: highlight-pulse 1.5s ease;
+        }
+
+        @keyframes highlight-pulse {
+            0%, 100% { 
+                background: linear-gradient(145deg, #f0fdfa, #e6f7f5); 
+                box-shadow: inset 0 0 0 0 rgba(14,124,123,0.1);
+            }
+            50% { 
+                background: linear-gradient(145deg, #ffffff, #f0fdfa);
+                box-shadow: inset 0 0 0 2px rgba(14,124,123,0.2);
+            }
+        }
+
+        /* Smooth scrolling for the entire list */
+        .variant-list {
+            scroll-behavior: smooth;
         }
     </style>
     
