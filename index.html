@@ -3270,7 +3270,6 @@ function clearManualForm() {
         if (el) el.value = '';
     });
 }
-
 function validateImport() {
     const input = document.getElementById('jsonInput');
     const results = document.getElementById('importResults');
@@ -3279,31 +3278,81 @@ function validateImport() {
     if (!input || !results) return;
     
     try {
-        const data = JSON.parse(input.value.trim());
-        const required = ['variant_legacy_name', 'variant_protein_name', 
-                         'variant_cDNA_name', 'variant_final_determination'];
+        const parsed = JSON.parse(input.value.trim());
         
-        const missing = required.filter(f => !data[f]);
-        if (missing.length) {
-            throw new Error(`Missing required fields: ${missing.join(', ')}`);
+        // Handle BOTH single object AND array
+        const dataArray = Array.isArray(parsed) ? parsed : [parsed];
+        
+        // Check each item for required fields
+        const errors = [];
+        const validItems = [];
+        
+        dataArray.forEach((item, index) => {
+            const required = ['variant_legacy_name', 'variant_protein_name', 
+                            'variant_cDNA_name', 'variant_final_determination'];
+            
+            const missing = required.filter(f => !item[f]);
+            
+            if (missing.length > 0) {
+                errors.push({
+                    index: index + 1,
+                    name: item.variant_legacy_name || 'UNKNOWN',
+                    missing: missing
+                });
+            } else {
+                validItems.push(item);
+            }
+        });
+        
+        if (errors.length > 0) {
+            // Show validation errors
+            let errorHtml = '';
+            errors.forEach(err => {
+                errorHtml += `<div class="text-xs mt-1">❌ Item ${err.index}: ${err.name} - missing ${err.missing.join(', ')}</div>`;
+            });
+            
+            results.innerHTML = `
+                <div class="bg-[#fee2e2] border-2 border-[#b91c1c] rounded-xl p-5">
+                    <p class="font-bold text-[#b91c1c]">❌ Validation failed</p>
+                    <p class="text-sm mt-1">${errors.length} of ${dataArray.length} item(s) have missing fields</p>
+                    ${errorHtml}
+                </div>
+            `;
+            
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Import Data';
+            }
+            STATE.ui.validatedJson = null;
+            return;
         }
         
-        STATE.ui.validatedJson = data;
+        // ALL items are valid
+        STATE.ui.validatedJson = dataArray.length === 1 ? dataArray[0] : dataArray;
         
-        const exists = STATE.variants.some(v => v.legacy_name === data.variant_legacy_name);
+        const existsText = dataArray.length === 1 && STATE.variants.some(v => v.legacy_name === dataArray[0].variant_legacy_name) 
+            ? 'will be updated' 
+            : 'ready to import';
+        
         results.innerHTML = `
             <div class="bg-[#e3f9e9] border-2 border-[#0e7b4e] rounded-xl p-5">
-                <p class="font-bold text-[#0e7b4e]">✓ Valid JSON — Ready to import</p>
+                <p class="font-bold text-[#0e7b4e]">✓ Valid JSON — ${validItems.length} variant(s) ready</p>
                 <p class="text-sm mt-1">
-                    <span class="font-mono">${escapeHTML(data.variant_legacy_name)}</span> 
-                    will be <span class="font-bold">${exists ? 'updated' : 'added'}</span>
+                    ${dataArray.length === 1 
+                        ? `<span class="font-mono">${escapeHTML(dataArray[0].variant_legacy_name)}</span> ${existsText}`
+                        : `Found ${validItems.length} valid variants`
+                    }
                 </p>
             </div>
         `;
         
         if (btn) {
             btn.disabled = false;
-            btn.innerHTML = `<i class="fas fa-cloud-upload-alt"></i> Import ${data.variant_legacy_name}`;
+            if (dataArray.length === 1) {
+                btn.innerHTML = `<i class="fas fa-cloud-upload-alt"></i> Import ${dataArray[0].variant_legacy_name}`;
+            } else {
+                btn.innerHTML = `<i class="fas fa-cloud-upload-alt"></i> Import ${validItems.length} Variants`;
+            }
         }
         
     } catch (e) {
