@@ -3777,33 +3777,88 @@ function handleCSVFile(file) {
     }
     
     const reader = new FileReader();
-    reader.onload = (e) => {
-        showNotification(`✓ Loaded ${file.name}`, 'success');
-        // TODO: Parse and import CSV data
+    reader.onload = async (e) => {
+        try {
+            showNotification(`📄 Parsing ${file.name}...`, 'info', 2000);
+            
+            // Parse CSV with tab or comma delimiter
+            const content = e.target.result;
+            const lines = content.trim().split('\n');
+            const headers = lines[0].split('\t').map(h => h.trim());
+            
+            // Validate headers
+            const requiredHeaders = ['variant_legacy_name', 'variant_protein_name', 
+                                   'variant_cDNA_name', 'variant_final_determination',
+                                   'cftr_class', 'eti_prediction'];
+            
+            const missingHeaders = requiredHeaders.filter(h => !headers.includes(h));
+            if (missingHeaders.length > 0) {
+                throw new Error(`Missing columns: ${missingHeaders.join(', ')}`);
+            }
+            
+            // Parse rows
+            const variants = [];
+            for (let i = 1; i < lines.length; i++) {
+                if (!lines[i].trim()) continue;
+                
+                const values = lines[i].split('\t');
+                const variant = {};
+                
+                headers.forEach((header, index) => {
+                    variant[header] = values[index]?.trim() || '';
+                });
+                
+                // Validate required fields
+                const missing = requiredHeaders.filter(f => !variant[f]);
+                if (missing.length > 0) {
+                    showNotification(`⏭️ Skipping row ${i + 1}: missing ${missing.join(', ')}`, 'warning', 3000);
+                    continue;
+                }
+                
+                variants.push(variant);
+            }
+            
+            if (variants.length === 0) {
+                throw new Error('No valid variants found in CSV');
+            }
+            
+            // Set as validated JSON and execute import
+            STATE.ui.validatedJson = variants;
+            
+            // Show preview
+            const resultsDiv = document.getElementById('importResults');
+            resultsDiv.innerHTML = `
+                <div class="bg-[#e3f9e9] border-2 border-[#0e7b4e] rounded-xl p-5">
+                    <p class="font-bold text-[#0e7b4e]">✓ CSV parsed successfully</p>
+                    <p class="text-sm mt-1">
+                        Found ${variants.length} variants ready to import
+                    </p>
+                </div>
+            `;
+            
+            // Execute the import
+            await executeJsonImport();
+            
+        } catch (error) {
+            console.error('❌ CSV parsing failed:', error);
+            showNotification(`CSV import failed: ${error.message}`, 'error');
+            
+            const resultsDiv = document.getElementById('importResults');
+            resultsDiv.innerHTML = `
+                <div class="bg-[#fee2e2] border-2 border-[#b91c1c] rounded-xl p-5">
+                    <p class="font-bold text-[#b91c1c]">❌ CSV import failed</p>
+                    <p class="text-sm mt-1">${escapeHTML(error.message)}</p>
+                </div>
+            `;
+        }
     };
+    
+    reader.onerror = () => {
+        showNotification('❌ Failed to read file', 'error');
+    };
+    
     reader.readAsText(file);
 }
-
-function downloadTemplate() {
-    const template = 'variant_legacy_name,variant_protein_name,variant_cDNA_name,variant_final_determination,cftr_class,eti_prediction\n' +
-                    'G542X,p.Gly542X,c.1624G>T,CF-causing,I,responsive\n' +
-                    'F508del,p.Phe508del,c.1521_1523delCTT,CF-causing,II,responsive\n' +
-                    'G551D,p.Gly551Asp,c.1652G>A,CF-causing,III,responsive';
-    
-    const blob = new Blob([template], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'helix_import_template.csv';
-    a.click();
-    URL.revokeObjectURL(url);
-    showNotification('✓ Template downloaded', 'success');
-}
-
-function processBulkImport() {
-    document.getElementById('csvFileInput')?.click();
-}
-
 // ===================================================================
 // 🔧 UTILITIES - HELPERS, FORMATTERS, VALIDATORS
 // ===================================================================
