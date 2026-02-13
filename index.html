@@ -3758,26 +3758,24 @@ function preloadCharts() {
 // ===================================================================
 // 📤 EXPORT SYSTEM - CSV REPORTS
 // ===================================================================
+// ===================================================================
+// 📤 EXPORT SYSTEM - CSV REPORTS
+// ===================================================================
 
-function exportFullReport() {
-    const headers = ['ID', 'Legacy Name', 'Protein', 'cDNA', 'Determination', 'CFTR Class',
-        'Subtype', 'Confidence', 'ETI Response', 'Evidence Level', 'Recommendation',
-        'Therapy Responsive', 'Data Status', 'Source', 'Population Frequency', 
-        'PubMed IDs', 'Date Updated', 'Validation Count', 'Last Validator', 'Last Validated']; // 👈 ADD THESE
+function exportReport() {
+    const headers = ['Legacy Name', 'Protein', 'cDNA', 'Determination', 'CFTR Class', 
+                    'Subtype', 'Confidence', 'ETI Response', 'Evidence Level', 
+                    'Recommendation', 'Data Status', 'Source', 'Validation Count'];
     
     const rows = STATE.variants.map(v => [
-        v.id, v.legacy_name, v.protein_name, v.cdna_name, v.final_determination,
+        v.legacy_name, v.protein_name, v.cdna_name, v.final_determination,
         v.cftr_class, v.class_subtype, v.class_confidence, v.eti_prediction,
-        v.eti_evidence_level, v.eti_recommendation,
-        v.therapy_responsive !== undefined ? (v.therapy_responsive ? 'Yes' : 'No') : '',
-        v.data_status, v.source_summary, v.population_frequency, v.pubmed_ids, v.date_updated,
-        v.validation_count || 0, // 👈 ADD THESE
-        v.last_validator_name || '',
-        v.last_validated_at || ''
+        v.eti_evidence_level, v.eti_recommendation, v.data_status, v.source_summary,
+        v.validation_count || 0
     ]);
     
-    generateCSV(headers, rows, `helix-full-report-${getCurrentDate()}.csv`);
-    showNotification('✓ Full export complete', 'success');
+    generateCSV(headers, rows, `helix-export-${getCurrentDate()}.csv`);
+    showNotification('✓ Export complete', 'success');
 }
 
 function exportFullReport() {
@@ -3814,7 +3812,6 @@ function generateCSV(headers, rows, filename) {
     a.click();
     URL.revokeObjectURL(url);
 }
-
 // ===================================================================
 // 📥 IMPORT SYSTEM - JSON, FORM, BULK CSV
 // ===================================================================
