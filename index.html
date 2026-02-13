@@ -260,6 +260,25 @@
             color: white;
             text-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
+        /* Custom scrollbar for evidence lists */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 20px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #6d28d9;
+    border-radius: 20px;
+    opacity: 0.5;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #5b21b6;
+}
 
         .variant-pill-primary {
             font-weight: 700;
@@ -1788,6 +1807,37 @@
             </div>
         </div>
     </div>
+        <!-- ===================================================================
+         ALL EVIDENCE MODAL - SCROLLABLE POPUP
+         =================================================================== -->
+    <div id="allEvidenceModal" class="modal-overlay hidden">
+        <div class="modal" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3 class="heading-3 text-gray-900 flex items-center gap-2">
+                    <i class="fas fa-link text-[#6d28d9]"></i>
+                    All Evidence Sources
+                </h3>
+                <button onclick="closeAllEvidenceModal()" class="w-9 h-9 rounded-xl hover:bg-gray-200 transition-colors">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="modal-body max-h-[60vh] overflow-y-auto custom-scrollbar" id="allEvidenceList">
+                <!-- Dynamically populated -->
+                <div class="text-center py-10">
+                    <i class="fas fa-spinner fa-spin text-[#6d28d9] text-2xl"></i>
+                    <p class="text-sm text-gray-500 mt-2">Loading evidence...</p>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button onclick="closeAllEvidenceModal()" class="btn btn-secondary">Close</button>
+                <button onclick="showEvidenceModal(currentVariantName, currentVariantId)" class="btn btn-primary bg-[#6d28d9] hover:bg-[#5b21b6]">
+                    <i class="fas fa-plus mr-1"></i> Add New Link
+                </button>
+            </div>
+        </div>
+    </div>
     <!-- ===================================================================
          NOTIFICATION CONTAINER
          =================================================================== -->
@@ -3253,34 +3303,65 @@ function renderVariantDetails(variant) {
         </div>
         
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <!-- EVIDENCE CHAIN - BEAUTIFUL WITH SCROLLABLE POPUP -->
             <div class="card">
                 <div class="card-header">
                     <i class="fas fa-microscope text-[#6d28d9]"></i>
                     <span>Evidence Chain</span>
+                    <div class="ml-auto flex items-center gap-2">
+                        <!-- Evidence count badge -->
+                        <span class="text-xs bg-[#6d28d9]/10 text-[#6d28d9] px-3 py-1.5 rounded-full font-semibold flex items-center gap-1"
+                              id="evidenceCount-${variant.id}"
+                              onclick="showAllEvidence(${variant.id})"
+                              style="cursor: pointer;">
+                            <i class="fas fa-link"></i>
+                            ${variant.evidence_links?.length || 0} sources
+                        </span>
+                        
+                        <!-- Add evidence button -->
+                        <button onclick="showEvidenceModal('${variant.legacy_name}', ${variant.id})" 
+                                class="text-xs bg-[#6d28d9] text-white px-3 py-1.5 rounded-lg hover:bg-[#5b21b6] transition-all flex items-center gap-1">
+                            <i class="fas fa-plus"></i> Add
+                        </button>
+                    </div>
                 </div>
+                
                 <div class="card-body">
+                    <!-- Preview of latest 3 evidence links (scrollable if more) -->
+                    <div class="space-y-2 max-h-[200px] overflow-y-auto pr-2 custom-scrollbar" id="evidencePreview-${variant.id}">
+                        ${renderEvidencePreview(variant)}
+                    </div>
+                    
+                    <!-- Source summary (if exists) -->
                     ${variant.source_summary ? `
-                        <div class="flex flex-wrap items-center gap-2">
-                            ${variant.source_summary.split('_').map((part, i) => `
-                                <span class="evidence-step">${escapeHTML(part)}</span>
-                                ${i < variant.source_summary.split('_').length - 1 ? 
-                                    '<i class="fas fa-arrow-right evidence-arrow"></i>' : ''}
-                            `).join('')}
+                        <div class="mt-4 pt-3 border-t border-gray-200 flex items-center justify-between">
+                            <div class="flex items-center gap-2 text-xs text-gray-500">
+                                <i class="fas fa-database"></i>
+                                <span>Source: ${escapeHTML(variant.source_summary)}</span>
+                            </div>
+                            ${variant.evidence_links?.length > 3 ? `
+                                <button onclick="showAllEvidence(${variant.id})" 
+                                        class="text-xs text-[#6d28d9] hover:underline font-medium">
+                                    View all ${variant.evidence_links.length} sources →
+                                </button>
+                            ` : ''}
                         </div>
-                        <div class="mt-3 pt-2 text-xs text-gray-500">
-                            <i class="fas fa-link mr-1"></i> Source: ${variant.source_summary}
-                        </div>
-                    ` : `
-                        <div class="flex items-center justify-between">
-                            <p class="text-sm text-gray-500 italic">No evidence chain available</p>
-                            <button onclick="showAnnotationModal('${variant.legacy_name}', 'source_summary', '')" 
-                                    class="px-4 py-2 text-xs bg-[#0e7c7b] text-white rounded-lg hover:bg-[#0a5e5d] transition-all shadow-sm">
-                                <i class="fas fa-plus mr-1"></i> Add Source
+                    ` : variant.evidence_links?.length > 3 ? `
+                        <div class="mt-4 pt-3 border-t border-gray-200 text-right">
+                            <button onclick="showAllEvidence(${variant.id})" 
+                                    class="text-xs text-[#6d28d9] hover:underline font-medium">
+                                View all ${variant.evidence_links.length} sources →
                             </button>
                         </div>
-                    `}
+                    ` : ''}
                 </div>
             </div>
+            
+            <!-- The other card (Clinical Validation) continues here -->
+            <div class="card">
+                ... existing clinical validation card ...
+            </div>
+        </div>
             
             <!-- CLINICAL VALIDATION CARD - ENHANCED VERSION -->
                         <!-- CLINICAL VALIDATION CARD - ENHANCED VERSION -->
@@ -4521,7 +4602,203 @@ function formatDate(dateString) {
         return dateString;
     }
 }
+// ===================================================================
+// 🔗 EVIDENCE SYSTEM FUNCTIONS
+// ===================================================================
 
+let currentVariantId = null;
+let currentVariantName = '';
+
+function renderEvidencePreview(variant) {
+    if (!variant.evidence_links || variant.evidence_links.length === 0) {
+        return `
+            <div class="text-center py-6">
+                <div class="w-12 h-12 bg-[#6d28d9]/10 rounded-xl mx-auto mb-3 flex items-center justify-center">
+                    <i class="fas fa-link text-xl text-[#6d28d9]/40"></i>
+                </div>
+                <p class="text-sm text-gray-500 mb-3">No evidence links yet</p>
+                <button onclick="showEvidenceModal('${variant.legacy_name}', ${variant.id})" 
+                        class="text-xs bg-[#6d28d9] text-white px-4 py-2 rounded-lg hover:bg-[#5b21b6] transition-all">
+                    <i class="fas fa-plus mr-1"></i> Add First Link
+                </button>
+            </div>
+        `;
+    }
+    
+    // Show only first 3 links in preview
+    const previewLinks = variant.evidence_links.slice(0, 3);
+    
+    return previewLinks.map(link => `
+        <div class="group relative bg-white rounded-lg border border-gray-200 hover:border-[#6d28d9] hover:shadow-md transition-all duration-200 p-3">
+            <div class="flex items-start gap-3">
+                <!-- Icon -->
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-[#6d28d9]/10 to-[#6d28d9]/5 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                    <i class="fas ${getEvidenceIcon(link.type)} text-[#6d28d9] text-sm"></i>
+                </div>
+                
+                <!-- Content -->
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-start justify-between gap-2">
+                        <div>
+                            <h4 class="text-sm font-semibold text-gray-900 group-hover:text-[#6d28d9] transition-colors truncate max-w-[200px]">
+                                ${escapeHTML(link.title)}
+                            </h4>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span class="text-xs bg-[#6d28d9]/10 text-[#6d28d9] px-2 py-0.5 rounded-full">
+                                    <i class="fas ${getEvidenceIcon(link.type)} mr-1"></i>${escapeHTML(link.source || link.type)}
+                                </span>
+                                <span class="text-xs text-gray-500">
+                                    <i class="far fa-clock mr-1"></i>${formatDate(link.date_added)}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <!-- Actions -->
+                        <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <a href="${escapeHTML(link.url)}" 
+                               target="_blank"
+                               class="w-7 h-7 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-500 hover:text-[#6d28d9] transition-colors"
+                               title="Open link">
+                                <i class="fas fa-external-link-alt text-xs"></i>
+                            </a>
+                            <button onclick="copyToClipboard('${escapeHTML(link.url)}')"
+                                    class="w-7 h-7 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-500 hover:text-[#6d28d9] transition-colors"
+                                    title="Copy link">
+                                <i class="fas fa-copy text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- URL preview on hover -->
+                    <div class="mt-2 hidden group-hover:block">
+                        <div class="bg-gray-50 rounded-lg px-3 py-2 text-xs font-mono text-gray-500 truncate">
+                            🔗 ${escapeHTML(link.url)}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function getEvidenceIcon(type) {
+    const icons = {
+        'pubmed': 'fa-book-open',
+        'cftr2': 'fa-dna',
+        'clinvar': 'fa-clinic-medical',
+        'article': 'fa-file-alt',
+        'study': 'fa-flask',
+        'guideline': 'fa-file-contract',
+        'pdf': 'fa-file-pdf',
+        'default': 'fa-link'
+    };
+    return icons[type?.toLowerCase()] || icons.default;
+}
+
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        showNotification('✓ Link copied to clipboard', 'success');
+    }).catch(() => {
+        showNotification('❌ Failed to copy', 'error');
+    });
+}
+
+function showAllEvidence(variantId) {
+    const variant = STATE.variantsById.get(variantId);
+    if (!variant) return;
+    
+    currentVariantId = variantId;
+    currentVariantName = variant.legacy_name;
+    
+    const modalList = document.getElementById('allEvidenceList');
+    const evidence = variant.evidence_links || [];
+    
+    if (evidence.length === 0) {
+        modalList.innerHTML = `
+            <div class="text-center py-12">
+                <div class="w-16 h-16 bg-[#6d28d9]/10 rounded-2xl mx-auto mb-4 flex items-center justify-center">
+                    <i class="fas fa-link text-3xl text-[#6d28d9]/40"></i>
+                </div>
+                <p class="text-gray-700 font-medium mb-2">No evidence links yet</p>
+                <p class="text-sm text-gray-500 mb-6">Add your first evidence source</p>
+                <button onclick="showEvidenceModal('${currentVariantName}', ${variantId}); closeAllEvidenceModal();" 
+                        class="btn btn-primary bg-[#6d28d9] hover:bg-[#5b21b6]">
+                    <i class="fas fa-plus mr-2"></i> Add Evidence
+                </button>
+            </div>
+        `;
+    } else {
+        modalList.innerHTML = evidence.map(link => `
+            <div class="group relative bg-white rounded-xl border border-gray-200 hover:border-[#6d28d9] hover:shadow-lg transition-all duration-200 mb-4 p-4">
+                <div class="flex items-start gap-4">
+                    <!-- Icon -->
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#6d28d9]/10 to-[#6d28d9]/5 flex items-center justify-center flex-shrink-0">
+                        <i class="fas ${getEvidenceIcon(link.type)} text-[#6d28d9]"></i>
+                    </div>
+                    
+                    <!-- Content -->
+                    <div class="flex-1">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <h4 class="font-semibold text-gray-900">${escapeHTML(link.title)}</h4>
+                                <div class="flex items-center gap-3 mt-2">
+                                    <span class="text-xs bg-[#6d28d9]/10 text-[#6d28d9] px-2 py-1 rounded-full">
+                                        <i class="fas ${getEvidenceIcon(link.type)} mr-1"></i>
+                                        ${escapeHTML(link.source || link.type)}
+                                    </span>
+                                    <span class="text-xs text-gray-500">
+                                        <i class="far fa-clock mr-1"></i>${formatDate(link.date_added)}
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <!-- Actions -->
+                            <div class="flex items-center gap-2">
+                                <a href="${escapeHTML(link.url)}" 
+                                   target="_blank"
+                                   class="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-500 hover:text-[#6d28d9] transition-colors"
+                                   title="Open link">
+                                    <i class="fas fa-external-link-alt"></i>
+                                </a>
+                                <button onclick="copyToClipboard('${escapeHTML(link.url)}')"
+                                        class="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-500 hover:text-[#6d28d9] transition-colors"
+                                        title="Copy link">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                                <button onclick="deleteEvidence(${variantId}, ${link.id})"
+                                        class="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-500 hover:text-[#b91c1c] transition-colors"
+                                        title="Delete">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- URL -->
+                        <div class="mt-3 bg-gray-50 rounded-lg px-3 py-2 text-xs font-mono text-gray-500 truncate">
+                            🔗 ${escapeHTML(link.url)}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+    
+    document.getElementById('allEvidenceModal').classList.remove('hidden');
+}
+
+function closeAllEvidenceModal() {
+    document.getElementById('allEvidenceModal').classList.add('hidden');
+}
+
+function showEvidenceModal(variantName, variantId) {
+    // Placeholder - we'll implement this after database
+    showNotification('Add Evidence modal coming soon!', 'info');
+}
+
+function deleteEvidence(variantId, evidenceId) {
+    // Placeholder - we'll implement this after database
+    showNotification('Delete function coming soon!', 'info');
+}
 function getCurrentDate() {
     return new Date().toISOString().split('T')[0];
 }
@@ -4703,7 +4980,7 @@ function exposeGlobals() {
         clearManualForm,
         downloadTemplate,
         processBulkImport,
-        
+          
         showDashboard,
         closeDashboard,
         refreshDashboardStats,
@@ -4725,6 +5002,12 @@ function exposeGlobals() {
         toggleValidationHistory,
         showExistingRoles,
         selectRole,
+        // NEW EVIDENCE FUNCTIONS
+        showAllEvidence,
+        closeAllEvidenceModal,
+        showEvidenceModal,
+        deleteEvidence,
+        copyToClipboard,
         
         showNotification
     };
