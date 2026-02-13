@@ -133,7 +133,126 @@
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
-
+/* ========== NEW: SKELETON LOADING ========== */
+    .skeleton-loader {
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: loading 1.5s infinite;
+        border-radius: var(--radius);
+    }
+    
+    @keyframes loading {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+    
+    .skeleton-card {
+        height: 80px;
+        margin-bottom: 8px;
+        border-radius: var(--radius);
+    }
+    
+    /* ========== NEW: GO TO PAGE ========== */
+    .goto-page {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    
+    .goto-page input {
+        width: 60px;
+        padding: 4px 8px;
+        border: 1px solid #e2e8f0;
+        border-radius: var(--radius);
+        font-family: var(--font-mono);
+        font-size: 0.875rem;
+        text-align: center;
+    }
+    
+    .goto-page input:focus {
+        outline: none;
+        border-color: var(--color-accent);
+        box-shadow: 0 0 0 2px rgba(14,124,123,0.1);
+    }
+    
+    /* ========== NEW: MOBILE OPTIMIZATIONS ========== */
+    @media (max-width: 640px) {
+        .data-grid {
+            grid-template-columns: 1fr !important;
+        }
+        
+        .variant-pill {
+            padding: 0.375rem 0.75rem;
+        }
+        
+        .variant-pill-primary {
+            font-size: 1rem;
+        }
+        
+        .view-toggle {
+            flex-direction: column;
+            width: 100%;
+        }
+        
+        .view-toggle-btn {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .modal {
+            margin: 0;
+            max-height: 100vh;
+            border-radius: 0;
+        }
+        
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+        }
+    }
+    
+    /* ========== NEW: AUDIT TRAIL ========== */
+    .audit-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 2px 8px;
+        background: #f3f4f6;
+        border-radius: var(--radius-full);
+        font-size: 0.625rem;
+        color: #4b5563;
+        border: 1px solid #e5e7eb;
+    }
+    
+    .audit-badge i {
+        font-size: 0.5rem;
+        color: #10b981;
+    }
+    
+    /* ========== NEW: KEYBOARD SHORTCUT HINT ========== */
+    .shortcut-hint {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        background: rgba(0,0,0,0.7);
+        backdrop-filter: blur(8px);
+        color: white;
+        padding: 8px 16px;
+        border-radius: var(--radius-full);
+        font-size: 0.75rem;
+        z-index: 9999;
+        border: 1px solid rgba(255,255,255,0.2);
+        box-shadow: var(--shadow-lg);
+        transition: opacity 0.3s;
+        pointer-events: none;
+    }
+    
+    .shortcut-hint kbd {
+        background: rgba(255,255,255,0.2);
+        padding: 2px 6px;
+        border-radius: 4px;
+        margin: 0 2px;
+        font-family: var(--font-mono);
+    }
         /* ========== TYPOGRAPHY UTILITIES ========== */
         .heading-1 {
             font-family: var(--font-display);
