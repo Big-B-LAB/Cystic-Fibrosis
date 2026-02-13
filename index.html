@@ -1717,7 +1717,77 @@
             </div>
         </div>
     </div>
-
+ <!-- ========== 👇 INSERT VALIDATION MODAL HERE ========== -->
+    <!-- ===================================================================
+         VALIDATION MODAL — SIMPLE & CLEAN
+         =================================================================== -->
+    <div id="validationModal" class="modal-overlay hidden">
+        <div class="modal" style="max-width: 450px;">
+            <div class="modal-header">
+                <h3 class="heading-3 text-gray-900 flex items-center gap-2 text-[#0e7c7b]">
+                    <i class="fas fa-check-circle"></i>
+                    Validate Variant
+                </h3>
+                <button onclick="closeValidationModal()" class="w-9 h-9 rounded-xl hover:bg-gray-200 transition-colors">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="bg-[#f0fdfa] rounded-xl p-5 mb-4 border border-[#0e7c7b]/20">
+                    <p class="text-sm text-gray-700">
+                        Add your validation to <span id="validateVariantName" class="font-mono font-bold text-[#0e7c7b]"></span>
+                    </p>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label flex items-center gap-1">
+                        <i class="fas fa-user-md text-[#0e7c7b]"></i>
+                        Your Name *
+                    </label>
+                    <input type="text" id="clinicianName" class="form-control" placeholder="e.g., Dr. Sarah Chen">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label flex items-center gap-1">
+                        <i class="fas fa-stethoscope text-[#0e7c7b]"></i>
+                        Your Role *
+                    </label>
+                    <div class="flex gap-2 relative">
+                        <input type="text" 
+                               id="clinicianRoleInput" 
+                               class="form-control flex-1" 
+                               placeholder="e.g., Pulmonologist, Geneticist..."
+                               list="existingRoles"
+                               autocomplete="off">
+                        <button type="button" 
+                                onclick="showExistingRoles()"
+                                class="btn btn-secondary px-3"
+                                title="View existing roles">
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                    </div>
+                    <datalist id="existingRoles"></datalist>
+                    <div id="roleSuggestions" class="absolute hidden" style="z-index: 1000;"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label flex items-center gap-1">
+                        <i class="fas fa-pencil-alt text-[#0e7c7b]"></i>
+                        Notes (optional)
+                    </label>
+                    <textarea id="validationNotes" class="form-control" rows="2" placeholder="Any comments..."></textarea>
+                </div>
+                
+                <div id="validationMessage" class="text-sm mt-2"></div>
+            </div>
+            <div class="modal-footer">
+                <button onclick="closeValidationModal()" class="btn btn-secondary">Cancel</button>
+                <button onclick="submitValidation()" class="btn btn-primary" id="submitValidationBtn">
+                    <i class="fas fa-check-circle mr-1"></i> Validate
+                </button>
+            </div>
+        </div>
+    </div>
     <!-- ===================================================================
          NOTIFICATION CONTAINER
          =================================================================== -->
@@ -2016,7 +2086,6 @@ function calculateMasterStats() {
         unknown: v.filter(v => !v?.eti_prediction || v?.eti_prediction === 'unknown').length,
         
         validated: v.filter(v => v?.validation_count > 0).length, // NEW
-        
         lastCalculated: new Date()
     };
     
@@ -2396,6 +2465,69 @@ function renderVariantList() {
         `;
         return;
     }
+    
+    container.innerHTML = pageVariants.map(v => {
+        const isSelected = STATE.view.selectedVariant?.id === v.id;
+        const missingCount = countMissingFields(v);
+        
+        let displayName = escapeHTML(v.legacy_name || '');
+        
+        if (STATE.view.searchQuery) {
+            try {
+                const re = new RegExp(`(${escapeRegExp(STATE.view.searchQuery)})`, 'gi');
+                displayName = displayName.replace(re, '<span class="search-highlight">$1</span>');
+            } catch (e) {}
+        }
+        
+        // ✅ NEW: Validation badge
+        const validationBadge = v.validation_count > 0 ? 
+            `<span class="text-xs bg-[#0e7c7b] text-white px-2 py-0.5 rounded-full ml-2">
+                <i class="fas fa-check-circle mr-0.5"></i>${v.validation_count}
+            </span>` : '';
+        
+        const classBadge = v.cftr_class ? 
+            `<span class="badge badge-class-${v.cftr_class.toLowerCase()}">
+                <i class="fas fa-dna"></i>Class ${v.cftr_class}
+            </span>` : '';
+        
+        const etiIcon = v.eti_prediction === 'responsive' ? 
+            '<span class="text-[#0f766e] text-xs ml-2"><i class="fas fa-check-circle"></i> Responds</span>' :
+            v.eti_prediction === 'non_responsive' ? 
+            '<span class="text-[#b91c1c] text-xs ml-2"><i class="fas fa-times-circle"></i> Non-responsive</span>' : '';
+        
+        const subtypeBadge = v.class_subtype === 'exceptional' ? 
+            '<span class="text-xs font-bold text-[#b45309] ml-2"><i class="fas fa-bolt"></i> EXCEPTIONAL</span>' :
+            v.class_subtype === 'true' ? 
+            '<span class="text-xs font-bold text-[#b91c1c] ml-2"><i class="fas fa-exclamation"></i> TRUE CLASS I</span>' : '';
+        
+        return `
+            <div class="variant-item ${isSelected ? 'selected' : ''}" 
+                 onclick="selectVariant('${escapeHTML(v.legacy_name)}')">
+                <div class="flex justify-between items-start mb-2">
+                    <div class="flex-1">
+                        <div class="flex items-center flex-wrap gap-2">
+                            <h4 class="variant-name">${displayName}${validationBadge}</h4>
+                            ${etiIcon}${subtypeBadge}
+                        </div>
+                        ${v.protein_name ? 
+                            `<p class="variant-subtitle">${escapeHTML(v.protein_name)}</p>` : ''}
+                    </div>
+                    ${classBadge}
+                </div>
+                <div class="flex justify-between items-center mt-2">
+                    <span class="text-xs text-gray-600 truncate max-w-[180px]">
+                        ${escapeHTML(v.final_determination || '')}
+                    </span>
+                    ${missingCount ? 
+                        `<span class="missing-count">${missingCount}</span>` : ''}
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    safeSetText('variantCount', STATE.view.filteredVariants.length.toLocaleString());
+    safeSetText('variantCountHeader', STATE.view.filteredVariants.length.toLocaleString());
+}
     
     container.innerHTML = pageVariants.map(v => {
         const isSelected = STATE.view.selectedVariant?.id === v.id;
@@ -3212,6 +3344,7 @@ function renderVariantDetails(variant) {
             </div>
             
             <!-- CLINICAL VALIDATION CARD - ENHANCED VERSION -->
+                        <!-- CLINICAL VALIDATION CARD - ENHANCED VERSION -->
             <div class="card">
                 <div class="card-header">
                     <i class="fas fa-shield-alt text-[#0e7c7b]"></i>
@@ -3286,7 +3419,6 @@ function renderVariantDetails(variant) {
                     </div>
                 </div>
             </div>
-        </div>
         
         ${CONFIG.FEATURES.ENABLE_DELETE ? `
             <div class="mt-4 flex justify-end">
@@ -3688,20 +3820,25 @@ function preloadCharts() {
 // 📤 EXPORT SYSTEM - CSV REPORTS
 // ===================================================================
 
-function exportReport() {
-    const headers = ['Legacy Name', 'Protein', 'cDNA', 'Determination', 'CFTR Class', 
-                    'Subtype', 'Confidence', 'ETI Response', 'Evidence Level', 
-                    'Recommendation', 'Data Status', 'Source', 'Validation Count'];
+function exportFullReport() {
+    const headers = ['ID', 'Legacy Name', 'Protein', 'cDNA', 'Determination', 'CFTR Class',
+        'Subtype', 'Confidence', 'ETI Response', 'Evidence Level', 'Recommendation',
+        'Therapy Responsive', 'Data Status', 'Source', 'Population Frequency', 
+        'PubMed IDs', 'Date Updated', 'Validation Count', 'Last Validator', 'Last Validated']; // 👈 ADD THESE
     
     const rows = STATE.variants.map(v => [
-        v.legacy_name, v.protein_name, v.cdna_name, v.final_determination,
+        v.id, v.legacy_name, v.protein_name, v.cdna_name, v.final_determination,
         v.cftr_class, v.class_subtype, v.class_confidence, v.eti_prediction,
-        v.eti_evidence_level, v.eti_recommendation, v.data_status, v.source_summary,
-        v.validation_count || 0
+        v.eti_evidence_level, v.eti_recommendation,
+        v.therapy_responsive !== undefined ? (v.therapy_responsive ? 'Yes' : 'No') : '',
+        v.data_status, v.source_summary, v.population_frequency, v.pubmed_ids, v.date_updated,
+        v.validation_count || 0, // 👈 ADD THESE
+        v.last_validator_name || '',
+        v.last_validated_at || ''
     ]);
     
-    generateCSV(headers, rows, `helix-export-${getCurrentDate()}.csv`);
-    showNotification('✓ Export complete', 'success');
+    generateCSV(headers, rows, `helix-full-report-${getCurrentDate()}.csv`);
+    showNotification('✓ Full export complete', 'success');
 }
 
 function exportFullReport() {
