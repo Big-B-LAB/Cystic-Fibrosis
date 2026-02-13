@@ -3781,7 +3781,7 @@ function handleCSVFile(file) {
         try {
             showNotification(`📄 Parsing ${file.name}...`, 'info', 2000);
             
-            // Parse CSV with tab or comma delimiter
+            // Parse CSV with tab delimiter
             const content = e.target.result;
             const lines = content.trim().split('\n');
             const headers = lines[0].split('\t').map(h => h.trim());
@@ -3859,6 +3859,32 @@ function handleCSVFile(file) {
     
     reader.readAsText(file);
 }
+
+// ========== PROCESS BULK IMPORT ==========
+function processBulkImport() {
+    document.getElementById('csvFileInput')?.click();
+}
+
+// ========== DOWNLOAD TEMPLATE ==========
+function downloadTemplate() {
+    const template = 'variant_legacy_name\tvariant_protein_name\tvariant_cDNA_name\tvariant_final_determination\tcftr_class\teti_prediction\n' +
+                    'G542X\tp.Gly542X\tc.1624G>T\tCF-causing\tI\tresponsive\n' +
+                    'F508del\tp.Phe508del\tc.1521_1523delCTT\tCF-causing\tII\tresponsive\n' +
+                    'G551D\tp.Gly551Asp\tc.1652G>A\tCF-causing\tIII\tresponsive';
+    
+    const blob = new Blob([template], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'helix_import_template.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+    showNotification('✓ Template downloaded (TAB-separated)', 'success');
+}
+
+
+
+
 // ===================================================================
 // 🔧 UTILITIES - HELPERS, FORMATTERS, VALIDATORS
 // ===================================================================
@@ -4035,26 +4061,7 @@ function attachEventListeners() {
         }
     });
 }
-        // ========== PROCESS BULK IMPORT ==========
-function processBulkImport() {
-    document.getElementById('csvFileInput')?.click();
-}
-// ========== DOWNLOAD TEMPLATE ==========
-function downloadTemplate() {
-    const template = 'variant_legacy_name\tvariant_protein_name\tvariant_cDNA_name\tvariant_final_determination\tcftr_class\teti_prediction\n' +
-                    'G542X\tp.Gly542X\tc.1624G>T\tCF-causing\tI\tresponsive\n' +
-                    'F508del\tp.Phe508del\tc.1521_1523delCTT\tCF-causing\tII\tresponsive\n' +
-                    'G551D\tp.Gly551Asp\tc.1652G>A\tCF-causing\tIII\tresponsive';
-    
-    const blob = new Blob([template], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'helix_import_template.csv';
-    a.click();
-    URL.revokeObjectURL(url);
-    showNotification('✓ Template downloaded (TAB-separated)', 'success');
-}
+
 // ===================================================================
 // 🚀 EXPOSE GLOBAL FUNCTIONS - FOR HTML ONCLICK
 // ===================================================================
