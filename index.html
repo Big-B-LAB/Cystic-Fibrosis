@@ -4035,6 +4035,10 @@ function attachEventListeners() {
         }
     });
 }
+        // ========== PROCESS BULK IMPORT ==========
+function processBulkImport() {
+    document.getElementById('csvFileInput')?.click();
+}
 // ========== DOWNLOAD TEMPLATE ==========
 function downloadTemplate() {
     const template = 'variant_legacy_name\tvariant_protein_name\tvariant_cDNA_name\tvariant_final_determination\tcftr_class\teti_prediction\n' +
@@ -4077,6 +4081,7 @@ function exposeGlobals() {
         clearManualForm,
         downloadTemplate,
         processBulkImport,
+        processBulkImport, 
         
         // Dashboard
         showDashboard,
