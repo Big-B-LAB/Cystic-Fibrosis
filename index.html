@@ -1726,38 +1726,22 @@
     <!-- ===================================================================
          JAVASCRIPT — ULTIMATE HYBRID ENGINE
          =================================================================== -->
-    <script>
+  <script>
         // ===================================================================
         // Δ HELIX | CFTR CLINICAL INTELLIGENCE SYSTEM
         // ULTIMATE HYBRID EDITION — Best of All Worlds + Next-Gen Features
-        // Version: 7.0.0
+        // Version: 10.1.0-PRODUCTION with Validation System
         // ===================================================================
 
-      // ===================================================================
-// Δ HELIX | CFTR CLINICAL INTELLIGENCE SYSTEM
-// COMPLETE PRODUCTION BUILD v9.0 - ALL 2,094 VARIANTS VISIBLE
-// ===================================================================
-// ✅ LOADS FROM variants TABLE - 2,094 VARIANTS
-// ✅ ALL CLASSES VISIBLE - I, II, III, IV, V
-// ✅ DEFAULT VIEW 'all' - NO FILTERING
-// ✅ STATS FROM MASTER DATA - NEVER FILTERED
-// ✅ SEARCH - FINDS EVERYTHING
-// ✅ ANNOTATIONS - FULL CRUD
-// ✅ DASHBOARD - REAL CHARTS
-// ✅ EXPORT - COMPLETE CSV
-// ===================================================================
-
 // ===================================================================
 // Δ HELIX | CFTR CLINICAL INTELLIGENCE SYSTEM
-// ULTIMATE EDITION v10.0 - PRODUCTION READY
+// COMPLETE PRODUCTION BUILD v10.1 - WITH VALIDATION SYSTEM
 // ===================================================================
-// ✅ MASTER STATS NEVER OVERWRITTEN - Class II: 7, Class III: 12 ALWAYS VISIBLE
-// ✅ TRUE SEPARATION OF CONCERNS - Master data vs Filtered views
-// ✅ COMPREHENSIVE ERROR HANDLING - Graceful degradation
-// ✅ OPTIMIZED PERFORMANCE - Search index, debouncing, render caching
-// ✅ FULL CRUD OPERATIONS - Create, Read, Update, Delete
-// ✅ BULK IMPORT/EXPORT - CSV/JSON support
-// ✅ DASHBOARD CHARTS - Real-time analytics
+// ✅ VALIDATION SYSTEM - Name, Role (free text), Notes
+// ✅ DYNAMIC BADGES - Shows validation count automatically
+// ✅ ROLE SUGGESTIONS - Learns from existing entries
+// ✅ VALIDATION HISTORY - Click to expand, shows all validators
+// ✅ STATS - Total, unique validators, unique roles
 // ===================================================================
 
 // ========== CONFIGURATION - SINGLE SOURCE OF TRUTH ==========
@@ -1777,7 +1761,8 @@ const CONFIG = {
         ENABLE_BULK_IMPORT: true,
         ENABLE_DELETE: true,
         ENABLE_EXPORT: true,
-        ENABLE_DASHBOARD: true
+        ENABLE_DASHBOARD: true,
+        ENABLE_VALIDATION: true
     },
     CLASSES: {
         COLORS: {
@@ -1795,7 +1780,7 @@ const CONFIG = {
             V: 'Class V - Splicing'
         }
     },
-    VERSION: '10.0.0-PRODUCTION'
+    VERSION: '10.1.0-PRODUCTION'
 };
 
 // ========== STATE - IMMUTABLE MASTER + MUTABLE VIEW ==========
@@ -1809,7 +1794,7 @@ const STATE = {
     searchIndex: {
         termMap: null,              // term -> Set(variantIds)
         variantMap: null,           // id -> variant
-        stats: {                   // performance metrics
+        stats: {                    // performance metrics
             variantCount: 0,
             termCount: 0,
             buildTime: 0,
@@ -1831,8 +1816,13 @@ const STATE = {
         responsive: 0,
         nonResponsive: 0,
         unknown: 0,
+        validated: 0,    // NEW: Count of variants with at least one validation
         lastCalculated: null
     },
+    
+    // ---------- VALIDATION DATA ----------
+    existingRoles: [],               // For role suggestions
+    validationCache: new Map(),      // Cache validation histories
     
     // ---------- VIEW STATE - MUTABLE, BASED ON FILTERS/SEARCH ----------
     view: {
@@ -1842,21 +1832,21 @@ const STATE = {
         dataViewMode: 'all',        // all | complete | clinical | exceptional | responsive
         currentPage: 1,
         searchQuery: '',
-        renderVersion: 0,          // Increments on each render
+        renderVersion: 0,           // Increments on each render
         lastUpdate: null
     },
     
     // ---------- UI STATE ----------
     ui: {
-        charts: {},                // Chart.js instances
-        notificationQueue: [],     // Pending notifications
+        charts: {},                 // Chart.js instances
+        notificationQueue: [],      // Pending notifications
         isLoading: false,
-        validationCache: new Map(), // JSON validation cache
-        annotationContext: null,   // Current annotation modal context
-        deleteContext: null,      // Current delete modal context
-        validatedJson: null,      // Validated import JSON
-        searchTimeout: null,      // Debounced search timer
-        renderTimeout: null       // Debounced render timer
+        annotationContext: null,    // Current annotation modal context
+        deleteContext: null,        // Current delete modal context
+        validationContext: null,    // Current validation modal context
+        validatedJson: null,        // Validated import JSON
+        searchTimeout: null,        // Debounced search timer
+        renderTimeout: null         // Debounced render timer
     },
     
     // ---------- SYSTEM ----------
@@ -1943,8 +1933,11 @@ async function loadVariants() {
         // ---------- BUILD SEARCH INDEX (FULL-TEXT) ----------
         buildSearchIndex();
         
+        // ---------- LOAD EXISTING ROLES FOR VALIDATION ----------
+        await loadExistingRoles();
+        
         // ---------- CALCULATE MASTER STATISTICS ----------
-        calculateMasterStats();  // ✅ This now handles ALL master stats UI updates
+        calculateMasterStats();
         
         // ---------- INITIALIZE VIEW WITH ALL VARIANTS ----------
         STATE.view.filteredVariants = [...STATE.variants];
@@ -1953,9 +1946,8 @@ async function loadVariants() {
         STATE.view.currentPage = 1;
         
         // ---------- RENDER UI ----------
-        // ❌ REMOVED: renderMasterStatsUI() - Now inside calculateMasterStats()
-        renderViewUI();            // Shows filtered counts
-        renderVariantList();       // Shows first page
+        renderViewUI();
+        renderVariantList();
         
         // ---------- SYSTEM READY ----------
         STATE.system.initialized = true;
@@ -1980,7 +1972,6 @@ async function loadVariants() {
         console.error('❌ FATAL: Failed to load variants:', error);
         showNotification('❌ Database connection failed', 'error', 0);
         
-        // ---------- SHOW ERROR STATE ----------
         const container = document.getElementById('variantList');
         if (container) {
             container.innerHTML = `
@@ -2000,73 +1991,61 @@ async function loadVariants() {
         return false;
     }
 }
-// ===================================================================
 
-/**
- * Calculate master statistics from STATE.variants (complete dataset)
- * This is the ONLY place masterStats should be updated
- * Called after loadVariants() and after any CREATE/UPDATE/DELETE
- */
 // ===================================================================
 // 📊 MASTER STATISTICS - CALCULATED FROM MASTER DATA ONLY
-// NEVER FILTERED, NEVER OVERWRITTEN, SINGLE SOURCE OF TRUTH
 // ===================================================================
 
 function calculateMasterStats() {
     const v = STATE.variants;
     
-    // ---------- CALCULATE ALL MASTER STATS (UNCHANGED) ----------
     STATE.masterStats = {
-        // ---------- COUNTS BY DATA STATUS ----------
         total: v.length,
         complete: v.filter(v => v?.data_status === 'complete_clinical').length,
         clinical: v.filter(v => v?.data_status === 'complete_clinical' || v?.data_status === 'partial_clinical').length,
         
-        // ---------- COUNTS BY CFTR CLASS ----------
         classI: v.filter(v => v?.cftr_class === 'I').length,
-        classII: v.filter(v => v?.cftr_class === 'II').length,      // ⚠️ 7 - SACRED
-        classIII: v.filter(v => v?.cftr_class === 'III').length,    // ⚠️ 12 - SACRED
+        classII: v.filter(v => v?.cftr_class === 'II').length,
+        classIII: v.filter(v => v?.cftr_class === 'III').length,
         classIV: v.filter(v => v?.cftr_class === 'IV').length,
         classV: v.filter(v => v?.cftr_class === 'V').length,
         
-        // ---------- COUNTS BY CLINICAL SIGNIFICANCE ----------
         exceptional: v.filter(v => v?.class_subtype === 'exceptional').length,
         responsive: v.filter(v => v?.eti_prediction === 'responsive').length,
         nonResponsive: v.filter(v => v?.eti_prediction === 'non_responsive').length,
         unknown: v.filter(v => !v?.eti_prediction || v?.eti_prediction === 'unknown').length,
         
-        // ---------- METADATA ----------
+        validated: v.filter(v => v?.validation_count > 0).length, // NEW
+        
         lastCalculated: new Date()
     };
     
-    // ---------- LOG VERIFICATION (UNCHANGED) ----------
     console.log('📊 MASTER STATS CALCULATED:', {
         total: STATE.masterStats.total,
-        classII: STATE.masterStats.classII,    // Should be 7
-        classIII: STATE.masterStats.classIII,  // Should be 12
-        exceptional: STATE.masterStats.exceptional,
-        responsive: STATE.masterStats.responsive
+        classII: STATE.masterStats.classII,
+        classIII: STATE.masterStats.classIII,
+        validated: STATE.masterStats.validated
     });
     
-    // ---------- UPDATE UI DIRECTLY (ADD THIS BLOCK) ----------
+    updateMasterStatsUI();
+}
+
+function updateMasterStatsUI() {
     const s = STATE.masterStats;
     
-    // 1. MAIN STATS CARDS - TOP ROW
     safeSetText('statTotal', s.total.toLocaleString());
     safeSetText('statClassI', s.classI.toLocaleString());
-    safeSetText('statClassII', s.classII.toLocaleString());      // ✅ NOW SHOWS 7
-    safeSetText('statClassIII', s.classIII.toLocaleString());    // ✅ NOW SHOWS 12
+    safeSetText('statClassII', s.classII.toLocaleString());
+    safeSetText('statClassIII', s.classIII.toLocaleString());
     safeSetText('statClassIVV', (s.classIV + s.classV).toLocaleString());
     safeSetText('statExceptional', s.exceptional.toLocaleString());
     
-    // 2. PERCENTAGES
     if (s.total > 0) {
         safeSetText('classIPercentage', ((s.classI / s.total) * 100).toFixed(1) + '%');
         safeSetText('exceptionalPercentage', 
             s.classI > 0 ? ((s.exceptional / s.classI) * 100).toFixed(1) + '%' : '0%');
     }
     
-    // 3. VIEW TOGGLE BUTTON COUNTS
     safeSetText('allCount', s.total.toLocaleString());
     safeSetText('completeCount', s.complete.toLocaleString());
     safeSetText('clinicalCount', s.clinical.toLocaleString());
@@ -2075,18 +2054,13 @@ function calculateMasterStats() {
     safeSetText('completeCountBtn', s.complete.toLocaleString());
     safeSetText('clinicalCountBtn', s.clinical.toLocaleString());
     
-    // 4. DASHBOARD STATS
     safeSetText('dashboardExceptional', s.exceptional.toLocaleString());
     if (s.classI > 0) {
         safeSetText('exceptionalPercentile', ((s.exceptional / s.classI) * 100).toFixed(1) + '%');
     }
     
-    // 5. CONTEXT TEXT
-    safeSetText('statContext', 
-        `All variants • ${s.total.toLocaleString()} total variants`
-    );
+    safeSetText('statContext', `All variants • ${s.total.toLocaleString()} total variants`);
     
-    // 6. CURRENT MODE TEXT
     const viewNames = {
         all: 'All Variants',
         complete: 'Complete Clinical',
@@ -2095,24 +2069,13 @@ function calculateMasterStats() {
         responsive: 'ETI Responsive'
     };
     safeSetText('currentModeText', 
-        `${viewNames[STATE.view?.dataViewMode || 'all']} (${s.total.toLocaleString()} total)`
-    );
+        `${viewNames[STATE.view?.dataViewMode || 'all']} (${s.total.toLocaleString()} total)`);
 }
-
-/**
- * Render master statistics UI elements
- * These elements should NEVER be updated anywhere else
- * They ALWAYS show the complete dataset, regardless of filters
- */
 
 // ===================================================================
 // 🔍 SEARCH ENGINE - OPTIMIZED FULL-TEXT SEARCH
 // ===================================================================
 
-/**
- * Build inverted index for O(1) full-text search
- * Indexes: legacy_name, protein_name, cdna_name, alt_names, class, eti_prediction
- */
 function buildSearchIndex() {
     console.time('🔨 Search index build');
     
@@ -2122,17 +2085,14 @@ function buildSearchIndex() {
     STATE.variants.forEach(variant => {
         const terms = new Set();
         
-        // ---------- 1. LEGACY NAME VARIANTS ----------
         if (variant.legacy_name) {
             const name = variant.legacy_name;
             terms.add(name.toLowerCase());
             terms.add(name.toUpperCase());
             
-            // Extract numbers (e.g., "508" from "F508del")
             const numbers = name.match(/\d+/g);
             if (numbers) numbers.forEach(n => terms.add(n));
             
-            // Handle deletion variants (F508del, deltaF508, ΔF508)
             if (name.includes('del')) {
                 const base = name.replace('del', '');
                 const numOnly = base.replace(/[A-Za-z]/g, '');
@@ -2142,26 +2102,22 @@ function buildSearchIndex() {
                 terms.add(`Δ${numOnly}`);
             }
             
-            // Handle stop variants (G542X, G542*)
             if (name.includes('X')) {
                 const base = name.replace('X', '');
                 terms.add(`${base}*`);
                 terms.add(name.replace('X', 'Ter'));
             }
             
-            // Handle splice variants
             if (name.includes('+')) {
                 terms.add(name.split('+')[0]);
             }
         }
         
-        // ---------- 2. PROTEIN NAME VARIANTS ----------
         if (variant.protein_name) {
             const prot = variant.protein_name;
             terms.add(prot.toLowerCase());
             terms.add(prot.replace('p.', ''));
             
-            // Convert three-letter to one-letter (p.Phe508del -> F508del)
             const match = prot.match(/p\.([A-Z][a-z]{2})(\d+)([A-Za-z*X]+)/);
             if (match) {
                 const threeToOne = {
@@ -2177,7 +2133,6 @@ function buildSearchIndex() {
             }
         }
         
-        // ---------- 3. cDNA NAME VARIANTS ----------
         if (variant.cdna_name) {
             const cdna = variant.cdna_name;
             terms.add(cdna.toLowerCase());
@@ -2187,21 +2142,18 @@ function buildSearchIndex() {
             if (numbers) numbers.forEach(n => terms.add(n));
         }
         
-        // ---------- 4. ALTERNATIVE NAMES ----------
         if (variant.alt_names) {
             variant.alt_names.split(/[,;/\s]+/).forEach(alt => {
                 if (alt?.trim()) terms.add(alt.trim().toLowerCase());
             });
         }
         
-        // ---------- 5. CFTR CLASS ----------
         if (variant.cftr_class) {
             terms.add(`class${variant.cftr_class}`);
             terms.add(`class ${variant.cftr_class}`);
             terms.add(variant.cftr_class);
         }
         
-        // ---------- 6. ETI PREDICTION ----------
         if (variant.eti_prediction) {
             terms.add(variant.eti_prediction);
             if (variant.eti_prediction === 'responsive') {
@@ -2215,7 +2167,6 @@ function buildSearchIndex() {
             }
         }
         
-        // ---------- 7. SPECIAL SUBTYPES ----------
         if (variant.class_subtype === 'exceptional') {
             terms.add('exceptional');
             terms.add('exceptional responder');
@@ -2226,7 +2177,6 @@ function buildSearchIndex() {
             terms.add('nonsense');
         }
         
-        // ---------- BUILD INVERTED INDEX ----------
         terms.forEach(term => {
             const key = String(term).toLowerCase().trim();
             if (key && key.length >= CONFIG.UI.MIN_SEARCH_CHARS) {
@@ -2253,11 +2203,6 @@ function buildSearchIndex() {
     console.log(`📊 Index: ${STATE.searchIndex.stats.termCount} terms, ${STATE.searchIndex.stats.variantCount} variants`);
 }
 
-/**
- * Execute search against inverted index
- * @param {string} query - Search query
- * @returns {Array} Ranked search results
- */
 function searchVariants(query) {
     if (!query || query.length < CONFIG.UI.MIN_SEARCH_CHARS || !STATE.searchIndex.termMap) {
         return STATE.variants;
@@ -2267,7 +2212,6 @@ function searchVariants(query) {
     const matchedIds = new Set();
     const scores = new Map();
     
-    // Generate search variations
     const variations = [
         q,
         q.replace(/^p\./, ''),
@@ -2276,20 +2220,17 @@ function searchVariants(query) {
         ...(q.match(/\d+/g) || [])
     ].filter((v, i, a) => v && v.length >= 2 && a.indexOf(v) === i);
     
-    // Score matches
     variations.forEach(term => {
         if (STATE.searchIndex.termMap.has(term)) {
             const ids = STATE.searchIndex.termMap.get(term);
             ids.forEach(id => {
                 matchedIds.add(id);
-                // Higher score for exact matches, lower for number-only
                 const score = term === q ? 100 : /^\d+$/.test(term) ? 50 : 10;
                 scores.set(id, (scores.get(id) || 0) + score);
             });
         }
     });
     
-    // Return ranked results
     return Array.from(matchedIds)
         .map(id => ({ 
             variant: STATE.searchIndex.variantMap.get(id), 
@@ -2303,20 +2244,13 @@ function searchVariants(query) {
 // 🔄 VIEW MANAGEMENT - FILTER, SORT, PAGINATE
 // ===================================================================
 
-/**
- * Apply all active filters and search to create filteredVariants list
- * This is the ONLY place view.filteredVariants should be updated
- */
 function applyFilterChain() {
-    // Start with ALL variants
     let filtered = [...STATE.variants];
     
-    // ---------- 1. APPLY SEARCH FILTER ----------
     if (STATE.view.searchQuery && STATE.view.searchQuery.length >= CONFIG.UI.MIN_SEARCH_CHARS) {
         filtered = searchVariants(STATE.view.searchQuery);
     }
     
-    // ---------- 2. APPLY DATA VIEW MODE FILTER ----------
     switch (STATE.view.dataViewMode) {
         case 'complete':
             filtered = filtered.filter(v => v?.data_status === 'complete_clinical');
@@ -2332,42 +2266,32 @@ function applyFilterChain() {
         case 'responsive':
             filtered = filtered.filter(v => v?.eti_prediction === 'responsive');
             break;
-        // case 'all' - no filter
     }
     
-    // ---------- 3. APPLY MISSING DATA FILTER ----------
     if (STATE.view.activeFilter === 'missing') {
         filtered = filtered.filter(v => hasMissingData(v));
     }
     
-    // ---------- UPDATE VIEW STATE ----------
     STATE.view.filteredVariants = filtered;
     STATE.view.currentPage = 1;
     STATE.view.renderVersion++;
     
-    // ---------- RENDER UPDATED VIEW ----------
     renderVariantList();
     updatePagination();
-    renderViewUI();  // Updates view-specific UI only
+    renderViewUI();
 }
 
-/**
- * Set data view mode (all/complete/clinical/exceptional/responsive)
- * @param {string} mode - View mode
- */
 function setDataView(mode) {
     if (STATE.view.dataViewMode === mode) return;
     
     STATE.view.dataViewMode = mode;
     STATE.view.currentPage = 1;
     
-    // Update toggle button active states
     ['all', 'complete', 'clinical', 'exceptional', 'responsive'].forEach(m => {
         const btn = document.getElementById(`${m}ViewBtn`);
         if (btn) btn.classList.toggle('active', m === mode);
     });
     
-    // Update view badge
     const viewNames = {
         all: 'All Variants',
         complete: 'Complete Clinical',
@@ -2377,19 +2301,13 @@ function setDataView(mode) {
     };
     safeSetText('currentModeText', `${viewNames[mode]} (${STATE.masterStats.total.toLocaleString()} total)`);
     
-    // Reapply filters
     applyFilterChain();
 }
 
-/**
- * Set active filter (all/missing)
- * @param {string} filter - Filter type
- */
 function filterVariants(filter) {
     STATE.view.activeFilter = filter;
     STATE.view.currentPage = 1;
     
-    // Update filter button styles
     const allBtn = document.getElementById('filterAll');
     const missingBtn = document.getElementById('filterMissing');
     
@@ -2420,22 +2338,15 @@ function filterVariants(filter) {
     applyFilterChain();
 }
 
-/**
- * Select a variant by legacy name
- * @param {string} name - Legacy name of variant
- */
 function selectVariant(name) {
     const variant = STATE.variantsByLegacyName.get(name);
     if (variant) {
         STATE.view.selectedVariant = variant;
         renderVariantDetails(variant);
-        renderVariantList(); // Refresh selection highlighting
+        renderVariantList();
     }
 }
 
-/**
- * Clear current search query
- */
 function clearSearch() {
     STATE.view.searchQuery = '';
     const input = document.getElementById('searchInput');
@@ -2446,10 +2357,6 @@ function clearSearch() {
     applyFilterChain();
 }
 
-/**
- * Quick search for common variants
- * @param {string} name - Variant name to search for
- */
 function quickSearch(name) {
     const input = document.getElementById('searchInput');
     if (input) {
@@ -2464,9 +2371,6 @@ function quickSearch(name) {
 // 🖨️ RENDERERS - UI UPDATE FUNCTIONS
 // ===================================================================
 
-/**
- * Render variant list with current page and filters
- */
 function renderVariantList() {
     const container = document.getElementById('variantList');
     if (!container) return;
@@ -2475,7 +2379,6 @@ function renderVariantList() {
     const end = start + CONFIG.UI.ITEMS_PER_PAGE;
     const pageVariants = STATE.view.filteredVariants.slice(start, end);
     
-    // ---------- EMPTY STATE ----------
     if (pageVariants.length === 0) {
         container.innerHTML = `
             <div class="p-10 text-center">
@@ -2494,14 +2397,12 @@ function renderVariantList() {
         return;
     }
     
-    // ---------- RENDER VARIANT ITEMS ----------
     container.innerHTML = pageVariants.map(v => {
         const isSelected = STATE.view.selectedVariant?.id === v.id;
         const missingCount = countMissingFields(v);
         
         let displayName = escapeHTML(v.legacy_name || '');
         
-        // Highlight search matches
         if (STATE.view.searchQuery) {
             try {
                 const re = new RegExp(`(${escapeRegExp(STATE.view.searchQuery)})`, 'gi');
@@ -2524,13 +2425,18 @@ function renderVariantList() {
             v.class_subtype === 'true' ? 
             '<span class="text-xs font-bold text-[#b91c1c] ml-2"><i class="fas fa-exclamation"></i> TRUE CLASS I</span>' : '';
         
+        const validationBadge = v.validation_count > 0 ? 
+            `<span class="text-xs bg-[#0e7c7b] text-white px-2 py-0.5 rounded-full ml-2">
+                <i class="fas fa-check-circle mr-0.5"></i>${v.validation_count}
+            </span>` : '';
+        
         return `
             <div class="variant-item ${isSelected ? 'selected' : ''}" 
                  onclick="selectVariant('${escapeHTML(v.legacy_name)}')">
                 <div class="flex justify-between items-start mb-2">
                     <div class="flex-1">
                         <div class="flex items-center flex-wrap gap-2">
-                            <h4 class="variant-name">${displayName}</h4>
+                            <h4 class="variant-name">${displayName}${validationBadge}</h4>
                             ${etiIcon}${subtypeBadge}
                         </div>
                         ${v.protein_name ? 
@@ -2549,25 +2455,18 @@ function renderVariantList() {
         `;
     }).join('');
     
-    // Update view counters
     safeSetText('variantCount', STATE.view.filteredVariants.length.toLocaleString());
     safeSetText('variantCountHeader', STATE.view.filteredVariants.length.toLocaleString());
 }
 
-/**
- * Render view-specific UI elements
- * These show FILTERED counts, not master stats
- */
 function renderViewUI() {
     const f = STATE.view.filteredVariants;
     const s = STATE.masterStats;
     
-    // ---------- FILTERED COUNTS (VIEW-SPECIFIC) ----------
     safeSetText('variantCount', f.length.toLocaleString());
     safeSetText('variantCountHeader', f.length.toLocaleString());
     safeSetText('viewTotal', f.length.toLocaleString());
     
-    // ---------- VIEW BADGE ----------
     const viewNames = { 
         all: 'All', 
         complete: 'Complete', 
@@ -2589,7 +2488,6 @@ function renderViewUI() {
         badge.className = `px-3 py-1.5 rounded-full text-xs font-bold text-white shadow-sm ${viewColors[STATE.view.dataViewMode] || 'bg-gray-600'}`;
     }
     
-    // ---------- CONTEXT TEXT ----------
     const ctxMessages = {
         all: 'All variants',
         complete: 'Complete clinical only',
@@ -2599,13 +2497,9 @@ function renderViewUI() {
     };
     
     safeSetText('statContext', 
-        `${ctxMessages[STATE.view.dataViewMode] || 'All variants'} • Showing ${f.length.toLocaleString()} of ${s.total.toLocaleString()} total`
-    );
+        `${ctxMessages[STATE.view.dataViewMode] || 'All variants'} • Showing ${f.length.toLocaleString()} of ${s.total.toLocaleString()} total`);
 }
 
-/**
- * Update pagination controls
- */
 function updatePagination() {
     const totalPages = Math.ceil(STATE.view.filteredVariants.length / CONFIG.UI.ITEMS_PER_PAGE);
     const controls = document.getElementById('paginationControls');
@@ -2651,13 +2545,470 @@ function nextPage() {
 }
 
 // ===================================================================
-// 🔬 VARIANT DETAILS - COMPREHENSIVE DISPLAY
+// ✅ VALIDATION SYSTEM - ENHANCED WITH DYNAMIC ROLES
 // ===================================================================
 
 /**
- * Render complete variant details panel
- * @param {Object} variant - Variant object to display
+ * Load existing roles for suggestions
  */
+async function loadExistingRoles() {
+    try {
+        // Try to load from validator_roles table if it exists
+        const response = await fetch(
+            `${CONFIG.SUPABASE.URL}/rest/v1/validator_roles?order=usage_count.desc&limit=20`,
+            {
+                headers: {
+                    'apikey': CONFIG.SUPABASE.KEY,
+                    'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`
+                }
+            }
+        );
+        
+        if (response.ok) {
+            const roles = await response.json();
+            STATE.existingRoles = roles;
+            
+            // Update datalist
+            const datalist = document.getElementById('existingRoles');
+            if (datalist && roles.length > 0) {
+                datalist.innerHTML = roles.map(r => 
+                    `<option value="${escapeHTML(r.role_name)}">${escapeHTML(r.role_name)} (${r.usage_count})</option>`
+                ).join('');
+            }
+        } else {
+            // Fallback: load from validation_history directly
+            const historyResponse = await fetch(
+                `${CONFIG.SUPABASE.URL}/rest/v1/validation_history?select=clinician_role&order=created_at.desc`,
+                {
+                    headers: {
+                        'apikey': CONFIG.SUPABASE.KEY,
+                        'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`
+                    }
+                }
+            );
+            
+            if (historyResponse.ok) {
+                const history = await historyResponse.json();
+                const roleCounts = new Map();
+                history.forEach(h => {
+                    if (h.clinician_role) {
+                        roleCounts.set(h.clinician_role, (roleCounts.get(h.clinician_role) || 0) + 1);
+                    }
+                });
+                
+                STATE.existingRoles = Array.from(roleCounts.entries())
+                    .map(([role, count]) => ({ role_name: role, usage_count: count }))
+                    .sort((a, b) => b.usage_count - a.usage_count)
+                    .slice(0, 20);
+                
+                const datalist = document.getElementById('existingRoles');
+                if (datalist) {
+                    datalist.innerHTML = STATE.existingRoles.map(r => 
+                        `<option value="${escapeHTML(r.role_name)}">${escapeHTML(r.role_name)} (${r.usage_count})</option>`
+                    ).join('');
+                }
+            }
+        }
+    } catch (error) {
+        console.error('❌ Failed to load roles:', error);
+        // Non-critical error, continue
+    }
+}
+
+/**
+ * Show validation modal
+ */
+function showValidationModal(variantName, variantId) {
+    STATE.ui.validationContext = { variantName, variantId };
+    document.getElementById('validateVariantName').textContent = variantName;
+    document.getElementById('clinicianName').value = '';
+    document.getElementById('clinicianRoleInput').value = '';
+    document.getElementById('validationNotes').value = '';
+    document.getElementById('validationMessage').innerHTML = '';
+    document.getElementById('roleSuggestions').classList.add('hidden');
+    document.getElementById('validationModal').classList.remove('hidden');
+}
+
+function closeValidationModal() {
+    document.getElementById('validationModal').classList.add('hidden');
+    document.getElementById('roleSuggestions').classList.add('hidden');
+    STATE.ui.validationContext = null;
+}
+
+/**
+ * Show existing roles in a popup
+ */
+function showExistingRoles() {
+    const suggestionsDiv = document.getElementById('roleSuggestions');
+    if (!suggestionsDiv) return;
+    
+    if (STATE.existingRoles && STATE.existingRoles.length > 0) {
+        suggestionsDiv.innerHTML = `
+            <div class="bg-white border rounded-xl p-3 shadow-lg absolute z-50 max-h-60 overflow-y-auto" style="width: 300px; margin-top: 5px;">
+                <p class="text-xs font-bold text-gray-500 mb-2 flex justify-between">
+                    <span>Popular Roles</span>
+                    <span class="text-gray-400">count</span>
+                </p>
+                ${STATE.existingRoles.map(role => `
+                    <div onclick="selectRole('${escapeHTML(role.role_name)}')" 
+                         class="flex justify-between items-center p-2 hover:bg-gray-50 cursor-pointer rounded">
+                        <span class="text-sm">${escapeHTML(role.role_name)}</span>
+                        <span class="text-xs bg-gray-200 px-2 py-0.5 rounded-full">${role.usage_count}</span>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+        suggestionsDiv.classList.remove('hidden');
+    } else {
+        loadExistingRoles().then(() => {
+            if (STATE.existingRoles.length > 0) {
+                showExistingRoles();
+            }
+        });
+    }
+}
+
+function selectRole(role) {
+    document.getElementById('clinicianRoleInput').value = role;
+    document.getElementById('roleSuggestions').classList.add('hidden');
+}
+
+// Close role suggestions when clicking outside
+document.addEventListener('click', function(e) {
+    const suggestions = document.getElementById('roleSuggestions');
+    const roleBtn = document.querySelector('[onclick="showExistingRoles()"]');
+    if (suggestions && !suggestions.contains(e.target) && roleBtn && !roleBtn.contains(e.target)) {
+        suggestions.classList.add('hidden');
+    }
+});
+
+/**
+ * Update variant validation stats
+ */
+async function updateVariantValidationStats(variantId) {
+    try {
+        const response = await fetch(
+            `${CONFIG.SUPABASE.URL}/rest/v1/validation_history?` +
+            `variant_id=eq.${variantId}&select=clinician_name,clinician_role,created_at&order=created_at.desc`,
+            {
+                headers: {
+                    'apikey': CONFIG.SUPABASE.KEY,
+                    'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`
+                }
+            }
+        );
+        
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        
+        const validations = await response.json();
+        
+        if (validations.length === 0) return;
+        
+        const total = validations.length;
+        const uniqueValidators = new Set(validations.map(v => v.clinician_name)).size;
+        const uniqueRoles = new Set(validations.map(v => v.clinician_role)).size;
+        const latest = validations[0];
+        
+        // Update variant in database (if validation_count column exists)
+        try {
+            await fetch(
+                `${CONFIG.SUPABASE.URL}/rest/v1/variants?id=eq.${variantId}`,
+                {
+                    method: 'PATCH',
+                    headers: {
+                        'apikey': CONFIG.SUPABASE.KEY,
+                        'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        validation_count: total,
+                        last_validated_at: latest.created_at,
+                        last_validator_name: latest.clinician_name,
+                        last_validator_role: latest.clinician_role
+                    })
+                }
+            ).catch(() => {
+                // Columns might not exist yet - that's ok
+                console.log('Validation columns not yet added to variants table');
+            });
+        } catch (e) {
+            // Silently fail - database schema update pending
+        }
+        
+        // Update local state
+        const variant = STATE.variants.find(v => v.id === variantId);
+        if (variant) {
+            variant.validation_count = total;
+            variant.last_validated_at = latest.created_at;
+            variant.last_validator_name = latest.clinician_name;
+            variant.last_validator_role = latest.clinician_role;
+        }
+        
+        // Update UI stats if elements exist
+        const uniqueSpan = document.getElementById(`uniqueValidators-${variantId}`);
+        const roleSpan = document.getElementById(`roleCount-${variantId}`);
+        
+        if (uniqueSpan) uniqueSpan.textContent = uniqueValidators;
+        if (roleSpan) roleSpan.textContent = uniqueRoles;
+        
+        return validations;
+        
+    } catch (error) {
+        console.error('❌ Failed to update validation stats:', error);
+        return [];
+    }
+}
+
+/**
+ * Submit validation to database
+ */
+async function submitValidation() {
+    if (!STATE.ui.validationContext) return;
+    
+    const name = document.getElementById('clinicianName').value.trim();
+    const role = document.getElementById('clinicianRoleInput').value.trim();
+    const notes = document.getElementById('validationNotes').value.trim();
+    const messageDiv = document.getElementById('validationMessage');
+    const btn = document.getElementById('submitValidationBtn');
+    
+    if (!name) {
+        messageDiv.innerHTML = '<span class="text-[#b91c1c]">❌ Please enter your name</span>';
+        return;
+    }
+    if (!role) {
+        messageDiv.innerHTML = '<span class="text-[#b91c1c]">❌ Please enter your role</span>';
+        return;
+    }
+    
+    const { variantId, variantName } = STATE.ui.validationContext;
+    
+    try {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+        messageDiv.innerHTML = '<span class="text-[#0e7c7b]">⏳ Submitting validation...</span>';
+        
+        // Save to Supabase
+        const response = await fetch(`${CONFIG.SUPABASE.URL}/rest/v1/validation_history`, {
+            method: 'POST',
+            headers: {
+                'apikey': CONFIG.SUPABASE.KEY,
+                'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`,
+                'Content-Type': 'application/json',
+                'Prefer': 'return=representation'
+            },
+            body: JSON.stringify({
+                variant_id: variantId,
+                clinician_name: name,
+                clinician_role: role,
+                action: 'VALIDATED',
+                notes: notes || null,
+                created_at: new Date().toISOString()
+            })
+        });
+        
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        
+        const savedValidation = await response.json();
+        
+        // Try to update validator_roles if table exists
+        try {
+            await fetch(`${CONFIG.SUPABASE.URL}/rest/v1/validator_roles`, {
+                method: 'POST',
+                headers: {
+                    'apikey': CONFIG.SUPABASE.KEY,
+                    'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`,
+                    'Content-Type': 'application/json',
+                    'Prefer': 'resolution=merge-duplicates'
+                },
+                body: JSON.stringify({
+                    role_name: role,
+                    last_used_at: new Date().toISOString()
+                })
+            }).catch(() => {
+                // Table might not exist, update local cache instead
+                const existingRole = STATE.existingRoles.find(r => r.role_name === role);
+                if (existingRole) {
+                    existingRole.usage_count = (existingRole.usage_count || 0) + 1;
+                } else {
+                    STATE.existingRoles.push({ role_name: role, usage_count: 1 });
+                }
+            });
+        } catch (e) {
+            // Non-critical, continue
+        }
+        
+        // Refresh validation stats
+        const validations = await updateVariantValidationStats(variantId);
+        
+        // Refresh validation history display if it's visible
+        const historyDiv = document.getElementById(`validationHistory-${variantId}`);
+        if (historyDiv && !historyDiv.classList.contains('hidden')) {
+            await loadValidationHistory(variantId);
+        }
+        
+        // Update count badge
+        const countSpan = document.getElementById(`validationCount-${variantId}`);
+        if (countSpan && validations) {
+            countSpan.textContent = validations.length;
+        }
+        
+        messageDiv.innerHTML = '<span class="text-[#0e7b4e]">✅ Validation saved successfully!</span>';
+        showNotification(`✓ ${name} (${role}) validated ${variantName}`, 'success');
+        
+        // Refresh the variant details if this is the selected variant
+        if (STATE.view.selectedVariant?.id === variantId) {
+            STATE.view.selectedVariant.validation_count = (STATE.view.selectedVariant.validation_count || 0) + 1;
+            STATE.view.selectedVariant.last_validator_name = name;
+            STATE.view.selectedVariant.last_validator_role = role;
+            STATE.view.selectedVariant.last_validated_at = new Date().toISOString();
+            
+            renderVariantDetails(STATE.view.selectedVariant);
+        }
+        
+        // Refresh master stats
+        calculateMasterStats();
+        
+        setTimeout(() => {
+            closeValidationModal();
+        }, 1500);
+        
+    } catch (error) {
+        console.error('❌ Validation failed:', error);
+        messageDiv.innerHTML = `<span class="text-[#b91c1c]">❌ Error: ${error.message}</span>`;
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-check-circle mr-1"></i> Validate';
+    }
+}
+
+/**
+ * Toggle validation history visibility
+ */
+function toggleValidationHistory(variantId) {
+    const historyDiv = document.getElementById(`validationHistory-${variantId}`);
+    const toggleBtn = document.getElementById(`historyToggle-${variantId}`);
+    
+    if (!historyDiv) return;
+    
+    if (historyDiv.classList.contains('hidden')) {
+        historyDiv.classList.remove('hidden');
+        if (toggleBtn) {
+            toggleBtn.innerHTML = '<i class="fas fa-history"></i> History <i class="fas fa-chevron-up text-xs ml-1"></i>';
+        }
+        
+        const loadingDiv = document.getElementById(`validationLoading-${variantId}`);
+        if (loadingDiv && loadingDiv.style.display !== 'none') {
+            loadValidationHistory(variantId);
+        }
+    } else {
+        historyDiv.classList.add('hidden');
+        if (toggleBtn) {
+            const count = document.getElementById(`validationCount-${variantId}`)?.textContent || '0';
+            toggleBtn.innerHTML = `<i class="fas fa-history"></i> History <span class="text-xs bg-gray-300 px-1.5 rounded-full">${count}</span>`;
+        }
+    }
+}
+
+/**
+ * Load validation history for a variant
+ */
+async function loadValidationHistory(variantId) {
+    const historyDiv = document.getElementById(`validationHistory-${variantId}`);
+    const loadingDiv = document.getElementById(`validationLoading-${variantId}`);
+    const countSpan = document.getElementById(`validationCount-${variantId}`);
+    
+    if (!historyDiv) return;
+    
+    try {
+        if (loadingDiv) loadingDiv.style.display = 'block';
+        
+        const response = await fetch(
+            `${CONFIG.SUPABASE.URL}/rest/v1/validation_history?` +
+            `variant_id=eq.${variantId}&order=created_at.desc`,
+            {
+                headers: {
+                    'apikey': CONFIG.SUPABASE.KEY,
+                    'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`
+                }
+            }
+        );
+        
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        
+        const validations = await response.json();
+        
+        if (loadingDiv) loadingDiv.style.display = 'none';
+        
+        if (countSpan) {
+            countSpan.textContent = validations.length;
+        }
+        
+        // Update stats in UI
+        const uniqueValidators = new Set(validations.map(v => v.clinician_name)).size;
+        const uniqueRoles = new Set(validations.map(v => v.clinician_role)).size;
+        
+        const uniqueSpan = document.getElementById(`uniqueValidators-${variantId}`);
+        const roleSpan = document.getElementById(`roleCount-${variantId}`);
+        
+        if (uniqueSpan) uniqueSpan.textContent = uniqueValidators;
+        if (roleSpan) roleSpan.textContent = uniqueRoles;
+        
+        if (validations.length === 0) {
+            historyDiv.innerHTML = `
+                <div class="text-center text-gray-500 py-4 text-sm">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    No validations yet. Be the first to validate!
+                </div>
+            `;
+            return;
+        }
+        
+        historyDiv.innerHTML = validations.map((v, index) => `
+            <div class="mb-3 p-3 bg-gray-50 rounded-lg border-l-4 border-[#0e7c7b] ${index === 0 ? 'bg-[#f0fdfa]' : ''}">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <span class="font-bold text-gray-900">${escapeHTML(v.clinician_name)}</span>
+                        <span class="text-xs bg-[#0e7c7b]/10 text-[#0e7c7b] px-2 py-0.5 rounded-full ml-2">
+                            ${escapeHTML(v.clinician_role)}
+                        </span>
+                    </div>
+                    <span class="text-xs text-gray-500">
+                        ${formatDate(v.created_at)}
+                    </span>
+                </div>
+                ${v.notes ? `
+                    <p class="text-sm text-gray-600 mt-2 italic bg-white p-2 rounded border border-gray-100">
+                        "${escapeHTML(v.notes)}"
+                    </p>
+                ` : ''}
+                <div class="flex items-center gap-2 mt-2">
+                    <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
+                        <i class="fas fa-check-circle mr-1"></i> Validated
+                    </span>
+                    ${index === 0 ? `
+                        <span class="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded">
+                            <i class="fas fa-clock mr-1"></i> Latest
+                        </span>
+                    ` : ''}
+                </div>
+            </div>
+        `).join('');
+        
+    } catch (error) {
+        console.error('❌ Failed to load validations:', error);
+        if (loadingDiv) loadingDiv.style.display = 'none';
+        historyDiv.innerHTML = `
+            <div class="text-center text-[#b91c1c] py-4 text-sm">
+                <i class="fas fa-exclamation-triangle mr-1"></i>
+                Failed to load validations
+            </div>
+        `;
+    }
+}
+
+// ===================================================================
+// 🔬 VARIANT DETAILS - COMPREHENSIVE DISPLAY
+// ===================================================================
+
 function renderVariantDetails(variant) {
     if (!variant) return;
     
@@ -2666,7 +3017,6 @@ function renderVariantDetails(variant) {
     const isExceptional = variant.class_subtype === 'exceptional';
     const isResponsive = variant.eti_prediction === 'responsive';
     
-    // Determine class color
     let classColor = '#374151';
     if (variant.cftr_class) {
         if (isExceptional) classColor = '#b45309';
@@ -2681,7 +3031,6 @@ function renderVariantDetails(variant) {
         <div class="card mb-6 overflow-visible">
             <div class="card-body" style="background: linear-gradient(145deg, #ffffff, #f9fafb);">
                 <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
-                    <!-- LEFT: Variant Identity -->
                     <div class="flex-1">
                         <div class="flex items-center gap-3 mb-4">
                             <div class="variant-pill">
@@ -2705,10 +3054,14 @@ function renderVariantDetails(variant) {
                                         <i class="fas fa-shield-alt"></i> Validated
                                     </span>` : ''
                                 }
+                                ${variant.validation_count > 0 ? 
+                                    `<span class="badge" style="background: #0e7c7b; color: white; border: none;">
+                                        <i class="fas fa-check-circle"></i> ✓ ${variant.validation_count}
+                                    </span>` : ''
+                                }
                             </div>
                         </div>
                         
-                        <!-- Badges Row -->
                         <div class="flex flex-wrap gap-2 mb-2">
                             ${variant.cftr_class ? `
                                 <span class="badge badge-class-${variant.cftr_class.toLowerCase()} text-sm py-1.5 px-3">
@@ -2743,7 +3096,6 @@ function renderVariantDetails(variant) {
                             ` : ''}
                         </div>
                         
-                        <!-- Metadata -->
                         <div class="flex flex-wrap items-center gap-x-4 gap-y-2 mt-3 text-xs text-gray-600">
                             ${variant.population_frequency ? 
                                 `<span><i class="fas fa-globe mr-1 text-gray-400"></i> AF: ${variant.population_frequency}</span>` : ''}
@@ -2754,7 +3106,6 @@ function renderVariantDetails(variant) {
                         </div>
                     </div>
                     
-                    <!-- RIGHT: Classification Card -->
                     <div class="bg-white rounded-2xl p-5 border border-gray-200 min-w-[200px] shadow-sm">
                         <p class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2 flex items-center gap-1">
                             <i class="fas fa-tag"></i> Classification
@@ -2789,14 +3140,12 @@ function renderVariantDetails(variant) {
             </div>
         </div>
         
-        <!-- Nomenclature Grid -->
         <div class="nomenclature-grid mb-6">
             ${createDataPoint('Legacy Name', variant.legacy_name, 'legacy_name', variant, true)}
             ${createDataPoint('Protein Notation', variant.protein_name, 'protein_name', variant)}
             ${createDataPoint('cDNA Notation', variant.cdna_name, 'cdna_name', variant)}
         </div>
         
-        <!-- Clinical Impact & Therapeutic Prediction -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             <div class="card">
                 <div class="card-header bg-gradient-to-r from-[#fef2f2] to-white border-b-2 border-[#b91c1c]/20">
@@ -2832,7 +3181,6 @@ function renderVariantDetails(variant) {
             </div>
         </div>
         
-        <!-- Evidence & Validation -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             <div class="card">
                 <div class="card-header">
@@ -2863,34 +3211,78 @@ function renderVariantDetails(variant) {
                 </div>
             </div>
             
+            <!-- CLINICAL VALIDATION CARD - ENHANCED VERSION -->
             <div class="card">
                 <div class="card-header">
                     <i class="fas fa-shield-alt text-[#0e7c7b]"></i>
                     <span>Clinical Validation</span>
+                    <div class="ml-auto flex items-center gap-2">
+                        ${variant.validation_count > 0 ? `
+                            <span class="bg-[#0e7c7b] text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                                <i class="fas fa-check-circle"></i> Validated (${variant.validation_count})
+                            </span>
+                        ` : `
+                            <span class="bg-gray-200 text-gray-600 px-3 py-1 rounded-full text-xs font-bold">
+                                Not Validated
+                            </span>
+                        `}
+                        <button onclick="showValidationModal('${variant.legacy_name}', ${variant.id})" 
+                                class="text-xs bg-[#0e7c7b] text-white px-3 py-1.5 rounded-lg hover:bg-[#0a5e5d] transition-all flex items-center gap-1">
+                            <i class="fas fa-check-circle"></i> Validate
+                        </button>
+                        <button onclick="toggleValidationHistory(${variant.id})" 
+                                id="historyToggle-${variant.id}"
+                                class="text-xs bg-gray-100 text-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-200 transition-all flex items-center gap-1">
+                            <i class="fas fa-history"></i> History 
+                            <span class="text-xs bg-gray-300 px-1.5 rounded-full" id="validationCount-${variant.id}">${variant.validation_count || 0}</span>
+                        </button>
+                    </div>
                 </div>
                 <div class="card-body">
-                    <div class="flex items-start gap-3">
-                        <div class="w-10 h-10 rounded-full bg-[#e9f0f9] flex items-center justify-center flex-shrink-0">
-                            <i class="fas fa-check-circle text-[#0a2e5a]"></i>
+                    <div class="flex items-start gap-3 mb-3">
+                        <div class="w-10 h-10 rounded-full ${variant.validation_count > 0 ? 'bg-[#0e7c7b]/20' : 'bg-[#e9f0f9]'} flex items-center justify-center flex-shrink-0">
+                            <i class="fas ${variant.validation_count > 0 ? 'fa-check-circle text-[#0e7c7b]' : 'fa-clock text-[#0a2e5a]'}"></i>
                         </div>
-                        <div>
-                            <p class="text-sm font-semibold text-gray-900">CFTR2 Status</p>
-                            <p class="text-xs text-gray-600 mt-1">
-                                ${variant.final_determination === 'CF-causing' ? 
-                                    'Well-established, multiple publications' : 
-                                  variant.final_determination === 'Probably responsive to ETI' ? 
-                                    'Emerging evidence, recent studies' : 
-                                    'Under review / Limited data'}
-                            </p>
+                        <div class="flex-1">
+                            <p class="text-sm font-semibold text-gray-900">Validation Status</p>
+                            ${variant.last_validator_name ? `
+                                <p class="text-xs text-gray-600 mt-1">
+                                    <span class="font-medium">Last validated by:</span> 
+                                    ${escapeHTML(variant.last_validator_name)} 
+                                    <span class="text-[#0e7c7b] bg-[#0e7c7b]/10 px-2 py-0.5 rounded-full text-[10px] ml-1">
+                                        ${escapeHTML(variant.last_validator_role || 'Unknown')}
+                                    </span>
+                                </p>
+                                <p class="text-xs text-gray-500 mt-0.5">
+                                    ${variant.last_validated_at ? formatDate(variant.last_validated_at) : ''}
+                                </p>
+                            ` : `
+                                <p class="text-xs text-gray-500 mt-1 italic">
+                                    No validations yet. Be the first to validate!
+                                </p>
+                            `}
                         </div>
                     </div>
-                    <div class="mt-4 flex gap-2">
-                        <span class="px-3 py-1.5 bg-gray-100 rounded-full text-xs font-medium text-gray-700">
-                            <i class="fas fa-user-md mr-1"></i> ACMG: ${variant.final_determination === 'CF-causing' ? 'Pathogenic' : 'VUS'}
-                        </span>
-                        <span class="px-3 py-1.5 bg-gray-100 rounded-full text-xs font-medium text-gray-700">
-                            <i class="fas fa-flask mr-1"></i> Functional: ${variant.cftr_class ? 'Confirmed' : 'Pending'}
-                        </span>
+                    
+                    <div class="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-gray-100">
+                        <div class="text-center">
+                            <span class="text-lg font-bold text-[#0e7c7b]">${variant.validation_count || 0}</span>
+                            <p class="text-[10px] text-gray-500">Total</p>
+                        </div>
+                        <div class="text-center">
+                            <span class="text-lg font-bold text-[#0e7c7b]" id="uniqueValidators-${variant.id}">—</span>
+                            <p class="text-[10px] text-gray-500">Unique</p>
+                        </div>
+                        <div class="text-center">
+                            <span class="text-lg font-bold text-[#0e7c7b]" id="roleCount-${variant.id}">—</span>
+                            <p class="text-[10px] text-gray-500">Roles</p>
+                        </div>
+                    </div>
+                    
+                    <div id="validationHistory-${variant.id}" class="mt-4 pt-4 border-t border-gray-200 hidden">
+                        <div class="text-center text-gray-500 py-4" id="validationLoading-${variant.id}">
+                            <i class="fas fa-spinner fa-spin mr-2"></i> Loading validation history...
+                        </div>
                     </div>
                 </div>
             </div>
@@ -2911,11 +3303,15 @@ function renderVariantDetails(variant) {
         container.innerHTML = detailsHTML;
     }
     document.getElementById('emptyState')?.classList.add('hidden');
+    
+    // Load validation stats and history
+    setTimeout(() => {
+        if (variant && variant.id) {
+            updateVariantValidationStats(variant.id);
+        }
+    }, 100);
 }
 
-/**
- * Create a data point card with annotation trigger
- */
 function createDataPoint(label, value, field, variant, isPrimary = false) {
     const isMissing = !value || value === 'null' || value === 'undefined' || value === '';
     const displayValue = isMissing ? 'Not specified' : escapeHTML(String(value));
@@ -2943,9 +3339,6 @@ function createDataPoint(label, value, field, variant, isPrimary = false) {
 // 📝 ANNOTATION SYSTEM - FULL CRUD
 // ===================================================================
 
-/**
- * Show annotation modal for a specific field
- */
 function showAnnotationModal(variantName, field, currentValue) {
     const variant = STATE.variantsByLegacyName.get(variantName);
     if (!variant) {
@@ -2978,7 +3371,6 @@ function showAnnotationModal(variantName, field, currentValue) {
     
     let inputHTML = '';
     
-    // Generate appropriate input based on field type
     if (field === 'cftr_class') {
         inputHTML = `<select id="annotationValue" class="form-control">
             <option value="">Select class</option>
@@ -3048,9 +3440,6 @@ function closeAnnotationModal() {
     STATE.ui.annotationContext = null;
 }
 
-/**
- * Save annotation to Supabase and update local state
- */
 async function saveAnnotation() {
     if (!STATE.ui.annotationContext) {
         showNotification('No annotation context', 'error');
@@ -3089,7 +3478,6 @@ async function saveAnnotation() {
         
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         
-        // Update local state
         STATE.variants = STATE.variants.map(v => 
             v.id === variant.id ? { ...v, [field]: val, updated_at: new Date().toISOString() } : v
         );
@@ -3098,11 +3486,9 @@ async function saveAnnotation() {
         STATE.variantsById.set(variant.id, updatedVariant);
         STATE.variantsByLegacyName.set(updatedVariant.legacy_name, updatedVariant);
         
-        // Rebuild indexes and recalc stats
         buildSearchIndex();
         calculateMasterStats();
         
-        // Update UI if this variant is selected
         if (STATE.view.selectedVariant?.id === variant.id) {
             STATE.view.selectedVariant = updatedVariant;
             renderVariantDetails(updatedVariant);
@@ -3111,7 +3497,6 @@ async function saveAnnotation() {
         closeAnnotationModal();
         showNotification(`✓ ${field.replace(/_/g, ' ')} updated successfully`, 'success');
         
-        // Refresh views
         renderVariantList();
         applyFilterChain();
         
@@ -3136,9 +3521,6 @@ function closeDeleteModal() {
     STATE.ui.deleteContext = null;
 }
 
-/**
- * Permanently delete a variant from database
- */
 async function confirmDeleteVariant() {
     if (!STATE.ui.deleteContext) return;
     
@@ -3162,17 +3544,14 @@ async function confirmDeleteVariant() {
         
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         
-        // Update local state
         STATE.variants = STATE.variants.filter(v => v.id !== variantId);
         STATE.view.filteredVariants = STATE.view.filteredVariants.filter(v => v.id !== variantId);
         STATE.variantsById.delete(variantId);
         STATE.variantsByLegacyName.delete(variantName);
         
-        // Rebuild indexes and recalc stats
         buildSearchIndex();
         calculateMasterStats();
         
-        // Clear selection if deleted variant was selected
         if (STATE.view.selectedVariant?.id === variantId) {
             STATE.view.selectedVariant = null;
             document.getElementById('variantDetails').innerHTML = document.getElementById('emptyState')?.outerHTML || '';
@@ -3181,7 +3560,6 @@ async function confirmDeleteVariant() {
         closeDeleteModal();
         showNotification(`✓ Deleted ${variantName} permanently`, 'success');
         
-        // Refresh views
         renderVariantList();
         updatePagination();
         renderViewUI();
@@ -3229,7 +3607,6 @@ function renderCharts() {
     
     const s = STATE.masterStats;
     
-    // Class Distribution Chart
     const classCtx = document.getElementById('classChart');
     if (classCtx) {
         if (STATE.ui.charts.classChart) STATE.ui.charts.classChart.destroy();
@@ -3255,7 +3632,6 @@ function renderCharts() {
         });
     }
     
-    // ETI Response Chart
     const respCtx = document.getElementById('responseChart');
     if (respCtx) {
         if (STATE.ui.charts.responseChart) STATE.ui.charts.responseChart.destroy();
@@ -3278,7 +3654,6 @@ function renderCharts() {
         });
     }
     
-    // Data Completion Chart
     const compCtx = document.getElementById('completionChart');
     if (compCtx) {
         if (STATE.ui.charts.completionChart) STATE.ui.charts.completionChart.destroy();
@@ -3316,12 +3691,13 @@ function preloadCharts() {
 function exportReport() {
     const headers = ['Legacy Name', 'Protein', 'cDNA', 'Determination', 'CFTR Class', 
                     'Subtype', 'Confidence', 'ETI Response', 'Evidence Level', 
-                    'Recommendation', 'Data Status', 'Source'];
+                    'Recommendation', 'Data Status', 'Source', 'Validation Count'];
     
     const rows = STATE.variants.map(v => [
         v.legacy_name, v.protein_name, v.cdna_name, v.final_determination,
         v.cftr_class, v.class_subtype, v.class_confidence, v.eti_prediction,
-        v.eti_evidence_level, v.eti_recommendation, v.data_status, v.source_summary
+        v.eti_evidence_level, v.eti_recommendation, v.data_status, v.source_summary,
+        v.validation_count || 0
     ]);
     
     generateCSV(headers, rows, `helix-export-${getCurrentDate()}.csv`);
@@ -3332,14 +3708,17 @@ function exportFullReport() {
     const headers = ['ID', 'Legacy Name', 'Protein', 'cDNA', 'Determination', 'CFTR Class',
         'Subtype', 'Confidence', 'ETI Response', 'Evidence Level', 'Recommendation',
         'Therapy Responsive', 'Data Status', 'Source', 'Population Frequency', 
-        'PubMed IDs', 'Date Updated'];
+        'PubMed IDs', 'Date Updated', 'Validation Count', 'Last Validator', 'Last Validated'];
     
     const rows = STATE.variants.map(v => [
         v.id, v.legacy_name, v.protein_name, v.cdna_name, v.final_determination,
         v.cftr_class, v.class_subtype, v.class_confidence, v.eti_prediction,
         v.eti_evidence_level, v.eti_recommendation,
         v.therapy_responsive !== undefined ? (v.therapy_responsive ? 'Yes' : 'No') : '',
-        v.data_status, v.source_summary, v.population_frequency, v.pubmed_ids, v.date_updated
+        v.data_status, v.source_summary, v.population_frequency, v.pubmed_ids, v.date_updated,
+        v.validation_count || 0,
+        v.last_validator_name || '',
+        v.last_validated_at || ''
     ]);
     
     generateCSV(headers, rows, `helix-full-report-${getCurrentDate()}.csv`);
@@ -3403,6 +3782,7 @@ function clearManualForm() {
         if (el) el.value = '';
     });
 }
+
 function validateImport() {
     const input = document.getElementById('jsonInput');
     const results = document.getElementById('importResults');
@@ -3413,10 +3793,8 @@ function validateImport() {
     try {
         const parsed = JSON.parse(input.value.trim());
         
-        // Handle BOTH single object AND array
         const dataArray = Array.isArray(parsed) ? parsed : [parsed];
         
-        // Check each item for required fields
         const errors = [];
         const validItems = [];
         
@@ -3438,7 +3816,6 @@ function validateImport() {
         });
         
         if (errors.length > 0) {
-            // Show validation errors
             let errorHtml = '';
             errors.forEach(err => {
                 errorHtml += `<div class="text-xs mt-1">❌ Item ${err.index}: ${err.name} - missing ${err.missing.join(', ')}</div>`;
@@ -3460,7 +3837,6 @@ function validateImport() {
             return;
         }
         
-        // ALL items are valid
         STATE.ui.validatedJson = dataArray.length === 1 ? dataArray[0] : dataArray;
         
         const existsText = dataArray.length === 1 && STATE.variants.some(v => v.legacy_name === dataArray[0].variant_legacy_name) 
@@ -3503,14 +3879,7 @@ function validateImport() {
         STATE.ui.validatedJson = null;
     }
 }
-// ===================================================================
-// 📥 IMPORT SYSTEM - ENHANCED WITH DUPLICATE DETECTION & BULK SUPPORT
-// ===================================================================
 
-/**
- * Execute JSON import with duplicate detection and bulk support
- * Supports single JSON object OR array of JSON objects
- */
 async function executeJsonImport() {
     if (!STATE.ui.validatedJson) {
         showNotification('Please validate JSON first', 'warning');
@@ -3524,12 +3893,10 @@ async function executeJsonImport() {
         btn.disabled = true;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
         
-        // ---------- HANDLE BOTH SINGLE OBJECT AND ARRAY ----------
         const importData = Array.isArray(STATE.ui.validatedJson) 
             ? STATE.ui.validatedJson 
             : [STATE.ui.validatedJson];
         
-        // ---------- TRACK RESULTS ----------
         const results = {
             total: importData.length,
             added: [],
@@ -3538,10 +3905,8 @@ async function executeJsonImport() {
             errors: []
         };
         
-        // ---------- PROCESS EACH VARIANT ----------
         for (const data of importData) {
             try {
-                // Validate required fields
                 const required = ['variant_legacy_name', 'variant_protein_name', 
                                  'variant_cDNA_name', 'variant_final_determination'];
                 const missing = required.filter(f => !data[f]);
@@ -3556,20 +3921,17 @@ async function executeJsonImport() {
                 
                 const name = data.variant_legacy_name;
                 
-                // ---------- CHECK FOR EXISTING VARIANT (CASE-INSENSITIVE) ----------
                 const existingVariant = STATE.variants.find(v => 
                     v.legacy_name && v.legacy_name.toLowerCase() === name.toLowerCase()
                 );
                 
                 if (existingVariant) {
-                    // ---------- VARIANT EXISTS - ASK USER WHAT TO DO ----------
                     const shouldUpdate = await promptUserForDuplicateAction(name, existingVariant);
                     
                     if (shouldUpdate === 'skip') {
                         results.skipped.push(name);
                         continue;
                     } else if (shouldUpdate === 'update') {
-                        // Update existing variant
                         await updateVariantField(existingVariant.id, 'protein_name', data.variant_protein_name);
                         await updateVariantField(existingVariant.id, 'cdna_name', data.variant_cDNA_name);
                         await updateVariantField(existingVariant.id, 'final_determination', data.variant_final_determination);
@@ -3582,7 +3944,6 @@ async function executeJsonImport() {
                     }
                 }
                 
-                // ---------- CREATE NEW VARIANT IN SUPABASE ----------
                 const insertResponse = await fetch(`${CONFIG.SUPABASE.URL}/rest/v1/variants`, {
                     method: 'POST',
                     headers: {
@@ -3600,6 +3961,7 @@ async function executeJsonImport() {
                         eti_prediction: data.eti_prediction || null,
                         data_status: 'minimal',
                         source_summary: 'Manual_JSON_Import',
+                        validation_count: 0,
                         created_at: new Date().toISOString(),
                         updated_at: new Date().toISOString()
                     })
@@ -3612,7 +3974,6 @@ async function executeJsonImport() {
                 const insertedData = await insertResponse.json();
                 const savedVariant = insertedData[0];
                 
-                // ---------- ADD TO LOCAL STATE WITH REAL ID ----------
                 const newVariant = {
                     id: savedVariant.id,
                     legacy_name: savedVariant.legacy_name,
@@ -3625,6 +3986,7 @@ async function executeJsonImport() {
                     class_confidence: savedVariant.class_confidence,
                     data_status: savedVariant.data_status,
                     source_summary: savedVariant.source_summary,
+                    validation_count: 0,
                     created_at: savedVariant.created_at,
                     updated_at: savedVariant.updated_at
                 };
@@ -3644,12 +4006,10 @@ async function executeJsonImport() {
             }
         }
         
-        // ---------- REBUILD INDEXES AND RECALC STATS ----------
         if (results.added.length > 0 || results.updated.length > 0) {
             buildSearchIndex();
             calculateMasterStats();
             
-            // Refresh views
             STATE.view.filteredVariants = [...STATE.variants];
             STATE.view.dataViewMode = 'all';
             STATE.view.activeFilter = 'all';
@@ -3657,10 +4017,8 @@ async function executeJsonImport() {
             applyFilterChain();
         }
         
-        // ---------- SHOW IMPORT SUMMARY ----------
         showImportSummary(results);
         
-        // ---------- CLEANUP ----------
         clearImportForm();
         
         if (importData.length === 1) {
@@ -3677,13 +4035,8 @@ async function executeJsonImport() {
     }
 }
 
-/**
- * Prompt user for action on duplicate variant
- * @returns {Promise<string>} 'update', 'skip', or null
- */
 async function promptUserForDuplicateAction(name, existingVariant) {
     return new Promise((resolve) => {
-        // Create modal content
         const modal = document.createElement('div');
         modal.className = 'modal-overlay';
         modal.style.zIndex = '100000';
@@ -3730,20 +4083,15 @@ async function promptUserForDuplicateAction(name, existingVariant) {
         
         document.body.appendChild(modal);
         
-        // Expose resolve function to window
         window.resolve = resolve;
     });
 }
 
-/**
- * Show import summary results
- */
 function showImportSummary(results) {
     const resultsDiv = document.getElementById('importResults');
     if (!resultsDiv) return;
     
     const hasSuccess = results.added.length > 0 || results.updated.length > 0;
-    const hasIssues = results.skipped.length > 0 || results.errors.length > 0;
     
     let summaryHtml = `
         <div class="bg-white rounded-xl p-5 border-2 ${hasSuccess ? 'border-[#0e7b4e]' : 'border-gray-200'} shadow-sm mt-4">
@@ -3797,11 +4145,9 @@ function showImportSummary(results) {
         </div>
     `;
     
-    // Append to existing results
     const existing = resultsDiv.innerHTML;
     resultsDiv.innerHTML = existing + summaryHtml;
     
-    // Show global notification for single imports
     if (results.total === 1) {
         if (results.added.length === 1) {
             showNotification(`✓ Added ${results.added[0]}`, 'success');
@@ -3811,7 +4157,6 @@ function showImportSummary(results) {
             showNotification(`⏭️ Skipped ${results.skipped[0]} (already exists)`, 'warning');
         }
     } else {
-        // Bulk import summary notification
         const totalSuccess = results.added.length + results.updated.length;
         if (totalSuccess > 0) {
             showNotification(`✓ Imported ${totalSuccess} of ${results.total} variants`, 'success', 5000);
@@ -3893,6 +4238,7 @@ async function submitManualForm() {
                 eti_recommendation: rec,
                 data_status: 'minimal',
                 source_summary: 'Manual_Form_Import',
+                validation_count: 0,
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString()
             };
@@ -3963,12 +4309,10 @@ function handleCSVFile(file) {
         try {
             showNotification(`📄 Parsing ${file.name}...`, 'info', 2000);
             
-            // Parse CSV with tab delimiter
             const content = e.target.result;
             const lines = content.trim().split('\n');
             const headers = lines[0].split('\t').map(h => h.trim());
             
-            // Validate headers
             const requiredHeaders = ['variant_legacy_name', 'variant_protein_name', 
                                    'variant_cDNA_name', 'variant_final_determination',
                                    'cftr_class', 'eti_prediction'];
@@ -3978,7 +4322,6 @@ function handleCSVFile(file) {
                 throw new Error(`Missing columns: ${missingHeaders.join(', ')}`);
             }
             
-            // Parse rows
             const variants = [];
             for (let i = 1; i < lines.length; i++) {
                 if (!lines[i].trim()) continue;
@@ -3990,7 +4333,6 @@ function handleCSVFile(file) {
                     variant[header] = values[index]?.trim() || '';
                 });
                 
-                // Validate required fields
                 const missing = requiredHeaders.filter(f => !variant[f]);
                 if (missing.length > 0) {
                     showNotification(`⏭️ Skipping row ${i + 1}: missing ${missing.join(', ')}`, 'warning', 3000);
@@ -4004,10 +4346,8 @@ function handleCSVFile(file) {
                 throw new Error('No valid variants found in CSV');
             }
             
-            // Set as validated JSON and execute import
             STATE.ui.validatedJson = variants;
             
-            // Show preview
             const resultsDiv = document.getElementById('importResults');
             resultsDiv.innerHTML = `
                 <div class="bg-[#e3f9e9] border-2 border-[#0e7b4e] rounded-xl p-5">
@@ -4018,7 +4358,6 @@ function handleCSVFile(file) {
                 </div>
             `;
             
-            // Execute the import
             await executeJsonImport();
             
         } catch (error) {
@@ -4042,12 +4381,10 @@ function handleCSVFile(file) {
     reader.readAsText(file);
 }
 
-// ========== PROCESS BULK IMPORT ==========
 function processBulkImport() {
     document.getElementById('csvFileInput')?.click();
 }
 
-// ========== DOWNLOAD TEMPLATE ==========
 function downloadTemplate() {
     const template = 'variant_legacy_name\tvariant_protein_name\tvariant_cDNA_name\tvariant_final_determination\tcftr_class\teti_prediction\n' +
                     'G542X\tp.Gly542X\tc.1624G>T\tCF-causing\tI\tresponsive\n' +
@@ -4063,9 +4400,6 @@ function downloadTemplate() {
     URL.revokeObjectURL(url);
     showNotification('✓ Template downloaded (TAB-separated)', 'success');
 }
-
-
-
 
 // ===================================================================
 // 🔧 UTILITIES - HELPERS, FORMATTERS, VALIDATORS
@@ -4106,7 +4440,9 @@ function formatDate(dateString) {
         return date.toLocaleDateString('en-US', { 
             year: 'numeric', 
             month: 'short', 
-            day: 'numeric' 
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
         });
     } catch {
         return dateString;
@@ -4175,8 +4511,6 @@ function showNotification(msg, type = 'info', duration = CONFIG.UI.NOTIFICATION_
 // 🎯 SEARCH INITIALIZATION - KEYBOARD SHORTCUTS
 // ===================================================================
 
-// ========== SEARCH INITIALIZATION — IMPROVED ==========
-// ========== SEARCH INITIALIZATION — IMPROVED ==========
 function initializeSearch() {
     const input = document.getElementById('searchInput');
     const clear = document.getElementById('searchClear');
@@ -4185,7 +4519,6 @@ function initializeSearch() {
     
     input.placeholder = '🔍 Search by name, cDNA, protein, class... (2,094 variants)';
     
-    // Add focus/blur handlers for orange glow
     input.addEventListener('focus', function() {
         this.style.borderColor = '#b45309';
         this.style.boxShadow = '0 0 0 4px rgba(180,83,9,0.15)';
@@ -4238,7 +4571,6 @@ function initializeSearch() {
         }
     });
     
-    // Keyboard shortcut: '/' to focus search
     document.addEventListener('keydown', (e) => {
         if (e.key === '/' && !e.ctrlKey && !e.metaKey && 
             !e.target.matches('input, textarea, button')) {
@@ -4253,23 +4585,23 @@ function initializeSearch() {
 // ===================================================================
 
 function attachEventListeners() {
-    // Close modals with Escape key
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             closeImportModal?.();
             closeDashboard?.();
             closeAnnotationModal?.();
             closeDeleteModal?.();
+            closeValidationModal?.();
         }
     });
     
-    // Close modals by clicking overlay
     document.addEventListener('click', (e) => {
         if (e.target.classList.contains('modal-overlay')) {
             closeImportModal?.();
             closeDashboard?.();
             closeAnnotationModal?.();
             closeDeleteModal?.();
+            closeValidationModal?.();
         }
     });
 }
@@ -4280,7 +4612,6 @@ function attachEventListeners() {
 
 function exposeGlobals() {
     const globals = {
-        // View management
         selectVariant,
         filterVariants,
         quickSearch,
@@ -4289,7 +4620,6 @@ function exposeGlobals() {
         previousPage,
         nextPage,
         
-        // Import/Export
         showImportModal,
         closeImportModal,
         switchImportTab,
@@ -4299,25 +4629,30 @@ function exposeGlobals() {
         clearImportForm,
         clearManualForm,
         downloadTemplate,
-        processBulkImport,        
-        // Dashboard
+        processBulkImport,
+        
         showDashboard,
         closeDashboard,
         refreshDashboardStats,
         exportReport,
         exportFullReport,
         
-        // Annotation
         showAnnotationModal,
         closeAnnotationModal,
         saveAnnotation,
         
-        // Delete
         showDeleteModal,
         closeDeleteModal,
         confirmDeleteVariant,
         
-        // Utility
+        // NEW VALIDATION FUNCTIONS
+        showValidationModal,
+        closeValidationModal,
+        submitValidation,
+        toggleValidationHistory,
+        showExistingRoles,
+        selectRole,
+        
         showNotification
     };
     
@@ -4337,22 +4672,13 @@ async function initializeApp() {
         
         showLoadingState('🚀 Initializing Δ Helix Clinical Intelligence...');
         
-        // Load data from Supabase
         await loadVariants();
         
-        // Setup event listeners
         attachEventListeners();
-        
-        // Initialize search
         initializeSearch();
-        
-        // Initialize bulk import UI
         initializeBulkImport();
-        
-        // Expose global functions
         exposeGlobals();
         
-        // Set initial view
         setDataView('all');
         
         const initTime = (performance.now() - startTime).toFixed(0);
@@ -4368,7 +4694,6 @@ async function initializeApp() {
     }
 }
 
-// ========== START THE APPLICATION ==========
 document.addEventListener('DOMContentLoaded', initializeApp);
 </script>
 </body>
