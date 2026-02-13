@@ -2529,67 +2529,6 @@ function renderVariantList() {
     safeSetText('variantCountHeader', STATE.view.filteredVariants.length.toLocaleString());
 }
     
-    container.innerHTML = pageVariants.map(v => {
-        const isSelected = STATE.view.selectedVariant?.id === v.id;
-        const missingCount = countMissingFields(v);
-        
-        let displayName = escapeHTML(v.legacy_name || '');
-        
-        if (STATE.view.searchQuery) {
-            try {
-                const re = new RegExp(`(${escapeRegExp(STATE.view.searchQuery)})`, 'gi');
-                displayName = displayName.replace(re, '<span class="search-highlight">$1</span>');
-            } catch (e) {}
-        }
-        
-        const classBadge = v.cftr_class ? 
-            `<span class="badge badge-class-${v.cftr_class.toLowerCase()}">
-                <i class="fas fa-dna"></i>Class ${v.cftr_class}
-            </span>` : '';
-        
-        const etiIcon = v.eti_prediction === 'responsive' ? 
-            '<span class="text-[#0f766e] text-xs ml-2"><i class="fas fa-check-circle"></i> Responds</span>' :
-            v.eti_prediction === 'non_responsive' ? 
-            '<span class="text-[#b91c1c] text-xs ml-2"><i class="fas fa-times-circle"></i> Non-responsive</span>' : '';
-        
-        const subtypeBadge = v.class_subtype === 'exceptional' ? 
-            '<span class="text-xs font-bold text-[#b45309] ml-2"><i class="fas fa-bolt"></i> EXCEPTIONAL</span>' :
-            v.class_subtype === 'true' ? 
-            '<span class="text-xs font-bold text-[#b91c1c] ml-2"><i class="fas fa-exclamation"></i> TRUE CLASS I</span>' : '';
-        
-        const validationBadge = v.validation_count > 0 ? 
-            `<span class="text-xs bg-[#0e7c7b] text-white px-2 py-0.5 rounded-full ml-2">
-                <i class="fas fa-check-circle mr-0.5"></i>${v.validation_count}
-            </span>` : '';
-        
-        return `
-            <div class="variant-item ${isSelected ? 'selected' : ''}" 
-                 onclick="selectVariant('${escapeHTML(v.legacy_name)}')">
-                <div class="flex justify-between items-start mb-2">
-                    <div class="flex-1">
-                        <div class="flex items-center flex-wrap gap-2">
-                            <h4 class="variant-name">${displayName}${validationBadge}</h4>
-                            ${etiIcon}${subtypeBadge}
-                        </div>
-                        ${v.protein_name ? 
-                            `<p class="variant-subtitle">${escapeHTML(v.protein_name)}</p>` : ''}
-                    </div>
-                    ${classBadge}
-                </div>
-                <div class="flex justify-between items-center mt-2">
-                    <span class="text-xs text-gray-600 truncate max-w-[180px]">
-                        ${escapeHTML(v.final_determination || '')}
-                    </span>
-                    ${missingCount ? 
-                        `<span class="missing-count">${missingCount}</span>` : ''}
-                </div>
-            </div>
-        `;
-    }).join('');
-    
-    safeSetText('variantCount', STATE.view.filteredVariants.length.toLocaleString());
-    safeSetText('variantCountHeader', STATE.view.filteredVariants.length.toLocaleString());
-}
 
 function renderViewUI() {
     const f = STATE.view.filteredVariants;
