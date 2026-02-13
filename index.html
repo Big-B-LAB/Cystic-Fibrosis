@@ -924,6 +924,58 @@
             .no-print { display: none !important; }
             .card { break-inside: avoid; border: 1px solid #ddd; }
         }
+        /* ========== FIXED VARIANT LIST — PERFECT HEIGHT ========== */
+.variant-list {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    min-height: 0;
+    scrollbar-width: thin;
+    scrollbar-color: #b45309 #f1f5f9;
+}
+
+.variant-list::-webkit-scrollbar {
+    width: 5px;
+}
+
+.variant-list::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: var(--radius-full);
+}
+
+.variant-list::-webkit-scrollbar-thumb {
+    background: #b45309;
+    border-radius: var(--radius-full);
+    opacity: 0.7;
+}
+
+.variant-list::-webkit-scrollbar-thumb:hover {
+    background: #9a3412;
+}
+
+/* Search focus glow */
+.search-input-focused {
+    border-color: #b45309 !important;
+    box-shadow: 0 0 0 4px rgba(180, 83, 9, 0.15) !important;
+}
+
+/* Remove duplicate icons in filter buttons */
+.btn i:first-child {
+    margin-right: 0.25rem;
+}
+
+/* Ensure card body uses flex properly */
+.card-body.flex-1 {
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .variant-list {
+        max-height: 350px;
+    }
+}
     </style>
 </head>
 <body>
@@ -1133,76 +1185,87 @@
         <!-- ========== MAIN GRID — ULTIMATE ========== -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <!-- LEFT COLUMN — VARIANT EXPLORER DELUXE -->
-            <div class="lg:col-span-3">
-                <div class="card h-full flex flex-col">
-                    <div class="card-header bg-gradient-to-r from-[#f9fafb] to-white">
-                        <i class="fas fa-list-ul text-[#0a2e5a]"></i>
-                        <span>Variant Explorer</span>
-                        <span class="ml-auto text-xs bg-gray-200 px-2 py-1 rounded-full" id="variantCountHeader">—</span>
-                    </div>
-                    
-                    <div class="card-body flex-1">
-                        <!-- Search — ULTRA -->
-                        <div class="search-wrapper mb-5">
-                            <i class="fas fa-search search-icon"></i>
-                            <input 
-                                type="text" 
-                                id="searchInput"
-                                class="search-input"
-                                placeholder="Search by name, protein, cDNA..."
-                                autocomplete="off"
-                            >
-                            <button class="search-clear hidden" id="searchClear">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                        
-                        <!-- Quick Filters — PREMIUM -->
-                        <div class="flex gap-2 mb-5">
-                            <button onclick="filterVariants('all')" 
-                                    id="filterAll"
-                                    class="flex-1 px-3 py-2.5 text-sm font-semibold rounded-xl border-2 transition-all"
-                                    style="border-color: #0e7c7b; color: #0e7c7b; background: rgba(14,124,123,0.05);">
-                                <i class="fas fa-list-ul mr-1"></i>All
-                            </button>
-                            <button onclick="filterVariants('missing')" 
-                                    id="filterMissing"
-                                    class="flex-1 px-3 py-2.5 text-sm font-semibold rounded-xl border-2 border-gray-200 hover:border-[#b45309] hover:text-[#b45309] transition-all">
-                                <i class="fas fa-exclamation-triangle mr-1"></i>Missing
-                            </button>
-                        </div>
-                        
-                        <!-- List Metadata — RICH -->
-                        <div class="flex items-center justify-between text-xs bg-gray-50/80 p-3 rounded-xl border border-gray-200">
-                            <span class="text-gray-700 font-medium flex items-center gap-1.5">
-                                <i class="fas fa-dna text-[#0e7c7b]"></i>
-                                <span id="variantCount" class="font-bold text-gray-900">—</span> variants
-                            </span>
-                            <span id="viewBadge" class="px-3 py-1.5 bg-[#0e7c7b] text-white rounded-full text-xs font-bold shadow-sm">
-                                All
-                            </span>
-                        </div>
-                    </div>
-                    
-                    <!-- Variant List — PERFECTED -->
-                    <div class="variant-list px-4 pb-4" id="variantList">
-                        <!-- Rendered dynamically -->
-                    </div>
-                    
-                    <!-- Pagination — ELEGANT -->
-                    <div class="border-t border-gray-200 px-5 py-4 flex justify-between items-center bg-gray-50/50" id="paginationControls" style="display: none;">
-                        <button onclick="previousPage()" class="btn btn-secondary btn-sm" id="prevBtn">
-                            <i class="fas fa-chevron-left"></i>
-                        </button>
-                        <span class="text-sm font-medium text-gray-700">
-                            Page <span id="currentPage" class="font-bold">1</span> / <span id="totalPages" class="font-bold">1</span>
-                        </span>
-                        <button onclick="nextPage()" class="btn btn-secondary btn-sm" id="nextBtn">
-                            <i class="fas fa-chevron-right"></i>
-                        </button>
-                    </div>
+            <!-- LEFT COLUMN — VARIANT EXPLORER DELUXE — FIXED HEIGHT -->
+<div class="lg:col-span-3">
+    <div class="card h-full flex flex-col" style="min-height: 600px;">
+        <div class="card-header bg-gradient-to-r from-[#f9fafb] to-white">
+            <i class="fas fa-list-ul text-[#0a2e5a]"></i>
+            <span>Variant Explorer</span>
+            <span class="ml-auto text-xs bg-gray-200 px-2 py-1 rounded-full" id="variantCountHeader">—</span>
+        </div>
+        
+        <div class="card-body flex-1" style="display: flex; flex-direction: column; min-height: 0; padding: var(--space-4);">
+            
+            <!-- SEARCH — IMPROVED VISIBILITY -->
+            <div class="search-wrapper" style="flex-shrink: 0; margin-bottom: 1rem;">
+                <div style="position: relative;">
+                    <i class="fas fa-search" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #b45309; font-size: 1rem; z-index: 5;"></i>
+                    <input 
+                        type="text" 
+                        id="searchInput"
+                        style="width: 100%; padding: 0.875rem 1rem 0.875rem 2.75rem; font-family: var(--font-sans); font-size: 1rem; border: 2px solid #e2e8f0; border-radius: var(--radius-full); background: white; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.02);"
+                        placeholder="🔍 Search by name, cDNA, protein, class..."
+                        autocomplete="off"
+                        onfocus="this.style.borderColor='#b45309'; this.style.boxShadow='0 0 0 4px rgba(180,83,9,0.1)';"
+                        onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.02)';"
+                    >
+                    <button class="search-clear hidden" id="searchClear" style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); background: transparent; border: none; color: #b45309; cursor: pointer; padding: 0.25rem; border-radius: 9999px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-times-circle" style="font-size: 1.25rem;"></i>
+                    </button>
+                </div>
+                <!-- Subtle glow hint -->
+                <div style="font-size: 0.7rem; color: #b45309; margin-top: 0.25rem; margin-left: 0.75rem; opacity: 0.8;">
+                    <i class="fas fa-lightbulb mr-1"></i> Try "G542X", "class I", "exceptional"
                 </div>
             </div>
+            
+            <!-- Quick Filters — PREMIUM -->
+            <div class="flex gap-2 mb-4" style="flex-shrink: 0;">
+                <button onclick="filterVariants('all')" 
+                        id="filterAll"
+                        class="flex-1 px-3 py-2.5 text-sm font-semibold rounded-xl border-2 transition-all"
+                        style="border-color: #0e7c7b; color: #0e7c7b; background: rgba(14,124,123,0.05);">
+                    <i class="fas fa-list-ul mr-1"></i>All
+                </button>
+                <button onclick="filterVariants('missing')" 
+                        id="filterMissing"
+                        class="flex-1 px-3 py-2.5 text-sm font-semibold rounded-xl border-2 border-gray-200 hover:border-[#b45309] hover:text-[#b45309] transition-all">
+                    <i class="fas fa-exclamation-triangle mr-1"></i>Missing
+                </button>
+            </div>
+            
+            <!-- List Metadata — RICH -->
+            <div class="flex items-center justify-between text-xs bg-gray-50/80 p-3 rounded-xl border border-gray-200 mb-3" style="flex-shrink: 0;">
+                <span class="text-gray-700 font-medium flex items-center gap-1.5">
+                    <i class="fas fa-dna text-[#0e7c7b]"></i>
+                    <span id="variantCount" class="font-bold text-gray-900">—</span> variants
+                </span>
+                <span id="viewBadge" class="px-3 py-1.5 bg-[#0e7c7b] text-white rounded-full text-xs font-bold shadow-sm">
+                    All
+                </span>
+            </div>
+            
+            <!-- VARIANT LIST — TAKES ALL REMAINING SPACE -->
+            <div class="variant-list" id="variantList" style="flex: 1 1 auto; overflow-y: auto; min-height: 0; scrollbar-width: thin; scrollbar-color: #b45309 #f1f5f9; margin: 0; padding-right: 0.25rem;">
+                <!-- Dynamically rendered -->
+            </div>
+            
+        </div> <!-- end card-body -->
+        
+        <!-- Pagination — ELEGANT -->
+        <div class="border-t border-gray-200 px-5 py-4 flex justify-between items-center bg-gray-50/50" id="paginationControls" style="display: none; flex-shrink: 0;">
+            <button onclick="previousPage()" class="btn btn-secondary btn-sm" id="prevBtn">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <span class="text-sm font-medium text-gray-700">
+                Page <span id="currentPage" class="font-bold">1</span> / <span id="totalPages" class="font-bold">1</span>
+            </span>
+            <button onclick="nextPage()" class="btn btn-secondary btn-sm" id="nextBtn">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+</div>
 
             <!-- RIGHT COLUMN — VARIANT DETAIL ULTIMATE -->
             <div class="lg:col-span-9">
@@ -4042,6 +4105,7 @@ function showNotification(msg, type = 'info', duration = CONFIG.UI.NOTIFICATION_
 // 🎯 SEARCH INITIALIZATION - KEYBOARD SHORTCUTS
 // ===================================================================
 
+// ========== SEARCH INITIALIZATION — IMPROVED ==========
 function initializeSearch() {
     const input = document.getElementById('searchInput');
     const clear = document.getElementById('searchClear');
@@ -4050,9 +4114,27 @@ function initializeSearch() {
     
     input.placeholder = '🔍 Search by name, cDNA, protein, class... (2,094 variants)';
     
+    // Add focus/blur handlers for orange glow
+    input.addEventListener('focus', function() {
+        this.style.borderColor = '#b45309';
+        this.style.boxShadow = '0 0 0 4px rgba(180,83,9,0.15)';
+    });
+    
+    input.addEventListener('blur', function() {
+        this.style.borderColor = '#e2e8f0';
+        this.style.boxShadow = '0 2px 8px rgba(0,0,0,0.02)';
+    });
+    
     input.addEventListener('input', function() {
         clearTimeout(STATE.ui.searchTimeout);
-        if (clear) clear.classList.toggle('hidden', !this.value);
+        if (clear) {
+            if (this.value) {
+                clear.classList.remove('hidden');
+                clear.style.display = 'flex';
+            } else {
+                clear.classList.add('hidden');
+            }
+        }
         
         STATE.ui.searchTimeout = setTimeout(() => {
             STATE.view.searchQuery = this.value;
@@ -4061,12 +4143,22 @@ function initializeSearch() {
     });
     
     if (clear) {
-        clear.addEventListener('click', clearSearch);
+        clear.addEventListener('click', function(e) {
+            e.stopPropagation();
+            input.value = '';
+            input.focus();
+            this.classList.add('hidden');
+            STATE.view.searchQuery = '';
+            applyFilterChain();
+        });
     }
     
     input.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
-            clearSearch();
+            input.value = '';
+            if (clear) clear.classList.add('hidden');
+            STATE.view.searchQuery = '';
+            applyFilterChain();
         }
         if (e.key === 'Enter' && input.value) {
             e.preventDefault();
@@ -4075,6 +4167,15 @@ function initializeSearch() {
         }
     });
     
+    // Keyboard shortcut: '/' to focus search
+    document.addEventListener('keydown', (e) => {
+        if (e.key === '/' && !e.ctrlKey && !e.metaKey && 
+            !e.target.matches('input, textarea, button')) {
+            e.preventDefault();
+            input.focus();
+        }
+    });
+}
     // Keyboard shortcut: '/' to focus search
     document.addEventListener('keydown', (e) => {
         if (e.key === '/' && !e.ctrlKey && !e.metaKey && 
