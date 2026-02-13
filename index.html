@@ -1838,6 +1838,102 @@
             </div>
         </div>
     </div>
+        <!-- ===================================================================
+         ADD EVIDENCE MODAL
+         =================================================================== -->
+    <div id="addEvidenceModal" class="modal-overlay hidden">
+        <div class="modal" style="max-width: 550px;">
+            <div class="modal-header">
+                <h3 class="heading-3 text-gray-900 flex items-center gap-2">
+                    <i class="fas fa-plus-circle text-[#6d28d9]"></i>
+                    Add Evidence Link
+                </h3>
+                <button onclick="closeAddEvidenceModal()" class="w-9 h-9 rounded-xl hover:bg-gray-200 transition-colors">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="bg-[#f5f0ff] rounded-xl p-4 mb-6 border border-[#6d28d9]/20">
+                    <p class="text-sm text-gray-700">
+                        Adding evidence to <span id="evidenceVariantName" class="font-mono font-bold text-[#6d28d9]"></span>
+                    </p>
+                </div>
+                
+                <!-- Source Type Selection -->
+                <div class="form-group">
+                    <label class="form-label flex items-center gap-1">
+                        <i class="fas fa-tag text-[#6d28d9]"></i>
+                        Source Type *
+                    </label>
+                    <div class="grid grid-cols-4 gap-2">
+                        <button type="button" onclick="selectEvidenceType('pubmed')" id="type-pubmed" class="type-btn px-3 py-2 text-sm rounded-lg border-2 border-gray-200 hover:border-[#6d28d9] hover:text-[#6d28d9] transition-all flex flex-col items-center gap-1">
+                            <i class="fas fa-book-open"></i>
+                            <span>PubMed</span>
+                        </button>
+                        <button type="button" onclick="selectEvidenceType('cftr2')" id="type-cftr2" class="type-btn px-3 py-2 text-sm rounded-lg border-2 border-gray-200 hover:border-[#6d28d9] hover:text-[#6d28d9] transition-all flex flex-col items-center gap-1">
+                            <i class="fas fa-dna"></i>
+                            <span>CFTR2</span>
+                        </button>
+                        <button type="button" onclick="selectEvidenceType('clinvar')" id="type-clinvar" class="type-btn px-3 py-2 text-sm rounded-lg border-2 border-gray-200 hover:border-[#6d28d9] hover:text-[#6d28d9] transition-all flex flex-col items-center gap-1">
+                            <i class="fas fa-clinic-medical"></i>
+                            <span>ClinVar</span>
+                        </button>
+                        <button type="button" onclick="selectEvidenceType('other')" id="type-other" class="type-btn px-3 py-2 text-sm rounded-lg border-2 border-gray-200 hover:border-[#6d28d9] hover:text-[#6d28d9] transition-all flex flex-col items-center gap-1">
+                            <i class="fas fa-link"></i>
+                            <span>Other</span>
+                        </button>
+                    </div>
+                    <input type="hidden" id="evidenceType" value="">
+                </div>
+                
+                <!-- Title -->
+                <div class="form-group">
+                    <label class="form-label flex items-center gap-1">
+                        <i class="fas fa-heading text-[#6d28d9]"></i>
+                        Title *
+                    </label>
+                    <input type="text" id="evidenceTitle" class="form-control" placeholder="e.g., Smith et al. 2023 - CFTR modulator study">
+                </div>
+                
+                <!-- URL -->
+                <div class="form-group">
+                    <label class="form-label flex items-center gap-1">
+                        <i class="fas fa-link text-[#6d28d9]"></i>
+                        URL *
+                    </label>
+                    <input type="url" id="evidenceUrl" class="form-control" placeholder="https://pubmed.ncbi.nlm.nih.gov/12345678/">
+                </div>
+                
+                <!-- Source (Display name) -->
+                <div class="form-group">
+                    <label class="form-label flex items-center gap-1">
+                        <i class="fas fa-database text-[#6d28d9]"></i>
+                        Source Name (optional)
+                    </label>
+                    <input type="text" id="evidenceSource" class="form-control" placeholder="e.g., PubMed, CFTR2, Journal Name">
+                </div>
+                
+                <!-- Notes -->
+                <div class="form-group">
+                    <label class="form-label flex items-center gap-1">
+                        <i class="fas fa-pencil-alt text-[#6d28d9]"></i>
+                        Notes (optional)
+                    </label>
+                    <textarea id="evidenceNotes" class="form-control" rows="2" placeholder="Any additional notes about this evidence..."></textarea>
+                </div>
+                
+                <div id="evidenceMessage" class="text-sm mt-2"></div>
+            </div>
+            
+            <div class="modal-footer">
+                <button onclick="closeAddEvidenceModal()" class="btn btn-secondary">Cancel</button>
+                <button onclick="saveEvidenceLink()" class="btn btn-primary bg-[#6d28d9] hover:bg-[#5b21b6]" id="saveEvidenceBtn">
+                    <i class="fas fa-save mr-1"></i> Save Evidence
+                </button>
+            </div>
+        </div>
+    </div>
     <!-- ===================================================================
          NOTIFICATION CONTAINER
          =================================================================== -->
@@ -2005,7 +2101,7 @@ async function loadVariants() {
         
         while (hasMore) {
             const response = await fetch(
-                `${CONFIG.SUPABASE.URL}/rest/v1/variants?select=*&order=legacy_name.asc&limit=${limit}&offset=${offset}`,
+                `${CONFIG.SUPABASE.URL}/rest/v1/variants?select=*,evidence_links(*)&order=legacy_name.asc&limit=${limit}&offset=${offset}`,
                 {
                     headers: {
                         'apikey': CONFIG.SUPABASE.KEY,
@@ -4605,6 +4701,9 @@ function formatDate(dateString) {
 // ===================================================================
 // 🔗 EVIDENCE SYSTEM FUNCTIONS
 // ===================================================================
+// ===================================================================
+// 🔗 EVIDENCE SYSTEM - COMPLETE CRUD
+// ===================================================================
 
 let currentVariantId = null;
 let currentVariantName = '';
@@ -4790,14 +4889,172 @@ function closeAllEvidenceModal() {
     document.getElementById('allEvidenceModal').classList.add('hidden');
 }
 
+// Show Add Evidence Modal
 function showEvidenceModal(variantName, variantId) {
-    // Placeholder - we'll implement this after database
-    showNotification('Add Evidence modal coming soon!', 'info');
+    currentVariantName = variantName;
+    currentVariantId = variantId;
+    
+    // Reset form
+    document.getElementById('evidenceVariantName').textContent = variantName;
+    document.getElementById('evidenceTitle').value = '';
+    document.getElementById('evidenceUrl').value = '';
+    document.getElementById('evidenceSource').value = '';
+    document.getElementById('evidenceNotes').value = '';
+    document.getElementById('evidenceMessage').innerHTML = '';
+    
+    // Reset type buttons
+    document.querySelectorAll('.type-btn').forEach(btn => {
+        btn.classList.remove('bg-[#6d28d9]', 'text-white', 'border-[#6d28d9]');
+        btn.classList.add('border-gray-200');
+    });
+    document.getElementById('evidenceType').value = '';
+    
+    // Show modal
+    document.getElementById('addEvidenceModal').classList.remove('hidden');
 }
 
-function deleteEvidence(variantId, evidenceId) {
-    // Placeholder - we'll implement this after database
-    showNotification('Delete function coming soon!', 'info');
+// Close Add Evidence Modal
+function closeAddEvidenceModal() {
+    document.getElementById('addEvidenceModal').classList.add('hidden');
+}
+
+// Select evidence type
+function selectEvidenceType(type) {
+    // Remove active class from all
+    document.querySelectorAll('.type-btn').forEach(btn => {
+        btn.classList.remove('bg-[#6d28d9]', 'text-white', 'border-[#6d28d9]');
+        btn.classList.add('border-gray-200');
+    });
+    
+    // Add active class to selected
+    const selectedBtn = document.getElementById(`type-${type}`);
+    if (selectedBtn) {
+        selectedBtn.classList.remove('border-gray-200');
+        selectedBtn.classList.add('bg-[#6d28d9]', 'text-white', 'border-[#6d28d9]');
+    }
+    
+    document.getElementById('evidenceType').value = type;
+}
+
+// Save evidence link to database
+async function saveEvidenceLink() {
+    const type = document.getElementById('evidenceType').value;
+    const title = document.getElementById('evidenceTitle').value.trim();
+    const url = document.getElementById('evidenceUrl').value.trim();
+    const source = document.getElementById('evidenceSource').value.trim();
+    const notes = document.getElementById('evidenceNotes').value.trim();
+    const messageDiv = document.getElementById('evidenceMessage');
+    const btn = document.getElementById('saveEvidenceBtn');
+    
+    // Validate
+    if (!type) {
+        messageDiv.innerHTML = '<span class="text-[#b91c1c]">❌ Please select a source type</span>';
+        return;
+    }
+    if (!title) {
+        messageDiv.innerHTML = '<span class="text-[#b91c1c]">❌ Please enter a title</span>';
+        return;
+    }
+    if (!url) {
+        messageDiv.innerHTML = '<span class="text-[#b91c1c]">❌ Please enter a URL</span>';
+        return;
+    }
+    
+    try {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+        messageDiv.innerHTML = '<span class="text-[#6d28d9]">⏳ Adding evidence...</span>';
+        
+        // Save to Supabase
+        const response = await fetch(`${CONFIG.SUPABASE.URL}/rest/v1/evidence_links`, {
+            method: 'POST',
+            headers: {
+                'apikey': CONFIG.SUPABASE.KEY,
+                'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`,
+                'Content-Type': 'application/json',
+                'Prefer': 'return=representation'
+            },
+            body: JSON.stringify({
+                variant_id: currentVariantId,
+                type: type,
+                title: title,
+                url: url,
+                source: source || type,
+                notes: notes || null,
+                date_added: new Date().toISOString()
+            })
+        });
+        
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        
+        const newEvidence = await response.json();
+        
+        // Update local state
+        const variant = STATE.variants.find(v => v.id === currentVariantId);
+        if (variant) {
+            if (!variant.evidence_links) variant.evidence_links = [];
+            variant.evidence_links.push(newEvidence[0] || newEvidence);
+        }
+        
+        // Refresh UI if this variant is selected
+        if (STATE.view.selectedVariant?.id === currentVariantId) {
+            renderVariantDetails(variant);
+        }
+        
+        messageDiv.innerHTML = '<span class="text-[#0e7b4e]">✅ Evidence added successfully!</span>';
+        showNotification('✓ Evidence link added', 'success');
+        
+        // Close modal after success
+        setTimeout(() => {
+            closeAddEvidenceModal();
+        }, 1500);
+        
+    } catch (error) {
+        console.error('❌ Failed to add evidence:', error);
+        messageDiv.innerHTML = `<span class="text-[#b91c1c]">❌ Error: ${error.message}</span>`;
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-save mr-1"></i> Save Evidence';
+    }
+}
+
+// Delete evidence link
+async function deleteEvidence(variantId, evidenceId) {
+    if (!confirm('Are you sure you want to delete this evidence link?')) return;
+    
+    try {
+        const response = await fetch(
+            `${CONFIG.SUPABASE.URL}/rest/v1/evidence_links?id=eq.${evidenceId}`,
+            {
+                method: 'DELETE',
+                headers: {
+                    'apikey': CONFIG.SUPABASE.KEY,
+                    'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`
+                }
+            }
+        );
+        
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        
+        // Update local state
+        const variant = STATE.variants.find(v => v.id === variantId);
+        if (variant && variant.evidence_links) {
+            variant.evidence_links = variant.evidence_links.filter(e => e.id !== evidenceId);
+        }
+        
+        // Refresh UI if this variant is selected
+        if (STATE.view.selectedVariant?.id === variantId) {
+            renderVariantDetails(variant);
+        }
+        
+        // Also close the all evidence modal if open
+        closeAllEvidenceModal();
+        
+        showNotification('✓ Evidence link deleted', 'success');
+        
+    } catch (error) {
+        console.error('❌ Failed to delete evidence:', error);
+        showNotification('Failed to delete evidence link', 'error');
+    }
 }
 function getCurrentDate() {
     return new Date().toISOString().split('T')[0];
@@ -5008,6 +5265,9 @@ function exposeGlobals() {
         showEvidenceModal,
         deleteEvidence,
         copyToClipboard,
+        closeAddEvidenceModal,
+selectEvidenceType,
+saveEvidenceLink,
         
         showNotification
     };
