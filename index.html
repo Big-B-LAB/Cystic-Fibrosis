@@ -3411,7 +3411,7 @@ function renderVariantDetails(variant) {
                               onclick="showAllEvidence(${variant.id})"
                               style="cursor: pointer;">
                             <i class="fas fa-link"></i>
-                            ${variant.evidence_links?.length || 0} sources
+                            ${variant.evidence_links ? variant.evidence_links.length : 0} sources
                         </span>
                         
                         <!-- Add evidence button -->
@@ -3424,9 +3424,11 @@ function renderVariantDetails(variant) {
                 
                 <div class="card-body">
                     <!-- Preview of latest 3 evidence links (scrollable if more) -->
-                    <div class="space-y-2 max-h-[200px] overflow-y-auto pr-2 custom-scrollbar" id="evidencePreview-${variant.id}">
-                        ${renderEvidencePreview(variant)}
-                    </div>
+            <div class="space-y-2 max-h-[200px] overflow-y-auto pr-2 custom-scrollbar" id="evidencePreview-${variant.id}">
+    ${variant.evidence_links && variant.evidence_links.length > 0 
+        ? variant.evidence_links.slice(0,3).map(link => renderEvidenceLink(link)).join('')
+        : '<div class="text-center py-4"><p class="text-sm text-gray-500">No evidence links yet</p></div>'}
+</div>
                     
                     <!-- Source summary (if exists) -->
                     ${variant.source_summary ? `
@@ -3576,7 +3578,31 @@ function createDataPoint(label, value, field, variant, isPrimary = false) {
         </div>
     `;
 }
-
+function renderEvidenceLink(link) {
+    return `
+        <div class="group relative bg-white rounded-lg border border-gray-200 hover:border-[#6d28d9] hover:shadow-md transition-all duration-200 p-3">
+            <div class="flex items-start gap-3">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-[#6d28d9]/10 to-[#6d28d9]/5 flex items-center justify-center flex-shrink-0">
+                    <i class="fas ${getEvidenceIcon(link.type)} text-[#6d28d9] text-sm"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h4 class="text-sm font-semibold text-gray-900 truncate">${escapeHTML(link.title)}</h4>
+                    <div class="flex items-center gap-2 mt-1">
+                        <span class="text-xs bg-[#6d28d9]/10 text-[#6d28d9] px-2 py-0.5 rounded-full">
+                            ${escapeHTML(link.source || link.type)}
+                        </span>
+                        <span class="text-xs text-gray-500">
+                            ${link.year ? link.year : ''}
+                        </span>
+                    </div>
+                    <div class="mt-2 text-xs text-gray-400 truncate">
+                        ${link.url ? link.url.substring(0, 40) + '...' : ''}
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
 // ===================================================================
 // 📝 ANNOTATION SYSTEM - FULL CRUD
 // ===================================================================
