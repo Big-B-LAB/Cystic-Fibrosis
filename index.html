@@ -3249,8 +3249,37 @@ function renderVariantDetails(variant) {
             <div class="card-body" style="background: linear-gradient(145deg, #ffffff, #f9fafb);">
                 <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
                     <div class="flex-1">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="variant-pill">
+                                <i class="fas fa-dna"></i>
+                                <div class="variant-pill-content">
+                                    <span class="variant-pill-primary">${escapeHTML(variant.legacy_name)}</span>
+                                    <span class="variant-pill-secondary">${escapeHTML(variant.protein_name || 'No protein notation')}</span>
+                                </div>
+                            </div>
+                            <div class="flex gap-2">
+                                ${missingCount > 0 ? 
+                                    `<span class="badge" style="background: #ffedd5; color: #b45309; border-color: #fcd34d; border-width: 2px;">
+                                        <i class="fas fa-exclamation-triangle"></i> ${missingCount} missing
+                                    </span>` : 
+                                    `<span class="badge" style="background: #d1fae5; color: #065f46; border-color: #a7f3d0; border-width: 2px;">
+                                        <i class="fas fa-check-circle"></i> Complete
+                                    </span>`
+                                }
+                                ${variant.data_status === 'complete_clinical' ? 
+                                    `<span class="badge" style="background: #e0f2fe; color: #0369a1; border-color: #bae6fd;">
+                                        <i class="fas fa-shield-alt"></i> Validated
+                                    </span>` : ''
+                                }
+                                ${variant.validation_count > 0 ? 
+                                    `<span class="badge" style="background: #0e7c7b; color: white; border: none;">
+                                        <i class="fas fa-check-circle"></i> ✓ ${variant.validation_count}
+                                    </span>` : ''
+                                }
+                            </div>
+                        </div>
                         
-                      <div class="flex flex-wrap gap-2 mb-2">
+                        <div class="flex flex-wrap gap-2 mb-2">
                             ${variant.cftr_class ? `
                                 <span class="badge badge-class-${variant.cftr_class.toLowerCase()} text-sm py-1.5 px-3">
                                     <i class="fas fa-dna"></i> Class ${variant.cftr_class}
