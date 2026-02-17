@@ -4150,6 +4150,250 @@ function validateImport() {
     }
 }
 
+// ===================================================================
+// 🔄 BULK DUPLICATE RESOLUTION - SAVE HOURS OF CLICKING
+// ===================================================================
+
+let bulkImportDecision = null; // 'skip_all', 'update_all', 'merge_all', 'prompt'
+
+async function promptForBulkDuplicateAction(duplicates) {
+    return new Promise((resolve) => {
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.style.zIndex = '100000';
+        
+        // Count duplicates by type
+        const existingCount = duplicates.length;
+        const sampleNames = duplicates.slice(0, 5).map(d => d.name).join(', ');
+        const moreText = existingCount > 5 ? ` and ${existingCount - 5} more` : '';
+        
+        modal.innerHTML = `
+            <div class="modal" style="max-width: 600px;">
+                <div class="modal-header bg-gradient-to-r from-[#b45309]/10 to-white border-b-2 border-[#b45309]">
+                    <h3 class="heading-3 text-gray-900 flex items-center gap-2">
+                        <i class="fas fa-layer-group text-[#b45309]"></i>
+                        <span>Bulk Import: ${existingCount} Duplicates Found</span>
+                    </h3>
+                    <button onclick="this.closest('.modal-overlay').remove()" class="w-9 h-9 rounded-xl hover:bg-gray-200">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="modal-body">
+                    <div class="bg-[#ffedd5] rounded-xl p-5 border border-[#b45309]/20 mb-5">
+                        <div class="flex items-start gap-3">
+                            <div class="w-10 h-10 rounded-full bg-[#b45309]/20 flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-exclamation-triangle text-[#b45309]"></i>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-[#b45309] mb-1">⚠️ Duplicate Variants Detected</p>
+                                <p class="text-sm text-gray-700">
+                                    ${existingCount} of the variants you're importing already exist in the database.
+                                </p>
+                                <p class="text-xs text-gray-600 mt-2 font-mono bg-white/50 p-2 rounded">
+                                    ${escapeHTML(sampleNames)}${moreText}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <p class="text-sm font-medium text-gray-700">How would you like to handle duplicates?</p>
+                        
+                        <!-- Option 1: Skip All -->
+                        <div onclick="selectBulkOption('skip_all')" id="bulk-option-skip" 
+                             class="border-2 rounded-xl p-4 cursor-pointer transition-all hover:border-[#b45309] hover:bg-[#ffedd5]/20">
+                            <div class="flex items-start gap-3">
+                                <div class="w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center flex-shrink-0 mt-0.5" id="radio-skip">
+                                    <div class="w-3 h-3 rounded-full hidden" id="radio-dot-skip"></div>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="font-semibold text-gray-900">Skip all duplicates</p>
+                                    <p class="text-sm text-gray-600 mt-1">
+                                        Keep existing records unchanged. Only import new variants that don't exist yet.
+                                    </p>
+                                    <div class="mt-2 text-xs bg-gray-100 p-2 rounded text-gray-700">
+                                        <i class="fas fa-ban mr-1 text-[#b45309]"></i>
+                                        ${existingCount} variant(s) will be skipped
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Option 2: Update All -->
+                        <div onclick="selectBulkOption('update_all')" id="bulk-option-update" 
+                             class="border-2 rounded-xl p-4 cursor-pointer transition-all hover:border-[#0e7c7b] hover:bg-[#f0fdfa]">
+                            <div class="flex items-start gap-3">
+                                <div class="w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center flex-shrink-0 mt-0.5" id="radio-update">
+                                    <div class="w-3 h-3 rounded-full hidden" id="radio-dot-update"></div>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="font-semibold text-gray-900">Update all existing records</p>
+                                    <p class="text-sm text-gray-600 mt-1">
+                                        Overwrite existing variants with imported data. Missing fields in import will be set to empty.
+                                    </p>
+                                    <div class="mt-2 text-xs bg-blue-50 p-2 rounded text-blue-700">
+                                        <i class="fas fa-sync-alt mr-1"></i>
+                                        ${existingCount} variant(s) will be UPDATED
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Option 3: Merge (only update fields that are empty in current) -->
+                        <div onclick="selectBulkOption('merge_all')" id="bulk-option-merge" 
+                             class="border-2 rounded-xl p-4 cursor-pointer transition-all hover:border-[#6d28d9] hover:bg-[#f5f0ff]">
+                            <div class="flex items-start gap-3">
+                                <div class="w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center flex-shrink-0 mt-0.5" id="radio-merge">
+                                    <div class="w-3 h-3 rounded-full hidden" id="radio-dot-merge"></div>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="font-semibold text-gray-900">Merge (smart update)</p>
+                                    <p class="text-sm text-gray-600 mt-1">
+                                        Only update fields that are empty in the current database. Keep existing data where present.
+                                    </p>
+                                    <div class="mt-2 text-xs bg-purple-50 p-2 rounded text-purple-700">
+                                        <i class="fas fa-code-branch mr-1"></i>
+                                        Preserves existing data, fills in missing fields
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Option 4: Prompt for each -->
+                        <div onclick="selectBulkOption('prompt')" id="bulk-option-prompt" 
+                             class="border-2 rounded-xl p-4 cursor-pointer transition-all hover:border-gray-400 hover:bg-gray-50">
+                            <div class="flex items-start gap-3">
+                                <div class="w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center flex-shrink-0 mt-0.5" id="radio-prompt">
+                                    <div class="w-3 h-3 rounded-full hidden" id="radio-dot-prompt"></div>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="font-semibold text-gray-900">Ask me for each duplicate</p>
+                                    <p class="text-sm text-gray-600 mt-1">
+                                        Review each duplicate one by one (slower but gives you full control).
+                                    </p>
+                                    <div class="mt-2 text-xs bg-gray-100 p-2 rounded text-gray-700">
+                                        <i class="fas fa-question-circle mr-1"></i>
+                                        You'll see ${existingCount} prompts
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Preview of what will happen -->
+                    <div class="mt-6 bg-gray-50 rounded-xl p-4 border border-gray-200" id="bulk-preview">
+                        <p class="text-xs font-bold text-gray-500 mb-2 flex items-center gap-1">
+                            <i class="fas fa-eye"></i>
+                            Preview
+                        </p>
+                        <p class="text-sm text-gray-700" id="bulk-preview-text">
+                            Select an option above to see what will happen
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="modal-footer flex-col sm:flex-row gap-3">
+                    <div class="flex-1 text-xs text-gray-500">
+                        <i class="fas fa-clock mr-1"></i>
+                        This choice will apply to ALL ${existingCount} duplicates
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="cancelBulkImport()" class="btn btn-secondary">
+                            Cancel Import
+                        </button>
+                        <button onclick="confirmBulkOption()" class="btn btn-primary" id="bulk-confirm-btn" disabled>
+                            <i class="fas fa-check mr-1"></i> Apply & Continue
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Store resolve function globally for this modal
+        window.bulkResolve = resolve;
+    });
+}
+
+// Select bulk option
+function selectBulkOption(option) {
+    bulkImportDecision = option;
+    
+    // Reset all radio buttons
+    ['skip', 'update', 'merge', 'prompt'].forEach(opt => {
+        const radio = document.getElementById(`radio-${opt}`);
+        const dot = document.getElementById(`radio-dot-${opt}`);
+        if (radio) {
+            radio.classList.remove('border-[#b45309]', 'border-[#0e7c7b]', 'border-[#6d28d9]');
+            radio.classList.add('border-gray-300');
+        }
+        if (dot) dot.classList.add('hidden');
+    });
+    
+    // Highlight selected
+    const selectedRadio = document.getElementById(`radio-${option}`);
+    const selectedDot = document.getElementById(`radio-dot-${option}`);
+    const borders = {
+        'skip_all': '#b45309',
+        'update_all': '#0e7c7b',
+        'merge_all': '#6d28d9',
+        'prompt': '#6b7280'
+    };
+    
+    if (selectedRadio) {
+        selectedRadio.classList.remove('border-gray-300');
+        selectedRadio.style.borderColor = borders[option];
+    }
+    if (selectedDot) {
+        selectedDot.classList.remove('hidden');
+        selectedDot.style.backgroundColor = borders[option];
+    }
+    
+    // Update preview
+    const preview = document.getElementById('bulk-preview-text');
+    const previews = {
+        'skip_all': '⏭️ All duplicate variants will be SKIPPED. Only new variants will be imported.',
+        'update_all': '✏️ All existing variants will be OVERWRITTEN with imported data.',
+        'merge_all': '🔄 SMART MERGE: Only empty fields will be filled. Existing data preserved.',
+        'prompt': '❓ You will be prompted for each of the duplicate variants.'
+    };
+    if (preview) preview.textContent = previews[option];
+    
+    // Enable confirm button
+    const confirmBtn = document.getElementById('bulk-confirm-btn');
+    if (confirmBtn) confirmBtn.disabled = false;
+}
+
+function cancelBulkImport() {
+    // Close modal and resolve with 'cancel'
+    const modal = document.querySelector('.modal-overlay:last-child');
+    if (modal) modal.remove();
+    
+    if (window.bulkResolve) {
+        window.bulkResolve('cancel');
+        window.bulkResolve = null;
+    }
+    bulkImportDecision = null;
+}
+
+function confirmBulkOption() {
+    // Close modal and resolve with selected option
+    const modal = document.querySelector('.modal-overlay:last-child');
+    if (modal) modal.remove();
+    
+    if (window.bulkResolve) {
+        window.bulkResolve(bulkImportDecision);
+        window.bulkResolve = null;
+    }
+    // Don't reset bulkImportDecision yet - it's needed for the import loop
+}
+
+// ===================================================================
+// 📥 MODIFIED JSON IMPORT WITH BULK DUPLICATE HANDLING
+// ===================================================================
+
 async function executeJsonImport() {
     if (!STATE.ui.validatedJson) {
         showNotification('Please validate JSON first', 'warning');
@@ -4175,107 +4419,105 @@ async function executeJsonImport() {
             errors: []
         };
         
-        for (const data of importData) {
-            try {
-                const required = ['variant_legacy_name', 'variant_protein_name', 
-                                 'variant_cDNA_name', 'variant_final_determination'];
-                const missing = required.filter(f => !data[f]);
-                
-                if (missing.length) {
-                    results.errors.push({
-                        name: data.variant_legacy_name || 'UNKNOWN',
-                        reason: `Missing fields: ${missing.join(', ')}`
-                    });
-                    continue;
-                }
-                
-                const name = data.variant_legacy_name;
-                
-                const existingVariant = STATE.variants.find(v => 
-                    v.legacy_name && v.legacy_name.toLowerCase() === name.toLowerCase()
-                );
-                
-                if (existingVariant) {
-                    const shouldUpdate = await promptUserForDuplicateAction(name, existingVariant);
-                    
-                    if (shouldUpdate === 'skip') {
-                        results.skipped.push(name);
-                        continue;
-                    } else if (shouldUpdate === 'update') {
-                        await updateVariantField(existingVariant.id, 'protein_name', data.variant_protein_name);
-                        await updateVariantField(existingVariant.id, 'cdna_name', data.variant_cDNA_name);
-                        await updateVariantField(existingVariant.id, 'final_determination', data.variant_final_determination);
-                        
-                        if (data.cftr_class) await updateVariantField(existingVariant.id, 'cftr_class', data.cftr_class);
-                        if (data.eti_prediction) await updateVariantField(existingVariant.id, 'eti_prediction', data.eti_prediction);
-                        
-                        results.updated.push(name);
-                        continue;
-                    }
-                }
-                
-                const insertResponse = await fetch(`${CONFIG.SUPABASE.URL}/rest/v1/variants`, {
-                    method: 'POST',
-                    headers: {
-                        'apikey': CONFIG.SUPABASE.KEY,
-                        'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`,
-                        'Content-Type': 'application/json',
-                        'Prefer': 'return=representation'
-                    },
-                    body: JSON.stringify({
-                        legacy_name: data.variant_legacy_name,
-                        protein_name: data.variant_protein_name,
-                        cdna_name: data.variant_cDNA_name,
-                        final_determination: data.variant_final_determination,
-                        cftr_class: data.cftr_class || null,
-                        eti_prediction: data.eti_prediction || null,
-                        data_status: 'minimal',
-                        source_summary: 'Manual_JSON_Import',
-                        validation_count: 0,
-                        created_at: new Date().toISOString(),
-                        updated_at: new Date().toISOString()
-                    })
+        // First, identify all duplicates
+        const duplicates = [];
+        const newVariants = [];
+        
+        importData.forEach((data, index) => {
+            const name = data.variant_legacy_name;
+            const existing = STATE.variants.find(v => 
+                v.legacy_name && v.legacy_name.toLowerCase() === name.toLowerCase()
+            );
+            
+            if (existing) {
+                duplicates.push({
+                    index,
+                    name,
+                    data,
+                    existing
                 });
+            } else {
+                newVariants.push({
+                    index,
+                    name,
+                    data
+                });
+            }
+        });
+        
+        // If there are duplicates, ask user for bulk action
+        let duplicateAction = null;
+        if (duplicates.length > 0) {
+            if (duplicates.length === 1) {
+                // Single duplicate - use existing prompt
+                const shouldUpdate = await promptUserForDuplicateAction(duplicates[0].name, duplicates[0].existing);
+                duplicateAction = shouldUpdate === 'update' ? 'update_all' : 'skip_all';
+            } else {
+                // Multiple duplicates - show bulk modal
+                duplicateAction = await promptForBulkDuplicateAction(duplicates);
                 
-                if (!insertResponse.ok) {
-                    throw new Error(`HTTP ${insertResponse.status}`);
+                if (duplicateAction === 'cancel') {
+                    showNotification('Import cancelled', 'warning');
+                    btn.disabled = false;
+                    btn.innerHTML = originalHTML;
+                    return;
                 }
-                
-                const insertedData = await insertResponse.json();
-                const savedVariant = insertedData[0];
-                
-                const newVariant = {
-                    id: savedVariant.id,
-                    legacy_name: savedVariant.legacy_name,
-                    protein_name: savedVariant.protein_name,
-                    cdna_name: savedVariant.cdna_name,
-                    final_determination: savedVariant.final_determination,
-                    cftr_class: savedVariant.cftr_class,
-                    eti_prediction: savedVariant.eti_prediction,
-                    class_subtype: savedVariant.class_subtype,
-                    class_confidence: savedVariant.class_confidence,
-                    data_status: savedVariant.data_status,
-                    source_summary: savedVariant.source_summary,
-                    validation_count: 0,
-                    created_at: savedVariant.created_at,
-                    updated_at: savedVariant.updated_at
-                };
-                
-                STATE.variants.push(newVariant);
-                STATE.variantsByLegacyName.set(newVariant.legacy_name, newVariant);
-                STATE.variantsById.set(newVariant.id, newVariant);
-                
-                results.added.push(name);
-                
+            }
+        }
+        
+        // Process new variants (always added)
+        for (const item of newVariants) {
+            try {
+                await insertNewVariant(item.data);
+                results.added.push(item.name);
             } catch (error) {
-                console.error('❌ Import failed for variant:', error);
                 results.errors.push({
-                    name: data.variant_legacy_name || 'UNKNOWN',
+                    name: item.name,
                     reason: error.message
                 });
             }
         }
         
+        // Process duplicates based on selected action
+        for (const dup of duplicates) {
+            try {
+                if (duplicateAction === 'skip_all') {
+                    results.skipped.push(dup.name);
+                    continue;
+                }
+                
+                if (duplicateAction === 'update_all') {
+                    await updateExistingVariant(dup.existing.id, dup.data, false);
+                    results.updated.push(dup.name);
+                    continue;
+                }
+                
+                if (duplicateAction === 'merge_all') {
+                    await updateExistingVariant(dup.existing.id, dup.data, true);
+                    results.updated.push(dup.name);
+                    continue;
+                }
+                
+                if (duplicateAction === 'prompt') {
+                    // Prompt for each one individually
+                    const shouldUpdate = await promptUserForDuplicateAction(dup.name, dup.existing);
+                    
+                    if (shouldUpdate === 'update') {
+                        await updateExistingVariant(dup.existing.id, dup.data, false);
+                        results.updated.push(dup.name);
+                    } else {
+                        results.skipped.push(dup.name);
+                    }
+                }
+            } catch (error) {
+                results.errors.push({
+                    name: dup.name,
+                    reason: error.message
+                });
+            }
+        }
+        
+        // Refresh data if any changes were made
         if (results.added.length > 0 || results.updated.length > 0) {
             buildSearchIndex();
             calculateMasterStats();
@@ -4288,12 +4530,14 @@ async function executeJsonImport() {
         }
         
         showImportSummary(results);
-        
         clearImportForm();
         
-        if (importData.length === 1) {
+        if (importData.length === 1 && results.added.length === 1) {
             setTimeout(closeImportModal, 2500);
         }
+        
+        // Reset bulk decision
+        bulkImportDecision = null;
         
     } catch (error) {
         console.error('❌ Import failed:', error);
@@ -4302,6 +4546,116 @@ async function executeJsonImport() {
         btn.disabled = false;
         btn.innerHTML = originalHTML;
         STATE.ui.validatedJson = null;
+    }
+}
+
+// Helper: Insert new variant
+async function insertNewVariant(data) {
+    const insertResponse = await fetch(`${CONFIG.SUPABASE.URL}/rest/v1/variants`, {
+        method: 'POST',
+        headers: {
+            'apikey': CONFIG.SUPABASE.KEY,
+            'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=representation'
+        },
+        body: JSON.stringify({
+            legacy_name: data.variant_legacy_name,
+            protein_name: data.variant_protein_name,
+            cdna_name: data.variant_cDNA_name,
+            final_determination: data.variant_final_determination,
+            cftr_class: data.cftr_class || null,
+            eti_prediction: data.eti_prediction || null,
+            data_status: 'minimal',
+            source_summary: 'Manual_JSON_Import',
+            validation_count: 0,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+        })
+    });
+    
+    if (!insertResponse.ok) throw new Error(`HTTP ${insertResponse.status}`);
+    
+    const insertedData = await insertResponse.json();
+    const savedVariant = insertedData[0];
+    
+    const newVariant = {
+        id: savedVariant.id,
+        legacy_name: savedVariant.legacy_name,
+        protein_name: savedVariant.protein_name,
+        cdna_name: savedVariant.cdna_name,
+        final_determination: savedVariant.final_determination,
+        cftr_class: savedVariant.cftr_class,
+        eti_prediction: savedVariant.eti_prediction,
+        class_subtype: savedVariant.class_subtype,
+        class_confidence: savedVariant.class_confidence,
+        data_status: savedVariant.data_status,
+        source_summary: savedVariant.source_summary,
+        validation_count: 0,
+        created_at: savedVariant.created_at,
+        updated_at: savedVariant.updated_at
+    };
+    
+    STATE.variants.push(newVariant);
+    STATE.variantsByLegacyName.set(newVariant.legacy_name, newVariant);
+    STATE.variantsById.set(newVariant.id, newVariant);
+}
+
+// Helper: Update existing variant
+async function updateExistingVariant(id, data, mergeMode = false) {
+    if (mergeMode) {
+        // Get current variant
+        const current = STATE.variants.find(v => v.id === id);
+        
+        // Only update fields that are empty/null in current
+        const updates = {};
+        if (!current.protein_name && data.variant_protein_name) 
+            updates.protein_name = data.variant_protein_name;
+        if (!current.cdna_name && data.variant_cDNA_name) 
+            updates.cdna_name = data.variant_cDNA_name;
+        if (!current.final_determination && data.variant_final_determination) 
+            updates.final_determination = data.variant_final_determination;
+        if (!current.cftr_class && data.cftr_class) 
+            updates.cftr_class = data.cftr_class;
+        if (!current.eti_prediction && data.eti_prediction) 
+            updates.eti_prediction = data.eti_prediction;
+        
+        if (Object.keys(updates).length === 0) {
+            return; // Nothing to update
+        }
+        
+        updates.updated_at = new Date().toISOString();
+        
+        await fetch(
+            `${CONFIG.SUPABASE.URL}/rest/v1/variants?id=eq.${id}`,
+            {
+                method: 'PATCH',
+                headers: {
+                    'apikey': CONFIG.SUPABASE.KEY,
+                    'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`,
+                    'Content-Type': 'application/json',
+                    'Prefer': 'return=minimal'
+                },
+                body: JSON.stringify(updates)
+            }
+        );
+        
+        // Update local state
+        const index = STATE.variants.findIndex(v => v.id === id);
+        if (index !== -1) {
+            STATE.variants[index] = { ...STATE.variants[index], ...updates };
+            STATE.variantsById.set(id, STATE.variants[index]);
+            STATE.variantsByLegacyName.set(STATE.variants[index].legacy_name, STATE.variants[index]);
+        }
+        
+    } else {
+        // Overwrite mode - update all fields
+        await updateVariantField(id, 'protein_name', data.variant_protein_name);
+        await updateVariantField(id, 'cdna_name', data.variant_cDNA_name);
+        await updateVariantField(id, 'final_determination', data.variant_final_determination);
+        
+        if (data.cftr_class) await updateVariantField(id, 'cftr_class', data.cftr_class);
+        if (data.eti_prediction) await updateVariantField(id, 'eti_prediction', data.eti_prediction);
     }
 }
 
