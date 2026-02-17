@@ -3266,11 +3266,7 @@ function renderVariantDetails(variant) {
                                         <i class="fas fa-check-circle"></i> Complete
                                     </span>`
                                 }
-                                ${variant.data_status === 'complete_clinical' ? 
-                                    `<span class="badge" style="background: #e0f2fe; color: #0369a1; border-color: #bae6fd;">
-                                        <i class="fas fa-shield-alt"></i> Validated
-                                    </span>` : ''
-                                }
+                            
                                 ${variant.validation_count > 0 ? 
                                     `<span class="badge" style="background: #0e7c7b; color: white; border: none;">
                                         <i class="fas fa-check-circle"></i> ✓ ${variant.validation_count}
