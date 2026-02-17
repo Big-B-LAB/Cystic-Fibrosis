@@ -3225,7 +3225,16 @@ async function loadValidationHistory(variantId) {
 // ===================================================================
 // 🔬 VARIANT DETAILS - COMPREHENSIVE DISPLAY
 // ===================================================================
-
+function getClassColor(cftrClass) {
+    const colors = {
+        'I': '#b91c1c',
+        'II': '#b45309',
+        'III': '#0f766e',
+        'IV': '#1e40af',
+        'V': '#6d28d9'
+    };
+    return colors[cftrClass] || '#374151';
+}
 // ===================================================================
 // 🔬 VARIANT INTELLIGENCE DASHBOARD - NEXT GENERATION
 // ===================================================================
