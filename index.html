@@ -4318,23 +4318,38 @@ async function promptForBulkDuplicateAction(duplicates) {
 }
 
 // Select bulk option
+// Select bulk option
 function selectBulkOption(option) {
     bulkImportDecision = option;
     
-    // Reset all radio buttons
+    // Reset all radio buttons and remove checkmarks
     ['skip', 'update', 'merge', 'prompt'].forEach(opt => {
         const radio = document.getElementById(`radio-${opt}`);
         const dot = document.getElementById(`radio-dot-${opt}`);
+        const parent = document.getElementById(`bulk-option-${opt}`);
+        
         if (radio) {
-            radio.classList.remove('border-[#b45309]', 'border-[#0e7c7b]', 'border-[#6d28d9]');
+            radio.classList.remove('border-[#b45309]', 'border-[#0e7c7b]', 'border-[#6d28d9]', 'border-[#6b7280]');
             radio.classList.add('border-gray-300');
+            radio.style.backgroundColor = 'transparent';
+            
+            // Remove any existing checkmark icon
+            const existingIcon = radio.querySelector('i');
+            if (existingIcon) existingIcon.remove();
         }
         if (dot) dot.classList.add('hidden');
+        
+        // Remove background highlight from parent
+        if (parent) {
+            parent.classList.remove('bg-[#ffedd5]/20', 'bg-[#f0fdfa]', 'bg-[#f5f0ff]', 'bg-gray-50');
+        }
     });
     
-    // Highlight selected
+    // Highlight selected option with both radio AND checkmark
     const selectedRadio = document.getElementById(`radio-${option}`);
     const selectedDot = document.getElementById(`radio-dot-${option}`);
+    const selectedParent = document.getElementById(`bulk-option-${option}`);
+    
     const borders = {
         'skip_all': '#b45309',
         'update_all': '#0e7c7b',
@@ -4342,13 +4357,43 @@ function selectBulkOption(option) {
         'prompt': '#6b7280'
     };
     
+    const backgrounds = {
+        'skip_all': 'bg-[#ffedd5]/20',
+        'update_all': 'bg-[#f0fdfa]',
+        'merge_all': 'bg-[#f5f0ff]',
+        'prompt': 'bg-gray-50'
+    };
+    
     if (selectedRadio) {
+        // Style the radio border
         selectedRadio.classList.remove('border-gray-300');
         selectedRadio.style.borderColor = borders[option];
+        selectedRadio.style.backgroundColor = borders[option];
+        
+        // Add a white checkmark inside the colored radio
+        const checkIcon = document.createElement('i');
+        checkIcon.className = 'fas fa-check text-white text-xs';
+        checkIcon.style.position = 'absolute';
+        checkIcon.style.top = '50%';
+        checkIcon.style.left = '50%';
+        checkIcon.style.transform = 'translate(-50%, -50%)';
+        
+        // Clear any existing content and add checkmark
+        selectedRadio.innerHTML = '';
+        selectedRadio.appendChild(checkIcon);
+        selectedRadio.style.display = 'flex';
+        selectedRadio.style.alignItems = 'center';
+        selectedRadio.style.justifyContent = 'center';
     }
+    
     if (selectedDot) {
         selectedDot.classList.remove('hidden');
         selectedDot.style.backgroundColor = borders[option];
+    }
+    
+    // Add background highlight to parent
+    if (selectedParent) {
+        selectedParent.classList.add(backgrounds[option]);
     }
     
     // Update preview
