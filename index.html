@@ -3226,278 +3226,382 @@ async function loadValidationHistory(variantId) {
 // 🔬 VARIANT DETAILS - COMPREHENSIVE DISPLAY
 // ===================================================================
 
+// ===================================================================
+// 🔬 VARIANT INTELLIGENCE DASHBOARD - NEXT GENERATION
+// ===================================================================
+
 function renderVariantDetails(variant) {
     if (!variant) return;
     
     STATE.view.selectedVariant = variant;
-    const isExceptional = variant.class_subtype === 'exceptional';
-    const isResponsive = variant.eti_prediction === 'responsive';
     const evidenceCount = variant.evidence_links ? variant.evidence_links.length : 0;
     
-    // Helper function to get class color
-    function getClassColor(cftrClass) {
-        const colors = {
-            'I': '#b91c1c',
-            'II': '#b45309',
-            'III': '#0f766e',
-            'IV': '#1e40af',
-            'V': '#6d28d9'
-        };
-        return colors[cftrClass] || '#374151';
-    }
+    // Calculate completeness percentage
+    const fields = [
+        variant.legacy_name, variant.protein_name, variant.cdna_name,
+        variant.final_determination, variant.cftr_class, variant.class_subtype,
+        variant.class_confidence, variant.eti_prediction, variant.eti_evidence_level
+    ];
+    const filledFields = fields.filter(f => f && f !== 'null' && f !== 'undefined' && f !== '').length;
+    const completeness = Math.round((filledFields / fields.length) * 100);
     
     const detailsHTML = `
-        <!-- TOP SECTION: Variant Identity + Key Classifications -->
-        <div class="card mb-4">
+        <!-- ===================================================================
+             VARIANT INTELLIGENCE DASHBOARD v2.0 - CLINICAL GRADE
+             =================================================================== -->
+        
+        <!-- HEADER SECTION - Variant Identity with Visual Status -->
+        <div class="card mb-4 overflow-hidden border-0 shadow-lg" style="background: linear-gradient(145deg, #ffffff, #f8fafc);">
+            <div class="relative h-2 w-full bg-gradient-to-r from-[#0e7c7b] via-[#6d28d9] to-[#b45309]"></div>
             <div class="card-body">
-                <div class="flex flex-wrap items-start justify-between gap-4">
-                    <div>
-                        <div class="flex items-center gap-3 mb-3">
-                            <span class="text-2xl font-bold font-mono">${escapeHTML(variant.legacy_name)}</span>
-                            ${variant.protein_name ? 
-                                `<span class="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">${escapeHTML(variant.protein_name)}</span>` : ''}
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                    
+                    <!-- Left: Variant Name & Protein -->
+                    <div class="flex-1">
+                        <div class="flex items-center gap-4 mb-3">
+                            <div class="relative">
+                                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#0a2e5a] to-[#1a4a7a] flex items-center justify-center shadow-lg shadow-[#0a2e5a]/30">
+                                    <i class="fas fa-dna text-white text-2xl"></i>
+                                </div>
+                                ${variant.validation_count > 0 ? `
+                                    <div class="absolute -top-2 -right-2 w-6 h-6 bg-[#0e7c7b] rounded-full border-2 border-white flex items-center justify-center shadow-lg">
+                                        <i class="fas fa-check text-white text-xs"></i>
+                                    </div>
+                                ` : ''}
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-3 flex-wrap">
+                                    <h1 class="text-3xl font-bold font-mono tracking-tight text-gray-900">${escapeHTML(variant.legacy_name)}</h1>
+                                    ${variant.protein_name ? 
+                                        `<span class="text-sm bg-gray-100 text-gray-700 px-4 py-1.5 rounded-full border border-gray-200 shadow-sm">
+                                            <i class="fas fa-code-branch mr-1 text-gray-500"></i>${escapeHTML(variant.protein_name)}
+                                        </span>` : ''}
+                                </div>
+                                <div class="flex items-center gap-4 mt-2 text-sm text-gray-600">
+                                    ${variant.cdna_name ? 
+                                        `<span><i class="fas fa-dna mr-1 text-[#0e7c7b]"></i>${escapeHTML(variant.cdna_name)}</span>` : ''}
+                                    ${variant.source_summary ? 
+                                        `<span><i class="fas fa-database mr-1 text-[#6d28d9]"></i>${escapeHTML(variant.source_summary)}</span>` : ''}
+                                    ${variant.updated_at ? 
+                                        `<span><i class="far fa-clock mr-1 text-[#b45309]"></i>Updated ${timeAgo(variant.updated_at)}</span>` : ''}
+                                </div>
+                            </div>
                         </div>
                         
-                        <!-- Classification Chips -->
-                        <div class="flex flex-wrap gap-2">
+                        <!-- Classification Chips - Beautiful & Informative -->
+                        <div class="flex flex-wrap gap-2 mt-4">
                             ${variant.cftr_class ? `
-                                <span class="px-3 py-1.5 rounded-full text-xs font-bold" 
-                                      style="background: ${getClassColor(variant.cftr_class)}15; color: ${getClassColor(variant.cftr_class)}; border: 1px solid ${getClassColor(variant.cftr_class)}30">
-                                    <i class="fas fa-dna mr-1"></i>Class ${variant.cftr_class}
-                                    ${isExceptional ? '• Exceptional' : variant.class_subtype === 'true' ? '• True Class I' : ''}
-                                </span>
+                                <div class="group relative">
+                                    <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5 cursor-help"
+                                          style="background: ${getClassColor(variant.cftr_class)}15; color: ${getClassColor(variant.cftr_class)}; border: 1px solid ${getClassColor(variant.cftr_class)}30">
+                                        <i class="fas fa-dna mr-2"></i>Class ${variant.cftr_class}
+                                        ${variant.class_subtype === 'exceptional' ? 
+                                            '<span class="ml-2 bg-yellow-400 text-yellow-900 px-2 py-0.5 rounded-full text-[10px] font-bold">EXCEPTIONAL</span>' : 
+                                            variant.class_subtype === 'true' ? 
+                                            '<span class="ml-2 bg-red-400 text-white px-2 py-0.5 rounded-full text-[10px] font-bold">TRUE CLASS I</span>' : ''}
+                                    </span>
+                                    <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-xl z-50">
+                                        ${CONFIG.CLASSES.LABELS[variant.cftr_class] || 'CFTR Functional Class'}
+                                    </div>
+                                </div>
                             ` : ''}
                             
                             ${variant.eti_prediction ? `
-                                <span class="px-3 py-1.5 rounded-full text-xs font-bold"
-                                      style="background: ${isResponsive ? '#0f766e15' : '#b91c1c15'}; 
-                                             color: ${isResponsive ? '#0f766e' : '#b91c1c'};
-                                             border: 1px solid ${isResponsive ? '#0f766e30' : '#b91c1c30'}">
-                                    <i class="fas ${isResponsive ? 'fa-check' : 'fa-times'} mr-1"></i>
-                                    ETI ${isResponsive ? 'Responsive' : 'Non-responsive'}
+                                <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold shadow-sm"
+                                      style="background: ${variant.eti_prediction === 'responsive' ? '#0f766e15' : '#b91c1c15'}; 
+                                             color: ${variant.eti_prediction === 'responsive' ? '#0f766e' : '#b91c1c'};
+                                             border: 1px solid ${variant.eti_prediction === 'responsive' ? '#0f766e30' : '#b91c1c30'}">
+                                    <i class="fas ${variant.eti_prediction === 'responsive' ? 'fa-bolt' : 'fa-times-circle'} mr-2"></i>
+                                    ETI ${variant.eti_prediction === 'responsive' ? 'RESPONSIVE' : 'NON-RESPONSIVE'}
+                                    ${variant.eti_evidence_level ? 
+                                        `<span class="ml-2 bg-white/30 px-2 py-0.5 rounded-full text-[10px]">${variant.eti_evidence_level}</span>` : ''}
                                 </span>
                             ` : ''}
                             
                             ${variant.final_determination ? `
-                                <span class="px-3 py-1.5 rounded-full text-xs font-bold bg-gray-100 text-gray-700 border border-gray-300">
-                                    <i class="fas fa-clipboard-check mr-1"></i>${escapeHTML(variant.final_determination)}
+                                <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold bg-gray-100 text-gray-700 border border-gray-300 shadow-sm">
+                                    <i class="fas fa-clipboard-check mr-2 text-gray-600"></i>
+                                    ${escapeHTML(variant.final_determination)}
                                 </span>
                             ` : ''}
                             
-                            ${variant.class_confidence ? `
-                                <span class="px-3 py-1.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600">
-                                    <i class="fas fa-chart-line mr-1"></i>${escapeHTML(variant.class_confidence)}
+                            ${variant.population_frequency ? `
+                                <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold bg-blue-50 text-blue-700 border border-blue-200 shadow-sm">
+                                    <i class="fas fa-globe mr-2"></i>
+                                    AF: ${variant.population_frequency}
                                 </span>
                             ` : ''}
                         </div>
                     </div>
                     
-                    <!-- Quick Stats Cards -->
-                    <div class="flex gap-3">
-                        ${variant.validation_count > 0 ? `
-                            <div class="bg-[#0e7c7b] text-white px-4 py-2 rounded-xl text-center min-w-[80px]">
-                                <div class="text-xl font-bold">${variant.validation_count}</div>
-                                <div class="text-[10px] opacity-90">validation${variant.validation_count > 1 ? 's' : ''}</div>
+                    <!-- Right: Key Metrics Dashboard -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-3 min-w-[200px]">
+                        <!-- Validation Metric -->
+                        <div class="bg-white rounded-xl p-4 text-center border-2 ${variant.validation_count > 0 ? 'border-[#0e7c7b] shadow-lg' : 'border-gray-200'} transition-all hover:shadow-md">
+                            <div class="text-2xl font-bold ${variant.validation_count > 0 ? 'text-[#0e7c7b]' : 'text-gray-400'}">
+                                ${variant.validation_count || 0}
                             </div>
-                        ` : ''}
+                            <div class="text-xs font-medium text-gray-500 mt-1">VALIDATIONS</div>
+                            ${variant.last_validator_name ? `
+                                <div class="text-[10px] text-gray-400 mt-1 truncate" title="${variant.last_validator_name} (${variant.last_validator_role || 'Clinician'})">
+                                    <i class="fas fa-user-md mr-1"></i>${escapeHTML(variant.last_validator_name)}
+                                </div>
+                            ` : ''}
+                        </div>
                         
-                        <div class="bg-[#6d28d9] text-white px-4 py-2 rounded-xl text-center min-w-[80px] ${evidenceCount === 0 ? 'opacity-50' : ''}">
-                            <div class="text-xl font-bold">${evidenceCount}</div>
-                            <div class="text-[10px] opacity-90">evidence</div>
+                        <!-- Evidence Metric -->
+                        <div class="bg-white rounded-xl p-4 text-center border-2 ${evidenceCount > 0 ? 'border-[#6d28d9] shadow-lg' : 'border-gray-200'} transition-all hover:shadow-md">
+                            <div class="text-2xl font-bold ${evidenceCount > 0 ? 'text-[#6d28d9]' : 'text-gray-400'}">
+                                ${evidenceCount}
+                            </div>
+                            <div class="text-xs font-medium text-gray-500 mt-1">EVIDENCE</div>
+                            <div class="text-[10px] text-gray-400 mt-1">sources</div>
+                        </div>
+                        
+                        <!-- Completeness Metric -->
+                        <div class="bg-white rounded-xl p-4 text-center border-2 border-gray-200 col-span-2 lg:col-span-2">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-xs font-medium text-gray-500">DATA QUALITY</span>
+                                <span class="text-xs font-bold ${completeness > 80 ? 'text-[#0e7c7b]' : completeness > 50 ? 'text-[#b45309]' : 'text-[#b91c1c]'}">${completeness}%</span>
+                            </div>
+                            <div class="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                                <div class="h-full rounded-full transition-all duration-500 ease-out"
+                                     style="width: ${completeness}%; background: ${completeness > 80 ? '#0e7c7b' : completeness > 50 ? '#b45309' : '#b91c1c'};">
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-                
-                <!-- Metadata Line -->
-                <div class="mt-4 pt-3 border-t border-gray-100 text-xs text-gray-500 flex flex-wrap gap-4">
-                    ${variant.source_summary ? 
-                        `<span><i class="fas fa-database mr-1"></i>Source: ${escapeHTML(variant.source_summary)}</span>` : ''}
-                    ${variant.last_validated_at ? 
-                        `<span><i class="fas fa-calendar-check mr-1"></i>Last validated: ${formatDate(variant.last_validated_at)} by ${escapeHTML(variant.last_validator_name || 'Unknown')}</span>` : ''}
-                    ${variant.updated_at ? 
-                        `<span><i class="fas fa-clock mr-1"></i>Updated: ${formatDate(variant.updated_at)}</span>` : ''}
-                    ${variant.population_frequency ? 
-                        `<span><i class="fas fa-globe mr-1"></i>AF: ${variant.population_frequency}</span>` : ''}
-                    ${variant.pubmed_ids ? 
-                        `<span><i class="fas fa-book mr-1"></i>PMID: ${variant.pubmed_ids}</span>` : ''}
                 </div>
             </div>
         </div>
         
-        <!-- MAIN GRID: 2 columns for data + 1 column for actions -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <!-- MAIN GRID: 3-Column Layout for Maximum Information Density -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
             
-            <!-- LEFT COLUMN: Nomenclature & Clinical Impact -->
-            <div class="lg:col-span-2 space-y-4">
-                <!-- Nomenclature Grid -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    ${createDataPoint('Legacy Name', variant.legacy_name, 'legacy_name', variant, true)}
-                    ${createDataPoint('Protein', variant.protein_name, 'protein_name', variant)}
-                    ${createDataPoint('cDNA', variant.cdna_name, 'cdna_name', variant)}
-                </div>
-                
-                <!-- Clinical Impact & Therapeutic Prediction side by side -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <!-- Clinical Impact Card -->
-                    <div class="card">
-                        <div class="card-header bg-gradient-to-r from-[#fef2f2] to-white border-b-2 border-[#b91c1c]/20 py-2">
-                            <i class="fas fa-stethoscope text-[#b91c1c] text-sm"></i>
-                            <span class="text-sm font-bold">Clinical Impact</span>
-                        </div>
-                        <div class="card-body p-4 space-y-2">
-                            ${createCompactDataPoint('Determination', variant.final_determination, 'final_determination', variant)}
-                            ${createCompactDataPoint('CFTR Class', variant.cftr_class, 'cftr_class', variant)}
-                            ${createCompactDataPoint('Subtype', variant.class_subtype, 'class_subtype', variant)}
-                            ${createCompactDataPoint('Confidence', variant.class_confidence, 'class_confidence', variant)}
-                        </div>
+            <!-- Column 1: Nomenclature & Basic IDs (3 cols) -->
+            <div class="lg:col-span-3 space-y-4">
+                <div class="card h-full">
+                    <div class="card-header bg-gradient-to-r from-[#f9fafb] to-white py-3">
+                        <i class="fas fa-tags text-[#0a2e5a]"></i>
+                        <span class="font-semibold">Variant Identifiers</span>
                     </div>
-                    
-                    <!-- Therapeutic Prediction Card -->
-                    <div class="card">
-                        <div class="card-header bg-gradient-to-r from-[#f0fdfa] to-white border-b-2 border-[#0e7c7b]/20 py-2">
-                            <i class="fas fa-prescription-bottle-alt text-[#0e7c7b] text-sm"></i>
-                            <span class="text-sm font-bold">Therapeutic</span>
-                        </div>
-                        <div class="card-body p-4 space-y-2">
-                            ${createCompactDataPoint('ETI Response', variant.eti_prediction, 'eti_prediction', variant)}
-                            ${createCompactDataPoint('Responsive', variant.therapy_responsive !== null ? (variant.therapy_responsive ? 'Yes' : 'No') : null, 'therapy_responsive', variant)}
-                            ${createCompactDataPoint('Evidence Level', variant.eti_evidence_level, 'eti_evidence_level', variant)}
-                            ${createCompactDataPoint('Recommendation', variant.eti_recommendation, 'eti_recommendation', variant)}
-                        </div>
+                    <div class="card-body p-4 space-y-3">
+                        ${createEnhancedDataPoint('Legacy Name', variant.legacy_name, 'legacy_name', variant, '🔖', true)}
+                        ${createEnhancedDataPoint('Protein Change', variant.protein_name, 'protein_name', variant, '🧬')}
+                        ${createEnhancedDataPoint('cDNA Notation', variant.cdna_name, 'cdna_name', variant, '📝')}
+                        ${variant.alt_names ? createEnhancedDataPoint('Also Known As', variant.alt_names, 'alt_names', variant, '📌') : ''}
+                        ${createEnhancedDataPoint('Source', variant.source_summary, 'source_summary', variant, '📚')}
                     </div>
                 </div>
             </div>
             
-            <!-- RIGHT COLUMN: Actions & Validation Summary -->
-            <div class="space-y-4">
-                <!-- Quick Actions Card -->
-                <div class="card bg-gradient-to-br from-gray-50 to-white">
-                    <div class="card-header py-2">
-                        <i class="fas fa-bolt text-[#0e7c7b] text-sm"></i>
-                        <span class="text-sm font-bold">Quick Actions</span>
+            <!-- Column 2: Clinical Impact (3 cols) -->
+            <div class="lg:col-span-3 space-y-4">
+                <div class="card h-full">
+                    <div class="card-header bg-gradient-to-r from-[#fef2f2] to-white border-b-2 border-[#b91c1c]/20 py-3">
+                        <i class="fas fa-stethoscope text-[#b91c1c]"></i>
+                        <span class="font-semibold">Clinical Impact</span>
+                        ${(!variant.final_determination || !variant.cftr_class) ? 
+                            '<span class="ml-auto text-xs bg-[#b45309] text-white px-2 py-0.5 rounded-full">Incomplete</span>' : ''}
                     </div>
-                    <div class="card-body p-4 space-y-2">
-                        <button onclick="showValidationModal('${variant.legacy_name}', ${variant.id})" 
-                                class="w-full btn ${variant.validation_count > 0 ? 'btn-secondary' : 'btn-primary'} text-sm justify-start">
-                            <i class="fas fa-check-circle mr-2"></i>
-                            ${variant.validation_count > 0 ? 'Add Another Validation' : 'First Validation'}
-                        </button>
-                        
-                        <button onclick="showEvidenceModal('${variant.legacy_name}', ${variant.id})" 
-                                class="w-full btn btn-secondary text-sm justify-start">
-                            <i class="fas fa-link mr-2"></i>
-                            Add Evidence Link
-                        </button>
-                        
-                        ${CONFIG.FEATURES.ENABLE_DELETE ? `
-                            <button onclick="showDeleteModal('${variant.legacy_name}', ${variant.id})" 
-                                    class="w-full btn btn-danger text-sm justify-start">
-                                <i class="fas fa-trash-alt mr-2"></i>
-                                Delete Variant
-                            </button>
-                        ` : ''}
+                    <div class="card-body p-4 space-y-3">
+                        ${createEnhancedDataPoint('ACMG/CFTR2', variant.final_determination, 'final_determination', variant, '⚕️')}
+                        ${createEnhancedDataPoint('CFTR Class', variant.cftr_class, 'cftr_class', variant, '🔬')}
+                        ${createEnhancedDataPoint('Subtype', variant.class_subtype, 'class_subtype', variant, '🧪')}
+                        ${createEnhancedDataPoint('Confidence', variant.class_confidence, 'class_confidence', variant, '📊')}
+                        ${variant.changed_prev ? createEnhancedDataPoint('Previous Classification', variant.changed_prev, 'changed_prev', variant, '🔄') : ''}
                     </div>
                 </div>
-                
-                <!-- Validation Summary Card -->
+            </div>
+            
+            <!-- Column 3: Therapeutic Prediction (3 cols) -->
+            <div class="lg:col-span-3 space-y-4">
+                <div class="card h-full">
+                    <div class="card-header bg-gradient-to-r from-[#f0fdfa] to-white border-b-2 border-[#0e7c7b]/20 py-3">
+                        <i class="fas fa-prescription-bottle-alt text-[#0e7c7b]"></i>
+                        <span class="font-semibold">Therapeutic Intelligence</span>
+                        ${!variant.eti_prediction ? 
+                            '<span class="ml-auto text-xs bg-[#b45309] text-white px-2 py-0.5 rounded-full">Missing</span>' : ''}
+                    </div>
+                    <div class="card-body p-4 space-y-3">
+                        ${createEnhancedDataPoint('ETI Response', variant.eti_prediction ? (variant.eti_prediction === 'responsive' ? '✅ Responsive' : '❌ Non-responsive') : null, 'eti_prediction', variant, '💊')}
+                        ${createEnhancedDataPoint('Therapy Response', variant.therapy_responsive !== null ? (variant.therapy_responsive ? '✅ Yes' : '❌ No') : null, 'therapy_responsive', variant, '🎯')}
+                        ${createEnhancedDataPoint('Evidence Level', variant.eti_evidence_level, 'eti_evidence_level', variant, '📋')}
+                        ${createEnhancedDataPoint('Recommendation', variant.eti_recommendation, 'eti_recommendation', variant, '📌')}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Column 4: Validation Center (3 cols) -->
+            <div class="lg:col-span-3 space-y-4">
+                <!-- Validation Card -->
                 <div class="card">
-                    <div class="card-header py-2">
-                        <i class="fas fa-shield-alt text-[#0e7c7b] text-sm"></i>
-                        <span class="text-sm font-bold">Validation Summary</span>
-                        <button onclick="toggleValidationHistory(${variant.id})" 
-                                class="ml-auto text-xs bg-gray-100 px-2 py-1 rounded-lg hover:bg-gray-200 transition-colors"
-                                id="historyToggle-${variant.id}">
-                            <i class="fas fa-history mr-1"></i>History
-                            <span class="ml-1 bg-gray-300 px-1.5 rounded-full text-[10px]" id="validationCount-${variant.id}">${variant.validation_count || 0}</span>
-                        </button>
+                    <div class="card-header bg-gradient-to-r from-[#f0fdfa] to-white py-3">
+                        <i class="fas fa-shield-alt text-[#0e7c7b]"></i>
+                        <span class="font-semibold">Validation Center</span>
+                        <div class="ml-auto flex items-center gap-2">
+                            <button onclick="showValidationModal('${variant.legacy_name}', ${variant.id})" 
+                                    class="text-xs bg-[#0e7c7b] text-white px-3 py-1.5 rounded-lg hover:bg-[#0a5e5d] transition-all flex items-center gap-1 shadow-sm">
+                                <i class="fas fa-plus-circle"></i> Add
+                            </button>
+                        </div>
                     </div>
                     <div class="card-body p-4">
                         ${variant.validation_count > 0 ? `
-                            <div class="flex items-center gap-3 mb-3">
-                                <div class="w-10 h-10 rounded-full bg-[#0e7c7b]/20 flex items-center justify-center">
-                                    <i class="fas fa-check-circle text-[#0e7c7b]"></i>
-                                </div>
-                                <div>
-                                    <p class="text-sm font-semibold">${variant.validation_count} Validation${variant.validation_count > 1 ? 's' : ''}</p>
-                                    ${variant.last_validator_name ? `
-                                        <p class="text-xs text-gray-600">
-                                            Last: ${escapeHTML(variant.last_validator_name)} 
-                                            <span class="text-[#0e7c7b] bg-[#0e7c7b]/10 px-2 py-0.5 rounded-full text-[10px] ml-1">
-                                                ${escapeHTML(variant.last_validator_role || '')}
+                            <!-- Latest Validation -->
+                            <div class="bg-gradient-to-br from-[#0e7c7b]/5 to-white rounded-xl p-4 border border-[#0e7c7b]/20 mb-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-12 h-12 rounded-full bg-[#0e7c7b]/20 flex items-center justify-center">
+                                        <i class="fas fa-user-md text-[#0e7c7b] text-xl"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <div class="flex items-center justify-between">
+                                            <span class="font-bold text-gray-900">${escapeHTML(variant.last_validator_name || 'Unknown')}</span>
+                                            <span class="text-xs bg-[#0e7c7b] text-white px-2 py-0.5 rounded-full">Latest</span>
+                                        </div>
+                                        <p class="text-xs text-gray-600 mt-1">
+                                            <span class="bg-[#0e7c7b]/10 text-[#0e7c7b] px-2 py-0.5 rounded-full">
+                                                ${escapeHTML(variant.last_validator_role || 'Clinician')}
                                             </span>
+                                            <span class="ml-2 text-gray-500">${variant.last_validated_at ? timeAgo(variant.last_validated_at) : ''}</span>
                                         </p>
-                                        <p class="text-xs text-gray-500">${formatDate(variant.last_validated_at)}</p>
-                                    ` : ''}
+                                    </div>
                                 </div>
                             </div>
                             
-                            <div class="grid grid-cols-2 gap-2 text-center text-xs border-t pt-3">
-                                <div>
-                                    <span class="text-lg font-bold text-[#0e7c7b]" id="uniqueValidators-${variant.id}">—</span>
-                                    <p class="text-gray-500">Unique</p>
+                            <!-- Stats Grid -->
+                            <div class="grid grid-cols-3 gap-2 mb-4">
+                                <div class="text-center p-3 bg-gray-50 rounded-lg">
+                                    <span class="text-2xl font-bold text-[#0e7c7b]">${variant.validation_count}</span>
+                                    <p class="text-[10px] text-gray-500">Total</p>
                                 </div>
-                                <div>
-                                    <span class="text-lg font-bold text-[#0e7c7b]" id="roleCount-${variant.id}">—</span>
-                                    <p class="text-gray-500">Roles</p>
+                                <div class="text-center p-3 bg-gray-50 rounded-lg">
+                                    <span class="text-2xl font-bold text-[#0e7c7b]" id="uniqueValidators-${variant.id}">—</span>
+                                    <p class="text-[10px] text-gray-500">Unique</p>
+                                </div>
+                                <div class="text-center p-3 bg-gray-50 rounded-lg">
+                                    <span class="text-2xl font-bold text-[#0e7c7b]" id="roleCount-${variant.id}">—</span>
+                                    <p class="text-[10px] text-gray-500">Roles</p>
+                                </div>
+                            </div>
+                            
+                            <!-- History Toggle -->
+                            <button onclick="toggleValidationHistory(${variant.id})" 
+                                    class="w-full text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 rounded-lg transition-colors flex items-center justify-center gap-2"
+                                    id="historyToggle-${variant.id}">
+                                <i class="fas fa-history"></i>
+                                View Validation History
+                                <span class="bg-gray-300 px-2 py-0.5 rounded-full text-xs" id="validationCount-${variant.id}">${variant.validation_count}</span>
+                            </button>
+                            
+                            <div id="validationHistory-${variant.id}" class="mt-4 hidden">
+                                <div class="text-center text-gray-500 py-4" id="validationLoading-${variant.id}">
+                                    <i class="fas fa-spinner fa-spin mr-2"></i> Loading...
                                 </div>
                             </div>
                         ` : `
-                            <div class="text-center py-4">
-                                <div class="w-12 h-12 bg-gray-100 rounded-full mx-auto mb-2 flex items-center justify-center">
-                                    <i class="fas fa-shield-alt text-gray-400"></i>
+                            <!-- Empty State -->
+                            <div class="text-center py-8">
+                                <div class="w-20 h-20 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                                    <i class="fas fa-shield-alt text-3xl text-gray-400"></i>
                                 </div>
-                                <p class="text-sm text-gray-600">No validations yet</p>
+                                <p class="text-gray-700 font-medium mb-2">No Validations Yet</p>
+                                <p class="text-sm text-gray-500 mb-6">Be the first to validate this variant</p>
                                 <button onclick="showValidationModal('${variant.legacy_name}', ${variant.id})" 
-                                        class="btn btn-primary text-xs mt-3">
-                                    <i class="fas fa-check-circle mr-1"></i> Be the first
+                                        class="btn btn-primary">
+                                    <i class="fas fa-check-circle mr-2"></i> Add First Validation
                                 </button>
                             </div>
                         `}
-                        
-                        <div id="validationHistory-${variant.id}" class="mt-3 pt-3 border-t border-gray-200 hidden">
-                            <div class="text-center text-gray-500 py-2 text-xs" id="validationLoading-${variant.id}">
-                                <i class="fas fa-spinner fa-spin mr-1"></i> Loading...
-                            </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Actions Card -->
+                <div class="card bg-gradient-to-br from-gray-50 to-white">
+                    <div class="card-body p-4">
+                        <div class="text-xs font-bold text-gray-500 mb-3 flex items-center gap-1">
+                            <i class="fas fa-bolt text-[#0e7c7b]"></i>
+                            QUICK ACTIONS
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="showAnnotationModal('${variant.legacy_name}', 'all', '')" 
+                                    class="btn btn-secondary text-xs py-3">
+                                <i class="fas fa-pencil-alt mr-1"></i> Annotate
+                            </button>
+                            <button onclick="showEvidenceModal('${variant.legacy_name}', ${variant.id})" 
+                                    class="btn btn-secondary text-xs py-3">
+                                <i class="fas fa-link mr-1"></i> Add Evidence
+                            </button>
+                            ${CONFIG.FEATURES.ENABLE_DELETE ? `
+                                <button onclick="showDeleteModal('${variant.legacy_name}', ${variant.id})" 
+                                        class="col-span-2 btn btn-danger text-xs py-3">
+                                    <i class="fas fa-trash-alt mr-1"></i> Delete Variant
+                                </button>
+                            ` : ''}
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         
-        <!-- EVIDENCE SECTION - Full width at bottom -->
+        <!-- EVIDENCE GALLERY - Full Width at Bottom -->
         <div class="card mt-4">
-            <div class="card-header py-2">
-                <i class="fas fa-microscope text-[#6d28d9] text-sm"></i>
-                <span class="text-sm font-bold">Evidence Sources</span>
-                <div class="ml-auto flex items-center gap-2">
-                    <span class="text-xs bg-[#6d28d9]/10 text-[#6d28d9] px-3 py-1 rounded-full font-semibold"
-                          onclick="showAllEvidence(${variant.id})"
-                          style="cursor: pointer;">
-                        <i class="fas fa-link mr-1"></i>${evidenceCount} sources
+            <div class="card-header bg-gradient-to-r from-[#f5f0ff] to-white border-b-2 border-[#6d28d9]/20 py-3">
+                <i class="fas fa-microscope text-[#6d28d9]"></i>
+                <span class="font-semibold">Evidence Gallery</span>
+                <div class="ml-auto flex items-center gap-3">
+                    <span class="text-sm bg-[#6d28d9]/10 text-[#6d28d9] px-4 py-1.5 rounded-full font-semibold">
+                        <i class="fas fa-link mr-1"></i>${evidenceCount} source${evidenceCount !== 1 ? 's' : ''}
                     </span>
                     <button onclick="showEvidenceModal('${variant.legacy_name}', ${variant.id})" 
-                            class="text-xs bg-[#6d28d9] text-white px-3 py-1.5 rounded-lg hover:bg-[#5b21b6]">
-                        <i class="fas fa-plus mr-1"></i> Add
+                            class="btn btn-primary bg-[#6d28d9] hover:bg-[#5b21b6] text-sm py-1.5">
+                        <i class="fas fa-plus mr-1"></i> Add Evidence
                     </button>
+                    ${evidenceCount > 0 ? `
+                        <button onclick="showAllEvidence(${variant.id})" 
+                                class="btn btn-secondary text-sm py-1.5">
+                            <i class="fas fa-expand mr-1"></i> View All
+                        </button>
+                    ` : ''}
                 </div>
             </div>
             <div class="card-body p-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3" id="evidencePreview-${variant.id}">
-                    ${variant.evidence_links && variant.evidence_links.length > 0 
-                        ? variant.evidence_links.slice(0,3).map(link => renderEvidenceLink(link)).join('')
-                        : '<div class="col-span-3 text-center py-6 text-gray-500"><i class="fas fa-link mr-2"></i>No evidence links yet</div>'
-                    }
-                </div>
-                ${variant.evidence_links?.length > 3 ? `
-                    <div class="text-right mt-3">
-                        <button onclick="showAllEvidence(${variant.id})" 
-                                class="text-xs text-[#6d28d9] hover:underline font-medium">
-                            View all ${variant.evidence_links.length} sources →
+                ${variant.evidence_links && variant.evidence_links.length > 0 ? `
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                        ${variant.evidence_links.slice(0, 3).map(link => renderEnhancedEvidenceLink(link)).join('')}
+                    </div>
+                    ${variant.evidence_links.length > 3 ? `
+                        <div class="mt-4 text-center">
+                            <button onclick="showAllEvidence(${variant.id})" 
+                                    class="text-sm text-[#6d28d9] hover:underline font-medium">
+                                + ${variant.evidence_links.length - 3} more evidence sources
+                            </button>
+                        </div>
+                    ` : ''}
+                ` : `
+                    <div class="text-center py-12">
+                        <div class="w-20 h-20 bg-[#6d28d9]/10 rounded-2xl mx-auto mb-4 flex items-center justify-center">
+                            <i class="fas fa-link text-3xl text-[#6d28d9]/40"></i>
+                        </div>
+                        <p class="text-gray-700 font-medium mb-2">No evidence links yet</p>
+                        <p class="text-sm text-gray-500 mb-6">Add PubMed articles, CFTR2 entries, or other sources</p>
+                        <button onclick="showEvidenceModal('${variant.legacy_name}', ${variant.id})" 
+                                class="btn btn-primary bg-[#6d28d9] hover:bg-[#5b21b6]">
+                            <i class="fas fa-plus mr-2"></i> Add First Evidence
                         </button>
                     </div>
-                ` : ''}
+                `}
             </div>
         </div>
+        
+        ${variant.pubmed_ids ? `
+            <!-- PubMed References -->
+            <div class="mt-2 text-right">
+                <span class="text-xs text-gray-500">
+                    <i class="fas fa-book mr-1"></i>PMID: ${escapeHTML(variant.pubmed_ids)}
+                </span>
+            </div>
+        ` : ''}
     `;
     
     const container = document.getElementById('variantDetails');
@@ -3514,25 +3618,91 @@ function renderVariantDetails(variant) {
     }, 100);
 }
 
-// Compact data point for side-by-side layout
-function createCompactDataPoint(label, value, field, variant) {
+// Enhanced data point with icons and better styling
+function createEnhancedDataPoint(label, value, field, variant, emoji = '•', isPrimary = false) {
     const isMissing = !value || value === 'null' || value === 'undefined' || value === '';
-    const displayValue = isMissing ? '—' : escapeHTML(String(value));
+    const displayValue = isMissing ? '<span class="text-gray-400 italic">Not specified</span>' : escapeHTML(String(value));
     const escapedValue = value ? String(value).replace(/'/g, "\\'").replace(/"/g, '&quot;') : '';
     
     return `
-        <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors group relative">
-            <span class="text-xs font-medium text-gray-500">${label}</span>
-            <span class="text-xs font-mono ${isMissing ? 'text-gray-400 italic' : 'text-gray-800 font-semibold'}">
-                ${displayValue}
-            </span>
-            <button class="absolute -right-1 -top-1 w-5 h-5 bg-white rounded-full shadow-sm border border-gray-200 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-gray-500 hover:text-[#0e7c7b]"
-                    onclick="showAnnotationModal('${variant.legacy_name}', '${field}', '${escapedValue}')"
-                    title="Annotate ${label}">
-                <i class="fas fa-pencil-alt text-[10px]"></i>
-            </button>
+        <div class="group relative bg-white rounded-xl p-3 border ${isMissing ? 'border-dashed border-gray-300 bg-gray-50/30' : 'border-gray-200 hover:border-[#0e7c7b]'} transition-all hover:shadow-md">
+            <div class="flex items-start justify-between">
+                <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="text-sm">${emoji}</span>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-gray-500">${label}</span>
+                    </div>
+                    <div class="font-mono text-sm ${isMissing ? 'text-gray-400' : 'text-gray-800'} break-words">
+                        ${displayValue}
+                    </div>
+                </div>
+                <button class="opacity-0 group-hover:opacity-100 transition-opacity w-7 h-7 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-500 hover:text-[#0e7c7b]"
+                        onclick="showAnnotationModal('${variant.legacy_name}', '${field}', '${escapedValue}')"
+                        title="Annotate ${label}">
+                    <i class="fas fa-pencil-alt text-xs"></i>
+                </button>
+            </div>
+            ${isMissing ? `
+                <div class="absolute -top-2 -right-2">
+                    <span class="bg-[#b45309] text-white text-[8px] px-2 py-0.5 rounded-full font-bold">MISSING</span>
+                </div>
+            ` : ''}
         </div>
     `;
+}
+
+// Enhanced evidence link with better visuals
+function renderEnhancedEvidenceLink(link) {
+    const icons = {
+        'pubmed': { icon: 'fa-book-open', bg: 'bg-blue-100', color: 'text-blue-600' },
+        'cftr2': { icon: 'fa-dna', bg: 'bg-purple-100', color: 'text-purple-600' },
+        'clinvar': { icon: 'fa-clinic-medical', bg: 'bg-green-100', color: 'text-green-600' },
+        'other': { icon: 'fa-link', bg: 'bg-gray-100', color: 'text-gray-600' }
+    };
+    const style = icons[link.type?.toLowerCase()] || icons.other;
+    
+    return `
+        <div class="group bg-white rounded-xl border border-gray-200 hover:border-[#6d28d9] hover:shadow-lg transition-all p-4">
+            <div class="flex items-start gap-3">
+                <div class="w-10 h-10 rounded-xl ${style.bg} flex items-center justify-center flex-shrink-0">
+                    <i class="fas ${style.icon} ${style.color}"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h4 class="font-semibold text-gray-900 text-sm mb-1 truncate">${escapeHTML(link.title)}</h4>
+                    <div class="flex items-center gap-2 text-xs text-gray-500 mb-2">
+                        <span class="bg-gray-100 px-2 py-0.5 rounded-full">${escapeHTML(link.source || link.type)}</span>
+                        <span>${formatDate(link.date_added)}</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <a href="${escapeHTML(link.url)}" target="_blank" 
+                           class="text-xs text-[#6d28d9] hover:underline flex items-center gap-1">
+                            <i class="fas fa-external-link-alt"></i> View Source
+                        </a>
+                        <button onclick="copyToClipboard('${escapeHTML(link.url)}')"
+                                class="text-xs text-gray-500 hover:text-[#6d28d9] transition-colors">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// Helper function for time ago
+function timeAgo(dateString) {
+    const date = new Date(dateString);
+    const now = new Date();
+    const seconds = Math.floor((now - date) / 1000);
+    
+    if (seconds < 60) return 'just now';
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    if (days < 7) return `${days}d ago`;
+    return formatDate(dateString);
 }
 
 function createDataPoint(label, value, field, variant, isPrimary = false) {
