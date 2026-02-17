@@ -3257,15 +3257,6 @@ function renderVariantDetails(variant) {
                                     <span class="variant-pill-secondary">${escapeHTML(variant.protein_name || 'No protein notation')}</span>
                                 </div>
                             </div>
-                            <div class="flex gap-2">
-                                ${missingCount > 0 ? 
-                                    `<span class="badge" style="background: #ffedd5; color: #b45309; border-color: #fcd34d; border-width: 2px;">
-                                        <i class="fas fa-exclamation-triangle"></i> ${missingCount} missing
-                                    </span>` : 
-                                    `<span class="badge" style="background: #d1fae5; color: #065f46; border-color: #a7f3d0; border-width: 2px;">
-                                        <i class="fas fa-check-circle"></i> Complete
-                                    </span>`
-                                }
                             
                                 ${variant.validation_count > 0 ? 
                                     `<span class="badge" style="background: #0e7c7b; color: white; border: none;">
