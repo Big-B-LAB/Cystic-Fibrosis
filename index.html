@@ -168,9 +168,10 @@
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
+            overflow: hidden;
         }
 
-        .brand-icon i { color: white; font-size: 13px; }
+        .brand-icon svg { display: block; }
 
         .brand-text { overflow: hidden; }
         .brand-name {
@@ -201,19 +202,32 @@
         .header-stats {
             display: flex;
             align-items: center;
-            gap: 24px;
+            gap: 0;
             margin-left: 8px;
         }
 
         .hstat {
             display: flex;
             flex-direction: column;
-            align-items: center;
+            align-items: flex-start;
+            padding: 0 20px;
+            position: relative;
+        }
+
+        .hstat + .hstat::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 1px;
+            height: 24px;
+            background: var(--border);
         }
 
         .hstat-value {
             font-family: var(--font-mono);
-            font-size: 15px;
+            font-size: 16px;
             font-weight: 600;
             color: var(--text-primary);
             line-height: 1.2;
@@ -228,9 +242,7 @@
         }
 
         .hstat-divider {
-            width: 1px;
-            height: 28px;
-            background: var(--border);
+            display: none;
         }
 
         .header-actions {
@@ -362,7 +374,7 @@
 
         .filter-chip {
             height: 26px;
-            padding: 0 10px;
+            padding: 0 8px 0 10px;
             border-radius: 13px;
             font-size: 11px;
             font-weight: 600;
@@ -385,16 +397,40 @@
             color: white;
         }
 
-        .filter-chip .chip-count {
-            background: rgba(255,255,255,0.25);
-            padding: 0 5px;
-            border-radius: 10px;
-            font-size: 10px;
+        .chip-divider {
+            width: 1px;
+            height: 12px;
+            background: currentColor;
+            opacity: 0.25;
+            margin-left: 2px;
+            flex-shrink: 0;
         }
 
-        .filter-chip:not(.active) .chip-count {
-            background: var(--surface-alt);
-            color: var(--text-tertiary);
+        .chip-count {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            font-weight: 600;
+            opacity: 0.75;
+            min-width: 14px;
+            text-align: right;
+        }
+
+        /* Loading shimmer for chip counts */
+        .chip-count.loading {
+            display: inline-block;
+            width: 18px;
+            height: 8px;
+            border-radius: 4px;
+            background: linear-gradient(90deg, currentColor 25%, transparent 50%, currentColor 75%);
+            background-size: 200% 100%;
+            animation: chipShimmer 1.2s ease infinite;
+            opacity: 0.15;
+            vertical-align: middle;
+        }
+
+        @keyframes chipShimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
         }
 
         /* Class filter bar */
@@ -420,16 +456,17 @@
             justify-content: center;
         }
 
-        .class-dot.ci   { background: var(--class-i-bg);   color: var(--class-i);   border-color: var(--class-i-border); }
-        .class-dot.cii  { background: var(--class-ii-bg);  color: var(--class-ii);  border-color: var(--class-ii-border); }
-        .class-dot.ciii { background: var(--class-iii-bg); color: var(--class-iii); border-color: var(--class-iii-border); }
-        .class-dot.civ  { background: var(--class-iv-bg);  color: var(--class-iv);  border-color: var(--class-iv-border); }
-        .class-dot.cv   { background: var(--class-v-bg);   color: var(--class-v);   border-color: var(--class-v-border); }
+        .class-dot.ci   { background: var(--class-i-bg);   color: var(--class-i-text);   border-color: var(--class-i-border); }
+        .class-dot.cii  { background: var(--class-ii-bg);  color: var(--class-ii-text);  border-color: var(--class-ii-border); }
+        .class-dot.ciii { background: var(--class-iii-bg); color: var(--class-iii-text); border-color: var(--class-iii-border); }
+        .class-dot.civ  { background: var(--class-iv-bg);  color: var(--class-iv-text);  border-color: var(--class-iv-border); }
+        .class-dot.cv   { background: var(--class-v-bg);   color: var(--class-v-text);   border-color: var(--class-v-border); }
         .class-dot.call { background: var(--surface-alt);  color: var(--text-secondary); border-color: var(--border); }
 
-        .class-dot.active, .class-dot:hover { opacity: 1; filter: brightness(0.9); }
-        .class-dot:not(.active) { opacity: 0.6; }
-        .class-dot:not(.active):hover { opacity: 1; }
+        .class-dot { opacity: 1; }
+        .class-dot:not(.active) { opacity: 0.55; border-style: dashed; }
+        .class-dot:not(.active):hover { opacity: 1; border-style: solid; }
+        .class-dot.active { opacity: 1; border-style: solid; border-width: 2px; box-shadow: 0 0 0 2px rgba(0,0,0,0.04); }
 
         /* Variant list meta */
         .list-meta {
@@ -1738,7 +1775,12 @@
     <header class="app-header">
         <div class="header-brand" id="headerBrand">
             <div class="brand-icon">
-                <i class="fas fa-dna"></i>
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Delta glyph -->
+                    <text x="16" y="21" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="20" font-weight="700" fill="white">Δ</text>
+                    <!-- Sine-wave underline -->
+                    <path d="M6 25 Q9 22 12 25 Q15 28 18 25 Q21 22 24 25 Q27 28 26 25" stroke="rgba(255,255,255,0.55)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+                </svg>
             </div>
             <div class="brand-text" id="brandText">
                 <div class="brand-name">Δ Helix</div>
@@ -1752,27 +1794,13 @@
                     <span class="hstat-value" id="hstatTotal">—</span>
                     <span class="hstat-label">Variants</span>
                 </div>
-                <div class="hstat-divider"></div>
-                <div class="hstat" style="color: var(--class-i)">
-                    <span class="hstat-value" style="color: var(--class-i)" id="hstatClassI">—</span>
-                    <span class="hstat-label">Class I</span>
+                <div class="hstat">
+                    <span class="hstat-value" style="color: var(--class-iii)" id="hstatResponsive">—</span>
+                    <span class="hstat-label">ETI Responsive</span>
                 </div>
                 <div class="hstat">
-                    <span class="hstat-value" style="color: var(--class-ii)" id="hstatClassII">—</span>
-                    <span class="hstat-label">Class II</span>
-                </div>
-                <div class="hstat">
-                    <span class="hstat-value" style="color: var(--class-iii)" id="hstatClassIII">—</span>
-                    <span class="hstat-label">Class III</span>
-                </div>
-                <div class="hstat">
-                    <span class="hstat-value" style="color: var(--class-iv)" id="hstatClassIV">—</span>
-                    <span class="hstat-label">IV/V</span>
-                </div>
-                <div class="hstat-divider"></div>
-                <div class="hstat">
-                    <span class="hstat-value" style="color: var(--class-ii)" id="hstatExceptional">—</span>
-                    <span class="hstat-label">Exceptional</span>
+                    <span class="hstat-value" style="color: var(--warning)" id="hstatMissing">—</span>
+                    <span class="hstat-label">Missing Data</span>
                 </div>
             </div>
 
@@ -1821,23 +1849,23 @@
         <!-- View filters -->
         <div class="sidebar-filters">
             <button class="filter-chip active" id="chip-all" onclick="setDataView('all')">
-                All <span class="chip-count" id="chipAll">—</span>
+                All <span class="chip-divider"></span><span class="chip-count" id="chipAll">—</span>
             </button>
             <button class="filter-chip" id="chip-responsive" onclick="setDataView('responsive')">
                 <i class="fas fa-check" style="font-size:9px"></i> ETI
-                <span class="chip-count" id="chipResponsive">—</span>
+                <span class="chip-divider"></span><span class="chip-count" id="chipResponsive">—</span>
             </button>
             <button class="filter-chip" id="chip-exceptional" onclick="setDataView('exceptional')">
                 <i class="fas fa-bolt" style="font-size:9px"></i> Exceptional
-                <span class="chip-count" id="chipExceptional">—</span>
+                <span class="chip-divider"></span><span class="chip-count" id="chipExceptional">—</span>
             </button>
             <button class="filter-chip" id="chip-missing" onclick="filterVariants('missing')">
                 Missing
-                <span class="chip-count" id="chipMissing">—</span>
+                <span class="chip-divider"></span><span class="chip-count" id="chipMissing">—</span>
             </button>
             <button class="filter-chip" id="chip-complete" onclick="setDataView('complete')">
                 Complete
-                <span class="chip-count" id="chipComplete">—</span>
+                <span class="chip-divider"></span><span class="chip-count" id="chipComplete">—</span>
             </button>
         </div>
 
@@ -1885,7 +1913,10 @@
             <!-- Empty state -->
             <div class="detail-empty" id="detailEmpty">
                 <div class="empty-graphic">
-                    <i class="fas fa-dna"></i>
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <text x="20" y="27" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="26" font-weight="700" fill="var(--border-strong)">Δ</text>
+                        <path d="M8 32 Q11.5 28.5 15 32 Q18.5 35.5 22 32 Q25.5 28.5 29 32 Q32.5 35.5 32 32" stroke="var(--border-strong)" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.6"/>
+                    </svg>
                 </div>
                 <h2 class="empty-title">Select a variant</h2>
                 <p class="empty-sub">
@@ -2543,12 +2574,10 @@ function calculateMasterStats() {
 
 function updateHeaderStats() {
     const s = STATE.masterStats;
+    const missing = STATE.variants.filter(hasMissingData).length;
     setText('hstatTotal', s.total.toLocaleString());
-    setText('hstatClassI', s.classI.toLocaleString());
-    setText('hstatClassII', s.classII.toLocaleString());
-    setText('hstatClassIII', s.classIII.toLocaleString());
-    setText('hstatClassIV', (s.classIV + s.classV).toLocaleString());
-    setText('hstatExceptional', s.exceptional.toLocaleString());
+    setText('hstatResponsive', s.responsive.toLocaleString());
+    setText('hstatMissing', missing.toLocaleString());
 }
 
 function updateFilterChips() {
