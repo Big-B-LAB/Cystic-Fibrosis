@@ -6,7 +6,7 @@ export const CONFIG = {
     SUPABASE: {
         URL: 'https://oxlkisjwfarseyqgeyuw.supabase.co',
         KEY: 'sb_publishable_vKCe5bc1Qr20_LI_awKIYw_CqSFrblh'
-    },
+    }, 
     UI: {
         ITEMS_PER_PAGE: 25,
         SEARCH_DELAY: 180,
