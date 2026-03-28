@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Δ Helix | CFTR Intelligence Platform</title>
+    <title>Δ Helix v4.1 | CFTR Intelligence Platform</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -135,7 +135,7 @@
             border-right: 1px solid rgba(255,255,255,0.08);
             height: 100%;
             transition: width var(--t-slow), min-width var(--t-slow);
-            overflow: hidden;
+            overflow: visible;
             flex-shrink: 0;
         }
 
@@ -146,27 +146,9 @@
             justify-content: center;
         }
 
-        .brand-mark {
-            width: 30px;
-            height: 30px;
-            border-radius: 8px;
-            background: linear-gradient(135deg, var(--teal) 0%, #0b9695 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            box-shadow: 0 2px 8px rgba(10,124,123,0.35);
-        }
+        /* brand-mark replaced by pure SVG — no box needed */
 
-        .brand-mark-glyph {
-            font-family: var(--font-display);
-            font-size: 16px;
-            font-weight: 700;
-            color: white;
-            line-height: 1;
-        }
-
-        .brand-text { overflow: hidden; }
+        .brand-wordmark { overflow: hidden; }
 
         .brand-name {
             font-family: var(--font-display);
@@ -306,8 +288,9 @@
 
         .stats-ribbon {
             grid-column: 1 / -1;
-            background: #1a2335;
-            border-bottom: 1px solid rgba(255,255,255,0.06);
+            background: #151f2e;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+            border-top: 1px solid rgba(255,255,255,0.04);
             display: flex;
             align-items: stretch;
             padding-left: var(--sidebar-w);
@@ -360,29 +343,34 @@
             border-right: 1px solid var(--border);
             display: flex;
             flex-direction: column;
-            overflow: hidden;
+            overflow: visible;
             position: relative;
         }
 
         .sidebar-toggle {
             position: absolute;
-            top: 12px;
-            right: -12px;
-            width: 22px; height: 22px;
+            top: 14px;
+            right: -14px;
+            width: 26px; height: 26px;
             border-radius: 50%;
             background: var(--surface);
-            border: 1px solid var(--border);
+            border: 1.5px solid var(--border-strong);
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            z-index: 50;
-            box-shadow: var(--shadow-sm);
+            z-index: 200;
+            box-shadow: 0 2px 8px rgba(15,22,35,0.14), 0 1px 3px rgba(15,22,35,0.08);
             transition: var(--t);
         }
 
-        .sidebar-toggle:hover { background: var(--teal); border-color: var(--teal); }
-        .sidebar-toggle i { font-size: 9px; color: var(--text-3); transition: var(--t); }
+        .sidebar-toggle:hover {
+            background: var(--teal);
+            border-color: var(--teal);
+            box-shadow: 0 3px 10px rgba(10,124,123,0.3);
+            transform: scale(1.08);
+        }
+        .sidebar-toggle i { font-size: 9px; color: var(--text-2); transition: var(--t); }
         .sidebar-toggle:hover i { color: white; }
         .sidebar-collapsed .sidebar-toggle i { transform: rotate(180deg); }
 
@@ -530,7 +518,13 @@
         .cdot.civ.active  { background: var(--civ-bg); color: var(--civ-text); border-color: var(--civ-border); }
         .cdot.cv.active   { background: var(--cv-bg); color: var(--cv-text); border-color: var(--cv-border); }
         .cdot.cvi.active  { background: var(--cvi-bg); color: var(--cvi-text); border-color: var(--cvi-border); }
-        .cdot:hover:not(.active) { background: var(--bg); color: var(--text-1); border-color: var(--border); }
+        .cdot.ci:hover:not(.active)   { background: var(--ci-bg); color: var(--ci-text); border-color: var(--ci-border); }
+        .cdot.cii:hover:not(.active)  { background: var(--cii-bg); color: var(--cii-text); border-color: var(--cii-border); }
+        .cdot.ciii:hover:not(.active) { background: var(--ciii-bg); color: var(--ciii-text); border-color: var(--ciii-border); }
+        .cdot.civ:hover:not(.active)  { background: var(--civ-bg); color: var(--civ-text); border-color: var(--civ-border); }
+        .cdot.cv:hover:not(.active)   { background: var(--cv-bg); color: var(--cv-text); border-color: var(--cv-border); }
+        .cdot.cvi:hover:not(.active)  { background: var(--cvi-bg); color: var(--cvi-text); border-color: var(--cvi-border); }
+        .cdot.call:hover:not(.active) { background: var(--bg); color: var(--text-1); border-color: var(--border); }
 
         /* List meta */
         .list-meta {
@@ -708,8 +702,12 @@
         .sidebar-collapsed .class-bar,
         .sidebar-collapsed .list-meta,
         .sidebar-collapsed .row-body,
-        .sidebar-collapsed .row-cbadge { display: none; }
-        .sidebar-collapsed .variant-row { justify-content: center; padding: 8px 0; }
+        .sidebar-collapsed .row-cbadge,
+        .sidebar-collapsed .list-pagination,
+        .sidebar-collapsed .lm-sort { display: none !important; }
+        .sidebar-collapsed .variant-row { justify-content: center; padding: 8px 0; border-left: none !important; }
+        .sidebar-collapsed .variant-row::before { display: none; }
+        .sidebar-collapsed .app-sidebar { border-right: 1px solid var(--border); }
 
         .row-collapsed-icon {
             display: none;
@@ -1175,7 +1173,7 @@
             border: 1px solid var(--border);
             border-radius: var(--radius);
             overflow: hidden;
-            margin-bottom: 12px;
+            margin-bottom: 20px;
             box-shadow: var(--shadow-xs);
         }
 
@@ -1386,15 +1384,72 @@
 </head>
 <body>
 
+<!-- SPLASH SCREEN -->
+<div id="splash">
+    <svg width="80" height="68" viewBox="0 0 80 68" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-bottom:24px;animation:splashPop 0.65s cubic-bezier(0.34,1.56,0.64,1) both">
+        <defs>
+            <linearGradient id="sp-teal" x1="0" y1="0" x2="80" y2="0" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#0a7c7b"/>
+                <stop offset="100%" stop-color="#15d9d8"/>
+            </linearGradient>
+            <linearGradient id="sp-dim" x1="0" y1="0" x2="80" y2="0" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="rgba(255,255,255,0.12)"/>
+                <stop offset="100%" stop-color="rgba(255,255,255,0.5)"/>
+            </linearGradient>
+        </defs>
+        <!-- Strand 1 — teal -->
+        <path d="M4 42 C12 20,24 20,40 42 C56 64,68 64,76 42"
+              stroke="url(#sp-teal)" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <!-- Strand 2 — dim -->
+        <path d="M4 42 C12 64,24 64,40 42 C56 20,68 20,76 42"
+              stroke="url(#sp-dim)" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <!-- Central glow node -->
+        <circle cx="40" cy="42" r="5.5" fill="#0dd9d8"/>
+        <circle cx="40" cy="42" r="11" fill="#0dd9d8" opacity="0.12"/>
+        <!-- Delta — top centre -->
+        <path d="M56 4 L72 30 L40 30 Z"
+              fill="none" stroke="#0dd9d8" stroke-width="2"
+              stroke-linejoin="round" opacity="0.7"/>
+    </svg>
+    <div class="splash-name">Δ Helix</div>
+    <div class="splash-sub">CFTR Intelligence Platform</div>
+    <div class="splash-bar-wrap">
+        <div class="splash-bar" id="splashBar"></div>
+    </div>
+    <div class="splash-msg" id="splashMsg">Initializing…</div>
+</div>
+
 <div class="app-shell" id="appShell">
 
     <!-- HEADER -->
     <header class="app-header">
         <div class="header-brand" id="headerBrand">
-            <div class="brand-mark">
-                <span class="brand-mark-glyph">Δ</span>
-            </div>
-            <div class="brand-text" id="brandText">
+            <!-- Logo mark: double helix + delta, no background rectangle -->
+            <svg class="logo-mark-svg" width="42" height="36" viewBox="0 0 42 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="hx-teal" x1="0" y1="0" x2="42" y2="0" gradientUnits="userSpaceOnUse">
+                        <stop offset="0%" stop-color="#0a7c7b"/>
+                        <stop offset="100%" stop-color="#15d9d8"/>
+                    </linearGradient>
+                    <linearGradient id="hx-dim" x1="0" y1="0" x2="42" y2="0" gradientUnits="userSpaceOnUse">
+                        <stop offset="0%" stop-color="rgba(255,255,255,0.18)"/>
+                        <stop offset="100%" stop-color="rgba(255,255,255,0.52)"/>
+                    </linearGradient>
+                </defs>
+                <!-- Strand 1 — teal -->
+                <path d="M2 20 C6 10,13 10,17 20 C21 30,28 30,32 20 C36 10,42 10,42 20"
+                      stroke="url(#hx-teal)" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+                <!-- Strand 2 — translucent white -->
+                <path d="M2 20 C6 30,13 30,17 20 C21 10,28 10,32 20 C36 30,42 30,42 20"
+                      stroke="url(#hx-dim)" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+                <!-- Crossover glow dot -->
+                <circle cx="17" cy="20" r="2.8" fill="#0dd9d8" opacity="0.9"/>
+                <!-- Delta mark — open triangle top-right -->
+                <path d="M30 2 L40 17 L20 17 Z"
+                      fill="none" stroke="#0dd9d8" stroke-width="1.4"
+                      stroke-linejoin="round" opacity="0.65"/>
+            </svg>
+            <div class="brand-wordmark" id="brandText">
                 <div class="brand-name">Δ Helix</div>
                 <div class="brand-sub">CFTR Intelligence</div>
             </div>
@@ -1406,7 +1461,7 @@
                 <span class="breadcrumb-sep">/</span>
                 <span class="breadcrumb-cur">CFTR variants</span>
             </div>
-            <span class="version-badge">v3.1</span>
+            <span class="version-badge">v4.1</span>
             <div class="live-indicator" id="syncStatus">
                 <span class="live-dot"></span>
                 <span>Live</span>
@@ -1462,6 +1517,7 @@
         <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" title="Toggle sidebar">
             <i class="fas fa-chevron-left"></i>
         </button>
+        <div class="sidebar-inner">
 
         <div class="sidebar-search">
             <div class="search-wrap">
@@ -1521,6 +1577,7 @@
                 Next <i class="fas fa-chevron-right"></i>
             </button>
         </div>
+        </div><!-- /sidebar-inner -->
     </aside>
 
     <!-- MAIN CONTENT -->
@@ -1761,7 +1818,7 @@ const CONFIG = {
         NOTIFICATION_DURATION: 4000,
         MIN_SEARCH_CHARS: 2
     },
-    VERSION: '4.0.0'
+    VERSION: '4.1.0'
 };
 
 const STATE = {
@@ -1803,7 +1860,8 @@ const STATE = {
         errorCount: 0,
         lastError: null,
         apiCalls: 0
-    }
+    },
+    isDemo: false
 };
 
 let currentVariantId = null;
@@ -1811,19 +1869,69 @@ let currentVariantName = '';
 
 // ========== DATABASE ==========
 
+// ========== DEMO DATA (fallback when DB unreachable) ==========
+const DEMO_VARIANTS = [
+    { id:1, legacy_name:'F508del', protein_name:'p.Phe508del', cdna_name:'c.1521_1523del', cftr_class:'II', class_subtype:'standard', class_confidence:'Confirmed', final_determination:'CF-causing', eti_prediction:'responsive', eti_evidence_level:'High', eti_recommendation:'Elexacaftor/Tezacaftor/Ivacaftor (Trikafta)', data_status:'complete_clinical', population_frequency:'0.7219', validation_count:12, last_validator_name:'Dr. Sarah Chen', last_validator_role:'Pulmonologist', evidence_links:[{id:1,type:'pubmed',title:'Chronic and acute modulator treatment restore wild-type-like activity',url:'https://pubmed.ncbi.nlm.nih.gov/30552139/',source:'PubMed'},{id:2,type:'cftr2',title:'F508del CFTR2 entry',url:'https://cftr2.org',source:'CFTR2'},{id:3,type:'clinvar',title:'ClinVar pathogenic classification',url:'https://clinvar.ncbi.nlm.nih.gov',source:'ClinVar'}] },
+    { id:2, legacy_name:'G542X', protein_name:'p.Gly542X', cdna_name:'c.1624G>T', cftr_class:'I', class_subtype:'standard', class_confidence:'Confirmed', final_determination:'CF-causing', eti_prediction:'non_responsive', eti_evidence_level:'High', eti_recommendation:'None currently approved', data_status:'complete_clinical', population_frequency:'0.0247', validation_count:4, last_validator_name:'Dr. James Park', last_validator_role:'Geneticist', evidence_links:[{id:4,type:'pubmed',title:'Premature stop codon suppression in CFTR',url:'https://pubmed.ncbi.nlm.nih.gov/',source:'PubMed'}] },
+    { id:3, legacy_name:'G551D', protein_name:'p.Gly551Asp', cdna_name:'c.1652G>A', cftr_class:'III', class_subtype:'exceptional', class_confidence:'Confirmed', final_determination:'CF-causing', eti_prediction:'responsive', eti_evidence_level:'High', eti_recommendation:'Ivacaftor (Kalydeco)', data_status:'complete_clinical', population_frequency:'0.0198', validation_count:8, evidence_links:[{id:5,type:'pubmed',title:'Ivacaftor in patients with G551D mutation',url:'https://pubmed.ncbi.nlm.nih.gov/22047557/',source:'PubMed'},{id:6,type:'clinvar',title:'ClinVar entry G551D',url:'https://clinvar.ncbi.nlm.nih.gov',source:'ClinVar'}] },
+    { id:4, legacy_name:'W1282X', protein_name:'p.Trp1282X', cdna_name:'c.3846G>A', cftr_class:'I', class_subtype:'standard', class_confidence:'High', final_determination:'CF-causing', eti_prediction:'non_responsive', eti_evidence_level:'Moderate', eti_recommendation:'None currently approved', data_status:'complete_clinical', population_frequency:'0.0147', validation_count:3, evidence_links:[] },
+    { id:5, legacy_name:'N1303K', protein_name:'p.Asn1303Lys', cdna_name:'c.3909C>G', cftr_class:'II', class_subtype:'standard', class_confidence:'High', final_determination:'CF-causing', eti_prediction:'non_responsive', eti_evidence_level:'Moderate', eti_recommendation:'None currently approved', data_status:'complete_clinical', population_frequency:'0.0133', validation_count:2, evidence_links:[] },
+    { id:6, legacy_name:'R117H', protein_name:'p.Arg117His', cdna_name:'c.350G>A', cftr_class:'IV', class_subtype:'standard', class_confidence:'High', final_determination:'Varying clinical consequence', eti_prediction:'responsive', eti_evidence_level:'High', eti_recommendation:'Ivacaftor (Kalydeco)', data_status:'complete_clinical', population_frequency:'0.0089', validation_count:5, evidence_links:[{id:7,type:'pubmed',title:'R117H mild CFTR dysfunction',url:'https://pubmed.ncbi.nlm.nih.gov/',source:'PubMed'}] },
+    { id:7, legacy_name:'621+1G>T', protein_name:'p.?', cdna_name:'c.489+1G>T', cftr_class:'I', class_subtype:'standard', class_confidence:'High', final_determination:'CF-causing', eti_prediction:'non_responsive', eti_evidence_level:'Moderate', data_status:'complete_clinical', population_frequency:'0.0068', validation_count:1, evidence_links:[] },
+    { id:8, legacy_name:'3849+10kbC>T', protein_name:'p.?', cdna_name:'c.3717+12191C>T', cftr_class:'V', class_subtype:'standard', class_confidence:'Moderate', final_determination:'CF-causing', eti_prediction:'responsive', eti_evidence_level:'Moderate', eti_recommendation:'Ivacaftor', data_status:'partial_clinical', population_frequency:null, validation_count:0, evidence_links:[] },
+    { id:9, legacy_name:'2184delA', protein_name:'p.Lys728SerfsX4', cdna_name:'c.2052del', cftr_class:'I', class_subtype:'standard', class_confidence:'High', final_determination:'CF-causing', eti_prediction:'non_responsive', eti_evidence_level:'Low', data_status:'partial_clinical', population_frequency:null, validation_count:0, evidence_links:[] },
+    { id:10, legacy_name:'1717-1G>A', protein_name:'p.?', cdna_name:'c.1585-1G>A', cftr_class:'I', class_subtype:'standard', class_confidence:'High', final_determination:'CF-causing', eti_prediction:'non_responsive', eti_evidence_level:'High', data_status:'complete_clinical', population_frequency:'0.0071', validation_count:2, evidence_links:[] },
+    { id:11, legacy_name:'R553X', protein_name:'p.Arg553X', cdna_name:'c.1657C>T', cftr_class:'I', class_subtype:'standard', class_confidence:'High', final_determination:'CF-causing', eti_prediction:'non_responsive', data_status:'complete_clinical', population_frequency:'0.0062', validation_count:1, evidence_links:[] },
+    { id:12, legacy_name:'A455E', protein_name:'p.Ala455Glu', cdna_name:'c.1364C>A', cftr_class:'V', class_subtype:'standard', class_confidence:'Moderate', final_determination:'CF-causing', eti_prediction:'responsive', eti_evidence_level:'Moderate', eti_recommendation:'Ivacaftor', data_status:'partial_clinical', population_frequency:null, validation_count:0, evidence_links:[] },
+    { id:13, legacy_name:'G85E', protein_name:'p.Gly85Glu', cdna_name:'c.254G>A', cftr_class:'II', class_subtype:'standard', class_confidence:'Moderate', final_determination:'CF-causing', eti_prediction:'responsive', eti_evidence_level:'Moderate', eti_recommendation:'Elexacaftor/Tezacaftor/Ivacaftor', data_status:'partial_clinical', population_frequency:null, validation_count:0, evidence_links:[] },
+    { id:14, legacy_name:'L206W', protein_name:'p.Leu206Trp', cdna_name:'c.617T>G', cftr_class:'IV', class_subtype:'standard', class_confidence:'Low', final_determination:'CF-causing', eti_prediction:'unknown', data_status:'literature_only', population_frequency:null, validation_count:0, evidence_links:[] },
+    { id:15, legacy_name:'D1152H', protein_name:'p.Asp1152His', cdna_name:'c.3454G>C', cftr_class:'IV', class_subtype:'standard', class_confidence:'Moderate', final_determination:'Varying clinical consequence', eti_prediction:'responsive', eti_evidence_level:'Moderate', eti_recommendation:'Ivacaftor', data_status:'complete_clinical', population_frequency:'0.0042', validation_count:1, evidence_links:[] },
+    { id:16, legacy_name:'00delA', protein_name:'p.?', cdna_name:null, cftr_class:'I', class_subtype:'standard', class_confidence:'Low', final_determination:'CF-causing', eti_prediction:'unknown', data_status:'literature_only', population_frequency:null, validation_count:0, evidence_links:[] },
+    { id:17, legacy_name:'02del14', protein_name:null, cdna_name:null, cftr_class:null, class_subtype:null, class_confidence:null, final_determination:'CF-causing', eti_prediction:null, data_status:'no_data', population_frequency:null, validation_count:0, evidence_links:[] },
+    { id:18, legacy_name:'1001+11C/T', protein_name:'p.?', cdna_name:'c.869+11C>T', cftr_class:'V', class_subtype:'standard', class_confidence:'Low', final_determination:'Unknown significance', eti_prediction:'unknown', data_status:'literature_only', population_frequency:null, validation_count:0, evidence_links:[] },
+    { id:19, legacy_name:'S549N', protein_name:'p.Ser549Asn', cdna_name:'c.1646G>A', cftr_class:'III', class_subtype:'standard', class_confidence:'High', final_determination:'CF-causing', eti_prediction:'responsive', eti_evidence_level:'High', eti_recommendation:'Ivacaftor (Kalydeco)', data_status:'complete_clinical', population_frequency:'0.0021', validation_count:3, evidence_links:[] },
+    { id:20, legacy_name:'R1162X', protein_name:'p.Arg1162X', cdna_name:'c.3484C>T', cftr_class:'I', class_subtype:'standard', class_confidence:'High', final_determination:'CF-causing', eti_prediction:'non_responsive', data_status:'complete_clinical', population_frequency:'0.0019', validation_count:0, evidence_links:[] },
+];
+
+// ========== DATABASE (with demo fallback) ==========
+
+function setSplashProgress(pct, msg) {
+    const bar = document.getElementById('splashBar');
+    const msgEl = document.getElementById('splashMsg');
+    if (bar) bar.style.width = pct + '%';
+    if (msgEl) msgEl.textContent = msg;
+}
+
+function hideSplash() {
+    const splash = document.getElementById('splash');
+    if (!splash) return;
+    setTimeout(() => {
+        splash.classList.add('fade-out');
+        setTimeout(() => splash.remove(), 550);
+    }, 600);
+}
+
 async function loadVariants() {
     const startTime = performance.now();
     STATE.system.initStartTime = new Date();
+    STATE.isDemo = false;
+
+    setSplashProgress(10, 'Connecting to database…');
+
     try {
         showListLoading();
+
+        setSplashProgress(25, 'Fetching variant data…');
+
         let allVariants = [];
         let offset = 0;
         const limit = 1000;
         let hasMore = true;
+
         while (hasMore) {
             const res = await fetch(
                 `${CONFIG.SUPABASE.URL}/rest/v1/variants?select=*,evidence_links(*)&order=legacy_name.asc&limit=${limit}&offset=${offset}`,
-                { headers: { 'apikey': CONFIG.SUPABASE.KEY, 'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}` } }
+                { headers: { 'apikey': CONFIG.SUPABASE.KEY, 'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}` }, signal: AbortSignal.timeout(8000) }
             );
             STATE.system.apiCalls++;
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -1831,31 +1939,70 @@ async function loadVariants() {
             allVariants = [...allVariants, ...data];
             hasMore = data.length === limit;
             offset += limit;
+            setSplashProgress(Math.min(60, 25 + allVariants.length / 50), `Loaded ${allVariants.length.toLocaleString()} variants…`);
         }
+
         STATE.variants = allVariants;
+        setSplashProgress(80, 'Building search index…');
+
         STATE.variantsById = new Map(STATE.variants.map(v => [v.id, v]));
         STATE.variantsByLegacyName = new Map(STATE.variants.map(v => [v.legacy_name, v]));
         buildSearchIndex();
         calculateMasterStats();
         await loadExistingRoles();
+
+        setSplashProgress(95, 'Rendering interface…');
         STATE.view.filteredVariants = [...STATE.variants];
         STATE.view.currentPage = 1;
         renderVariantList();
         updateHeaderStats();
         updateFilterChips();
         updateSyncTime();
+
+        setSplashProgress(100, `${STATE.variants.length.toLocaleString()} variants loaded`);
         STATE.system.initialized = true;
         STATE.system.initEndTime = new Date();
         const initTime = (performance.now() - startTime).toFixed(0);
-        showNotification(`${STATE.variants.length.toLocaleString()} variants loaded in ${initTime}ms`, 'success', 2500);
+
+        hideSplash();
+        setTimeout(() => showNotification(`${STATE.variants.length.toLocaleString()} variants loaded in ${initTime}ms`, 'success', 2500), 700);
+
     } catch (err) {
-        console.error('Load failed:', err);
-        showListError(err.message);
-        showNotification('Database connection failed', 'error');
+        console.warn('DB connection failed, using demo data:', err.message);
+        STATE.isDemo = true;
+
+        setSplashProgress(70, 'Loading demo data…');
+        await new Promise(r => setTimeout(r, 300));
+
+        STATE.variants = DEMO_VARIANTS;
+        STATE.variantsById = new Map(STATE.variants.map(v => [v.id, v]));
+        STATE.variantsByLegacyName = new Map(STATE.variants.map(v => [v.legacy_name, v]));
+        buildSearchIndex();
+        calculateMasterStats();
+
+        setSplashProgress(95, 'Preparing interface…');
+        await new Promise(r => setTimeout(r, 200));
+
+        STATE.view.filteredVariants = [...STATE.variants];
+        STATE.view.currentPage = 1;
+        renderVariantList();
+        updateHeaderStats();
+        updateFilterChips();
+        updateSyncTime();
+
+        setSplashProgress(100, 'Demo mode ready');
+        STATE.system.initialized = true;
+        hideSplash();
+
+        // Show demo banner
+        setTimeout(() => {
+            const syncEl = document.getElementById('syncStatus');
+            if (syncEl) syncEl.innerHTML = '<span style="width:6px;height:6px;border-radius:50%;background:#fbbf24;display:inline-block;margin-right:4px"></span><span style="color:rgba(255,255,255,0.5)">Demo</span>';
+            showNotification('DB unreachable — showing demo data. Connect Supabase to load live variants.', 'warning', 6000);
+        }, 700);
+
         STATE.system.errorCount++;
         STATE.system.lastError = err;
-        const sync = document.getElementById('syncStatus');
-        if (sync) sync.innerHTML = '<span style="width:6px;height:6px;border-radius:50%;background:#f87171;display:inline-block"></span> <span style="color:#f87171">Offline</span>';
     }
 }
 
@@ -1897,18 +2044,45 @@ function searchVariants(query) {
     const q = query.toLowerCase().trim();
     const matchedIds = new Set();
     const scores = new Map();
-    [q, q.replace(/^p\./, ''), q.replace(/^c\./, ''), ...(q.match(/\d+/g) || [])]
-        .filter((v, i, a) => v && v.length >= 2 && a.indexOf(v) === i)
-        .forEach(term => {
-            if (STATE.searchIndex.termMap.has(term)) {
-                STATE.searchIndex.termMap.get(term).forEach(id => {
+
+    // Build query variants for flexible matching
+    const queryVariants = [q, q.replace(/^p\./, ''), q.replace(/^c\./, ''), ...(q.match(/\d+/g) || [])].filter((v, i, a) => v && v.length >= 2 && a.indexOf(v) === i);
+
+    // Exact + prefix match via index
+    queryVariants.forEach(term => {
+        if (STATE.searchIndex.termMap.has(term)) {
+            STATE.searchIndex.termMap.get(term).forEach(id => {
+                matchedIds.add(id);
+                scores.set(id, (scores.get(id) || 0) + (term === q ? 100 : 20));
+            });
+        }
+        // Prefix scan for partial matches
+        for (const [key, ids] of STATE.searchIndex.termMap) {
+            if (key !== term && key.startsWith(term)) {
+                ids.forEach(id => {
                     matchedIds.add(id);
-                    scores.set(id, (scores.get(id) || 0) + (term === q ? 100 : 20));
+                    scores.set(id, (scores.get(id) || 0) + 8);
                 });
             }
+        }
+    });
+
+    // Fallback: substring match on legacy names not found via index
+    if (matchedIds.size === 0) {
+        STATE.variants.forEach(v => {
+            const name = (v.legacy_name || '').toLowerCase();
+            const prot = (v.protein_name || '').toLowerCase();
+            const cdna = (v.cdna_name || '').toLowerCase();
+            if (name.includes(q) || prot.includes(q) || cdna.includes(q)) {
+                matchedIds.add(v.id);
+                scores.set(v.id, 5);
+            }
         });
+    }
+
     return Array.from(matchedIds)
         .map(id => ({ v: STATE.variantsById.get(id), s: scores.get(id) || 0 }))
+        .filter(r => r.v)
         .sort((a, b) => b.s - a.s)
         .map(r => r.v);
 }
@@ -2053,7 +2227,13 @@ function renderVariantList() {
     setText('listCount', STATE.view.filteredVariants.length.toLocaleString());
 
     if (page.length === 0) {
-        container.innerHTML = `<div class="list-empty"><i class="fas fa-search"></i><p>No variants found</p><p style="margin-top:5px;font-size:11px">Try a different search or filter</p></div>`;
+        const hasQuery = STATE.view.searchQuery?.length >= 2;
+        container.innerHTML = `<div class="list-empty">
+            <i class="fas ${hasQuery ? 'fa-search' : 'fa-filter'}" style="font-size:22px;color:var(--border-strong);margin-bottom:10px;display:block"></i>
+            <p style="font-weight:600;color:var(--text-2);font-size:13px">${hasQuery ? 'No results for "' + escapeHTML(STATE.view.searchQuery) + '"' : 'No variants match'}</p>
+            <p style="margin-top:5px;font-size:11px">${hasQuery ? 'Try cDNA notation (c.) or protein (p.)' : 'Try a different filter combination'}</p>
+            ${hasQuery ? '<button onclick="clearSearch()" style="margin-top:12px;height:26px;padding:0 12px;border-radius:100px;border:1px solid var(--border);background:none;cursor:pointer;font-size:11px;color:var(--text-3)">Clear search</button>' : ''}
+        </div>`;
         return;
     }
 
@@ -2061,7 +2241,7 @@ function renderVariantList() {
     const clsBg = { ci:'var(--ci-bg)', cii:'var(--cii-bg)', ciii:'var(--ciii-bg)', civ:'var(--civ-bg)', cv:'var(--cv-bg)', cvi:'var(--cvi-bg)', cx:'var(--surface-inset)' };
     const clsColor = { ci:'var(--ci-text)', cii:'var(--cii-text)', ciii:'var(--ciii-text)', civ:'var(--civ-text)', cv:'var(--cv-text)', cvi:'var(--cvi-text)', cx:'var(--text-4)' };
 
-    container.innerHTML = page.map(v => {
+    container.innerHTML = page.map((v, idx) => {
         const isSelected = STATE.view.selectedVariant?.id === v.id;
         const cls = v.cftr_class ? `c${v.cftr_class.toLowerCase()}` : 'cx';
         const eti = v.eti_prediction || 'unknown';
@@ -2079,7 +2259,7 @@ function renderVariantList() {
         }
 
         return `
-        <div class="variant-row ${isSelected ? 'selected' : ''} ${hasMissing ? 'has-missing' : ''}" onclick="selectVariant('${escapeAttr(v.legacy_name)}')">
+        <div class="variant-row ${isSelected ? 'selected' : ''} ${hasMissing ? 'has-missing' : ''}" onclick="selectVariant('${escapeAttr(v.legacy_name)}')" style="animation-delay:${Math.min(idx * 0.025, 0.3)}s">
             <div class="row-body">
                 <div class="row-top">
                     <span class="row-name">${nameDisplay}${isExceptional ? ' <span style="color:var(--cii-text);font-size:9px">⚡</span>' : ''}</span>
@@ -2277,6 +2457,14 @@ function renderVariantDetail(variant) {
         ` : ''}
     `;
 
+    // Footer spacer
+    const footer = document.createElement('div');
+    footer.style.cssText = 'padding:0 0 24px;text-align:right;font-size:10.5px;color:var(--text-4);';
+    footer.innerHTML = variant.date_updated
+        ? `<i class="fas fa-clock" style="margin-right:5px;font-size:9px"></i>Last updated ${formatDate(variant.date_updated)}`
+        : '';
+    container.appendChild(footer);
+
     setTimeout(() => loadValidationHistory(variant.id), 100);
 }
 
@@ -2321,6 +2509,21 @@ async function loadExistingRoles() {
 }
 
 async function loadValidationHistory(variantId) {
+    // In demo mode use cached/empty data
+    if (STATE.isDemo) {
+        const histEl = document.getElementById(`valHistory-${variantId}`);
+        const variant = STATE.variantsById.get(variantId);
+        if (!histEl || !variant) return;
+        const cnt = variant.validation_count || 0;
+        setText(`valUnique-${variantId}`, cnt);
+        setText(`valRoles-${variantId}`, cnt > 0 ? '1' : '0');
+        if (cnt === 0) {
+            histEl.innerHTML = `<div style="text-align:center;padding:16px;font-size:11px;color:var(--text-4)">No validation history yet</div>`;
+        } else {
+            histEl.innerHTML = `<div class="val-entry"><div class="val-avatar">${(variant.last_validator_name||'?').split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2)}</div><div style="flex:1"><div style="display:flex;align-items:center;gap:4px;margin-bottom:2px"><span class="val-name">${escapeHTML(variant.last_validator_name||'Clinician')}</span>${variant.last_validator_role?`<span class="val-role">· ${escapeHTML(variant.last_validator_role)}</span>`:''}<span class="val-badge-new">Latest</span></div><div class="val-date">Demo record</div></div></div>`;
+        }
+        return;
+    }
     try {
         const res = await fetch(`${CONFIG.SUPABASE.URL}/rest/v1/validations?variant_id=eq.${variantId}&order=created_at.desc`,
             { headers: { 'apikey': CONFIG.SUPABASE.KEY, 'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}` } });
@@ -2394,18 +2597,19 @@ async function submitValidation() {
 
     try {
         const { variantName, variantId } = STATE.ui.validationContext;
+        if (!STATE.isDemo) {
         const res = await fetch(`${CONFIG.SUPABASE.URL}/rest/v1/validations`, {
             method: 'POST',
             headers: { 'apikey': CONFIG.SUPABASE.KEY, 'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
             body: JSON.stringify({ variant_id: variantId, clinician_name: name, clinician_role: role, notes: notes || null })
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
         await fetch(`${CONFIG.SUPABASE.URL}/rest/v1/variants?id=eq.${variantId}`, {
             method: 'PATCH',
             headers: { 'apikey': CONFIG.SUPABASE.KEY, 'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
             body: JSON.stringify({ validation_count: (STATE.variantsById.get(variantId)?.validation_count || 0) + 1, last_validator_name: name, last_validator_role: role, last_validated_at: new Date().toISOString() })
         });
+        }
 
         const updated = STATE.variants.find(v => v.id === variantId);
         if (updated) {
@@ -2477,12 +2681,14 @@ async function saveAnnotation() {
     let val = input.value || null;
 
     try {
+        if (!STATE.isDemo) {
         const res = await fetch(`${CONFIG.SUPABASE.URL}/rest/v1/variants?id=eq.${variant.id}`, {
             method: 'PATCH',
             headers: { 'apikey': CONFIG.SUPABASE.KEY, 'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
             body: JSON.stringify({ [field]: val, updated_at: new Date().toISOString() })
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        }
 
         STATE.variants = STATE.variants.map(v => v.id === variant.id ? { ...v, [field]: val } : v);
         const updated = STATE.variants.find(v => v.id === variant.id);
@@ -2498,7 +2704,7 @@ async function saveAnnotation() {
         }
         applyFilterChain();
         closeAnnotationModal();
-        showNotification(`${field.replace(/_/g, ' ')} updated`, 'success');
+        showNotification(`${field.replace(/_/g, ' ')} updated${STATE.isDemo ? ' (demo — not persisted)' : ''}`, 'success');
     } catch (err) {
         showNotification(`Update failed: ${err.message}`, 'error');
     }
@@ -2736,10 +2942,16 @@ async function showAllEvidence(variantId) {
     list.innerHTML = `<div style="text-align:center;padding:40px;"><i class="fas fa-spinner fa-spin" style="color:var(--teal);font-size:18px"></i></div>`;
 
     try {
-        const res = await fetch(`${CONFIG.SUPABASE.URL}/rest/v1/evidence_links?variant_id=eq.${variantId}&order=created_at.desc`,
-            { headers: { 'apikey': CONFIG.SUPABASE.KEY, 'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}` } });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const links = await res.json();
+        let links;
+        if (STATE.isDemo) {
+            links = variant.evidence_links || [];
+            await new Promise(r => setTimeout(r, 200));
+        } else {
+            const res = await fetch(`${CONFIG.SUPABASE.URL}/rest/v1/evidence_links?variant_id=eq.${variantId}&order=created_at.desc`,
+                { headers: { 'apikey': CONFIG.SUPABASE.KEY, 'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}` } });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            links = await res.json();
+        }
         if (links.length === 0) {
             list.innerHTML = `<div style="text-align:center;padding:40px;font-size:12px;color:var(--text-4)">No evidence links yet</div>`;
         } else {
