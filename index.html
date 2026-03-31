@@ -1054,14 +1054,64 @@
             flex-shrink: 0;
         }
 
-        /* Search highlight */
+        /* Search highlight — glowing green, exact nomenclature match */
         .sh {
-            background: rgba(41,121,255,0.15);
-            color: #93c5fd;
+            background: rgba(34,197,94,0.18);
+            color: #4ade80;
             font-weight: 700;
-            border-radius: 2px;
-            padding: 0 1px;
+            border-radius: 3px;
+            padding: 0 2px;
+            box-shadow: 0 0 8px rgba(34,197,94,0.28);
         }
+
+        /* Search Intelligence modal — tabs */
+        .si-tabs { display:flex; gap:2px; padding:10px 16px 0; background:var(--surface); border-bottom:1px solid var(--border); }
+        .si-tab { font-size:11px; font-weight:600; padding:6px 14px; border-radius:6px 6px 0 0; cursor:pointer; color:var(--text-tertiary); border:none; background:transparent; font-family:var(--font-body); transition:all .15s; border:1px solid transparent; border-bottom:none; }
+        .si-tab.active { background:var(--white); color:var(--text-primary); border-color:var(--border); }
+        .si-tab:hover:not(.active) { color:var(--text-secondary); }
+        .si-panel { display:none; } .si-panel.active { display:block; }
+        .si-kpi-row { display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--border); border-bottom:1px solid var(--border); }
+        .si-kpi { background:var(--surface); padding:12px 14px; }
+        .si-kpi-label { font-size:9px; font-weight:600; color:var(--text-tertiary); text-transform:uppercase; letter-spacing:.1em; margin-bottom:5px; }
+        .si-kpi-val { font-size:19px; font-weight:700; font-family:var(--font-mono); line-height:1; color:var(--text-primary); }
+        .si-kpi-val.g { color:#4ade80; } .si-kpi-val.r { color:#f87171; } .si-kpi-val.a { color:#fbbf24; } .si-kpi-val.b { color:#60a5fa; }
+        .si-kpi-sub { font-size:10px; color:var(--text-tertiary); margin-top:3px; font-family:var(--font-mono); }
+        .si-body { padding:16px; display:flex; flex-direction:column; gap:14px; }
+        .si-card { background:var(--surface-alt); border:1px solid var(--border); border-radius:8px; overflow:hidden; }
+        .si-card-head { padding:9px 13px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+        .si-card-title { font-size:10px; font-weight:600; color:var(--text-secondary); text-transform:uppercase; letter-spacing:.08em; display:flex; align-items:center; gap:7px; }
+        .si-card-note { font-size:10px; color:var(--text-tertiary); font-family:var(--font-mono); }
+        .si-card-body { padding:13px; }
+        .si-row2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+        .si-bar-row { display:flex; align-items:center; gap:10px; margin-bottom:7px; }
+        .si-bar-row:last-child { margin-bottom:0; }
+        .si-bl { font-size:11px; font-family:var(--font-mono); color:var(--text-primary); min-width:118px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .si-bt { flex:1; height:6px; background:rgba(255,255,255,0.04); border-radius:3px; overflow:hidden; }
+        .si-bf { height:100%; border-radius:3px; transition:width .7s cubic-bezier(.4,0,.2,1); }
+        .si-bf.g { background:#4ade80; } .si-bf.r { background:#f87171; }
+        .si-bn { font-size:10px; font-family:var(--font-mono); color:var(--text-secondary); min-width:30px; text-align:right; }
+        .si-miss-row { display:flex; align-items:center; gap:10px; padding:6px 0; border-bottom:1px solid var(--border); }
+        .si-miss-row:last-child { border-bottom:none; }
+        .si-miss-q { font-size:12px; font-family:var(--font-mono); color:var(--text-primary); flex:1; }
+        .si-miss-u { font-size:10px; font-family:var(--font-mono); padding:2px 7px; border-radius:4px; background:rgba(248,113,113,0.08); color:#f87171; border:1px solid rgba(248,113,113,0.18); }
+        .si-miss-n { font-size:10px; color:var(--text-tertiary); font-family:var(--font-mono); min-width:36px; text-align:right; }
+        .si-miss-s { font-size:9px; font-weight:600; padding:2px 6px; border-radius:4px; letter-spacing:.03em; white-space:nowrap; }
+        .si-miss-s.pending { background:rgba(251,191,36,0.1); color:#fbbf24; border:1px solid rgba(251,191,36,0.2); }
+        .si-miss-s.review { background:rgba(96,165,250,0.1); color:#60a5fa; border:1px solid rgba(96,165,250,0.2); }
+        .si-miss-s.resolved { background:rgba(74,222,128,0.1); color:#4ade80; border:1px solid rgba(74,222,128,0.2); }
+        .si-recent-row { display:flex; align-items:center; gap:10px; padding:5px 0; border-bottom:1px solid var(--border); }
+        .si-recent-row:last-child { border-bottom:none; }
+        .si-hb { font-size:9px; font-weight:700; padding:2px 6px; border-radius:4px; letter-spacing:.04em; flex-shrink:0; }
+        .si-hb.hit { background:rgba(74,222,128,0.1); color:#4ade80; border:1px solid rgba(74,222,128,0.18); }
+        .si-hb.miss { background:rgba(248,113,113,0.08); color:#f87171; border:1px solid rgba(248,113,113,0.18); }
+        .si-rq { font-size:11px; font-family:var(--font-mono); color:var(--text-primary); flex:1; }
+        .si-rf { font-size:9px; color:var(--text-secondary); background:var(--white); border-radius:3px; padding:1px 5px; border:1px solid var(--border); }
+        .si-rt { font-size:9px; color:var(--text-tertiary); font-family:var(--font-mono); }
+        .si-coverage-track { height:8px; background:rgba(255,255,255,0.04); border-radius:4px; overflow:hidden; margin-bottom:5px; }
+        .si-coverage-fill { height:100%; border-radius:4px; background:#4ade80; transition:width 1s cubic-bezier(.4,0,.2,1); }
+        .si-field-bar { display:flex; height:24px; border-radius:4px; overflow:hidden; gap:1px; margin-bottom:7px; }
+        .si-fb-seg { display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:600; letter-spacing:.04em; }
+        .si-gap-badge { font-size:9px; font-weight:600; padding:1px 6px; border-radius:4px; background:rgba(248,113,113,0.08); color:#f87171; border:1px solid rgba(248,113,113,0.18); }
 
         /* Empty state */
         .list-empty {
@@ -2657,12 +2707,20 @@
 <div id="dashboardModal" class="modal-overlay hidden">
     <div class="modal dashboard-modal">
         <div class="modal-header">
-            <span class="modal-title">Analytics Dashboard</span>
-            <button class="btn btn-ghost btn-icon" onclick="closeDashboard()">
-                <i class="fas fa-times"></i>
-            </button>
+            <span class="modal-title" id="dashModalTitle">Analytics Dashboard</span>
+            <div style="display:flex;align-items:center;gap:6px;margin-left:auto;">
+                <div style="display:flex;border:1px solid var(--border);border-radius:6px;overflow:hidden;">
+                    <button class="si-tab active" id="dashTab-clinical" onclick="setDashTab('clinical',this)" style="border-radius:0;font-size:10px;padding:4px 10px;">Clinical</button>
+                    <button class="si-tab" id="dashTab-search" onclick="setDashTab('search',this)" style="border-radius:0;font-size:10px;padding:4px 10px;border-left:1px solid var(--border);">
+                        <i class="fas fa-chart-line" style="font-size:9px;margin-right:4px;"></i>Search Intelligence
+                    </button>
+                </div>
+                <button class="btn btn-ghost btn-icon" onclick="closeDashboard()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
         </div>
-        <div class="modal-body">
+        <div class="modal-body" id="dashModalBody">
             <div class="dash-kpis">
                 <div class="dash-kpi">
                     <div class="dash-kpi-value" id="dkTotal">—</div>
@@ -2713,8 +2771,101 @@
                 </div>
             </div>
         </div>
-        <div class="modal-footer">
-            <button onclick="exportFullReport()" class="btn btn-secondary">
+        <!-- Search Intelligence tab content -->
+        <div id="siPanel" style="display:none;">
+            <div class="si-tabs">
+                <button class="si-tab active" id="siTab-overview" onclick="setSITab('overview',this)">Overview</button>
+                <button class="si-tab" id="siTab-misses" onclick="setSITab('misses',this)">Miss queue</button>
+                <button class="si-tab" id="siTab-recent" onclick="setSITab('recent',this)">Session</button>
+            </div>
+
+            <div id="siPanelOverview" class="si-panel active">
+                <div class="si-kpi-row">
+                    <div class="si-kpi"><div class="si-kpi-label">Total searches</div><div class="si-kpi-val b" id="siKpiTotal">0</div><div class="si-kpi-sub">this session</div></div>
+                    <div class="si-kpi"><div class="si-kpi-label">Hit rate</div><div class="si-kpi-val g" id="siKpiHitRate">—</div><div class="si-kpi-sub">exact match</div></div>
+                    <div class="si-kpi"><div class="si-kpi-label">Unique queries</div><div class="si-kpi-val a" id="siKpiUniq">0</div><div class="si-kpi-sub">distinct terms</div></div>
+                    <div class="si-kpi"><div class="si-kpi-label">Miss queue</div><div class="si-kpi-val r" id="siKpiMiss">0</div><div class="si-kpi-sub">no result found</div></div>
+                </div>
+                <div class="si-body">
+                    <div class="si-card">
+                        <div class="si-card-head">
+                            <div class="si-card-title">
+                                <span style="width:6px;height:6px;border-radius:50%;background:#2979ff;display:inline-block;flex-shrink:0;"></span>
+                                Search activity — hits vs misses over session
+                            </div>
+                            <div class="si-card-note">Bars = volume · Line = hit rate %</div>
+                        </div>
+                        <div class="si-card-body"><canvas id="siTimelineChart" height="110"></canvas></div>
+                    </div>
+                    <div class="si-row2">
+                        <div class="si-card">
+                            <div class="si-card-head"><div class="si-card-title"><span style="width:6px;height:6px;border-radius:50%;background:#4ade80;display:inline-block;"></span>Top hit variants</div><div class="si-card-note">by frequency</div></div>
+                            <div class="si-card-body" id="siTopHits"><div style="font-size:11px;color:var(--text-tertiary);padding:8px 0;">No searches yet</div></div>
+                        </div>
+                        <div class="si-card">
+                            <div class="si-card-head"><div class="si-card-title"><span style="width:6px;height:6px;border-radius:50%;background:#f87171;display:inline-block;"></span>Top misses <span class="si-gap-badge">research gap</span></div><div class="si-card-note">by unique users</div></div>
+                            <div class="si-card-body" id="siTopMisses"><div style="font-size:11px;color:var(--text-tertiary);padding:8px 0;">No misses yet</div></div>
+                        </div>
+                    </div>
+                    <div class="si-row2">
+                        <div class="si-card">
+                            <div class="si-card-head"><div class="si-card-title"><span style="width:6px;height:6px;border-radius:50%;background:#4ade80;display:inline-block;"></span>DB coverage</div></div>
+                            <div class="si-card-body">
+                                <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:9px;">
+                                    <span style="font-size:24px;font-weight:700;font-family:var(--font-mono);color:#4ade80;" id="siCoveragePct">—</span>
+                                    <span style="font-size:10px;color:var(--text-tertiary);">clinical coverage</span>
+                                </div>
+                                <div class="si-coverage-track"><div class="si-coverage-fill" id="siCoverageBar" style="width:0%"></div></div>
+                                <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text-tertiary);font-family:var(--font-mono);margin-top:4px;"><span>0%</span><span>50%</span><span>100%</span></div>
+                                <div style="margin-top:10px;font-size:11px;color:var(--text-tertiary);line-height:1.6;" id="siCoverageNote">Search more variants to build coverage data.</div>
+                            </div>
+                        </div>
+                        <div class="si-card">
+                            <div class="si-card-head"><div class="si-card-title"><span style="width:6px;height:6px;border-radius:50%;background:#fbbf24;display:inline-block;"></span>Nomenclature used by clinicians</div></div>
+                            <div class="si-card-body">
+                                <div class="si-field-bar" id="siFieldBar">
+                                    <div class="si-fb-seg" style="flex:1;background:var(--surface-alt);color:var(--text-tertiary);">No data</div>
+                                </div>
+                                <div style="display:flex;gap:10px;font-size:10px;font-family:var(--font-mono);" id="siFieldLegend"></div>
+                                <div style="margin-top:8px;font-size:11px;color:var(--text-tertiary);line-height:1.5;" id="siFieldNote">Breakdown appears after searches.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="siPanelMisses" class="si-panel" style="display:none;">
+                <div class="si-body">
+                    <div class="si-card">
+                        <div class="si-card-head">
+                            <div class="si-card-title"><span style="width:6px;height:6px;border-radius:50%;background:#f87171;display:inline-block;"></span>Miss queue — research gap work items</div>
+                            <div class="si-card-note">Sorted by unique users · not raw count</div>
+                        </div>
+                        <div class="si-card-body">
+                            <div style="display:grid;grid-template-columns:1fr auto auto;gap:8px;padding-bottom:8px;border-bottom:1px solid var(--border);font-size:9px;font-weight:600;letter-spacing:.08em;color:var(--text-tertiary);text-transform:uppercase;">
+                                <span>Query not found</span><span>Users</span><span>Count</span>
+                            </div>
+                            <div id="siMissQueue"><div style="font-size:11px;color:var(--text-tertiary);padding:12px 0;">No misses recorded yet.</div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="siPanelRecent" class="si-panel" style="display:none;">
+                <div class="si-body">
+                    <div class="si-card">
+                        <div class="si-card-head">
+                            <div class="si-card-title"><span style="width:6px;height:6px;border-radius:50%;background:#fbbf24;display:inline-block;"></span>Recent searches — this session</div>
+                            <div class="si-card-note">Last 20 · not persisted</div>
+                        </div>
+                        <div class="si-card-body" id="siRecentList"><div style="font-size:11px;color:var(--text-tertiary);padding:8px 0;">No searches this session yet.</div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer" id="dashModalFooter">
+            <button onclick="exportFullReport()" class="btn btn-secondary" id="dashExportBtn">
                 <i class="fas fa-download"></i> Export Full Report
             </button>
             <button onclick="closeDashboard()" class="btn btn-primary">Close</button>
@@ -2884,6 +3035,16 @@ const STATE = {
         errorCount: 0,
         lastError: null,
         apiCalls: 0
+    },
+
+    // ---- Search Intelligence ----
+    searchIntelligence: {
+        recentSearches: [],
+        globalHits: new Map(),
+        globalMisses: new Map(),
+        timeline: [],
+        sessionId: 'sess_' + Math.random().toString(36).slice(2,10),
+        siCharts: {}
     }
 };
 
@@ -2958,202 +3119,254 @@ async function loadVariants() {
 
 // ========== SEARCH INDEX ==========
 
+// ========== SEARCH INDEX — DETERMINISTIC NOMENCLATURE LOOKUP ==========
+// O(1) map lookup. Matches only legacy_name, protein_name, cdna_name, alt_names.
+// No fuzzy, no scoring, no Levenshtein. Case-insensitive. HGVS prefix stripped.
+
 function buildSearchIndex() {
-    const termMap = new Map();     // exact/prefix terms → Set of ids
-    const ngramMap = new Map();    // bigrams/trigrams → Set of ids
-    const variantTokens = new Map(); // id → array of searchable tokens
+    const lookup = new Map(); // normalizedKey → Set of variant ids
 
-    // Clinical aliases and synonyms
-    const ALIASES = {
-        'deltaF508': ['F508del','f508del','delta508'],
-        'f508': ['F508del'],
-        'g551d': ['G551D'],
-        'g542x': ['G542X'],
-        'w1282x': ['W1282X'],
-        'n1303k': ['N1303K'],
-        'responsive': ['eti+','eti responsive','responder','modulable'],
-        'non_responsive': ['eti-','eti non','no responde','non responsive'],
-        'class i': ['nonsense','stop','class1'],
-        'class ii': ['misfolding','trafficking','class2'],
-        'class iii': ['gating','class3'],
-        'class iv': ['conductance','class4'],
-        'class v': ['splicing','reduced','class5'],
-        'class vi': ['instability','class6'],
-    };
-
-    function tokenize(str) {
-        if (!str) return [];
-        const s = str.toLowerCase().trim();
-        const tokens = [s];
-        // Strip common prefixes
-        tokens.push(s.replace(/^p\./, '').replace(/^c\./, '').replace(/^r\./, ''));
-        // Extract numbers
-        const nums = s.match(/\d+/g);
-        if (nums) nums.forEach(n => tokens.push(n));
-        // Handle del/ins variants
-        if (s.includes('del')) tokens.push(s.replace('del',''), 'del' + s.replace(/[a-zdel]/g,''));
-        if (s.includes('ins')) tokens.push(s.replace('ins',''));
-        // Extract amino acid codes
-        const aa = s.match(/[a-z]{1,3}\d+[a-z*]{0,3}/g);
-        if (aa) aa.forEach(a => tokens.push(a));
-        return [...new Set(tokens.filter(t => t && t.length >= 2))];
+    function stripPrefix(s) {
+        return s.toLowerCase().trim()
+            .replace(/^p\./, '')
+            .replace(/^c\./, '')
+            .replace(/^r\./,'');
     }
 
-    function addNgrams(str, id) {
-        const s = str.toLowerCase().replace(/\s+/g,'');
-        for (let n = 2; n <= 3; n++) {
-            for (let i = 0; i <= s.length - n; i++) {
-                const gram = s.slice(i, i + n);
-                if (!ngramMap.has(gram)) ngramMap.set(gram, new Set());
-                ngramMap.get(gram).add(id);
-            }
-        }
+    function addKey(raw, variantId) {
+        if (!raw) return;
+        const withCase = raw.toLowerCase().trim();
+        const stripped = stripPrefix(raw);
+        [withCase, stripped].forEach(key => {
+            if (!key || key.length < 1) return;
+            if (!lookup.has(key)) lookup.set(key, new Set());
+            lookup.get(key).add(variantId);
+        });
     }
 
     STATE.variants.forEach(v => {
-        const tokens = [];
-
-        const fields = [
-            v.legacy_name, v.protein_name, v.cdna_name,
-            v.final_determination, v.source_summary,
-            v.cftr_class ? `class ${v.cftr_class}` : null,
-            v.cftr_class ? `class${v.cftr_class}` : null,
-            v.eti_prediction, v.class_subtype, v.eti_recommendation
-        ];
-
-        fields.forEach(f => { if (f) tokenize(f).forEach(t => tokens.push(t)); });
-
-        // Alias expansion
-        tokens.forEach(t => {
-            Object.entries(ALIASES).forEach(([key, vals]) => {
-                if (vals.some(a => a.toLowerCase() === t)) tokens.push(key);
-                if (t === key) vals.forEach(a => tokens.push(a.toLowerCase()));
-            });
-        });
-
-        const uniqueTokens = [...new Set(tokens)];
-        variantTokens.set(v.id, uniqueTokens);
-
-        uniqueTokens.forEach(term => {
-            if (!termMap.has(term)) termMap.set(term, new Set());
-            termMap.get(term).add(v.id);
-        });
-
-        // Build ngrams from key fields only
-        [v.legacy_name, v.protein_name, v.cdna_name].forEach(f => {
-            if (f) addNgrams(f, v.id);
-        });
+        addKey(v.legacy_name,  v.id);
+        addKey(v.protein_name, v.id);
+        addKey(v.cdna_name,    v.id);
+        // alt_names: space/comma/semicolon separated
+        if (v.alt_names) {
+            v.alt_names.split(/[\s,;]+/).forEach(n => addKey(n, v.id));
+        }
     });
 
-    STATE.searchIndex.termMap = termMap;
-    STATE.searchIndex.ngramMap = ngramMap;
-    STATE.searchIndex.variantTokens = variantTokens;
+    STATE.searchIndex.lookup = lookup;
     STATE.searchIndex.stats = {
         variantCount: STATE.variants.length,
-        termCount: termMap.size,
-        ngramCount: ngramMap.size,
+        termCount: lookup.size,
         lastBuilt: new Date()
     };
 }
 
-// ---- Levenshtein distance (bounded for performance) ----
-function editDistance(a, b, maxDist = 2) {
-    if (Math.abs(a.length - b.length) > maxDist) return maxDist + 1;
-    const la = a.length, lb = b.length;
-    const dp = Array.from({length: la + 1}, (_, i) => i);
-    for (let j = 1; j <= lb; j++) {
-        let prev = j;
-        for (let i = 1; i <= la; i++) {
-            const curr = a[i-1] === b[j-1] ? dp[i-1] : 1 + Math.min(dp[i-1], dp[i], prev);
-            dp[i-1] = prev;
-            prev = curr;
-        }
-        dp[la] = prev;
-    }
-    return dp[la];
-}
+// ========== SEARCH — EXACT NOMENCLATURE MATCH ==========
+// Returns variants whose legacy_name, protein_name, cdna_name or alt_names
+// contain the query as a substring (case-insensitive). No guessing.
 
 function searchVariants(query) {
-    if (!query || query.length < CONFIG.UI.MIN_SEARCH_CHARS) return STATE.variants;
+    if (!query || query.trim().length < CONFIG.UI.MIN_SEARCH_CHARS) {
+        return STATE.variants;
+    }
 
     const raw = query.toLowerCase().trim();
-    // Multi-token AND logic: split on spaces
-    const queryTokens = raw.split(/\s+/).filter(t => t.length >= 1);
-    const scores = new Map();
+    const stripped = raw.replace(/^p\./, '').replace(/^c\./, '').replace(/^r\./, '');
 
-    const addScore = (id, pts) => scores.set(id, (scores.get(id) || 0) + pts);
+    // Collect all variant ids that match either form
+    const matchedIds = new Set();
 
-    queryTokens.forEach(q => {
-        // 1. Exact match — highest score
-        if (STATE.searchIndex.termMap.has(q)) {
-            STATE.searchIndex.termMap.get(q).forEach(id => addScore(id, 200));
-        }
-
-        // 2. Prefix match on all terms
-        STATE.searchIndex.termMap.forEach((ids, term) => {
-            if (term !== q && term.startsWith(q)) {
-                ids.forEach(id => addScore(id, 80 + (q.length / term.length) * 40));
-            }
-            // Substring match
-            else if (term.includes(q) && term !== q && !term.startsWith(q)) {
-                ids.forEach(id => addScore(id, 30));
-            }
-        });
-
-        // 3. Ngram fuzzy match (for typos / partial)
-        if (q.length >= 3) {
-            const ngramHits = new Map();
-            for (let i = 0; i <= q.length - 2; i++) {
-                const gram = q.slice(i, i + 2);
-                if (STATE.searchIndex.ngramMap.has(gram)) {
-                    STATE.searchIndex.ngramMap.get(gram).forEach(id => {
-                        ngramHits.set(id, (ngramHits.get(id) || 0) + 1);
-                    });
-                }
-            }
-            const maxGrams = q.length - 1;
-            ngramHits.forEach((hits, id) => {
-                const similarity = hits / maxGrams;
-                if (similarity >= 0.5) addScore(id, similarity * 45);
-            });
-        }
-
-        // 4. Fuzzy edit-distance match for short-ish queries
-        if (q.length >= 4 && q.length <= 12) {
-            STATE.searchIndex.variantTokens.forEach((tokens, id) => {
-                tokens.forEach(term => {
-                    if (Math.abs(term.length - q.length) <= 2) {
-                        const dist = editDistance(q, term, 2);
-                        if (dist === 1) addScore(id, 35);
-                        else if (dist === 2 && q.length >= 6) addScore(id, 12);
-                    }
-                });
-            });
+    STATE.searchIndex.lookup.forEach((ids, key) => {
+        if (key.includes(raw) || key.includes(stripped)) {
+            ids.forEach(id => matchedIds.add(id));
         }
     });
 
-    // Multi-token AND bonus: boost variants that matched ALL tokens
-    if (queryTokens.length > 1) {
-        const tokenMatchCount = new Map();
-        queryTokens.forEach(q => {
-            const matched = new Set();
-            STATE.searchIndex.termMap.forEach((ids, term) => {
-                if (term.includes(q) || term.startsWith(q)) ids.forEach(id => matched.add(id));
-            });
-            matched.forEach(id => tokenMatchCount.set(id, (tokenMatchCount.get(id) || 0) + 1));
+    const results = Array.from(matchedIds)
+        .map(id => STATE.variantsById.get(id))
+        .filter(Boolean)
+        .sort((a, b) => {
+            // Exact matches first, then prefix, then substring
+            const score = v => {
+                const fields = [v.legacy_name, v.protein_name, v.cdna_name]
+                    .filter(Boolean).map(f => f.toLowerCase());
+                if (fields.some(f => f === raw || f === stripped)) return 0;
+                if (fields.some(f => f.startsWith(raw) || f.startsWith(stripped))) return 1;
+                return 2;
+            };
+            return score(a) - score(b);
         });
-        tokenMatchCount.forEach((count, id) => {
-            if (count === queryTokens.length) addScore(id, 150); // Strong AND bonus
-        });
+
+    // Determine which field matched (for the match pill + logging)
+    let matchedField = null;
+    if (results.length > 0) {
+        const v = results[0];
+        if (v.legacy_name && (v.legacy_name.toLowerCase().includes(raw) || v.legacy_name.toLowerCase().includes(stripped))) matchedField = 'legacy_name';
+        else if (v.protein_name && (v.protein_name.toLowerCase().includes(raw) || v.protein_name.toLowerCase().includes(stripped))) matchedField = 'protein_name';
+        else if (v.cdna_name && (v.cdna_name.toLowerCase().includes(raw) || v.cdna_name.toLowerCase().includes(stripped))) matchedField = 'cdna_name';
+        else matchedField = 'alt_names';
     }
 
-    // Sort by score descending, filter out near-zero noise
-    return Array.from(scores.entries())
-        .filter(([, s]) => s >= 10)
-        .sort((a, b) => b[1] - a[1])
-        .map(([id]) => STATE.variantsById.get(id))
-        .filter(Boolean);
+    logSearch(query.trim(), results.length > 0, matchedField);
+    return results;
 }
+
+// ========== SEARCH INTELLIGENCE ==========
+
+function logSearch(query, isHit, matchedField) {
+    if (!query || query.length < CONFIG.UI.MIN_SEARCH_CHARS) return;
+    const si = STATE.searchIntelligence;
+    const ts = Date.now();
+
+    // Recent searches — session, deduped, max 20
+    si.recentSearches = si.recentSearches.filter(r => r.query !== query);
+    si.recentSearches.unshift({ query, isHit, matchedField, ts });
+    if (si.recentSearches.length > 20) si.recentSearches.pop();
+
+    // Global hit / miss counters
+    if (isHit) {
+        si.globalHits.set(query, (si.globalHits.get(query) || 0) + 1);
+    } else {
+        if (!si.globalMisses.has(query)) si.globalMisses.set(query, { count: 0, sessions: new Set() });
+        const m = si.globalMisses.get(query);
+        m.count++;
+        m.sessions.add(si.sessionId);
+    }
+
+    // Timeline (last 500 events)
+    si.timeline.push({ ts, hit: isHit });
+    if (si.timeline.length > 500) si.timeline.shift();
+
+    // Persist to Supabase — fire-and-forget, never blocks UI
+    persistSearchEvent(query, isHit, matchedField);
+}
+
+async function persistSearchEvent(query, isHit, matchedField) {
+    try {
+        await fetch(`${CONFIG.SUPABASE.URL}/rest/v1/search_logs`, {
+            method: 'POST',
+            headers: {
+                'apikey': CONFIG.SUPABASE.KEY,
+                'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`,
+                'Content-Type': 'application/json',
+                'Prefer': 'return=minimal'
+            },
+            body: JSON.stringify({
+                query: query.toLowerCase().trim(),
+                is_hit: isHit,
+                matched_field: matchedField || null,
+                session_id: STATE.searchIntelligence.sessionId,
+                searched_at: new Date().toISOString()
+            })
+        });
+        // If miss — upsert into miss queue
+        if (!isHit) {
+            await fetch(`${CONFIG.SUPABASE.URL}/rest/v1/search_miss_queue`, {
+                method: 'POST',
+                headers: {
+                    'apikey': CONFIG.SUPABASE.KEY,
+                    'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`,
+                    'Content-Type': 'application/json',
+                    'Prefer': 'resolution=merge-duplicates,return=minimal'
+                },
+                body: JSON.stringify({
+                    query: query.toLowerCase().trim(),
+                    last_seen_at: new Date().toISOString()
+                })
+            });
+        }
+    } catch (e) { /* silent — logging never breaks the UI */ }
+}
+
+// ---- Bookmarks ----
+const BOOKMARK_KEY = 'helix_bookmarks_v1';
+function getBookmarks() { try { return JSON.parse(localStorage.getItem(BOOKMARK_KEY) || '[]'); } catch { return []; } }
+function toggleBookmark(variantId) {
+    const list = getBookmarks();
+    const idx = list.indexOf(variantId);
+    if (idx === -1) list.push(variantId); else list.splice(idx, 1);
+    localStorage.setItem(BOOKMARK_KEY, JSON.stringify(list));
+    return idx === -1;
+}
+function isBookmarked(variantId) { return getBookmarks().includes(variantId); }
+function getBookmarkedVariants() { return getBookmarks().map(id => STATE.variantsById.get(id)).filter(Boolean); }
+
+// ---- Analytics helpers ----
+function getTopSearchHits(n = 10) {
+    return Array.from(STATE.searchIntelligence.globalHits.entries())
+        .sort((a,b) => b[1] - a[1]).slice(0, n)
+        .map(([query, count]) => ({ query, count }));
+}
+function getTopMisses(n = 10) {
+    return Array.from(STATE.searchIntelligence.globalMisses.entries())
+        .sort((a,b) => b[1].sessions.size - a[1].sessions.size).slice(0, n)
+        .map(([query, data]) => ({ query, count: data.count, sessions: data.sessions.size }));
+}
+function getSearchHitRate() {
+    const si = STATE.searchIntelligence;
+    const hits   = Array.from(si.globalHits.values()).reduce((a,b) => a+b, 0);
+    const misses = Array.from(si.globalMisses.values()).reduce((a,b) => a+b.count, 0);
+    const total  = hits + misses;
+    return { total, hits, misses, hitRate: total > 0 ? +((hits/total)*100).toFixed(1) : 0 };
+}
+function getFieldBreakdown() {
+    const counts = { legacy_name:0, protein_name:0, cdna_name:0, alt_names:0 };
+    STATE.searchIntelligence.recentSearches.forEach(r => { if (r.isHit && r.matchedField) counts[r.matchedField]++; });
+    return counts;
+}
+function getSearchTimeline() {
+    // Bucket last 500 events into 8 time buckets
+    const tl = STATE.searchIntelligence.timeline;
+    if (!tl.length) return { labels:[], hits:[], misses:[], rates:[] };
+    const buckets = 8;
+    const min = tl[0].ts, max = tl[tl.length-1].ts || (min+1);
+    const size = Math.max(1, Math.ceil((max-min)/buckets));
+    const data = Array.from({length:buckets}, () => ({hits:0,misses:0}));
+    tl.forEach(({ts,hit}) => {
+        const i = Math.min(buckets-1, Math.floor((ts-min)/size));
+        if (hit) data[i].hits++; else data[i].misses++;
+    });
+    const labels = data.map((_,i) => {
+        const t = new Date(min + i*size);
+        return t.toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'});
+    });
+    return {
+        labels,
+        hits: data.map(d => d.hits),
+        misses: data.map(d => d.misses),
+        rates: data.map(d => { const tot=d.hits+d.misses; return tot>0 ? Math.round((d.hits/tot)*1000)/10 : 0; })
+    };
+}
+
+// ---- Search Intelligence export ----
+function exportSearchReport() {
+    const top    = getTopSearchHits(20);
+    const misses = getTopMisses(20);
+    const rate   = getSearchHitRate();
+    const lines  = [
+        'ΔHELIX — SEARCH INTELLIGENCE REPORT',
+        'Generated: ' + new Date().toLocaleString('en-GB'),
+        '',
+        '=== SUMMARY ===',
+        'Total searches   : ' + rate.total,
+        'Searches with hit: ' + rate.hits,
+        'Searches no result: ' + rate.misses,
+        'Hit rate          : ' + rate.hitRate + '%',
+        '',
+        '=== TOP HITS (by frequency) ===',
+        ...top.map((r,i) => String(i+1).padStart(2,'0') + '. ' + r.query.padEnd(28) + r.count + ' searches'),
+        '',
+        '=== MISS QUEUE — RESEARCH GAP SIGNAL (by unique users) ===',
+        ...misses.map((r,i) => String(i+1).padStart(2,'0') + '. ' + r.query.padEnd(28) + r.sessions + ' users · ' + r.count + ' times'),
+    ];
+    const blob = new Blob([lines.join('\n')], {type:'text/plain'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'helix-search-report-' + new Date().toISOString().split('T')[0] + '.txt';
+    a.click(); URL.revokeObjectURL(a.href);
+}
+
 
 // ========== STATISTICS ==========
 
@@ -3372,8 +3585,10 @@ function renderVariantList() {
         function hl(str) {
             if (!str) return '';
             let s = escapeHTML(str);
-            if (q && q.length >= 2) {
-                const tokens = q.toLowerCase().trim().split(/\s+/).filter(t => t.length >= 2);
+            if (q && q.length >= CONFIG.UI.MIN_SEARCH_CHARS) {
+                const raw = q.toLowerCase().trim();
+                const stripped = raw.replace(/^p\./, '').replace(/^c\./, '').replace(/^r\./, '');
+                const tokens = [...new Set([raw, stripped])].filter(t => t.length >= 2);
                 tokens.forEach(tok => {
                     try { s = s.replace(new RegExp(`(${escapeRegExp(tok)})`, 'gi'), '<span class="sh">$1</span>'); } catch(e) {}
                 });
@@ -4390,11 +4605,176 @@ function copyToClipboard(text) {
 
 function showDashboard() {
     document.getElementById('dashboardModal').classList.remove('hidden');
+    // Default to clinical tab
+    setDashTab('clinical', document.getElementById('dashTab-clinical'));
     setTimeout(renderCharts, 100);
 }
 
-function closeDashboard() { 
-    document.getElementById('dashboardModal').classList.add('hidden'); 
+function closeDashboard() {
+    document.getElementById('dashboardModal').classList.add('hidden');
+    // Destroy SI charts to free memory
+    const si = STATE.searchIntelligence;
+    Object.values(si.siCharts).forEach(c => { try { c.destroy(); } catch(e){} });
+    si.siCharts = {};
+}
+
+function setDashTab(tab, btn) {
+    // Toggle clinical vs search intelligence panels
+    const clinicalEls = ['dash-kpis','dash-grid'];
+    document.querySelectorAll('.dash-kpis, .dash-grid, [id^="dash-card"]').forEach(el => {});
+    // Clinical panel = all children of modal-body except siPanel
+    const body = document.getElementById('dashModalBody');
+    Array.from(body.children).forEach(el => {
+        if (el.id === 'siPanel') return;
+        el.style.display = tab === 'clinical' ? '' : 'none';
+    });
+    document.getElementById('siPanel').style.display = tab === 'search' ? 'block' : 'none';
+    document.getElementById('dashExportBtn').style.display = tab === 'search' ? 'none' : '';
+    // Update tab highlight
+    document.querySelectorAll('#dashModalTitle').forEach(el => {
+        el.textContent = tab === 'clinical' ? 'Analytics Dashboard' : 'Search Intelligence';
+    });
+    document.querySelectorAll('[id^="dashTab-"]').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    if (tab === 'search') setTimeout(renderSICharts, 80);
+}
+
+function setSITab(name, btn) {
+    ['overview','misses','recent'].forEach(t => {
+        const el = document.getElementById('siPanel' + t.charAt(0).toUpperCase() + t.slice(1));
+        if (el) el.style.display = t === name ? 'block' : 'none';
+    });
+    document.querySelectorAll('.si-tab').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    populateSITab(name);
+}
+
+function populateSITab(name) {
+    const rate   = getSearchHitRate();
+    const hits   = getTopSearchHits(8);
+    const misses = getTopMisses(8);
+    const recent = STATE.searchIntelligence.recentSearches;
+
+    // KPIs
+    const uniq = STATE.searchIntelligence.globalHits.size + STATE.searchIntelligence.globalMisses.size;
+    document.getElementById('siKpiTotal').textContent  = rate.total;
+    document.getElementById('siKpiHitRate').textContent = rate.total > 0 ? rate.hitRate + '%' : '—';
+    document.getElementById('siKpiUniq').textContent   = uniq;
+    document.getElementById('siKpiMiss').textContent   = STATE.searchIntelligence.globalMisses.size;
+
+    // Coverage
+    const pct = rate.total > 0 ? rate.hitRate : 0;
+    document.getElementById('siCoveragePct').textContent = rate.total > 0 ? pct + '%' : '—';
+    document.getElementById('siCoverageBar').style.width = pct + '%';
+    document.getElementById('siCoverageNote').textContent = rate.misses > 0
+        ? rate.misses + ' searches returned no result — potential DB gaps.'
+        : 'All searches resolved. Excellent coverage.';
+
+    // Field breakdown
+    const fb = getFieldBreakdown();
+    const fbTotal = Object.values(fb).reduce((a,b) => a+b, 0);
+    const fbEl = document.getElementById('siFieldBar');
+    const lgEl = document.getElementById('siFieldLegend');
+    const fieldCfg = [
+        { key:'legacy_name',  label:'Legacy',  bg:'#1e3a5f', color:'#93c5fd' },
+        { key:'protein_name', label:'Protein', bg:'#2d1f5e', color:'#c4b5fd' },
+        { key:'cdna_name',    label:'cDNA',    bg:'#0f3d2e', color:'#6ee7b7' },
+    ];
+    if (fbTotal > 0) {
+        fbEl.innerHTML = fieldCfg.map(f => {
+            const pct = Math.round((fb[f.key]||0)/fbTotal*100);
+            return pct > 0 ? `<div class="si-fb-seg" style="flex:${pct};background:${f.bg};color:${f.color};">${f.label}</div>` : '';
+        }).join('');
+        lgEl.innerHTML = fieldCfg.map(f => {
+            const pct = Math.round((fb[f.key]||0)/fbTotal*100);
+            return `<span style="color:${f.color};font-family:var(--font-mono);font-size:10px;">${pct}% ${f.label.toLowerCase()}</span>`;
+        }).join('');
+        const dominant = fieldCfg.reduce((a,b) => (fb[b.key]||0)>(fb[a.key]||0) ? b : a);
+        document.getElementById('siFieldNote').textContent = dominant.label + ' names dominate — prioritize ' + dominant.label.toLowerCase() + ' in display.';
+    }
+
+    // Top hits
+    const hEl = document.getElementById('siTopHits');
+    if (hits.length) {
+        const max = hits[0].count;
+        hEl.innerHTML = hits.map(h => `
+            <div class="si-bar-row">
+                <div class="si-bl" title="${escapeHTML(h.query)}">${escapeHTML(h.query)}</div>
+                <div class="si-bt"><div class="si-bf g" style="width:${Math.round(h.count/max*100)}%"></div></div>
+                <div class="si-bn">${h.count}</div>
+            </div>`).join('');
+    } else { hEl.innerHTML = '<div style="font-size:11px;color:var(--text-tertiary);padding:8px 0;">No searches yet</div>'; }
+
+    // Top misses small
+    const mEl = document.getElementById('siTopMisses');
+    if (misses.length) {
+        const maxS = misses[0].sessions;
+        mEl.innerHTML = misses.slice(0,5).map(m => `
+            <div class="si-bar-row">
+                <div class="si-bl" title="${escapeHTML(m.query)}">${escapeHTML(m.query)}</div>
+                <div class="si-bt"><div class="si-bf r" style="width:${Math.round(m.sessions/maxS*100)}%"></div></div>
+                <div class="si-bn">${m.sessions}<span style="font-size:9px;color:var(--text-tertiary);">u</span></div>
+            </div>`).join('');
+    } else { mEl.innerHTML = '<div style="font-size:11px;color:var(--text-tertiary);padding:8px 0;">No misses yet</div>'; }
+
+    // Miss queue tab
+    const mqEl = document.getElementById('siMissQueue');
+    if (misses.length) {
+        mqEl.innerHTML = misses.map(m => `
+            <div class="si-miss-row">
+                <div class="si-miss-q">${escapeHTML(m.query)}</div>
+                <div class="si-miss-u">${m.sessions} user${m.sessions!==1?'s':''}</div>
+                <div class="si-miss-n">${m.count}×</div>
+            </div>`).join('');
+    } else { mqEl.innerHTML = '<div style="font-size:11px;color:var(--text-tertiary);padding:12px 0;">No misses recorded yet.</div>'; }
+
+    // Recent session tab
+    const rEl = document.getElementById('siRecentList');
+    const fieldLabel = { legacy_name:'legacy', protein_name:'protein', cdna_name:'cDNA', alt_names:'alt' };
+    if (recent.length) {
+        rEl.innerHTML = recent.map(r => `
+            <div class="si-recent-row">
+                <span class="si-hb ${r.isHit?'hit':'miss'}">${r.isHit?'HIT':'MISS'}</span>
+                <span class="si-rq">${escapeHTML(r.query)}</span>
+                ${r.matchedField ? `<span class="si-rf">${fieldLabel[r.matchedField]||r.matchedField}</span>` : ''}
+                <span class="si-rt">${new Date(r.ts).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}</span>
+            </div>`).join('');
+    } else { rEl.innerHTML = '<div style="font-size:11px;color:var(--text-tertiary);padding:8px 0;">No searches this session yet.</div>'; }
+}
+
+function renderSICharts() {
+    if (!window.Chart) return;
+    populateSITab('overview');
+    const tl = getSearchTimeline();
+    const ctx = document.getElementById('siTimelineChart');
+    if (!ctx) return;
+    const si = STATE.searchIntelligence;
+    if (si.siCharts['timeline']) { si.siCharts['timeline'].destroy(); delete si.siCharts['timeline']; }
+    if (!tl.labels.length) return;
+    si.siCharts['timeline'] = new Chart(ctx, {
+        data: {
+            labels: tl.labels,
+            datasets: [
+                { type:'bar', label:'Hits',    data:tl.hits,   backgroundColor:'rgba(74,222,128,0.45)', borderColor:'rgba(74,222,128,0.7)', borderWidth:1, borderRadius:3, yAxisID:'y' },
+                { type:'bar', label:'Misses',  data:tl.misses, backgroundColor:'rgba(248,113,113,0.35)', borderColor:'rgba(248,113,113,0.6)', borderWidth:1, borderRadius:3, yAxisID:'y' },
+                { type:'line',label:'Hit rate %', data:tl.rates, borderColor:'#fbbf24', borderWidth:2, pointBackgroundColor:'#fbbf24', pointRadius:3, tension:.4, yAxisID:'y2', fill:false }
+            ]
+        },
+        options: {
+            responsive:true, maintainAspectRatio:false,
+            plugins:{
+                legend:{ labels:{ color:'var(--text-secondary)', font:{size:10}, boxWidth:10, padding:12 } },
+                tooltip:{ backgroundColor:'var(--surface)', borderColor:'var(--border)', borderWidth:1, titleColor:'var(--text-primary)', bodyColor:'var(--text-secondary)',
+                    callbacks:{ label: ctx => ctx.dataset.label === 'Hit rate %' ? ` Hit rate: ${ctx.parsed.y}%` : ` ${ctx.dataset.label}: ${ctx.parsed.y}` }
+                }
+            },
+            scales:{
+                x:{ ticks:{color:'var(--text-tertiary)',font:{size:10}}, grid:{color:'var(--border)'} },
+                y:{ beginAtZero:true, stacked:false, ticks:{color:'var(--text-tertiary)',font:{size:10}}, grid:{color:'var(--border)'}, title:{display:true,text:'Count',color:'var(--text-tertiary)',font:{size:9}} },
+                y2:{ beginAtZero:false, min:0, max:100, position:'right', ticks:{color:'#fbbf24',font:{size:10}, callback:v=>v+'%'}, grid:{display:false}, title:{display:true,text:'Hit rate',color:'#fbbf24',font:{size:9}} }
+            }
+        }
+    });
 }
 
 function renderCharts() {
@@ -4730,7 +5110,7 @@ document.addEventListener('DOMContentLoaded', init);
 Object.assign(window, {
     selectVariant, setDataView, filterVariants, setClassFilter, toggleSort,
     clearSearch, quickSearch, toggleSidebar, previousPage, nextPage,
-    showImportModal, closeImportModal, switchImportTab, validateImport, 
+    showImportModal, closeImportModal, switchImportTab, validateImport,
     executeJsonImport, submitManualForm, clearManualForm, clearImportForm,
     showAnnotationModal, closeAnnotationModal, saveAnnotation,
     showDeleteModal, closeDeleteModal, confirmDeleteVariant,
@@ -4738,7 +5118,9 @@ Object.assign(window, {
     showDashboard, closeDashboard, refreshDashboardStats, exportReport, exportFullReport,
     showEvidenceModal, closeAddEvidenceModal, selectEvidenceType, saveEvidenceLink,
     showAllEvidence, closeAllEvidenceModal, copyToClipboard,
-    downloadTemplate, processBulkImport
+    downloadTemplate, processBulkImport,
+    setDashTab, setSITab, exportSearchReport,
+    toggleBookmark, isBookmarked
 });
 </script>
 </body>
