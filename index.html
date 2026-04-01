@@ -140,11 +140,73 @@
             position: absolute;
             inset: 0;
             background-image:
-                linear-gradient(rgba(41,121,255,0.04) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(41,121,255,0.04) 1px, transparent 1px);
+                linear-gradient(rgba(41,121,255,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(41,121,255,0.03) 1px, transparent 1px);
             background-size: 48px 48px;
             mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, black 20%, transparent 100%);
         }
+
+        #loadCanvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.75;
+        }
+
+        .load-variant-counter {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            color: rgba(41,121,255,0.6);
+            letter-spacing: 0.06em;
+            margin-top: 8px;
+            height: 16px;
+            transition: opacity 0.3s;
+        }
+
+        #loadingScreen.load-error .load-delta-glyph {
+            color: #f87171;
+            filter: drop-shadow(0 0 12px rgba(248,113,113,0.6));
+            animation: none;
+        }
+        #loadingScreen.load-error .load-bar-fill {
+            background: linear-gradient(90deg, #b91c1c, #f87171);
+            box-shadow: 0 0 8px rgba(248,113,113,0.6);
+        }
+        #loadingScreen.load-error .ring-spin,
+        #loadingScreen.load-error .ring-spin-rev {
+            animation-play-state: paused;
+        }
+        .load-retry-btn {
+            margin-top: 16px;
+            padding: 8px 24px;
+            background: rgba(248,113,113,0.12);
+            border: 1px solid rgba(248,113,113,0.35);
+            border-radius: 6px;
+            color: #fca5a5;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 0.08em;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: none;
+        }
+        #loadingScreen.load-error .load-retry-btn { display: inline-block; }
+        .load-retry-btn:hover { background: rgba(248,113,113,0.22); border-color: rgba(248,113,113,0.6); }
+
+        .load-hospital-greeting {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            color: rgba(52,211,153,0.7);
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            margin-top: 10px;
+            height: 14px;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        .load-hospital-greeting.visible { opacity: 1; }
 
         .load-scanline {
             position: absolute;
@@ -2418,6 +2480,7 @@
      ================================================================ -->
 <div id="loadingScreen">
     <div class="load-grid-bg"></div>
+    <canvas id="loadCanvas"></canvas>
     <div class="load-scanline"></div>
     <div class="load-glow"></div>
 
@@ -2466,17 +2529,10 @@
                 <span class="load-pct" id="loadPct">0%</span>
             </div>
         </div>
-    </div>
 
-    <div class="load-data-lines">
-        <div class="load-data-line"></div>
-        <div class="load-data-line"></div>
-        <div class="load-data-line"></div>
-        <div class="load-data-line"></div>
-        <div class="load-data-line"></div>
-        <div class="load-data-line"></div>
-        <div class="load-data-line"></div>
-        <div class="load-data-line"></div>
+        <div class="load-variant-counter" id="loadVariantCounter"></div>
+        <div class="load-hospital-greeting" id="loadHospitalGreeting"></div>
+        <button class="load-retry-btn" id="loadRetryBtn" onclick="location.reload()">↺ Reintentar conexión</button>
     </div>
 </div>
 
@@ -3449,11 +3505,13 @@ async function loadVariants() {
     
     try {
         showListLoading();
+        window.LOADER?.advance('db_connect');
         
         let allVariants = [];
         let offset = 0;
         const limit = 1000;
         let hasMore = true;
+        let pageNum = 0;
 
         while (hasMore) {
             const res = await fetch(
@@ -3467,23 +3525,34 @@ async function loadVariants() {
             );
             
             STATE.system.apiCalls++;
+            pageNum++;
             
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const data = await res.json();
             allVariants = [...allVariants, ...data];
             hasMore = data.length === limit;
             offset += limit;
+
+            // Advance loader on first page; update live counter on subsequent pages
+            if (pageNum === 1) {
+                window.LOADER?.advance('fetch_page');
+            }
+            window.LOADER?.setVariantCount(allVariants.length);
         }
 
         STATE.variants = allVariants;
         STATE.variantsById = new Map(STATE.variants.map(v => [v.id, v]));
         STATE.variantsByLegacyName = new Map(STATE.variants.map(v => [v.legacy_name, v]));
 
+        window.LOADER?.advance('index');
         buildSearchIndex();
         calculateMasterStats();
         await loadExistingRoles();
+
+        window.LOADER?.advance('search_intel');
         await loadSearchIntelligence(); // hydrate SI state from DB
 
+        window.LOADER?.advance('render');
         STATE.view.filteredVariants = [...STATE.variants];
         STATE.view.currentPage = 1;
 
@@ -3495,12 +3564,19 @@ async function loadVariants() {
         STATE.system.initEndTime = new Date();
         
         const initTime = (performance.now() - startTime).toFixed(0);
+
+        // Clear variant counter, advance to done — loader will auto-dismiss
+        window.LOADER?.setVariantCount(0);
+        window.LOADER?._clearSafety();
+        window.LOADER?.advance('done');
+
         showNotification(`${STATE.variants.length.toLocaleString()} variants loaded in ${initTime}ms`, 'success', 2500);
 
     } catch (err) {
         console.error('Load failed:', err);
         showListError(err.message);
         showNotification('Database connection failed', 'error');
+        window.LOADER?.setError('Error de conexión — ' + err.message);
         
         STATE.system.errorCount++;
         STATE.system.lastError = err;
@@ -6432,7 +6508,7 @@ const HOSPITAL_SEEDS = [
     'Hospital Universitario Central de Asturias (HUCA)',
     'Complejo Hospitalario Universitario de A Coruña (CHUAC)',
     'Hospital Universitario La Paz — Madrid',
-    'Hospital Vall d'Hebron — Barcelona',
+    "Hospital Vall d'Hebron — Barcelona",
     'Hospital Universitario Virgen del Rocío — Sevilla',
     'Hospital Universitario 12 de Octubre — Madrid',
     'Hospital Universitario La Fe — Valencia',
@@ -7131,44 +7207,205 @@ async function init() {
 
 document.addEventListener('DOMContentLoaded', init);
 
-// ========== LOADING SCREEN ==========
+// ========== LOADING SCREEN — REAL MILESTONE SYSTEM ==========
+// Progress is driven by actual async work in init(). No fake timers.
+// Milestones are resolved externally via window.LOADER.advance(key).
 (function() {
-    const steps = [
-        { pct: 8,  msg: 'Iniciando sistema…' },
-        { pct: 22, msg: 'Cargando módulos clínicos…' },
-        { pct: 38, msg: 'Conectando base de datos CFTR…' },
-        { pct: 54, msg: 'Verificando integridad de datos…' },
-        { pct: 70, msg: 'Calibrando modelos ETI…' },
-        { pct: 84, msg: 'Compilando variantes genéticas…' },
-        { pct: 95, msg: 'Preparando interfaz…' },
-        { pct: 100, msg: 'Sistema listo.' },
-    ];
-    const fill = document.getElementById('loadBarFill');
-    const statusText = document.getElementById('loadStatusText');
-    const pctEl = document.getElementById('loadPct');
-    const screen = document.getElementById('loadingScreen');
+    const fill       = document.getElementById('loadBarFill');
+    const statusEl   = document.getElementById('loadStatusText');
+    const pctEl      = document.getElementById('loadPct');
+    const screen     = document.getElementById('loadingScreen');
+    const counterEl  = document.getElementById('loadVariantCounter');
+    const greetingEl = document.getElementById('loadHospitalGreeting');
 
-    let step = 0;
-    function runStep() {
-        if (step >= steps.length) {
-            setTimeout(() => {
-                screen.classList.add('fade-out');
-                setTimeout(() => { screen.style.display = 'none'; }, 750);
-            }, 320);
-            return;
+    // ── Milestones — each maps to a real async event ──────────────────
+    const MILESTONES = [
+        { key: 'boot',        pct: 8,   msg: 'Iniciando sistema…' },
+        { key: 'db_connect',  pct: 22,  msg: 'Conectando base de datos CFTR…' },
+        { key: 'fetch_page',  pct: 40,  msg: 'Cargando variantes genéticas…' },
+        { key: 'index',       pct: 62,  msg: 'Construyendo índice de búsqueda…' },
+        { key: 'search_intel',pct: 75,  msg: 'Hidratando inteligencia de búsqueda…' },
+        { key: 'render',      pct: 88,  msg: 'Preparando interfaz clínica…' },
+        { key: 'done',        pct: 100, msg: 'Sistema listo.' },
+    ];
+    const milestoneMap = new Map(MILESTONES.map(m => [m.key, m]));
+    let currentPct = 0;
+    let dismissed  = false;
+
+    // ── Odometer counter ──────────────────────────────────────────────
+    function animatePct(target) {
+        const start = currentPct;
+        if (target <= start) return;
+        const duration = 380;
+        const startTime = performance.now();
+        function tick(now) {
+            const t = Math.min((now - startTime) / duration, 1);
+            const ease = 1 - Math.pow(1 - t, 3);
+            const val = Math.round(start + (target - start) * ease);
+            pctEl.textContent = val + '%';
+            if (t < 1) requestAnimationFrame(tick);
+            else { pctEl.textContent = target + '%'; currentPct = target; }
         }
-        const s = steps[step++];
-        fill.style.width = s.pct + '%';
-        statusText.style.opacity = '0';
-        setTimeout(() => {
-            statusText.textContent = s.msg;
-            pctEl.textContent = s.pct + '%';
-            statusText.style.opacity = '1';
-        }, 120);
-        const delay = step === steps.length ? 500 : 220 + Math.random() * 320;
-        setTimeout(runStep, delay);
+        requestAnimationFrame(tick);
+        currentPct = target;
     }
-    setTimeout(runStep, 300);
+
+    // ── Status text with typewriter effect ───────────────────────────
+    let typeTimer = null;
+    function setStatus(msg) {
+        clearTimeout(typeTimer);
+        statusEl.style.opacity = '0';
+        setTimeout(() => {
+            statusEl.textContent = '';
+            statusEl.style.opacity = '1';
+            let i = 0;
+            function type() {
+                if (i < msg.length) {
+                    statusEl.textContent += msg[i++];
+                    typeTimer = setTimeout(type, 22 + Math.random() * 18);
+                }
+            }
+            type();
+        }, 140);
+    }
+
+    // ── Advance by milestone key ──────────────────────────────────────
+    function advance(key) {
+        if (dismissed) return;
+        const m = milestoneMap.get(key);
+        if (!m) return;
+        fill.style.width = m.pct + '%';
+        animatePct(m.pct);
+        setStatus(m.msg);
+        if (key === 'done') {
+            setTimeout(dismiss, 420);
+        }
+    }
+
+    // ── Variant fetch counter (called during paginated loop) ──────────
+    function setVariantCount(n) {
+        if (n === 0) { counterEl.textContent = ''; return; }
+        counterEl.textContent = `${n.toLocaleString()} variantes encontradas…`;
+    }
+
+    // ── Hospital greeting (reads localStorage) ────────────────────────
+    function showHospitalGreeting() {
+        try {
+            const saved = localStorage.getItem('deltahelix_hospital');
+            if (saved) {
+                const h = JSON.parse(saved);
+                const name = h.name || h;
+                greetingEl.textContent = `Bienvenido — ${name}`;
+                greetingEl.classList.add('visible');
+            }
+        } catch(e) {}
+    }
+
+    // ── Error state ───────────────────────────────────────────────────
+    function setError(msg) {
+        if (dismissed) return;
+        screen.classList.add('load-error');
+        fill.style.width = '100%';
+        pctEl.textContent = 'ERR';
+        setStatus(msg || 'Error de conexión — comprueba tu red');
+    }
+
+    // ── Dismiss ───────────────────────────────────────────────────────
+    function dismiss() {
+        if (dismissed) return;
+        dismissed = true;
+        stopCanvas();
+        screen.classList.add('fade-out');
+        setTimeout(() => { screen.style.display = 'none'; }, 750);
+    }
+
+    // ── Particle canvas — molecular network ──────────────────────────
+    const canvas = document.getElementById('loadCanvas');
+    const ctx    = canvas.getContext('2d');
+    let animId   = null;
+    let particles = [];
+
+    function initCanvas() {
+        canvas.width  = window.innerWidth;
+        canvas.height = window.innerHeight;
+        particles = Array.from({ length: 55 }, () => ({
+            x:   Math.random() * canvas.width,
+            y:   Math.random() * canvas.height,
+            vx:  (Math.random() - 0.5) * 0.4,
+            vy:  (Math.random() - 0.5) * 0.4,
+            r:   1 + Math.random() * 1.5,
+            alpha: 0.2 + Math.random() * 0.5,
+        }));
+    }
+
+    function drawCanvas() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const W = canvas.width, H = canvas.height;
+        const cx = W / 2, cy = H / 2;
+
+        // Move
+        for (const p of particles) {
+            p.x += p.vx; p.y += p.vy;
+            if (p.x < 0) p.x = W; if (p.x > W) p.x = 0;
+            if (p.y < 0) p.y = H; if (p.y > H) p.y = 0;
+        }
+
+        // Connections — only within 130px
+        for (let i = 0; i < particles.length; i++) {
+            for (let j = i + 1; j < particles.length; j++) {
+                const a = particles[i], b = particles[j];
+                const dx = a.x - b.x, dy = a.y - b.y;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+                if (dist < 130) {
+                    // Fade with distance AND with proximity to screen edges
+                    const strength = (1 - dist / 130) * 0.18;
+                    ctx.beginPath();
+                    ctx.moveTo(a.x, a.y);
+                    ctx.lineTo(b.x, b.y);
+                    ctx.strokeStyle = `rgba(41,121,255,${strength})`;
+                    ctx.lineWidth = 0.8;
+                    ctx.stroke();
+                }
+            }
+        }
+
+        // Dots — brighter near center
+        for (const p of particles) {
+            const dx = p.x - cx, dy = p.y - cy;
+            const distFromCenter = Math.sqrt(dx*dx + dy*dy);
+            const fade = Math.max(0, 1 - distFromCenter / (Math.min(W, H) * 0.6));
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(41,121,255,${p.alpha * fade})`;
+            ctx.fill();
+        }
+
+        animId = requestAnimationFrame(drawCanvas);
+    }
+
+    function stopCanvas() {
+        if (animId) cancelAnimationFrame(animId);
+        animId = null;
+    }
+
+    initCanvas();
+    window.addEventListener('resize', initCanvas);
+    drawCanvas();
+
+    // ── Boot milestone fires immediately ─────────────────────────────
+    setTimeout(() => {
+        advance('boot');
+        showHospitalGreeting();
+    }, 200);
+
+    // ── Safety net: if init() never calls 'done', bail after 12s ─────
+    const safetyTimer = setTimeout(() => {
+        if (!dismissed) dismiss();
+    }, 12000);
+
+    // ── Expose to init() and loadVariants() ──────────────────────────
+    window.LOADER = { advance, setVariantCount, setError, dismiss,
+        _clearSafety: () => clearTimeout(safetyTimer) };
 })();
 
 
