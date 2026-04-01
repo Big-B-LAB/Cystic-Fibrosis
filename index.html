@@ -4675,7 +4675,7 @@ function renderVariantDetail(variant) {
     const etiSub = isResponsive ? 'Predicted to respond to elexacaftor/tezacaftor/ivacaftor' :
                    isNonResponsive ? 'Not predicted to respond to current modulators' :
                    'Insufficient data to predict ETI response';
-    const gap = calculateGapScore(variant);
+    const gapScore = calculateGapScore(variant);
 
     // Evidence links
     const evidenceLinks = variant.evidence_links || [];
