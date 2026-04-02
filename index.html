@@ -4308,9 +4308,30 @@ function getBookmarkedVariants() { return getBookmarks().map(id => STATE.variant
 
 // ---- Analytics helpers ----
 function getTopSearchHits(n = 10) {
-    return Array.from(STATE.searchIntelligence.globalHits.entries())
-        .sort((a,b) => b[1] - a[1]).slice(0, n)
-        .map(([query, count]) => ({ query, count }));
+    // Normalize: lowercase + strip spaces, merge duplicates
+    const normalized = new Map();
+    STATE.searchIntelligence.globalHits.forEach((count, query) => {
+        if (query.length < 3) return; // filter single-char / 2-char keystrokes
+        // Find canonical name from variants (checks all fields)
+        const v = STATE.variants.find(vv =>
+            vv.legacy_name.toLowerCase()  === query.toLowerCase() ||
+            (vv.cdna_name    && vv.cdna_name.toLowerCase()    === query.toLowerCase()) ||
+            (vv.protein_name && vv.protein_name.toLowerCase() === query.toLowerCase()) ||
+            (vv.alt_names    && vv.alt_names.toLowerCase().split(/[,;\s]+/).includes(query.toLowerCase()))
+        );
+        // Use canonical name as key so duplicates merge
+        const key = v ? v.legacy_name.toLowerCase() : query.toLowerCase();
+        const display = v ? v.legacy_name : query;
+        const existing = normalized.get(key);
+        if (existing) {
+            existing.count += count;
+        } else {
+            normalized.set(key, { query: display, count });
+        }
+    });
+    return Array.from(normalized.values())
+        .sort((a,b) => b.count - a.count)
+        .slice(0, n);
 }
 function getTopMisses(n = 10) {
     return Array.from(STATE.searchIntelligence.globalMisses.entries())
@@ -4819,6 +4840,7 @@ async function exportSearchPDF() {
 
     const tableCaption = (caption) => {
         tableNum++;
+        needsPage(12); // caption + table header minimum
         txt(`Table ${tableNum}.  ${caption}`, M, y, 8, 'bold', C.mid);
         y += 5;
     };
@@ -4942,6 +4964,30 @@ async function exportSearchPDF() {
     y += 0.8;
     rule(y, M, W-M, 0.3, C.accent);
 
+    // Key findings box — always render, ensure it fits
+    y += 8;
+    if (y + 34 > 270) { doc.addPage(); y = newPage() || 22; }
+    {
+        const kfRate  = hitRate;
+        const kfTotal = rate.total;
+        const kfGap   = si.globalMisses.size;
+        const kfColor = kfRate >= 80 ? [15,100,50] : kfRate >= 60 ? [110,80,10] : [130,30,30];
+        doc.setFillColor(10, 18, 38);
+        doc.setDrawColor(60, 100, 160); doc.setLineWidth(0.4);
+        doc.roundedRect(M, y, TW, 24, 2, 2, 'FD');
+        txt('Key findings', M+5, y+7, 8, 'bold', C.light);
+        const kfW = TW / 3;
+        [[fmt(kfTotal)+' searches', 'analysed this period'],
+         [kfRate+'%', 'query resolution rate'],
+         [kfGap+' gap'+(kfGap!==1?'s':''), 'open in miss queue']
+        ].forEach(([val, lbl], i) => {
+            const kx = M + i*kfW + kfW/2;
+            txt(val, kx, y+13, 10, 'bold', kfColor, 'center');
+            txt(lbl, kx, y+20, 7,  'normal', C.light, 'center');
+        });
+        y += 30;
+    }
+
     // Confidential footer on title page
     txt(BRAND.full, W/2, 280, 7.5, 'normal', C.mid, 'center');
     txt('CONFIDENTIAL - For authorised clinical and research personnel only', W/2, 286, 7, 'italic', C.light, 'center');
@@ -5005,10 +5051,18 @@ async function exportSearchPDF() {
     tableHeader(hitCols);
 
     const topHits = getTopSearchHits(25);
-    topHits.forEach((h, i) => {
+    // Filter out very short queries even if they somehow passed the Map filter
+    const filteredHits = topHits.filter(h => h.query && h.query.length >= 3);
+    filteredHits.forEach((h, i) => {
         needsPage(7);
-        const v = STATE.variants.find(vv => vv.legacy_name.toLowerCase() === h.query.toLowerCase());
-        const displayName = v ? v.legacy_name : h.query; // canonical case from DB
+        // Enrich: check legacy_name, cDNA, protein — catches variants matched via any field
+        const v = STATE.variants.find(vv =>
+            vv.legacy_name.toLowerCase()  === h.query.toLowerCase() ||
+            (vv.cdna_name    && vv.cdna_name.toLowerCase()    === h.query.toLowerCase()) ||
+            (vv.protein_name && vv.protein_name.toLowerCase() === h.query.toLowerCase()) ||
+            (vv.alt_names    && vv.alt_names.toLowerCase().split(/[,;\s]+/).some(a => a === h.query.toLowerCase()))
+        );
+        const displayName = v ? v.legacy_name : h.query;
         const etiLabel = v ? (v.eti_prediction === 'responsive' ? 'Responsive'
             : v.eti_prediction === 'non_responsive' ? 'Non-responsive' : 'Unknown') : '-';
         const valStr = v ? (v.validation_count > 0 ? v.validation_count + '' : '0') : '-';
@@ -5090,8 +5144,11 @@ async function exportSearchPDF() {
             `${CONFIG.SUPABASE.URL}/rest/v1/search_logs?select=query,is_hit,matched_field,city,hospital_name,searched_at&order=searched_at.desc&limit=300`,
             { headers: {'apikey': CONFIG.SUPABASE.KEY, 'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`} }
         );
-        const dbHistory = res.ok ? await res.json() : [];
-        tableCaption(`Full search event log (most recent ${dbHistory.length} events). Fields: query term, resolution status, matched nomenclature field, location.`);
+        const allHistory = res.ok ? await res.json() : [];
+        // Filter keystroke noise (< 3 chars) and cap display at 25 most recent
+        const dbHistory = allHistory.filter(r => (r.query||'').length >= 3).slice(0, 25);
+        const wasCapped = allHistory.filter(r => (r.query||'').length >= 3).length > 25;
+        tableCaption(`Most recent ${dbHistory.length} search events${wasCapped ? ' (filtered to 25 - full log in Supabase dashboard)' : ''}. Keystroke fragments (<3 chars) excluded.`);
 
         const logCols = [
             {label:'Query',          x:M},
@@ -5126,6 +5183,51 @@ async function exportSearchPDF() {
     } catch(e) {
         txt('Search log unavailable - database connection required.', M, y, 9, 'italic', C.light);
         y += 8;
+    }
+
+    // ================================================================
+    // SECTION — Actions required (auto-generated from live data)
+    // ================================================================
+    const pendingMisses = getTopMisses(10).filter(m => m.status !== 'resolved' && m.count >= 2);
+    const critGaps = Array.from(GAP_REGISTRY.values())
+        .filter(g => g.gap_level === 'CRITICAL' || g.gap_level === 'SEVERE').slice(0, 4);
+
+    if (pendingMisses.length || critGaps.length) {
+        sectionHeader('Actions Required');
+        needsPage(14); // guard: intro text + first section header
+        txt('The following items require attention from the curation team.', M, y, 8.5, 'italic', C.mid);
+        y += 8;
+
+        if (pendingMisses.length) {
+            needsPage(8);
+            txt('A.  Unresolved searches - candidates for database expansion', M, y, 9, 'bold', C.accent); y += 7;
+            pendingMisses.forEach((m, i) => {
+                needsPage(6);
+                doc.setFont('courier','normal'); doc.setFontSize(8.5); doc.setTextColor(...C.dark);
+                doc.text((i+1)+'.  '+m.query, M+4, y);
+                doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(...C.mid);
+                doc.text(m.sessions+' user'+(m.sessions!==1?'s':'')+' . '+m.count+' searches . '+m.status, M+65, y);
+                y += 5.5;
+            });
+            y += 4;
+        }
+
+        if (critGaps.length) {
+            needsPage(8);
+            txt('B.  Critical data gaps - variants requiring urgent curation', M, y, 9, 'bold', C.accent); y += 7;
+            critGaps.forEach((g, i) => {
+                needsPage(6);
+                const gv = STATE.variantsById.get(g.variant_id);
+                if (!gv) return;
+                doc.setFont('courier','normal'); doc.setFontSize(8.5); doc.setTextColor(...C.dark);
+                doc.text((i+1)+'.  '+gv.legacy_name, M+4, y);
+                doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(...C.mid);
+                const missing = (g.missing_types||[]).slice(0,3).join(', ');
+                doc.text('Score '+g.gap_score+' ('+g.gap_level+') - missing: '+missing, M+65, y);
+                y += 5.5;
+            });
+        }
+        y += 6;
     }
 
     // ================================================================
@@ -7179,188 +7281,31 @@ function getGapLevel(score) {
     return GAP_LEVELS.find(g => score >= g.min) || GAP_LEVELS[GAP_LEVELS.length - 1];
 }
 
-function scoreVariantGap(variant) {
-    if (!variant) return null;
-
-    let score = 0;
-    const missing = [];
-    const recs    = [];
-
-    // ---- Field completeness (60 pts max) ----
-    if (!variant.cftr_class) {
-        score += 30;
-        missing.push('cftr_class');
-        recs.push('Assign CFTR functional class based on variant mechanism');
-    }
-    if (!variant.eti_prediction || variant.eti_prediction === 'unknown') {
-        score += 20;
-        missing.push('eti_prediction');
-        recs.push('Determine ETI (elexacaftor/tezacaftor/ivacaftor) response prediction');
-    }
-    if (!variant.final_determination) {
-        score += 10;
-        missing.push('final_determination');
-        recs.push('Assign clinical determination (CF-causing, VUS, etc.)');
-    }
-    if (!variant.protein_name) {
-        score += 5;
-        missing.push('protein_name');
-        recs.push('Add HGVS protein notation (p.Xxx000Xxx)');
-    }
-    if (!variant.cdna_name) {
-        score += 5;
-        missing.push('cdna_name');
-        recs.push('Add HGVS cDNA notation (c.XXXXXX)');
-    }
-    if (!variant.alt_names) {
-        score += 2;
-        missing.push('alt_names');
-        recs.push('Add alternate names to improve search recall');
-    }
-
-    // ---- Evidence chain (20 pts max) ----
-    const evidenceCount = (variant.evidence_links || []).length;
-    if (evidenceCount === 0) {
-        score += 20;
-        missing.push('evidence_links');
-        recs.push('Add at least one evidence source (PubMed, CFTR2, ClinVar)');
-    } else if (evidenceCount < 2) {
-        score += 8;
-        recs.push('Add additional evidence sources — single-source variants are fragile');
-    } else if (evidenceCount < 3) {
-        score += 3;
-    }
-
-    // ---- Validation (15 pts max) ----
-    const valCount = variant.validation_count || 0;
-    if (valCount === 0) {
-        score += 15;
-        missing.push('validation');
-        recs.push('Requires at least one clinical validation');
-    } else if (valCount < 2) {
-        score += 5;
-        recs.push('Consider a second independent validation');
-    }
-
-    // ---- Search signal bonus (5 pts) ----
-    // If frequently searched but still has gaps — urgency multiplier
-    const searchHits = variant.search_hit_count || 0;
-    if (searchHits >= 10 && score > 20) {
-        score += 5;
-        recs.push(`High clinical interest (${searchHits} searches) — prioritise data completion`);
-    } else if (searchHits >= 5 && score > 30) {
-        score += 3;
-    }
-
-    score = Math.min(100, score);
-    const gapLevel = getGapLevel(score);
-
-    return {
-        variant_id:    variant.id,
-        gap_score:     score,
-        gap_level:     gapLevel.level,
-        missing_types: missing,
-        recommendations: recs,
-        analyzed_at:   new Date().toISOString(),
-        color:         gapLevel.color
-    };
-}
-
-// Persist gap to DB — fire and forget
-async function persistGapScore(gap) {
-    if (!gap || !gap.variant_id) return;
-    try {
-        await fetch(
-            `${CONFIG.SUPABASE.URL}/rest/v1/research_gaps?variant_id=eq.${gap.variant_id}`,
-            {
-                method: 'GET',
-                headers: { 'apikey': CONFIG.SUPABASE.KEY, 'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}` }
-            }
-        ).then(async res => {
-            const existing = await res.json();
-            const method   = existing.length ? 'PATCH' : 'POST';
-            const url      = existing.length
-                ? `${CONFIG.SUPABASE.URL}/rest/v1/research_gaps?variant_id=eq.${gap.variant_id}`
-                : `${CONFIG.SUPABASE.URL}/rest/v1/research_gaps`;
-            await fetch(url, {
-                method,
-                headers: {
-                    'apikey': CONFIG.SUPABASE.KEY,
-                    'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`,
-                    'Content-Type': 'application/json',
-                    'Prefer': 'return=minimal'
-                },
-                body: JSON.stringify({
-                    variant_id:      gap.variant_id,
-                    gap_score:       gap.gap_score,
-                    gap_level:       gap.gap_level,
-                    missing_types:   JSON.stringify(gap.missing_types),
-                    recommendations: JSON.stringify(gap.recommendations),
-                    analyzed_at:     gap.analyzed_at
-                })
-            });
-        });
-    } catch(e) { /* silent */ }
-}
-
-// In-memory gap registry — grows as variants are selected
-const GAP_REGISTRY = new Map(); // variant_id → gap result
+// Gap registry — bridges calculateGapScore result into GAP_REGISTRY
+const GAP_REGISTRY = new Map(); // variant_id -> gap result
 
 function analyseAndRegisterGap(variant) {
     if (!variant) return null;
-    const gap = scoreVariantGap(variant);
-    if (gap) {
-        GAP_REGISTRY.set(variant.id, gap);
-        variant._gap = gap;
-        persistGapScore(gap);
-        // Update sidebar chip
-        setTimeout(updateGapChip, 0);
-    }
+    const result = calculateGapScore(variant);
+    if (!result || !variant.id) return result;
+    // Normalise shape for GAP_REGISTRY (used by sidebar chip + intel strip)
+    const gap = {
+        variant_id:      variant.id,
+        gap_score:       result.score,
+        gap_level:       result.gapLevel,
+        missing_types:   result.missing,
+        recommendations: result.recommendations,
+        color:           gapLevelColor(result.gapLevel),
+        analyzed_at:     new Date().toISOString()
+    };
+    GAP_REGISTRY.set(variant.id, gap);
+    variant._gap = gap;
+    // Persist asynchronously with old engine signature
+    persistGapScore(variant.id, result.score, result.gapLevel, result.missing, result.recommendations);
+    setTimeout(updateGapChip, 0);
     return gap;
 }
 
-function renderGapQueue() {
-    const gaps = Array.from(GAP_REGISTRY.values())
-        .sort((a, b) => b.gap_score - a.gap_score);
-
-    const listEl    = document.getElementById('gapQueueList');
-    const noteEl    = document.getElementById('gapQueueNote');
-    const critEl    = document.getElementById('criticalGapNum');
-    const avgEl     = document.getElementById('avgGapScore');
-
-    if (!gaps.length) {
-        if (listEl) listEl.innerHTML = '<div style="font-size:11px;color:var(--text-tertiary);padding:12px 0;">Select variants to populate gap analysis.</div>';
-        return;
-    }
-
-    const critical  = gaps.filter(g => g.gap_level === 'CRITICAL').length;
-    const avgScore  = Math.round(gaps.reduce((s, g) => s + g.gap_score, 0) / gaps.length);
-
-    if (critEl) critEl.textContent = critical;
-    if (avgEl)  avgEl.textContent  = avgScore;
-    if (noteEl) noteEl.textContent = `${gaps.length} variant${gaps.length!==1?'s':''} scored`;
-
-    if (!listEl) return;
-    listEl.innerHTML = gaps.slice(0, 20).map(g => {
-        const v = STATE.variantsById.get(g.variant_id);
-        const name = v ? v.legacy_name : `ID ${g.variant_id}`;
-        const barColor = g.color;
-        const searches = v ? (v.search_hit_count || 0) : 0;
-        return `<div class="gap-queue-row" style="cursor:pointer;" onclick="selectVariant('${v ? escapeAttr(v.legacy_name) : ''}')">
-            <span class="gap-level-pill ${g.gap_level}">${g.gap_level}</span>
-            <div style="flex:1;min-width:0;">
-                <div class="gap-queue-name">${escapeHTML(name)}</div>
-                <div class="gap-score-bar" style="width:${g.gap_score}%;background:${barColor};opacity:.7;"></div>
-                <div class="gap-queue-meta">${g.missing_types.slice(0,3).join(' · ')}${g.missing_types.length > 3 ? ' +' + (g.missing_types.length - 3) + ' more' : ''}</div>
-                <div class="gap-recs">${g.recommendations.slice(0,2).map(r => `<span class="gap-rec">${escapeHTML(r)}</span>`).join('')}</div>
-            </div>
-            <div style="font-size:10px;font-family:var(--font-mono);color:var(--text-tertiary);text-align:right;flex-shrink:0;">
-                <div style="font-size:14px;font-weight:700;color:${barColor};">${g.gap_score}</div>
-                <div>${searches}×</div>
-            </div>
-        </div>`;
-    }).join('');
-}
 
 // ========== HOSPITAL MANAGEMENT ==========
 
@@ -7781,14 +7726,16 @@ function updateIntelStrip(variant, gap) {
         else missRef.style.display='none';
     }
 
-    // Gap alert — real score from engine
+    // Gap alert — works with both result shapes (GAP_REGISTRY uses gap_score/gap_level)
     const gapEl = document.getElementById('intelGapAlert');
     if (gapEl) {
-        if (gap && gap.gap_score >= 20) {
-            gapEl.textContent = `${gap.gap_level}  ·  score ${gap.gap_score}`;
-            gapEl.className = 'intel-pill gap-level-pill ' + gap.gap_level;
+        const gScore = gap ? (gap.gap_score !== undefined ? gap.gap_score : gap.score) : null;
+        const gLevel = gap ? (gap.gap_level || gap.gapLevel) : null;
+        if (gScore !== null && gScore >= 20) {
+            gapEl.textContent = `${gLevel}  ·  score ${gScore}`;
+            gapEl.className = 'intel-pill gap-level-pill ' + gLevel;
             gapEl.style.display = '';
-        } else if (gap && gap.gap_score < 20) {
+        } else if (gScore !== null && gScore < 20) {
             gapEl.textContent = 'ADEQUATE';
             gapEl.className = 'intel-pill gap-level-pill ADEQUATE';
             gapEl.style.display = '';
