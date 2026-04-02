@@ -685,6 +685,7 @@
             flex-direction: column;
             overflow: hidden;
             position: relative;
+            padding-bottom: 28px; /* activity ribbon height */
         }
 
         .sidebar-toggle {
@@ -1793,7 +1794,7 @@
 
         .list-pagination {
             border-top: 1px solid var(--border);
-            padding: 8px 12px;
+            padding: 10px 14px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -1802,19 +1803,19 @@
         }
 
         .page-btn {
-            height: 28px;
-            padding: 0 10px;
-            border-radius: 6px;
+            height: 34px;
+            padding: 0 14px;
+            border-radius: 7px;
             font-size: 12px;
-            font-weight: 500;
-            border: 1px solid var(--border);
+            font-weight: 600;
+            border: 1.5px solid var(--border);
             background: rgba(4,8,15,0.6);
             color: var(--text-secondary);
             cursor: pointer;
             transition: var(--transition);
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 5px;
         }
 
         .page-btn:hover:not(:disabled) { border-color: var(--brand); color: var(--brand); }
@@ -3213,7 +3214,7 @@
     <!-- ============================================================
          MAIN CONTENT
          ============================================================ -->
-    <main class="app-main" id="appMain" style="padding-bottom:28px;">
+    <main class="app-main" id="appMain" style="padding-bottom:28px;overflow-y:auto;">
         <div class="main-inner">
             <!-- Empty state -->
             <div class="detail-empty" id="detailEmpty">
@@ -5444,7 +5445,20 @@ function renderVariantList() {
                     <span class="row-name">${hl(v.legacy_name)}${isExceptional ? ' <span style="color:var(--class-ii);font-size:9px;font-family:var(--font-body)">⚡</span>' : ''}</span>
                     ${v.cftr_class ? `<span class="row-class-badge ${cls}">${v.cftr_class}</span>` : ''}
                 </div>
-                ${v.protein_name ? `<div class="row-protein">${hl(v.protein_name)}</div>` : '<div class="row-protein" style="opacity:0.4">—</div>'}
+                ${(() => {
+                    const prot = v.protein_name;
+                    const cdna = v.cdna_name;
+                    if (prot && prot !== 'p.?') {
+                        // Real protein consequence — show it
+                        return `<div class="row-protein">${hl(prot)}</div>`;
+                    } else if (cdna) {
+                        // p.? or no protein — show cDNA which is always actionable
+                        const display = cdna.length > 22 ? cdna.slice(0,21)+'…' : cdna;
+                        return `<div class="row-protein">${hl(display)}</div>`;
+                    } else {
+                        return '<div class="row-protein" style="opacity:0.2;">—</div>';
+                    }
+                })()}
                 <div class="row-indicators">
                     <span class="eti-indicator ${eti}">
                         <span class="eti-dot"></span>
