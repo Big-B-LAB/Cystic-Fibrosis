@@ -8251,26 +8251,43 @@ Object.assign(window, {
 </script>
 <style>
 /* ================================================================
-   HELIOS DESIGN SYSTEM
-   Solar/amber palette — distinct from main app blue
+   HELIOS DESIGN SYSTEM v2
+   Solar/amber — precision clinical review interface
    ================================================================ */
 :root {
-    --helios-bg:        #09090f;
-    --helios-surface:   #0f0f1a;
-    --helios-surface2:  #151525;
-    --helios-border:    rgba(251,191,36,0.12);
-    --helios-border2:   rgba(251,191,36,0.25);
-    --helios-sun:       #fbbf24;
-    --helios-sun2:      #f59e0b;
-    --helios-sun-glow:  rgba(251,191,36,0.15);
-    --helios-green:     #34d399;
-    --helios-red:       #f87171;
-    --helios-blue:      #60a5fa;
-    --helios-text:      #f0f4ff;
-    --helios-text2:     #8fa3c8;
-    --helios-text3:     #4a5a7a;
-    --helios-mono:      'IBM Plex Mono', monospace;
-    --helios-display:   'Syne', sans-serif;
+    --helios-bg:          #07080f;
+    --helios-surface:     #0c0d1a;
+    --helios-surface2:    #10111f;
+    --helios-surface3:    #14152a;
+    --helios-border:      rgba(251,191,36,0.10);
+    --helios-border2:     rgba(251,191,36,0.22);
+    --helios-border3:     rgba(251,191,36,0.38);
+    --helios-sun:         #fbbf24;
+    --helios-sun2:        #f59e0b;
+    --helios-sun3:        #d97706;
+    --helios-sun-glow:    rgba(251,191,36,0.18);
+    --helios-green:       #34d399;
+    --helios-green2:      #10b981;
+    --helios-red:         #f87171;
+    --helios-red2:        #ef4444;
+    --helios-blue:        #60a5fa;
+    --helios-purple:      #c084fc;
+    --helios-text:        #eef2ff;
+    --helios-text2:       #8892b0;
+    --helios-text3:       #3d4a6b;
+    --helios-text4:       #1e2740;
+    --helios-mono:        'IBM Plex Mono', 'SF Mono', monospace;
+    --helios-display:     'Syne', sans-serif;
+    --helios-body:        'IBM Plex Sans', sans-serif;
+    --helios-radius:      12px;
+    --helios-radius-sm:   8px;
+    --helios-radius-xs:   5px;
+    --helios-transition:  180ms cubic-bezier(0.4,0,0.2,1);
+    --helios-shadow:      0 4px 24px rgba(0,0,8,0.7), 0 1px 0 rgba(251,191,36,0.04);
+    --helios-shadow-lg:   0 16px 48px rgba(0,0,8,0.8), 0 0 0 1px rgba(251,191,36,0.06);
+    --helios-glow-sun:    0 0 24px rgba(251,191,36,0.25), 0 0 48px rgba(251,191,36,0.08);
+    --helios-glow-green:  0 0 16px rgba(52,211,153,0.2);
+    --helios-glow-red:    0 0 16px rgba(248,113,113,0.2);
 }
 
 /* Full-screen overlay */
@@ -8282,16 +8299,27 @@ Object.assign(window, {
     display: none;
     flex-direction: column;
     overflow: hidden;
+    font-family: var(--helios-body);
 }
 
 #heliosOverlay.open {
     display: flex;
-    animation: heliosOpen 280ms cubic-bezier(0.4,0,0.2,1);
+    animation: heliosOpen 260ms cubic-bezier(0.22,1,0.36,1);
 }
 
 @keyframes heliosOpen {
-    from { opacity:0; transform:scale(0.98); }
-    to   { opacity:1; transform:scale(1); }
+    from { opacity:0; transform:translateY(6px) scale(0.99); }
+    to   { opacity:1; transform:translateY(0) scale(1); }
+}
+
+@keyframes heliosClose {
+    from { opacity:1; transform:translateY(0) scale(1); }
+    to   { opacity:0; transform:translateY(4px) scale(0.99); }
+}
+
+#heliosOverlay.closing {
+    animation: heliosClose 200ms cubic-bezier(0.4,0,0.2,1) forwards;
+    pointer-events: none;
 }
 
 /* ---- Helios header ---- */
@@ -8299,19 +8327,20 @@ Object.assign(window, {
     display: flex;
     align-items: center;
     gap: 16px;
-    padding: 0 24px;
-    height: 56px;
+    padding: 0 28px;
+    height: 60px;
     background: var(--helios-surface);
     border-bottom: 1px solid var(--helios-border);
     flex-shrink: 0;
     position: relative;
+    backdrop-filter: blur(12px);
 }
 
 .helios-header::after {
     content:'';
     position:absolute;
     bottom:0;left:0;right:0;height:1px;
-    background: linear-gradient(90deg, transparent, rgba(251,191,36,0.4), transparent);
+    background: linear-gradient(90deg, transparent 0%, rgba(251,191,36,0.5) 40%, rgba(251,191,36,0.5) 60%, transparent 100%);
 }
 
 .helios-logo {
@@ -8321,65 +8350,69 @@ Object.assign(window, {
 }
 
 .helios-logo-icon {
-    width: 34px; height: 34px;
-    border-radius: 8px;
-    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    width: 36px; height: 36px;
+    border-radius: 9px;
+    background: linear-gradient(135deg, #fcd34d, #f59e0b);
     display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 0 16px rgba(251,191,36,0.35);
+    box-shadow: 0 0 20px rgba(251,191,36,0.45), 0 0 0 1px rgba(251,191,36,0.2);
+    flex-shrink: 0;
 }
 
 .helios-logo-name {
     font-family: var(--helios-display);
-    font-size: 17px;
+    font-size: 18px;
     font-weight: 800;
     color: var(--helios-text);
-    letter-spacing: -0.02em;
+    letter-spacing: -0.03em;
+    line-height: 1;
 }
 
 .helios-logo-sub {
     font-family: var(--helios-mono);
-    font-size: 9px;
-    color: var(--helios-sun);
-    letter-spacing: 0.12em;
+    font-size: 8.5px;
+    color: rgba(251,191,36,0.65);
+    letter-spacing: 0.14em;
     text-transform: uppercase;
+    margin-top: 2px;
 }
 
 /* Tab nav */
 .helios-tabs {
     display: flex;
-    gap: 2px;
-    background: rgba(0,0,0,0.3);
+    gap: 1px;
+    background: rgba(0,0,0,0.35);
     border: 1px solid var(--helios-border);
     border-radius: 10px;
     padding: 3px;
-    margin-left: 16px;
+    margin-left: 12px;
 }
 
 .helios-tab {
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 6px 16px;
+    padding: 6px 18px;
     border-radius: 7px;
-    border: none;
+    border: 1px solid transparent;
     cursor: pointer;
-    font-family: var(--helios-display);
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+    font-family: var(--helios-body);
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
     color: var(--helios-text3);
     background: transparent;
-    transition: all 0.18s;
+    transition: all var(--helios-transition);
     position: relative;
+    white-space: nowrap;
 }
 
-.helios-tab:hover { color: var(--helios-text2); background: rgba(255,255,255,0.04); }
+.helios-tab:hover { color: var(--helios-text2); background: rgba(255,255,255,0.03); }
 
 .helios-tab.active {
-    background: rgba(251,191,36,0.12);
+    background: rgba(251,191,36,0.1);
     color: var(--helios-sun);
-    border: 1px solid rgba(251,191,36,0.2);
+    border-color: rgba(251,191,36,0.18);
+    box-shadow: 0 0 12px rgba(251,191,36,0.08);
 }
 
 .helios-tab-badge {
@@ -8401,18 +8434,25 @@ Object.assign(window, {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 7px 14px;
-    border-radius: 8px;
+    padding: 7px 16px;
+    border-radius: var(--helios-radius-sm);
     border: 1px solid var(--helios-border2);
-    background: transparent;
+    background: rgba(255,255,255,0.02);
     color: var(--helios-text2);
-    font-family: var(--helios-mono);
-    font-size: 11px;
+    font-family: var(--helios-body);
+    font-size: 12px;
+    font-weight: 500;
     cursor: pointer;
-    transition: all 0.18s;
+    transition: all var(--helios-transition);
+    letter-spacing: 0.01em;
 }
 
-.helios-close:hover { background: rgba(255,255,255,0.05); color: var(--helios-text); border-color: rgba(255,255,255,0.2); }
+.helios-close:hover {
+    background: rgba(255,255,255,0.05);
+    color: var(--helios-text);
+    border-color: rgba(255,255,255,0.15);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
 
 /* Status pills in header */
 .helios-status-row {
@@ -8470,59 +8510,67 @@ Object.assign(window, {
 .helios-card {
     background: var(--helios-surface);
     border: 1px solid var(--helios-border);
-    border-radius: 12px;
+    border-radius: var(--helios-radius);
     overflow: hidden;
     flex-shrink: 0;
+    box-shadow: var(--helios-shadow);
 }
 
 .helios-card-head {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 13px 18px;
+    padding: 14px 20px;
     border-bottom: 1px solid var(--helios-border);
-    font-family: var(--helios-display);
+    font-family: var(--helios-body);
     font-size: 11px;
-    font-weight: 700;
+    font-weight: 600;
     letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--helios-text2);
+    background: rgba(0,0,0,0.15);
 }
 
-.helios-card-head i { color: var(--helios-sun); }
+.helios-card-head i { color: var(--helios-sun); opacity:0.8; }
 
-.helios-card-body { padding: 18px; }
+.helios-card-body { padding: 20px; }
 
 /* ---- Inbox item ---- */
 .helios-inbox-item {
     background: var(--helios-surface2);
     border: 1px solid var(--helios-border);
-    border-radius: 10px;
-    margin-bottom: 10px;
+    border-radius: var(--helios-radius);
+    margin-bottom: 8px;
     overflow: hidden;
-    transition: border-color 0.2s;
+    transition: all var(--helios-transition);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
-.helios-inbox-item:hover { border-color: var(--helios-border2); }
+.helios-inbox-item:hover {
+    border-color: var(--helios-border2);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4), 0 0 0 1px rgba(251,191,36,0.05);
+    transform: translateY(-1px);
+}
 
-.helios-inbox-item.urgent { border-left: 3px solid var(--helios-red); }
-.helios-inbox-item.routine { border-left: 3px solid var(--helios-sun); }
-.helios-inbox-item.low { border-left: 3px solid var(--helios-text3); }
-.helios-inbox-item.approved { border-left: 3px solid var(--helios-green); opacity: 0.6; }
-.helios-inbox-item.rejected { border-left: 3px solid var(--helios-red); opacity: 0.5; }
-.helios-inbox-item.deferred { border-left: 3px solid var(--helios-blue); opacity: 0.6; }
+.helios-inbox-item.urgent  { border-left: 2px solid var(--helios-red);   box-shadow: -2px 0 12px rgba(248,113,113,0.08), 0 2px 8px rgba(0,0,0,0.3); }
+.helios-inbox-item.routine { border-left: 2px solid var(--helios-sun);   }
+.helios-inbox-item.low     { border-left: 2px solid var(--helios-text4); }
+.helios-inbox-item.approved { border-left: 2px solid var(--helios-green); opacity: 0.55; }
+.helios-inbox-item.rejected { border-left: 2px solid var(--helios-red);   opacity: 0.45; }
+.helios-inbox-item.deferred { border-left: 2px solid var(--helios-blue);  opacity: 0.55; }
 
 .helios-item-head {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 13px 16px;
+    gap: 12px;
+    padding: 14px 18px;
     cursor: pointer;
+    user-select: none;
 }
 
 .helios-item-type-icon {
-    width: 32px; height: 32px;
-    border-radius: 8px;
+    width: 34px; height: 34px;
+    border-radius: var(--helios-radius-sm);
     display: flex; align-items: center; justify-content: center;
     font-size: 13px;
     flex-shrink: 0;
@@ -8531,54 +8579,62 @@ Object.assign(window, {
 .helios-item-info { flex: 1; min-width: 0; }
 
 .helios-item-title {
-    font-family: var(--helios-display);
-    font-size: 13px;
-    font-weight: 700;
+    font-family: var(--helios-body);
+    font-size: 13.5px;
+    font-weight: 600;
     color: var(--helios-text);
-    margin-bottom: 2px;
+    margin-bottom: 3px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    letter-spacing: -0.01em;
 }
 
 .helios-item-sub {
-    font-size: 11px;
+    font-size: 11.5px;
     color: var(--helios-text2);
-    font-family: var(--helios-mono);
+    font-family: var(--helios-body);
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .helios-priority-badge {
-    font-size: 9px;
-    font-weight: 800;
-    padding: 3px 8px;
-    border-radius: 5px;
-    letter-spacing: 0.06em;
+    font-size: 9.5px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: var(--helios-radius-xs);
+    letter-spacing: 0.05em;
     flex-shrink: 0;
+    font-family: var(--helios-mono);
 }
 
-.helios-priority-badge.URGENT  { background: rgba(248,113,113,0.15); color: var(--helios-red); border: 1px solid rgba(248,113,113,0.3); }
-.helios-priority-badge.ROUTINE { background: rgba(251,191,36,0.1); color: var(--helios-sun); border: 1px solid rgba(251,191,36,0.25); }
-.helios-priority-badge.LOW     { background: rgba(100,120,160,0.1); color: var(--helios-text3); border: 1px solid var(--helios-border); }
+.helios-priority-badge.URGENT  { background: rgba(248,113,113,0.12); color: #fca5a5; border: 1px solid rgba(248,113,113,0.28); }
+.helios-priority-badge.ROUTINE { background: rgba(251,191,36,0.09);  color: var(--helios-sun); border: 1px solid rgba(251,191,36,0.22); }
+.helios-priority-badge.LOW     { background: rgba(61,74,107,0.3);    color: var(--helios-text3); border: 1px solid var(--helios-border); }
 
 /* Expanded item body */
 .helios-item-body {
     display: none;
-    padding: 0 16px 16px;
+    padding: 0 18px 18px;
     border-top: 1px solid var(--helios-border);
-    margin-top: 0;
 }
 
-.helios-item-body.open { display: block; }
+.helios-item-body.open { display: block; animation: heliosFadeIn 160ms ease; }
+
+@keyframes heliosFadeIn { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:translateY(0); } }
 
 .helios-evidence-box {
-    background: rgba(0,0,0,0.3);
+    background: rgba(0,0,0,0.25);
     border: 1px solid var(--helios-border);
-    border-radius: 8px;
-    padding: 12px;
-    margin: 10px 0;
-    font-size: 12px;
+    border-radius: var(--helios-radius-sm);
+    padding: 14px;
+    margin: 12px 0;
+    font-size: 12.5px;
     color: var(--helios-text2);
-    line-height: 1.6;
+    line-height: 1.65;
+    font-family: var(--helios-body);
 }
 
 .helios-confidence-bar {
@@ -8616,93 +8672,155 @@ Object.assign(window, {
     align-items: center;
     gap: 6px;
     padding: 8px 16px;
-    border-radius: 8px;
-    border: 1.5px solid;
+    border-radius: var(--helios-radius-sm);
+    border: 1px solid;
     cursor: pointer;
-    font-family: var(--helios-display);
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    transition: all 0.18s;
+    font-family: var(--helios-body);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.015em;
+    transition: all var(--helios-transition);
+    white-space: nowrap;
+    position: relative;
+    overflow: hidden;
 }
+
+.helios-btn:active { transform: translateY(1px); }
+
+.helios-btn i { font-size: 11px; opacity: 0.85; }
 
 .helios-btn-approve {
-    background: rgba(52,211,153,0.1);
-    color: var(--helios-green);
-    border-color: rgba(52,211,153,0.3);
+    background: rgba(52,211,153,0.09);
+    color: #6ee7b7;
+    border-color: rgba(52,211,153,0.25);
 }
-.helios-btn-approve:hover { background: rgba(52,211,153,0.2); border-color: rgba(52,211,153,0.5); }
+.helios-btn-approve:hover {
+    background: rgba(52,211,153,0.18);
+    border-color: rgba(52,211,153,0.45);
+    box-shadow: var(--helios-glow-green);
+    color: #a7f3d0;
+}
 
 .helios-btn-reject {
-    background: rgba(248,113,113,0.08);
-    color: var(--helios-red);
-    border-color: rgba(248,113,113,0.25);
+    background: rgba(248,113,113,0.07);
+    color: #fca5a5;
+    border-color: rgba(248,113,113,0.2);
 }
-.helios-btn-reject:hover { background: rgba(248,113,113,0.15); }
+.helios-btn-reject:hover {
+    background: rgba(248,113,113,0.15);
+    border-color: rgba(248,113,113,0.4);
+    box-shadow: var(--helios-glow-red);
+}
 
 .helios-btn-defer {
-    background: rgba(96,165,250,0.08);
-    color: var(--helios-blue);
-    border-color: rgba(96,165,250,0.2);
+    background: rgba(96,165,250,0.07);
+    color: #93c5fd;
+    border-color: rgba(96,165,250,0.18);
 }
-.helios-btn-defer:hover { background: rgba(96,165,250,0.15); }
+.helios-btn-defer:hover {
+    background: rgba(96,165,250,0.14);
+    border-color: rgba(96,165,250,0.35);
+}
 
 .helios-btn-ghost {
-    background: transparent;
+    background: rgba(255,255,255,0.02);
     color: var(--helios-text2);
     border-color: var(--helios-border);
 }
-.helios-btn-ghost:hover { background: rgba(255,255,255,0.05); color: var(--helios-text); }
+.helios-btn-ghost:hover {
+    background: rgba(255,255,255,0.05);
+    color: var(--helios-text);
+    border-color: var(--helios-border2);
+}
 
 .helios-btn-sun {
-    background: rgba(251,191,36,0.12);
+    background: rgba(251,191,36,0.1);
     color: var(--helios-sun);
-    border-color: rgba(251,191,36,0.3);
+    border-color: rgba(251,191,36,0.28);
 }
-.helios-btn-sun:hover { background: rgba(251,191,36,0.2); }
+.helios-btn-sun:hover {
+    background: rgba(251,191,36,0.18);
+    border-color: rgba(251,191,36,0.45);
+    box-shadow: 0 0 16px rgba(251,191,36,0.15);
+}
+
+/* New button variants */
+.helios-btn-exceptional {
+    background: rgba(192,132,252,0.09);
+    color: #d8b4fe;
+    border-color: rgba(192,132,252,0.25);
+}
+.helios-btn-exceptional:hover {
+    background: rgba(192,132,252,0.18);
+    border-color: rgba(192,132,252,0.42);
+    box-shadow: 0 0 16px rgba(192,132,252,0.15);
+}
+
+.helios-btn-create {
+    background: rgba(251,191,36,0.07);
+    color: var(--helios-sun2);
+    border-color: rgba(251,191,36,0.2);
+}
+.helios-btn-create:hover {
+    background: rgba(251,191,36,0.15);
+    border-color: rgba(251,191,36,0.38);
+}
+
+/* Actions row */
+.helios-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    padding: 14px 0 10px;
+    border-top: 1px solid var(--helios-border);
+    margin-top: 12px;
+}
 
 /* Discussion thread */
 .helios-thread {
-    margin-top: 12px;
-    background: rgba(0,0,0,0.2);
+    margin-top: 14px;
+    background: rgba(0,0,0,0.18);
     border: 1px solid var(--helios-border);
-    border-radius: 8px;
+    border-radius: var(--helios-radius-sm);
     overflow: hidden;
 }
 
 .helios-thread-head {
-    padding: 8px 12px;
+    padding: 9px 14px;
     font-size: 10px;
-    font-weight: 700;
-    font-family: var(--helios-mono);
+    font-weight: 600;
+    font-family: var(--helios-body);
     color: var(--helios-text3);
     letter-spacing: 0.08em;
     text-transform: uppercase;
     border-bottom: 1px solid var(--helios-border);
+    background: rgba(0,0,0,0.12);
 }
 
 .helios-thread-note {
-    padding: 10px 12px;
+    padding: 11px 14px;
     border-bottom: 1px solid var(--helios-border);
-    font-size: 12px;
+    font-size: 12.5px;
+    font-family: var(--helios-body);
 }
 
 .helios-thread-note:last-of-type { border-bottom: none; }
 
 .helios-thread-author {
-    font-weight: 700;
+    font-weight: 600;
     color: var(--helios-text);
-    margin-right: 4px;
+    margin-right: 5px;
+    font-size: 12.5px;
 }
 
 .helios-thread-role {
     font-size: 10px;
-    padding: 1px 6px;
+    padding: 1px 7px;
     border-radius: 4px;
-    background: rgba(251,191,36,0.1);
-    color: var(--helios-sun);
-    margin-right: 6px;
+    background: rgba(251,191,36,0.09);
+    color: var(--helios-sun2);
+    border: 1px solid rgba(251,191,36,0.15);
+    margin-right: 7px;
 }
 
 .helios-thread-ts {
@@ -8712,34 +8830,39 @@ Object.assign(window, {
 }
 
 .helios-thread-msg {
-    margin-top: 4px;
+    margin-top: 5px;
     color: var(--helios-text2);
-    line-height: 1.5;
+    line-height: 1.6;
+    font-size: 12.5px;
 }
 
 .helios-thread-add {
     display: flex;
     gap: 8px;
-    padding: 10px 12px;
+    padding: 10px 14px;
     border-top: 1px solid var(--helios-border);
-    background: rgba(0,0,0,0.2);
+    background: rgba(0,0,0,0.15);
 }
 
 .helios-thread-input {
     flex: 1;
-    background: rgba(255,255,255,0.04) !important;
+    background: rgba(255,255,255,0.03) !important;
     border: 1px solid var(--helios-border) !important;
-    border-radius: 6px !important;
-    padding: 6px 10px !important;
-    font-size: 12px !important;
+    border-radius: var(--helios-radius-xs) !important;
+    padding: 7px 12px !important;
+    font-size: 12.5px !important;
     color: var(--helios-text) !important;
-    font-family: var(--helios-display) !important;
+    font-family: var(--helios-body) !important;
     outline: none !important;
+    transition: border-color var(--helios-transition) !important;
 }
 
 .helios-thread-input:focus {
-    border-color: rgba(251,191,36,0.4) !important;
+    border-color: rgba(251,191,36,0.35) !important;
+    background: rgba(255,255,255,0.05) !important;
 }
+
+.helios-thread-input::placeholder { color: var(--helios-text3) !important; }
 
 /* ---- Scanner panel ---- */
 .helios-scan-grid {
@@ -8752,39 +8875,47 @@ Object.assign(window, {
 .helios-metric {
     background: var(--helios-surface2);
     border: 1px solid var(--helios-border);
-    border-radius: 10px;
-    padding: 16px;
+    border-radius: var(--helios-radius);
+    padding: 18px 20px;
+    box-shadow: var(--helios-shadow);
+    transition: all var(--helios-transition);
+}
+
+.helios-metric:hover {
+    border-color: var(--helios-border2);
+    box-shadow: var(--helios-shadow-lg);
 }
 
 .helios-metric-val {
     font-family: var(--helios-display);
-    font-size: 28px;
+    font-size: 32px;
     font-weight: 800;
     color: var(--helios-sun);
     line-height: 1;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
+    letter-spacing: -0.02em;
 }
 
 .helios-metric-lbl {
     font-size: 10px;
-    font-weight: 700;
+    font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--helios-text3);
-    font-family: var(--helios-mono);
+    font-family: var(--helios-body);
 }
 
 /* Console */
 .helios-console {
-    background: rgba(0,0,0,0.5);
-    border: 1px solid var(--helios-border);
-    border-radius: 8px;
-    padding: 14px;
+    background: rgba(0,0,0,0.55);
+    border-radius: 0;
+    padding: 14px 18px;
     font-family: var(--helios-mono);
-    font-size: 11px;
-    height: 220px;
+    font-size: 11.5px;
+    height: 240px;
     overflow-y: auto;
-    line-height: 1.8;
+    line-height: 1.85;
+    letter-spacing: 0.01em;
 }
 
 .helios-console::-webkit-scrollbar { width: 3px; }
@@ -8864,10 +8995,10 @@ Object.assign(window, {
 .helios-audit-icon.note_added { background: rgba(251,191,36,0.1); color: var(--helios-sun); }
 
 .helios-audit-main { flex: 1; min-width: 0; }
-.helios-audit-who { font-size: 12px; font-weight: 700; color: var(--helios-text); }
-.helios-audit-what { font-size: 11px; color: var(--helios-text2); margin-top: 2px; }
-.helios-audit-note { font-size: 11px; color: var(--helios-text3); font-style: italic; margin-top: 3px; }
-.helios-audit-ts { font-family: var(--helios-mono); font-size: 10px; color: var(--helios-text3); flex-shrink: 0; }
+.helios-audit-who { font-size: 12.5px; font-weight: 600; color: var(--helios-text); font-family: var(--helios-body); }
+.helios-audit-what { font-size: 12px; color: var(--helios-text2); margin-top: 3px; font-family: var(--helios-body); line-height: 1.5; }
+.helios-audit-note { font-size: 11.5px; color: var(--helios-text2); font-style: italic; margin-top: 4px; padding: 6px 10px; background: rgba(255,255,255,0.02); border-radius: 5px; border-left: 2px solid var(--helios-border2); }
+.helios-audit-ts { font-family: var(--helios-mono); font-size: 10px; color: var(--helios-text3); flex-shrink: 0; padding-top: 2px; }
 
 /* ---- Morning greeting ---- */
 .helios-greeting {
@@ -8900,15 +9031,19 @@ Object.assign(window, {
 
 .helios-greeting-text h2 {
     font-family: var(--helios-display);
-    font-size: 18px;
+    font-size: 19px;
     font-weight: 800;
     color: var(--helios-text);
     margin-bottom: 4px;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
 }
 
 .helios-greeting-text p {
-    font-size: 12px;
+    font-size: 12.5px;
     color: var(--helios-text2);
+    font-family: var(--helios-body);
+    line-height: 1.4;
 }
 
 .helios-est {
@@ -8944,6 +9079,51 @@ Object.assign(window, {
 .htype-internal_orphan { background: rgba(96,165,250,0.1); color: var(--helios-blue); }
 .htype-internal_duplicate { background: rgba(248,113,113,0.1); color: var(--helios-red); }
 .htype-external_guideline { background: rgba(52,211,153,0.1); color: var(--helios-green); }
+
+/* Resurfaced deferred tag */
+.helios-resurfaced-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 9.5px;
+    font-family: var(--helios-mono);
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: rgba(96,165,250,0.1);
+    color: var(--helios-blue);
+    border: 1px solid rgba(96,165,250,0.22);
+    letter-spacing: 0.04em;
+}
+
+/* Confidence bar */
+.helios-bar-track {
+    flex: 1;
+    height: 3px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.helios-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.6s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* Pill */
+.helios-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 11px;
+    border-radius: 99px;
+    font-family: var(--helios-mono);
+    font-size: 10.5px;
+    background: var(--helios-surface2);
+    border: 1px solid var(--helios-border);
+    color: var(--helios-text2);
+}
 
 /* Loading spinner */
 .helios-spinner {
@@ -9165,6 +9345,9 @@ Object.assign(window, {
                         <button class="helios-btn helios-btn-ghost" onclick="heliosScanMissQueue()" id="hbtnMiss">
                             <i class="fas fa-question-circle"></i> Resolve Miss Queue
                         </button>
+                        <button class="helios-btn helios-btn-ghost" onclick="heliosCheckDrift()" id="hbtnDrift" style="grid-column:1/-1;border-color:rgba(251,191,36,0.2);color:var(--helios-sun2);">
+                            <i class="fas fa-history"></i> Check Value Drift
+                        </button>
                     </div>
                     <div id="heliosScanProgress" style="display:none;">
                         <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--helios-text3);margin-bottom:6px;">
@@ -9321,16 +9504,23 @@ function hFetch(path, opts = {}) {
 
 // ---- Open / Close ----
 function openHelios() {
-    document.getElementById('heliosOverlay').classList.add('open');
+    const overlay = document.getElementById('heliosOverlay');
+    overlay.classList.add('open');
     HELIOS.open = true;
-    heliosTab('inbox');
-    heliosLoadInbox();
+    const list = document.getElementById('heliosInboxList');
+    if (list) list.innerHTML = `<div class="helios-empty"><div class="helios-spinner" style="margin:0 auto 16px;"></div><p style="color:var(--helios-text2);font-size:13px;">Loading…</p></div>`;
     heliosUpdateGreeting();
+    heliosTab('inbox');
+    requestAnimationFrame(() => setTimeout(() => heliosLoadInbox(), 0));
 }
 
 function closeHelios() {
-    document.getElementById('heliosOverlay').classList.remove('open');
-    HELIOS.open = false;
+    const overlay = document.getElementById('heliosOverlay');
+    overlay.classList.add('closing');
+    setTimeout(() => {
+        overlay.classList.remove('open', 'closing');
+        HELIOS.open = false;
+    }, 200);
 }
 
 // ---- Tab switching ----
@@ -9340,9 +9530,9 @@ function heliosTab(tab) {
         document.getElementById(`hpanel-${t}`)?.classList.toggle('active', t === tab);
         document.getElementById(`htab-${t}`)?.classList.toggle('active', t === tab);
     });
-    if (tab === 'health')  heliosRunHealthCheck();
     if (tab === 'audit')   heliosLoadAudit();
-    if (tab === 'scanner') { heliosUpdateScannerStats(); }
+    if (tab === 'scanner') heliosUpdateScannerStats();
+    // health check only on explicit Run Check click
 }
 
 // ---- Greeting ----
@@ -9359,25 +9549,51 @@ function heliosUpdateGreeting() {
 // ================================================================
 async function heliosLoadInbox() {
     const list = document.getElementById('heliosInboxList');
-    list.innerHTML = `<div class="helios-empty"><div class="helios-spinner" style="margin:0 auto 16px;"></div><p>Loading inbox…</p></div>`;
+    list.innerHTML = `<div class="helios-empty"><div class="helios-spinner" style="margin:0 auto 16px;"></div><p>Loading…</p></div>`;
 
     try {
         const f = HELIOS.currentFilter;
         let query = `helios_pending_review?select=*&order=priority.desc,created_at.desc&limit=100`;
 
-        if (f === 'urgent')   query += `&priority=eq.URGENT&status=eq.pending`;
+        if (f === 'urgent')    query += `&priority=eq.URGENT&status=eq.pending`;
         else if (f === 'internal') query += `&status=eq.pending&item_type=like.INTERNAL*`;
         else if (f === 'external') query += `&status=eq.pending&item_type=not.like.INTERNAL*`;
-        else if (f === 'done')  query += `&status=in.(approved,rejected,deferred)`;
-        else                    query += `&status=eq.pending`;
+        else if (f === 'done') query += `&status=in.(approved,rejected,deferred)`;
+        else                   query += `&status=eq.pending`;
 
         const r = await hFetch(query);
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        HELIOS.pendingItems = await r.json();
-        renderHeliosInbox(HELIOS.pendingItems);
+        let items = await r.json();
+
+        // Resurface deferred items whose deferred_until date has passed
+        if (f === 'all' || f === undefined) {
+            const today = new Date().toISOString().split('T')[0];
+            const dr = await hFetch(`helios_pending_review?status=eq.deferred&deferred_until=lte.${today}&select=*&limit=20`);
+            if (dr.ok) {
+                const resurfaced = await dr.json();
+                if (resurfaced.length > 0) {
+                    // Re-open them
+                    for (const item of resurfaced) {
+                        await hFetch(`helios_pending_review?id=eq.${item.id}`, {
+                            method: 'PATCH',
+                            body: JSON.stringify({ status: 'pending', updated_at: new Date().toISOString() })
+                        });
+                        item.status = 'pending';
+                        item._resurfaced = true;
+                    }
+                    // Merge into items, avoid duplicates
+                    const existingIds = new Set(items.map(i => i.id));
+                    resurfaced.forEach(i => { if (!existingIds.has(i.id)) items.push(i); });
+                    heliosLog('info', `↩ ${resurfaced.length} deferred item${resurfaced.length > 1 ? 's' : ''} resurfaced`);
+                }
+            }
+        }
+
+        HELIOS.pendingItems = items;
+        renderHeliosInbox(items);
         heliosUpdateBadge();
     } catch(e) {
-        list.innerHTML = `<div class="helios-empty"><div class="helios-empty-icon"><i class="fas fa-exclamation-triangle"></i></div><p>Failed to load: ${escapeHTML(e.message)}</p><p style="margin-top:8px;font-size:11px;">Run the SQL setup first if tables don't exist yet.</p></div>`;
+        list.innerHTML = `<div class="helios-empty"><div class="helios-empty-icon"><i class="fas fa-exclamation-triangle"></i></div><p>Failed to load: ${escapeHTML(e.message)}</p></div>`;
     }
 }
 
@@ -9469,7 +9685,10 @@ function renderHeliosItem(item) {
         <div class="helios-item-head" onclick="heliosToggleItem(${item.id})">
             <div class="helios-item-type-icon ${tc.cls}"><i class="fas ${tc.icon}"></i></div>
             <div class="helios-item-info">
-                <div class="helios-item-title">${escapeHTML(tc.label)}${item.variant_name ? ' — ' + escapeHTML(item.variant_name) : ''}</div>
+                <div class="helios-item-title">
+                    ${escapeHTML(tc.label)}${item.variant_name ? ' — ' + escapeHTML(item.variant_name) : ''}
+                    ${item._resurfaced ? '<span class="helios-resurfaced-tag" style="margin-left:8px;vertical-align:middle;"><i class="fas fa-redo" style="font-size:8px;"></i> Resurfaced</span>' : ''}
+                </div>
                 <div class="helios-item-sub">${escapeHTML(item.bot_summary||'')}</div>
             </div>
             <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
@@ -9498,6 +9717,8 @@ function renderHeliosItem(item) {
             <div class="helios-actions">
                 ${item.priority !== 'URGENT' ? `<button class="helios-btn helios-btn-approve" onclick="heliosApprove(${item.id})"><i class="fas fa-check"></i> Approve</button>` : ''}
                 ${item.priority === 'URGENT' || item.proposed_field ? `<button class="helios-btn helios-btn-approve" onclick="heliosApproveWithNote(${item.id})"><i class="fas fa-check-circle"></i> Approve & sign</button>` : ''}
+                ${item.item_type === 'INTERNAL_LOGIC' ? `<button class="helios-btn helios-btn-exceptional" onclick="heliosMarkExceptional(${item.id})"><i class="fas fa-bolt"></i> Mark Exceptional</button>` : ''}
+                ${item.item_type === 'MISS_RESOLVED' ? `<button class="helios-btn helios-btn-create" onclick="heliosCreateVariantFromMiss(${item.id})"><i class="fas fa-plus-circle"></i> Create Variant</button>` : ''}
                 <button class="helios-btn helios-btn-reject" onclick="heliosReject(${item.id})"><i class="fas fa-times"></i> Reject</button>
                 <button class="helios-btn helios-btn-defer" onclick="heliosDefer(${item.id})"><i class="fas fa-clock"></i> Defer</button>
                 ${item.variant_name ? `<button class="helios-btn helios-btn-ghost" onclick="closeHelios();quickSearch('${escapeAttr(item.variant_name)}')"><i class="fas fa-external-link-alt"></i> View Variant</button>` : ''}
@@ -9597,11 +9818,139 @@ async function heliosDefer(itemId) {
     const clinician = await heliosGetClinicianIdentity();
     const deferUntil = new Date();
     deferUntil.setDate(deferUntil.getDate() + 1);
-    await heliosSetItemStatus(itemId, 'deferred', clinician.name, clinician.role, 'Deferred to tomorrow');
-    await heliosWriteAudit(item, 'deferred', clinician.name, clinician.role, 'Deferred');
-    heliosLog('info', `⏱ Deferred: ${item.variant_name}`);
+    const deferStr = deferUntil.toISOString().split('T')[0];
+    const newCount = (item.defer_count || 0) + 1;
+
+    await hFetch(`helios_pending_review?id=eq.${itemId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({
+            status: 'deferred',
+            deferred_until: deferStr,
+            defer_count: newCount,
+            reviewed_by: clinician.name,
+            reviewed_by_role: clinician.role,
+            updated_at: new Date().toISOString()
+        })
+    });
+    await heliosWriteAudit(item, 'deferred', clinician.name, clinician.role, `Deferred until ${deferStr} (×${newCount})`);
+    heliosLog('info', `⏱ Deferred until ${deferStr}: ${item.variant_name}`);
     showNotification(`Deferred to tomorrow`, 'info');
     await heliosLoadInbox();
+}
+
+// ---- Mark Exceptional ----
+async function heliosMarkExceptional(itemId) {
+    const item = HELIOS.pendingItems.find(i => i.id === itemId);
+    if (!item || !item.variant_id) return;
+    const note = prompt(`Marking ${item.variant_name} as an exceptional case.\n\nClinical justification (required — recorded in audit trail):`);
+    if (!note || !note.trim()) return;
+    const clinician = await heliosGetClinicianIdentity();
+    const r = await hFetch(`variants?id=eq.${item.variant_id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ class_subtype: 'exceptional', updated_at: new Date().toISOString() })
+    });
+    if (!r.ok) { showNotification('Failed to update variant', 'error'); return; }
+    const v = STATE.variants.find(x => x.id === item.variant_id);
+    if (v) {
+        v.class_subtype = 'exceptional';
+        STATE.variantsById?.set(v.id, v);
+        if (STATE.view?.selectedVariant?.id === v.id) {
+            STATE.view.selectedVariant = v;
+            if (typeof renderVariantDetail === 'function') renderVariantDetail(v);
+        }
+    }
+    await heliosSetItemStatus(itemId, 'approved', clinician.name, clinician.role, `Exceptional: ${note}`);
+    await heliosWriteAudit(item, 'approved', clinician.name, clinician.role, `Exceptional case: ${note}`);
+    heliosLog('success', `⚡ ${item.variant_name} marked exceptional by ${clinician.name}`);
+    showNotification(`${item.variant_name} marked exceptional — will not flag again`, 'success');
+    await heliosLoadInbox();
+}
+
+// ---- Create Variant from Miss Queue (Fix 4) ----
+async function heliosCreateVariantFromMiss(itemId) {
+    const item = HELIOS.pendingItems.find(i => i.id === itemId);
+    if (!item) return;
+    closeHelios();
+    await new Promise(r => setTimeout(r, 250));
+    showImportModal();
+    // Pre-fill the legacy name field
+    setTimeout(() => {
+        const nameField = document.getElementById('importLegacyName') || document.getElementById('manualLegacyName');
+        if (nameField) {
+            nameField.value = item.variant_name || '';
+            nameField.dispatchEvent(new Event('input'));
+        }
+    }, 300);
+    showNotification(`Pre-filled with '${item.variant_name}' — add clinical details and save`, 'info');
+}
+
+// ---- Historical Accuracy Cache (Fix 5) ----
+const HELIOS_ACCURACY_CACHE = {};
+async function heliosGetHistoricalAccuracy(itemType) {
+    if (HELIOS_ACCURACY_CACHE[itemType] !== undefined) return HELIOS_ACCURACY_CACHE[itemType];
+    try {
+        const r = await hFetch(`helios_audit_log?item_type=eq.${itemType}&select=action&limit=200`);
+        if (!r.ok) return null;
+        const entries = await r.json();
+        if (!entries.length) return null;
+        const approved = entries.filter(e => e.action === 'approved').length;
+        const decided  = entries.filter(e => ['approved','rejected'].includes(e.action)).length;
+        const rate = decided > 0 ? Math.round((approved / decided) * 100) : null;
+        HELIOS_ACCURACY_CACHE[itemType] = rate;
+        return rate;
+    } catch { return null; }
+}
+
+// ---- Drift Detection (Fix 1 novel) ----
+async function heliosCheckDrift() {
+    heliosLog('info', '🔄 Checking for value drift since last approvals…');
+    heliosSetBotStatus('running');
+    try {
+        const r = await hFetch(
+            `helios_audit_log?action=eq.approved&db_change_field=not.is.null&order=created_at.desc&limit=200`
+        );
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        const approved = await r.json();
+        const runId = crypto.randomUUID();
+        let drifts = 0;
+
+        for (const entry of approved) {
+            if (!entry.variant_id || !entry.db_change_field || !entry.db_change_new) continue;
+            const v = STATE.variants.find(x => x.id === entry.variant_id);
+            if (!v) continue;
+            const currentVal = String(v[entry.db_change_field] ?? '');
+            const approvedVal = String(entry.db_change_new ?? '');
+            if (currentVal && approvedVal && currentVal !== approvedVal) {
+                await heliosCreatePendingItem({
+                    item_type:      'DRIFT_ALERT',
+                    variant_id:     entry.variant_id,
+                    variant_name:   entry.variant_name,
+                    bot_summary:    `${entry.db_change_field} changed since last approval`,
+                    bot_reasoning:  `Approved as '${approvedVal}' on ${new Date(entry.created_at).toLocaleDateString('en-GB', {day:'2-digit',month:'short',year:'numeric'})} by ${entry.clinician_name}. Current value is now '${currentVal}'. This may indicate an unauthorised change or manual override.`,
+                    bot_confidence: 80,
+                    proposed_field: entry.db_change_field,
+                    proposed_value: approvedVal,
+                    current_value:  currentVal,
+                    scan_source:    'DRIFT',
+                    scan_run_id:    runId,
+                    priority:       'URGENT'
+                });
+                heliosLog('warn', `  ⚠ Drift: ${entry.variant_name} · ${entry.db_change_field} '${approvedVal}' → '${currentVal}'`);
+                drifts++;
+            }
+        }
+        heliosSetBotStatus('idle');
+        if (drifts > 0) {
+            showNotification(`Drift detected: ${drifts} field${drifts > 1 ? 's' : ''} changed`, 'warning');
+            heliosUpdateBadge();
+        } else {
+            heliosLog('success', '✓ No drift — all approved values intact');
+            showNotification('No drift detected', 'success');
+        }
+    } catch(e) {
+        heliosSetBotStatus('idle');
+        heliosLog('error', `Drift check failed: ${e.message}`);
+    }
 }
 
 async function heliosAddNote(itemId) {
@@ -9775,42 +10124,64 @@ function heliosClearConsole() {
 
 // ---- Internal scan: DB consistency ----
 async function heliosScanInternal() {
-    heliosLog('info', '🔍 Starting internal DB consistency scan…');
+    heliosLog('info', '🔍 Starting internal consistency scan…');
     heliosSetBotStatus('running');
-    heliosShowProgress('Scanning DB…', 0);
+    heliosShowProgress('Scanning…', 0);
 
     const variants = STATE.variants;
     let findings = 0;
+    let errors = 0;
     const runId = crypto.randomUUID();
+    const startedAt = new Date().toISOString();
+
+    // Open bot run record
+    await hFetch('helios_bot_runs', {
+        method: 'POST',
+        body: JSON.stringify({
+            id: runId, run_type: 'INTERNAL_SCAN', status: 'running',
+            variants_scanned: 0, findings_created: 0, errors: 0,
+            triggered_by: 'clinician', started_at: startedAt
+        })
+    }).catch(() => {});
 
     for (let i = 0; i < variants.length; i++) {
         const v = variants[i];
-        const pct = Math.round((i / variants.length) * 100);
-        heliosShowProgress(`Checking ${v.legacy_name}…`, pct);
-
-        const issues = heliosCheckVariantConsistency(v);
-        for (const issue of issues) {
-            await heliosCreatePendingItem({
-                ...issue,
-                variant_id:   v.id,
-                variant_name: v.legacy_name,
-                scan_source:  'INTERNAL',
-                scan_run_id:  runId,
-                priority:     issue.item_type === 'INTERNAL_LOGIC' ? 'URGENT' : 'ROUTINE'
-            });
-            findings++;
-        }
-
-        // Throttle to avoid overloading
+        heliosShowProgress(`Checking ${v.legacy_name}…`, Math.round((i / variants.length) * 100));
+        try {
+            const issues = heliosCheckVariantConsistency(v);
+            for (const issue of issues) {
+                const { _priority, ...issueData } = issue;
+                await heliosCreatePendingItem({
+                    ...issueData,
+                    variant_id:   v.id,
+                    variant_name: v.legacy_name,
+                    scan_source:  'INTERNAL',
+                    scan_run_id:  runId,
+                    priority:     _priority || 'ROUTINE'
+                });
+                findings++;
+            }
+        } catch(e) { errors++; }
         if (i % 20 === 0) await new Promise(r => setTimeout(r, 50));
     }
+
+    // Close bot run record
+    await hFetch(`helios_bot_runs?id=eq.${runId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({
+            status: errors > 0 && findings === 0 ? 'failed' : errors > 0 ? 'partial' : 'completed',
+            variants_scanned: variants.length,
+            findings_created: findings,
+            errors,
+            completed_at: new Date().toISOString()
+        })
+    }).catch(() => {});
 
     heliosShowProgress('Complete', 100);
     setTimeout(() => heliosHideProgress(), 1000);
     heliosSetBotStatus('idle');
-    heliosLog('success', `✅ Internal scan complete — ${findings} finding${findings !== 1 ? 's' : ''} queued`);
-    showNotification(`Internal scan: ${findings} findings`, findings > 0 ? 'warning' : 'success');
-
+    heliosLog('success', `✅ Scan complete — ${findings} finding${findings !== 1 ? 's' : ''} queued`);
+    showNotification(`Scan: ${findings} findings`, findings > 0 ? 'warning' : 'success');
     if (HELIOS.currentTab === 'scanner') heliosUpdateScannerStats();
     heliosUpdateBadge();
 }
@@ -9818,53 +10189,64 @@ async function heliosScanInternal() {
 function heliosCheckVariantConsistency(v) {
     const issues = [];
 
-    // 1. Class vs ETI logic error
-    const classETIRules = {
-        'I':   ['non_responsive'],   // Class I should NOT be responsive (unless exceptional)
-        'III': ['responsive'],        // Class III should be responsive
-    };
-    if (v.cftr_class && v.eti_prediction) {
-        const expected = classETIRules[v.cftr_class];
-        if (expected && !expected.includes(v.eti_prediction) && v.class_subtype !== 'exceptional') {
-            issues.push({
-                item_type:      'INTERNAL_LOGIC',
-                bot_summary:    `Class ${v.cftr_class} variant marked as '${v.eti_prediction}' — contradicts standard class rules`,
-                bot_reasoning:  `Class ${v.cftr_class} variants are typically ${expected.join(' or ')}. Current value '${v.eti_prediction}' may be incorrect unless this is an exceptional case.`,
-                bot_confidence: 75,
-                proposed_field: 'eti_prediction',
-                proposed_value: expected[0],
-                current_value:  v.eti_prediction,
-            });
-        }
+    // 1. Class III + non_responsive = unambiguous contradiction, URGENT
+    if (v.cftr_class === 'III' && v.eti_prediction && v.eti_prediction !== 'responsive' && v.class_subtype !== 'exceptional') {
+        issues.push({
+            item_type:      'INTERNAL_LOGIC',
+            bot_summary:    `Class III variant marked as '${v.eti_prediction}' — contradicts standard class rules`,
+            bot_reasoning:  `Class III variants have gating defects and are typically responsive to ETI (e.g. Kalydeco/Trikafta). Current value '${v.eti_prediction}' may be incorrect unless this is a documented exceptional case.`,
+            bot_confidence: 85,
+            proposed_field: 'eti_prediction',
+            proposed_value: 'responsive',
+            current_value:  v.eti_prediction,
+            _priority:      'URGENT'
+        });
     }
 
-    // 2. Missing critical fields
+    // 2. Class I + responsive = possible but needs justification, ROUTINE
+    if (v.cftr_class === 'I' && v.eti_prediction === 'responsive' && v.class_subtype !== 'exceptional') {
+        issues.push({
+            item_type:      'INTERNAL_LOGIC',
+            bot_summary:    `Class I variant marked as 'responsive' — verify if this is a documented exceptional case`,
+            bot_reasoning:  `Class I variants (nonsense/stop mutations) are typically non-responsive to ETI. Exceptional cases exist but must be documented. If intentional, use Mark Exceptional to suppress this alert.`,
+            bot_confidence: 50,
+            proposed_field: 'class_subtype',
+            proposed_value: 'exceptional',
+            current_value:  v.class_subtype || 'not set',
+            _priority:      'ROUTINE'
+        });
+    }
+
+    // 3. Unclassified variant with high search demand
     if (!v.cftr_class && (v.search_hit_count || 0) >= 3) {
         issues.push({
             item_type:      'INTERNAL_ORPHAN',
             bot_summary:    `No CFTR class assigned — searched ${v.search_hit_count} times by clinicians`,
             bot_reasoning:  `This variant has been searched ${v.search_hit_count} times but has no class assigned. High clinical demand without classification.`,
             bot_confidence: 90,
+            _priority:      'ROUTINE'
         });
     }
 
-    // 3. Naming inconsistency: protein name not starting with p.
+    // 4. Protein name HGVS
     if (v.protein_name && !v.protein_name.startsWith('p.') && !v.protein_name.startsWith('p.(')) {
         issues.push({
             item_type:      'INTERNAL_NAMING',
-            bot_summary:    `Protein name '${v.protein_name}' may not follow HGVS notation (expected p.Xxx format)`,
+            bot_summary:    `Protein name '${v.protein_name}' may not follow HGVS notation (expected p.Xxx)`,
             bot_reasoning:  `HGVS protein notation should start with 'p.'. Current value: ${v.protein_name}`,
             bot_confidence: 60,
+            _priority:      'ROUTINE'
         });
     }
 
-    // 4. cDNA name not starting with c.
+    // 5. cDNA name HGVS
     if (v.cdna_name && !v.cdna_name.startsWith('c.')) {
         issues.push({
             item_type:      'INTERNAL_NAMING',
-            bot_summary:    `cDNA name '${v.cdna_name}' may not follow HGVS notation (expected c. format)`,
+            bot_summary:    `cDNA name '${v.cdna_name}' may not follow HGVS notation (expected c.)`,
             bot_reasoning:  `HGVS cDNA notation should start with 'c.'. Current value: ${v.cdna_name}`,
             bot_confidence: 60,
+            _priority:      'ROUTINE'
         });
     }
 
@@ -9957,7 +10339,8 @@ async function heliosScanSingle() {
     // Internal checks
     const issues = heliosCheckVariantConsistency(v);
     for (const issue of issues) {
-        await heliosCreatePendingItem({ ...issue, variant_id: v.id, variant_name: v.legacy_name, scan_source: 'INTERNAL', priority: 'ROUTINE' });
+        const { _priority, ...issueData } = issue;
+        await heliosCreatePendingItem({ ...issueData, variant_id: v.id, variant_name: v.legacy_name, scan_source: 'INTERNAL', priority: _priority || 'ROUTINE' });
     }
 
     // External
@@ -10261,16 +10644,40 @@ function heliosHideProgress() {
 }
 
 // ================================================================
-// POLL FOR INBOX UPDATES WHEN OPEN
+// POLL — badge refresh + active monitor scan
 // ================================================================
 setInterval(async () => {
     if (!HELIOS.open) return;
+    // Refresh badge count
     const r = await hFetch('helios_pending_review?status=eq.pending&select=id&limit=1');
-    if (r.ok) {
-        const d = await r.json();
-        // Badge update only — don't re-render full inbox to avoid disruption
-    }
+    if (r.ok) { /* badge updated via heliosUpdateBadge on next load */ }
 }, 30000);
+
+// Monitor scan — runs every 5 minutes in background regardless of overlay state
+setInterval(async () => {
+    try {
+        const r = await hFetch('helios_monitor_targets?is_active=eq.true&select=variant_id,variant_name&limit=20');
+        if (!r.ok) return;
+        const targets = await r.json();
+        for (const t of targets) {
+            const v = STATE.variants.find(x => x.id === t.variant_id);
+            if (!v) continue;
+            // Run consistency check on monitored variants silently
+            const issues = heliosCheckVariantConsistency(v);
+            for (const issue of issues) {
+                const { _priority, ...issueData } = issue;
+                await heliosCreatePendingItem({
+                    ...issueData,
+                    variant_id:   v.id,
+                    variant_name: v.legacy_name,
+                    scan_source:  'MONITOR',
+                    priority:     _priority || 'ROUTINE'
+                });
+            }
+        }
+        if (targets.length > 0) heliosUpdateBadge();
+    } catch { /* silent — background task */ }
+}, 300000); // every 5 minutes
 
 // ================================================================
 // MONITOR BUTTON on current variant (exposed to main app)
@@ -10287,6 +10694,7 @@ function heliosMonitorCurrentVariant() {
 Object.assign(window, {
     openHelios, closeHelios, heliosTab, heliosFilter,
     heliosApprove, heliosApproveWithNote, heliosReject, heliosDefer,
+    heliosMarkExceptional, heliosCreateVariantFromMiss, heliosCheckDrift,
     heliosAddNote, heliosApproveAllRoutine,
     heliosScanInternal, heliosScanExternal, heliosScanSingle, heliosScanMissQueue,
     heliosRunHealthCheck, heliosToggleItem, heliosClearConsole,
