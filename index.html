@@ -8294,6 +8294,16 @@ Object.assign(window, {
     to   { opacity:1; transform:scale(1); }
 }
 
+@keyframes heliosClose {
+    from { opacity:1; transform:scale(1); }
+    to   { opacity:0; transform:scale(0.98); }
+}
+
+#heliosOverlay.closing {
+    animation: heliosClose 220ms cubic-bezier(0.4,0,0.2,1) forwards;
+    pointer-events: none;
+}
+
 /* ---- Helios header ---- */
 .helios-header {
     display: flex;
@@ -9321,17 +9331,35 @@ function hFetch(path, opts = {}) {
 
 // ---- Open / Close ----
 function openHelios() {
-    document.getElementById('heliosOverlay').classList.add('open');
+    // Respond instantly — show overlay immediately before any async work
+    const overlay = document.getElementById('heliosOverlay');
+    overlay.classList.add('open');
     HELIOS.open = true;
-    heliosTab('inbox');
-    heliosLoadInbox();
+
+    // Show skeleton right away so button feels instant
+    const list = document.getElementById('heliosInboxList');
+    if (list) list.innerHTML = `<div class="helios-empty"><div class="helios-spinner" style="margin:0 auto 16px;"></div><p>Loading inbox…</p></div>`;
+
+    // Update greeting synchronously
     heliosUpdateGreeting();
+
+    // Switch tab synchronously
+    heliosTab('inbox');
+
+    // Defer the network fetch so the overlay paints first
+    requestAnimationFrame(() => setTimeout(() => heliosLoadInbox(), 0));
 }
 
 function closeHelios() {
-    document.getElementById('heliosOverlay').classList.remove('open');
-    HELIOS.open = false;
+    const overlay = document.getElementById('heliosOverlay');
+    overlay.classList.add('closing');
+    setTimeout(() => {
+        overlay.classList.remove('open', 'closing');
+        HELIOS.open = false;
+    }, 220);
 }
+
+
 
 // ---- Tab switching ----
 function heliosTab(tab) {
@@ -9340,9 +9368,10 @@ function heliosTab(tab) {
         document.getElementById(`hpanel-${t}`)?.classList.toggle('active', t === tab);
         document.getElementById(`htab-${t}`)?.classList.toggle('active', t === tab);
     });
-    if (tab === 'health')  heliosRunHealthCheck();
+    // Only load data on explicit tab clicks, not on open
     if (tab === 'audit')   heliosLoadAudit();
-    if (tab === 'scanner') { heliosUpdateScannerStats(); }
+    if (tab === 'scanner') heliosUpdateScannerStats();
+    // Health check only runs when user explicitly clicks Run Check button
 }
 
 // ---- Greeting ----
@@ -9498,6 +9527,7 @@ function renderHeliosItem(item) {
             <div class="helios-actions">
                 ${item.priority !== 'URGENT' ? `<button class="helios-btn helios-btn-approve" onclick="heliosApprove(${item.id})"><i class="fas fa-check"></i> Approve</button>` : ''}
                 ${item.priority === 'URGENT' || item.proposed_field ? `<button class="helios-btn helios-btn-approve" onclick="heliosApproveWithNote(${item.id})"><i class="fas fa-check-circle"></i> Approve & sign</button>` : ''}
+                ${item.item_type === 'INTERNAL_LOGIC' ? `<button class="helios-btn" style="background:rgba(192,132,252,0.1);border:1px solid rgba(192,132,252,0.3);color:#d8b4fe;" onclick="heliosMarkExceptional(${item.id})"><i class="fas fa-bolt"></i> Mark Exceptional</button>` : ''}
                 <button class="helios-btn helios-btn-reject" onclick="heliosReject(${item.id})"><i class="fas fa-times"></i> Reject</button>
                 <button class="helios-btn helios-btn-defer" onclick="heliosDefer(${item.id})"><i class="fas fa-clock"></i> Defer</button>
                 ${item.variant_name ? `<button class="helios-btn helios-btn-ghost" onclick="closeHelios();quickSearch('${escapeAttr(item.variant_name)}')"><i class="fas fa-external-link-alt"></i> View Variant</button>` : ''}
@@ -9601,6 +9631,48 @@ async function heliosDefer(itemId) {
     await heliosWriteAudit(item, 'deferred', clinician.name, clinician.role, 'Deferred');
     heliosLog('info', `⏱ Deferred: ${item.variant_name}`);
     showNotification(`Deferred to tomorrow`, 'info');
+    await heliosLoadInbox();
+}
+
+async function heliosMarkExceptional(itemId) {
+    const item = HELIOS.pendingItems.find(i => i.id === itemId);
+    if (!item || !item.variant_id) return;
+
+    const note = prompt(`Marking ${item.variant_name} as an exceptional case.\n\nClinical justification (required — will be recorded in audit trail):`);
+    if (!note || !note.trim()) return; // cancelled or empty
+
+    const clinician = await heliosGetClinicianIdentity();
+
+    // Write class_subtype = 'exceptional' to variants table
+    const r = await hFetch(`variants?id=eq.${item.variant_id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ class_subtype: 'exceptional', updated_at: new Date().toISOString() })
+    });
+
+    if (!r.ok) {
+        showNotification('Failed to update variant — check connection', 'error');
+        heliosLog('error', `✗ Failed to mark ${item.variant_name} exceptional`);
+        return;
+    }
+
+    // Update local STATE so the variant won't be flagged again this session
+    const v = STATE.variants.find(x => x.id === item.variant_id);
+    if (v) {
+        v.class_subtype = 'exceptional';
+        STATE.variantsById?.set(v.id, v);
+        // Refresh variant detail panel if this variant is currently selected
+        if (STATE.view?.selectedVariant?.id === v.id) {
+            STATE.view.selectedVariant = v;
+            if (typeof renderVariantDetail === 'function') renderVariantDetail(v);
+        }
+    }
+
+    // Resolve the Helios inbox item
+    await heliosSetItemStatus(itemId, 'approved', clinician.name, clinician.role, `Marked exceptional: ${note}`);
+    await heliosWriteAudit(item, 'approved', clinician.name, clinician.role, `Exceptional case documented: ${note}`);
+
+    heliosLog('success', `⚡ ${item.variant_name} marked exceptional by ${clinician.name}`);
+    showNotification(`${item.variant_name} marked as exceptional — will not flag again`, 'success');
     await heliosLoadInbox();
 }
 
@@ -9790,13 +9862,14 @@ async function heliosScanInternal() {
 
         const issues = heliosCheckVariantConsistency(v);
         for (const issue of issues) {
+            const { _priority, ...issueData } = issue;
             await heliosCreatePendingItem({
-                ...issue,
+                ...issueData,
                 variant_id:   v.id,
                 variant_name: v.legacy_name,
                 scan_source:  'INTERNAL',
                 scan_run_id:  runId,
-                priority:     issue.item_type === 'INTERNAL_LOGIC' ? 'URGENT' : 'ROUTINE'
+                priority:     _priority || 'ROUTINE'
             });
             findings++;
         }
@@ -9819,52 +9892,69 @@ function heliosCheckVariantConsistency(v) {
     const issues = [];
 
     // 1. Class vs ETI logic error
-    const classETIRules = {
-        'I':   ['non_responsive'],   // Class I should NOT be responsive (unless exceptional)
-        'III': ['responsive'],        // Class III should be responsive
-    };
+    // Class III: gating defects — should always be responsive. High confidence, URGENT.
+    // Class I: nonsense/stop — typically non_responsive BUT known exceptional cases exist.
+    //          Only flag if subtype is NOT 'exceptional'. Lower confidence, ROUTINE.
     if (v.cftr_class && v.eti_prediction) {
-        const expected = classETIRules[v.cftr_class];
-        if (expected && !expected.includes(v.eti_prediction) && v.class_subtype !== 'exceptional') {
+        // Class III + non_responsive = clear biological contradiction
+        if (v.cftr_class === 'III' && v.eti_prediction !== 'responsive' && v.class_subtype !== 'exceptional') {
             issues.push({
                 item_type:      'INTERNAL_LOGIC',
-                bot_summary:    `Class ${v.cftr_class} variant marked as '${v.eti_prediction}' — contradicts standard class rules`,
-                bot_reasoning:  `Class ${v.cftr_class} variants are typically ${expected.join(' or ')}. Current value '${v.eti_prediction}' may be incorrect unless this is an exceptional case.`,
-                bot_confidence: 75,
+                bot_summary:    `Class III variant marked as '${v.eti_prediction}' — contradicts standard class rules`,
+                bot_reasoning:  `Class III variants have gating defects and are typically responsive to ETI (e.g. Kalydeco/Trikafta). Current value '${v.eti_prediction}' may be incorrect unless this is a documented exceptional case.`,
+                bot_confidence: 85,
                 proposed_field: 'eti_prediction',
-                proposed_value: expected[0],
+                proposed_value: 'responsive',
                 current_value:  v.eti_prediction,
+                _priority:      'URGENT'
+            });
+        }
+        // Class I + responsive = possible but needs justification
+        // Only flag if subtype is NOT already marked exceptional
+        if (v.cftr_class === 'I' && v.eti_prediction === 'responsive' && v.class_subtype !== 'exceptional') {
+            issues.push({
+                item_type:      'INTERNAL_LOGIC',
+                bot_summary:    `Class I variant marked as 'responsive' — verify if this is a documented exceptional case`,
+                bot_reasoning:  `Class I variants (nonsense/stop mutations) are typically non-responsive to ETI. However, exceptional cases exist. If this is intentional, mark the subtype as 'exceptional' to suppress this alert.`,
+                bot_confidence: 50,
+                proposed_field: 'class_subtype',
+                proposed_value: 'exceptional',
+                current_value:  v.class_subtype || 'not set',
+                _priority:      'ROUTINE'
             });
         }
     }
 
-    // 2. Missing critical fields
+    // 2. Missing critical fields — high search demand but no class
     if (!v.cftr_class && (v.search_hit_count || 0) >= 3) {
         issues.push({
             item_type:      'INTERNAL_ORPHAN',
             bot_summary:    `No CFTR class assigned — searched ${v.search_hit_count} times by clinicians`,
             bot_reasoning:  `This variant has been searched ${v.search_hit_count} times but has no class assigned. High clinical demand without classification.`,
             bot_confidence: 90,
+            _priority:      'ROUTINE'
         });
     }
 
-    // 3. Naming inconsistency: protein name not starting with p.
+    // 3. Protein name not following HGVS
     if (v.protein_name && !v.protein_name.startsWith('p.') && !v.protein_name.startsWith('p.(')) {
         issues.push({
             item_type:      'INTERNAL_NAMING',
             bot_summary:    `Protein name '${v.protein_name}' may not follow HGVS notation (expected p.Xxx format)`,
             bot_reasoning:  `HGVS protein notation should start with 'p.'. Current value: ${v.protein_name}`,
             bot_confidence: 60,
+            _priority:      'ROUTINE'
         });
     }
 
-    // 4. cDNA name not starting with c.
+    // 4. cDNA name not following HGVS
     if (v.cdna_name && !v.cdna_name.startsWith('c.')) {
         issues.push({
             item_type:      'INTERNAL_NAMING',
             bot_summary:    `cDNA name '${v.cdna_name}' may not follow HGVS notation (expected c. format)`,
             bot_reasoning:  `HGVS cDNA notation should start with 'c.'. Current value: ${v.cdna_name}`,
             bot_confidence: 60,
+            _priority:      'ROUTINE'
         });
     }
 
@@ -10286,7 +10376,7 @@ function heliosMonitorCurrentVariant() {
 // ================================================================
 Object.assign(window, {
     openHelios, closeHelios, heliosTab, heliosFilter,
-    heliosApprove, heliosApproveWithNote, heliosReject, heliosDefer,
+    heliosApprove, heliosApproveWithNote, heliosReject, heliosDefer, heliosMarkExceptional,
     heliosAddNote, heliosApproveAllRoutine,
     heliosScanInternal, heliosScanExternal, heliosScanSingle, heliosScanMissQueue,
     heliosRunHealthCheck, heliosToggleItem, heliosClearConsole,
