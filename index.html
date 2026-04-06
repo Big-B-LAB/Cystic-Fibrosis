@@ -2927,6 +2927,14 @@
         .sidebar-collapsed .list-pagination { display: none; }
         .sidebar-collapsed .list-meta { display: none; }
 
+        @keyframes writeModeShake {
+            0%,100% { transform: translateX(0); }
+            20%      { transform: translateX(-6px); }
+            40%      { transform: translateX(6px); }
+            60%      { transform: translateX(-4px); }
+            80%      { transform: translateX(4px); }
+        }
+
     </style>
 </head>
 <body>
@@ -3086,6 +3094,11 @@
             </div>
 
             <div class="header-actions">
+                <!-- Write mode indicator -->
+                <button id="writeModeBtn" onclick="requestWriteMode()" title="Enable write mode" style="display:flex;align-items:center;gap:6px;height:36px;padding:0 12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#5a7aaa;font-size:12px;cursor:pointer;transition:all .2s;font-family:'IBM Plex Mono',monospace;">
+                    <i class="fas fa-lock" id="writeModeIcon" style="font-size:10px;"></i>
+                    <span id="writeModeBtnLabel">Read only</span>
+                </button>
                 <span class="hospital-badge" id="hospitalBadge" onclick="changeHospital()" title="Click to change institution" style="display:none;">
                     <i class="fas fa-hospital" style="font-size:9px;"></i>
                     <span id="hospitalBadgeText">—</span>
@@ -3978,6 +3991,51 @@
     </div>
 </div>
 
+<!-- ================================================================
+     WRITE MODE PIN MODAL
+     ================================================================ -->
+<div id="writeModeModal" style="display:none;position:fixed;inset:0;z-index:99998;background:rgba(0,0,0,0.7);align-items:center;justify-content:center;">
+    <div style="background:#0a1220;border:1px solid rgba(41,121,255,0.3);border-radius:16px;padding:32px;width:360px;box-shadow:0 24px 64px rgba(0,0,0,0.8);">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
+            <div style="width:40px;height:40px;border-radius:10px;background:rgba(41,121,255,0.12);border:1px solid rgba(41,121,255,0.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <i class="fas fa-lock" style="color:#60a5fa;font-size:14px;"></i>
+            </div>
+            <div>
+                <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:#f0f6ff;letter-spacing:-.02em;">Write mode</div>
+                <div style="font-size:11px;color:#5a7aaa;margin-top:1px;">Enter PIN to enable editing for 30 minutes</div>
+            </div>
+        </div>
+        <div style="position:relative;margin-bottom:16px;">
+            <input
+                type="password"
+                id="writeModeInput"
+                placeholder="Enter PIN…"
+                autocomplete="off"
+                onkeydown="if(event.key==='Enter')confirmWriteMode();if(event.key==='Escape')closeWriteModeModal();"
+                oninput="document.getElementById('writeModeError').style.display='none';"
+                style="width:100%;height:46px;background:rgba(4,8,15,0.8);border:1.5px solid rgba(41,121,255,0.25);border-radius:10px;color:#f0f6ff;font-family:'IBM Plex Mono',monospace;font-size:15px;padding:0 44px 0 16px;outline:none;letter-spacing:.12em;box-sizing:border-box;transition:border-color .2s;"
+                onfocus="this.style.borderColor='rgba(41,121,255,0.7)'"
+                onblur="this.style.borderColor='rgba(41,121,255,0.25)'"
+            >
+            <button onclick="toggleWritePINVisibility()" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#5a7aaa;font-size:12px;" tabindex="-1">
+                <i class="fas fa-eye" id="writePINEye"></i>
+            </button>
+        </div>
+        <div id="writeModeError" style="display:none;font-size:12px;color:#f87171;margin-bottom:12px;padding:8px 12px;background:rgba(248,113,113,0.08);border-radius:6px;border:1px solid rgba(248,113,113,0.2);">
+            <i class="fas fa-times-circle" style="margin-right:6px;"></i>Incorrect PIN — try again
+        </div>
+        <div style="display:flex;gap:8px;">
+            <button onclick="closeWriteModeModal()" style="flex:1;height:40px;background:transparent;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#9ab8e0;font-size:13px;cursor:pointer;">Cancel</button>
+            <button onclick="confirmWriteMode()" style="flex:2;height:40px;background:#2979ff;border:1px solid #2979ff;border-radius:8px;color:white;font-size:13px;font-weight:600;cursor:pointer;transition:background .15s;" onmouseover="this.style.background='#1a5fd9'" onmouseout="this.style.background='#2979ff'">
+                <i class="fas fa-unlock" style="font-size:11px;margin-right:6px;"></i>Unlock write mode
+            </button>
+        </div>
+        <div style="margin-top:16px;font-size:11px;color:#3a4a6a;text-align:center;line-height:1.6;">
+            Write mode lasts 30 minutes · Read-only access is always available without a PIN
+        </div>
+    </div>
+</div>
+
 <!-- Notification container -->
 <div id="notification-container"></div>
 
@@ -4007,7 +4065,12 @@ const CONFIG = {
         NOTIFICATION_DURATION: 4000,
         MIN_SEARCH_CHARS: 2
     },
-    VERSION: '3.0.0-PRODUCTION'
+    VERSION: '3.0.0-PRODUCTION',
+    // ---- Write mode PIN ----
+    // Change WRITE_CODE to whatever PIN you want. Min 4 chars.
+    // WRITE_DURATION is in milliseconds (30 min = 1800000)
+    WRITE_CODE: 'helix2024',
+    WRITE_DURATION: 30 * 60 * 1000
 };
 
 // ========== STATE MANAGEMENT ==========
@@ -4066,6 +4129,13 @@ const STATE = {
         apiCalls: 0
     },
 
+    // ---- Write mode ----
+    writeMode: {
+        active: false,
+        expiry: null,       // Date.now() + WRITE_DURATION when activated
+        timerInterval: null // setInterval handle for the countdown
+    },
+
     // ---- Search Intelligence ----
     searchIntelligence: {
         recentSearches: [],
@@ -4083,6 +4153,144 @@ const STATE = {
 // Global variables for evidence modals
 let currentVariantId = null;
 let currentVariantName = '';
+
+// ========== WRITE MODE ==========
+
+function isWriteMode() {
+    const wm = STATE.writeMode;
+    if (!wm.active) return false;
+    if (Date.now() > wm.expiry) {
+        deactivateWriteMode();
+        return false;
+    }
+    return true;
+}
+
+function requireWriteMode(callback) {
+    if (isWriteMode()) {
+        callback();
+    } else {
+        // Store the pending action and show the PIN modal
+        STATE.writeMode._pendingAction = callback;
+        openWriteModeModal();
+    }
+}
+
+function openWriteModeModal() {
+    const modal = document.getElementById('writeModeModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        setTimeout(() => {
+            const input = document.getElementById('writeModeInput');
+            if (input) { input.value = ''; input.focus(); }
+            const err = document.getElementById('writeModeError');
+            if (err) err.style.display = 'none';
+        }, 50);
+    }
+}
+
+function closeWriteModeModal() {
+    const modal = document.getElementById('writeModeModal');
+    if (modal) modal.style.display = 'none';
+    STATE.writeMode._pendingAction = null;
+}
+
+function confirmWriteMode() {
+    const input = document.getElementById('writeModeInput');
+    const err = document.getElementById('writeModeError');
+    if (!input) return;
+    const entered = input.value.trim();
+    if (entered !== CONFIG.WRITE_CODE) {
+        if (err) err.style.display = 'block';
+        input.value = '';
+        input.focus();
+        // Shake animation
+        input.style.animation = 'none';
+        void input.offsetWidth;
+        input.style.animation = 'writeModeShake .35s ease';
+        return;
+    }
+    // Correct PIN — activate write mode
+    activateWriteMode();
+    closeWriteModeModal();
+    // Fire the pending action if there was one
+    const pending = STATE.writeMode._pendingAction;
+    STATE.writeMode._pendingAction = null;
+    if (pending) pending();
+}
+
+function toggleWritePINVisibility() {
+    const input = document.getElementById('writeModeInput');
+    const eye = document.getElementById('writePINEye');
+    if (!input) return;
+    const isPassword = input.type === 'password';
+    input.type = isPassword ? 'text' : 'password';
+    if (eye) eye.className = isPassword ? 'fas fa-eye-slash' : 'fas fa-eye';
+}
+
+function activateWriteMode() {
+    const wm = STATE.writeMode;
+    wm.active = true;
+    wm.expiry = Date.now() + CONFIG.WRITE_DURATION;
+    // Clear any existing timer
+    if (wm.timerInterval) clearInterval(wm.timerInterval);
+    // Update button every second with countdown
+    updateWriteModeBtn();
+    wm.timerInterval = setInterval(() => {
+        if (!isWriteMode()) {
+            clearInterval(wm.timerInterval);
+            updateWriteModeBtn();
+            showNotification('Write mode expired — now read only', 'info', 4000);
+        } else {
+            updateWriteModeBtn();
+        }
+    }, 1000);
+    showNotification('Write mode active — 30 minutes', 'success', 3000);
+}
+
+function deactivateWriteMode() {
+    const wm = STATE.writeMode;
+    wm.active = false;
+    wm.expiry = null;
+    if (wm.timerInterval) { clearInterval(wm.timerInterval); wm.timerInterval = null; }
+    updateWriteModeBtn();
+}
+
+function requestWriteMode() {
+    if (isWriteMode()) {
+        // Already active — clicking again deactivates (lock it early)
+        deactivateWriteMode();
+        showNotification('Write mode deactivated', 'info', 2500);
+    } else {
+        openWriteModeModal();
+    }
+}
+
+function updateWriteModeBtn() {
+    const btn = document.getElementById('writeModeBtn');
+    const icon = document.getElementById('writeModeIcon');
+    const label = document.getElementById('writeModeBtnLabel');
+    if (!btn) return;
+    if (isWriteMode()) {
+        const remaining = Math.max(0, Math.ceil((STATE.writeMode.expiry - Date.now()) / 1000));
+        const mins = Math.floor(remaining / 60);
+        const secs = remaining % 60;
+        const timeStr = mins > 0 ? `${mins}m ${secs.toString().padStart(2,'0')}s` : `${secs}s`;
+        btn.style.background = 'rgba(41,121,255,0.12)';
+        btn.style.borderColor = 'rgba(41,121,255,0.4)';
+        btn.style.color = '#60a5fa';
+        if (icon) icon.className = 'fas fa-unlock';
+        if (label) label.textContent = timeStr;
+        btn.title = 'Write mode active — click to lock';
+    } else {
+        btn.style.background = 'rgba(255,255,255,0.04)';
+        btn.style.borderColor = 'rgba(255,255,255,0.1)';
+        btn.style.color = '#5a7aaa';
+        if (icon) icon.className = 'fas fa-lock';
+        if (label) label.textContent = 'Read only';
+        btn.title = 'Enable write mode';
+    }
+}
 
 // ========== DATABASE OPERATIONS ==========
 
@@ -6125,6 +6333,7 @@ function closeValidationModal() {
 }
 
 async function submitValidation() {
+    if (!isWriteMode()) { requireWriteMode(() => submitValidation()); return; }
     if (!STATE.ui.validationContext) return;
     const name = document.getElementById('clinicianName').value.trim();
     const role = document.getElementById('clinicianRoleInput').value.trim();
@@ -6289,6 +6498,7 @@ function closeAnnotationModal() {
 }
 
 async function saveAnnotation() {
+    if (!isWriteMode()) { requireWriteMode(() => saveAnnotation()); return; }
     if (!STATE.ui.annotationContext) return;
     const { variant, field } = STATE.ui.annotationContext;
     const input = document.getElementById('annotationValue');
@@ -6343,6 +6553,7 @@ function closeDeleteModal() {
 }
 
 async function confirmDeleteVariant() {
+    if (!isWriteMode()) { requireWriteMode(() => confirmDeleteVariant()); return; }
     if (!STATE.ui.deleteContext) return;
     const { variantName, variantId } = STATE.ui.deleteContext;
     try {
@@ -6514,6 +6725,7 @@ function previewImportBatch(arr, resultsEl, btn) {
 }
 
 async function executeJsonImport() {
+    if (!isWriteMode()) { requireWriteMode(() => executeJsonImport()); return; }
     if (!STATE.ui.validatedJson) return;
     const btn = document.getElementById('executeImportBtn');
     btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Importing…';
@@ -6632,6 +6844,7 @@ async function resolveMissQueueForVariant(variant) {
 }
 
 async function submitManualForm() {
+    if (!isWriteMode()) { requireWriteMode(() => submitManualForm()); return; }
     const name = document.getElementById('formLegacyName').value.trim();
     const prot = document.getElementById('formProteinName').value.trim();
     const cdna = document.getElementById('formCdnaName').value.trim();
@@ -6819,6 +7032,7 @@ function selectEvidenceType(type) {
 }
 
 async function saveEvidenceLink() {
+    if (!isWriteMode()) { requireWriteMode(() => saveEvidenceLink()); return; }
     const type = document.getElementById('evidenceType').value;
     const title = document.getElementById('evidenceTitle').value.trim();
     const url = document.getElementById('evidenceUrl').value.trim();
@@ -8528,7 +8742,8 @@ Object.assign(window, {
     renderGapQueue, renderCommandCentre, calculateGapScore,
     showHospitalModal, confirmHospital, skipHospital, changeHospital,
     selectHospital, filterHospitalSuggestions,
-    toggleBookmark, isBookmarked
+    toggleBookmark, isBookmarked,
+    requestWriteMode, confirmWriteMode, closeWriteModeModal, toggleWritePINVisibility
 });
 </script>
 <style>
@@ -10365,6 +10580,7 @@ async function heliosGetClinicianIdentity() {
 }
 
 async function heliosApprove(itemId) {
+    if (!isWriteMode()) { requireWriteMode(() => heliosApprove(itemId)); return; }
     const item = HELIOS.pendingItems.find(i => i.id === itemId);
     if (!item) return;
 
@@ -10386,6 +10602,7 @@ async function heliosApprove(itemId) {
 }
 
 async function heliosApproveWithNote(itemId) {
+    if (!isWriteMode()) { requireWriteMode(() => heliosApproveWithNote(itemId)); return; }
     const item = HELIOS.pendingItems.find(i => i.id === itemId);
     if (!item) return;
     const note = prompt(`Approving: ${item.bot_summary}\n\nAdd a clinical note (required for URGENT items):`);
@@ -10402,6 +10619,7 @@ async function heliosApproveWithNote(itemId) {
 }
 
 async function heliosReject(itemId) {
+    if (!isWriteMode()) { requireWriteMode(() => heliosReject(itemId)); return; }
     const item = HELIOS.pendingItems.find(i => i.id === itemId);
     if (!item) return;
     const note = prompt(`Rejecting: ${item.bot_summary}\n\nReason for rejection (optional):`);
@@ -10415,6 +10633,7 @@ async function heliosReject(itemId) {
 }
 
 async function heliosDefer(itemId) {
+    if (!isWriteMode()) { requireWriteMode(() => heliosDefer(itemId)); return; }
     const item = HELIOS.pendingItems.find(i => i.id === itemId);
     if (!item) return;
     const clinician = await heliosGetClinicianIdentity();
@@ -10442,6 +10661,7 @@ async function heliosDefer(itemId) {
 
 // ---- Mark Exceptional ----
 async function heliosMarkExceptional(itemId) {
+    if (!isWriteMode()) { requireWriteMode(() => heliosMarkExceptional(itemId)); return; }
     const item = HELIOS.pendingItems.find(i => i.id === itemId);
     if (!item || !item.variant_id) return;
     const note = prompt(`Marking ${item.variant_name} as an exceptional case.\n\nClinical justification (required — recorded in audit trail):`);
@@ -10701,6 +10921,7 @@ async function heliosAddNote(itemId) {
 }
 
 async function heliosApproveAllRoutine() {
+    if (!isWriteMode()) { requireWriteMode(() => heliosApproveAllRoutine()); return; }
     const routine = HELIOS.pendingItems.filter(i => i.priority === 'ROUTINE' && i.status === 'pending');
     if (!routine.length) return;
     const ok = confirm(`Approve all ${routine.length} routine items? This will apply any proposed DB changes.`);
