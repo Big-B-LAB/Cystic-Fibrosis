@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Δ Helix | CFTR Precision Medicine Platform</title>
 
-    <!-- Fonts & Icons -->
+    <!-- Fonts & Icons -->   
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
@@ -1459,7 +1459,7 @@
 
         /* ---- Hospital onboarding modal ---- */
         .hospital-modal-overlay {
-            position: fixed; inset: 0; z-index: 99998;
+            position: fixed; inset: 0; z-index: 99995;
             background: rgba(4,8,15,0.92);
             display: flex; align-items: center; justify-content: center;
             backdrop-filter: blur(8px);
@@ -2927,6 +2927,133 @@
         .sidebar-collapsed .list-pagination { display: none; }
         .sidebar-collapsed .list-meta { display: none; }
 
+        @keyframes writeModeShake {
+            0%,100% { transform: translateX(0); }
+            20%      { transform: translateX(-6px); }
+            40%      { transform: translateX(6px); }
+            60%      { transform: translateX(-4px); }
+            80%      { transform: translateX(4px); }
+        }
+
+        /* ============================================================
+           RESPONSIVE — TABLET & MOBILE
+           ============================================================ */
+
+        @media (max-width: 900px) {
+            :root {
+                --sidebar-width: 260px;
+                --header-height: 52px;
+            }
+
+            .header-stats { display: none; }
+            .brand-sub    { display: none; }
+
+            .app-shell {
+                grid-template-columns: var(--sidebar-width) 1fr;
+            }
+
+            /* Auto-collapse sidebar on tablet */
+            .app-shell:not(.sidebar-collapsed) {
+                grid-template-columns: var(--sidebar-collapsed) 1fr;
+            }
+            .app-shell:not(.sidebar-collapsed) .app-sidebar {
+                width: var(--sidebar-collapsed);
+                min-width: var(--sidebar-collapsed);
+            }
+            .app-shell:not(.sidebar-collapsed) .brand-text,
+            .app-shell:not(.sidebar-collapsed) .sidebar-search,
+            .app-shell:not(.sidebar-collapsed) .sidebar-filters,
+            .app-shell:not(.sidebar-collapsed) .class-filter-bar,
+            .app-shell:not(.sidebar-collapsed) .list-meta,
+            .app-shell:not(.sidebar-collapsed) .variant-list,
+            .app-shell:not(.sidebar-collapsed) .list-pagination,
+            .app-shell:not(.sidebar-collapsed) .activity-ribbon {
+                display: none;
+            }
+
+            /* Bigger touch targets for Helios action buttons */
+            .helios-btn {
+                min-height: 44px !important;
+                padding: 10px 14px !important;
+                font-size: 13px !important;
+            }
+
+            /* Hospital modal full-width on mobile */
+            .hospital-modal {
+                width: calc(100vw - 32px) !important;
+                max-width: 440px;
+                padding: 24px 20px !important;
+            }
+
+            /* Dashboard modal full screen on tablet */
+            .dashboard-modal .modal-content {
+                width: 100vw !important;
+                height: 100vh !important;
+                max-width: 100vw !important;
+                border-radius: 0 !important;
+            }
+
+            /* Write mode modal full width */
+            #writeModeModal > div {
+                width: calc(100vw - 32px) !important;
+                max-width: 380px;
+            }
+
+            /* Detail grid stacks vertically */
+            .detail-grid {
+                grid-template-columns: 1fr !important;
+            }
+
+            /* Nomenclature row wraps */
+            .nomenclature-row {
+                grid-template-columns: 1fr !important;
+            }
+
+            /* Header actions — hide labels on small screens */
+            .header-actions .btn span:not(.chip-count) {
+                display: none;
+            }
+            .header-actions .btn {
+                padding: 0 10px !important;
+            }
+
+            #connStatusLabel { display: none; }
+        }
+
+        @media (max-width: 600px) {
+            :root { --header-height: 48px; }
+
+            .app-header { padding: 0 8px 0 0; }
+
+            /* On phone — sidebar fully hidden, show only with toggle */
+            .app-shell {
+                grid-template-columns: 0px 1fr;
+            }
+            .app-shell.sidebar-open {
+                grid-template-columns: var(--sidebar-width) 1fr;
+            }
+            .app-sidebar {
+                position: fixed;
+                left: 0; top: var(--header-height);
+                height: calc(100vh - var(--header-height));
+                z-index: 500;
+                transform: translateX(-100%);
+                transition: transform var(--transition-slow);
+                box-shadow: 4px 0 24px rgba(0,0,0,0.5);
+            }
+            .app-shell.sidebar-open .app-sidebar {
+                transform: translateX(0);
+                width: var(--sidebar-width);
+                min-width: var(--sidebar-width);
+                display: flex;
+            }
+
+            .detail-actions {
+                flex-wrap: wrap;
+                gap: 6px !important;
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -3004,31 +3131,65 @@
      HOSPITAL ONBOARDING MODAL
      ================================================================ -->
 <div id="hospitalModal" class="hospital-modal-overlay" style="display:none;">
-    <div class="hospital-modal">
+    <div class="hospital-modal" style="width:480px;max-height:90vh;overflow-y:auto;">
         <div class="hospital-modal-logo">Δ Helix</div>
         <div class="hospital-modal-sub">CFTR Precision Medicine Platform</div>
         <h3>Which institution are you searching from?</h3>
         <p>This helps us track which variants are most searched at each clinical centre — enabling regional prevalence insights and prioritising research gaps by institution.</p>
+
+        <!-- Search input -->
         <div class="hospital-input-wrap">
             <input
                 type="text"
                 id="hospitalInput"
                 class="hospital-input"
-                placeholder="Start typing your hospital or centre name…"
+                placeholder="Search institutions…"
                 autocomplete="off"
                 oninput="filterHospitalSuggestions(this.value)"
             >
             <div class="hospital-suggestions hidden" id="hospitalSuggestions"></div>
         </div>
-        <div style="font-size:10px;color:var(--text-tertiary);margin-top:4px;">
+
+        <!-- Country-grouped institution list -->
+        <div id="hospitalGroupedList" style="max-height:260px;overflow-y:auto;margin-bottom:12px;border:1px solid rgba(99,140,210,0.15);border-radius:8px;background:rgba(4,8,15,0.5);">
+            <div style="padding:20px;text-align:center;font-size:12px;color:#5a7aaa;">
+                <i class="fas fa-spinner fa-spin" style="margin-right:6px;"></i>Loading institutions…
+            </div>
+        </div>
+
+        <!-- "Not in list?" — new institution form (hidden by default) -->
+        <div id="hospitalNewForm" style="display:none;background:rgba(41,121,255,0.05);border:1px solid rgba(41,121,255,0.18);border-radius:10px;padding:14px;margin-bottom:12px;">
+            <div style="font-size:12px;font-weight:600;color:#60a5fa;margin-bottom:10px;">
+                <i class="fas fa-plus-circle" style="margin-right:5px;"></i>Register new institution
+            </div>
+            <input type="text" id="newInstitutionName" class="hospital-input" placeholder="Full institution name *" style="margin-bottom:6px;" oninput="validateNewInstitution()">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;">
+                <input type="text" id="newInstitutionCity" class="hospital-input" placeholder="City *" oninput="validateNewInstitution()">
+                <input type="text" id="newInstitutionCountry" class="hospital-input" placeholder="Country *" oninput="validateNewInstitution()">
+            </div>
+            <select id="newInstitutionType" class="hospital-input" style="margin-bottom:8px;" onchange="validateNewInstitution()">
+                <option value="">Institution type *</option>
+                <option value="hospital">Hospital</option>
+                <option value="research">Research centre</option>
+                <option value="university">University</option>
+                <option value="lab">Laboratory</option>
+                <option value="other">Other</option>
+            </select>
+            <div style="display:flex;gap:6px;">
+                <button onclick="cancelNewInstitution()" style="flex:1;height:34px;background:transparent;border:1px solid rgba(255,255,255,0.1);border-radius:6px;color:#9ab8e0;font-size:12px;cursor:pointer;">Cancel</button>
+                <button id="saveNewInstitutionBtn" onclick="saveNewInstitution()" disabled style="flex:2;height:34px;background:#2979ff;border:none;border-radius:6px;color:white;font-size:12px;font-weight:600;cursor:pointer;opacity:.5;">Save & select</button>
+            </div>
+        </div>
+
+        <!-- Not in list link -->
+        <div id="hospitalNotInList" style="text-align:center;margin-bottom:10px;">
+            <span onclick="showNewInstitutionForm()" style="font-size:11px;color:#5a7aaa;cursor:pointer;text-decoration:underline;">My institution is not in the list</span>
+        </div>
+
+        <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:10px;text-align:center;">
             Your selection is saved locally — you will not be asked again on this device.
         </div>
-        <button
-            class="hospital-confirm-btn"
-            id="hospitalConfirmBtn"
-            onclick="confirmHospital()"
-            disabled
-        >
+        <button class="hospital-confirm-btn" id="hospitalConfirmBtn" onclick="confirmHospital()" disabled>
             Continue to platform
         </button>
         <div class="hospital-skip" onclick="skipHospital()">Skip — search anonymously</div>
@@ -3086,6 +3247,16 @@
             </div>
 
             <div class="header-actions">
+                <!-- Connection status indicator -->
+                <div style="display:flex;align-items:center;gap:5px;padding:0 8px;" title="Database connection status">
+                    <div id="connStatusDot" style="width:7px;height:7px;border-radius:50%;background:#34d399;transition:background .3s;flex-shrink:0;"></div>
+                    <span id="connStatusLabel" style="font-size:10px;font-family:var(--font-mono);color:#5a7aaa;min-width:40px;"></span>
+                </div>
+                <!-- Write mode indicator -->
+                <button id="writeModeBtn" onclick="requestWriteMode()" title="Enable write mode" style="display:flex;align-items:center;gap:6px;height:36px;padding:0 12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#5a7aaa;font-size:12px;cursor:pointer;transition:all .2s;font-family:'IBM Plex Mono',monospace;">
+                    <i class="fas fa-lock" id="writeModeIcon" style="font-size:10px;"></i>
+                    <span id="writeModeBtnLabel">Read only</span>
+                </button>
                 <span class="hospital-badge" id="hospitalBadge" onclick="changeHospital()" title="Click to change institution" style="display:none;">
                     <i class="fas fa-hospital" style="font-size:9px;"></i>
                     <span id="hospitalBadgeText">—</span>
@@ -3725,6 +3896,7 @@
                         <div style="display:flex;align-items:center;gap:6px;margin-right:auto;">
                             <span style="width:6px;height:6px;border-radius:50%;background:#34d399;display:inline-block;animation:geoPulseDot 2.5s ease-in-out infinite;"></span>
                             <span style="font-size:11px;color:rgba(255,255,255,0.4);font-family:var(--font-mono);letter-spacing:.04em;" id="geoNoteV4">Geographic search distribution</span>
+                            <span id="geoHealthBadge" style="display:none;margin-left:10px;font-family:var(--font-mono);font-size:9px;padding:2px 8px;border-radius:100px;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.35);" title="Percentage of search log rows that have geo coordinates"></span>
                         </div>
                         <div style="display:flex;align-items:center;gap:5px;margin-right:16px;">
                             <button class="geo-v5-view-btn active" id="geoViewMap"     onclick="geoV5SetView('map',this)">Map</button>
@@ -3977,6 +4149,56 @@
     </div>
 </div>
 
+<!-- ================================================================
+     WRITE MODE PIN MODAL
+     ================================================================ -->
+<div id="writeModeModal" style="display:none;position:fixed;inset:0;z-index:999999;background:rgba(0,0,0,0.85);align-items:center;justify-content:center;backdrop-filter:blur(4px);">
+    <div style="background:#0a1220;border:1px solid rgba(41,121,255,0.35);border-radius:16px;padding:32px;width:380px;box-shadow:0 32px 80px rgba(0,0,0,0.9),0 0 0 1px rgba(41,121,255,0.1);">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+            <div style="width:40px;height:40px;border-radius:10px;background:rgba(41,121,255,0.12);border:1px solid rgba(41,121,255,0.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <i class="fas fa-lock" style="color:#60a5fa;font-size:14px;"></i>
+            </div>
+            <div>
+                <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:#f0f6ff;letter-spacing:-.02em;">Write mode required</div>
+                <div style="font-size:11px;color:#5a7aaa;margin-top:1px;">Enter PIN to enable editing for 30 minutes</div>
+            </div>
+        </div>
+        <!-- Context message — what the user was trying to do -->
+        <div id="writeModeContext" style="display:none;margin-bottom:16px;padding:9px 12px;background:rgba(41,121,255,0.07);border:1px solid rgba(41,121,255,0.15);border-radius:8px;font-size:12px;color:#9ab8e0;line-height:1.5;">
+            <i class="fas fa-info-circle" style="color:#60a5fa;margin-right:6px;"></i>
+            <span id="writeModeContextText"></span>
+        </div>
+        <div style="position:relative;margin-bottom:12px;margin-top:16px;">
+            <input
+                type="password"
+                id="writeModeInput"
+                placeholder="Enter PIN…"
+                autocomplete="off"
+                onkeydown="if(event.key==='Enter')confirmWriteMode();if(event.key==='Escape')closeWriteModeModal();"
+                oninput="document.getElementById('writeModeError').style.display='none';"
+                style="width:100%;height:46px;background:rgba(4,8,15,0.8);border:1.5px solid rgba(41,121,255,0.25);border-radius:10px;color:#f0f6ff;font-family:'IBM Plex Mono',monospace;font-size:15px;padding:0 44px 0 16px;outline:none;letter-spacing:.12em;box-sizing:border-box;transition:border-color .2s;"
+                onfocus="this.style.borderColor='rgba(41,121,255,0.7)'"
+                onblur="this.style.borderColor='rgba(41,121,255,0.25)'"
+            >
+            <button onclick="toggleWritePINVisibility()" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#5a7aaa;font-size:12px;" tabindex="-1">
+                <i class="fas fa-eye" id="writePINEye"></i>
+            </button>
+        </div>
+        <div id="writeModeError" style="display:none;font-size:12px;color:#f87171;margin-bottom:12px;padding:8px 12px;background:rgba(248,113,113,0.08);border-radius:6px;border:1px solid rgba(248,113,113,0.2);">
+            <i class="fas fa-times-circle" style="margin-right:6px;"></i>Incorrect PIN — try again
+        </div>
+        <div style="display:flex;gap:8px;">
+            <button onclick="closeWriteModeModal()" style="flex:1;height:40px;background:transparent;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#9ab8e0;font-size:13px;cursor:pointer;transition:border-color .15s;" onmouseover="this.style.borderColor='rgba(255,255,255,0.25)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'">Cancel</button>
+            <button onclick="confirmWriteMode()" style="flex:2;height:40px;background:#2979ff;border:1px solid #2979ff;border-radius:8px;color:white;font-size:13px;font-weight:600;cursor:pointer;transition:background .15s;" onmouseover="this.style.background='#1a5fd9'" onmouseout="this.style.background='#2979ff'">
+                <i class="fas fa-unlock" style="font-size:11px;margin-right:6px;"></i>Unlock write mode
+            </button>
+        </div>
+        <div style="margin-top:14px;font-size:11px;color:#3a4a6a;text-align:center;line-height:1.6;">
+            Write mode lasts 30 minutes · Read-only access is always available without a PIN
+        </div>
+    </div>
+</div>
+
 <!-- Notification container -->
 <div id="notification-container"></div>
 
@@ -4006,10 +4228,141 @@ const CONFIG = {
         NOTIFICATION_DURATION: 4000,
         MIN_SEARCH_CHARS: 2
     },
-    VERSION: '3.0.0-PRODUCTION'
+    VERSION: '3.0.0-PRODUCTION',
+    // ---- Write mode PIN ----
+    // Change WRITE_CODE to whatever PIN you want. Min 4 chars.
+    // WRITE_DURATION is in milliseconds (30 min = 1800000)
+    WRITE_CODE: 'helix2024',
+    WRITE_DURATION: 30 * 60 * 1000
 };
 
-// ========== STATE MANAGEMENT ==========
+// ========== ERROR RESILIENCE — DB WRITE WRAPPER ==========
+// All write operations go through dbWrite() instead of raw fetch().
+// Handles: retries, error classification, failed-save queue, connection indicator.
+
+const FAILED_SAVE_KEY = 'helix_failed_saves_v1';
+
+const DB_ERROR = {
+    classify(status, body) {
+        if (!navigator.onLine)          return { type: 'offline',    msg: 'No internet connection — change saved locally and will retry' };
+        if (status === 0)               return { type: 'network',    msg: 'Network error — retrying…' };
+        if (status === 409)             return { type: 'duplicate',  msg: 'Duplicate entry — this record already exists' };
+        if (status === 400)             return { type: 'validation', msg: 'Invalid data — check field values' };
+        if (status === 403)             return { type: 'permission', msg: 'Permission denied — check database policy' };
+        if (status === 404)             return { type: 'notfound',   msg: 'Record not found — may have been deleted' };
+        if (status >= 500)              return { type: 'server',     msg: 'Database server error — retrying…' };
+        return { type: 'unknown', msg: `Unexpected error (${status})` };
+    },
+    isRetryable(type) {
+        return ['network','server','offline'].includes(type);
+    }
+};
+
+async function dbWrite(url, options, { retries = 3, label = 'Save', silent = false } = {}) {
+    let lastErr = null;
+    for (let attempt = 1; attempt <= retries; attempt++) {
+        try {
+            updateConnectionStatus('connecting');
+            const res = await fetch(`${CONFIG.SUPABASE.URL}/rest/v1/${url}`, {
+                ...options,
+                headers: {
+                    'apikey': CONFIG.SUPABASE.KEY,
+                    'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`,
+                    'Content-Type': 'application/json',
+                    ...(options.headers || {})
+                },
+                signal: AbortSignal.timeout(12000)
+            });
+            if (res.ok) {
+                updateConnectionStatus('ok');
+                return res;
+            }
+            // Parse error body for better messages
+            let body = '';
+            try { body = await res.text(); } catch {}
+            const err = DB_ERROR.classify(res.status, body);
+            lastErr = err;
+            if (!DB_ERROR.isRetryable(err.type) || attempt === retries) {
+                updateConnectionStatus('error');
+                if (!silent) showNotification(`${label} failed: ${err.msg}`, 'error', 6000);
+                throw Object.assign(new Error(err.msg), { dbError: err });
+            }
+            // Retryable — wait before next attempt
+            updateConnectionStatus('error');
+            if (!silent && attempt === 1) showNotification(`${label}: ${err.msg}`, 'warning', 3000);
+            await new Promise(r => setTimeout(r, attempt * 800));
+        } catch(e) {
+            if (e.name === 'AbortError' || e.name === 'TimeoutError') {
+                lastErr = { type: 'network', msg: 'Request timed out' };
+                if (attempt < retries) {
+                    await new Promise(r => setTimeout(r, attempt * 800));
+                    continue;
+                }
+            }
+            if (e.dbError) throw e; // already handled above
+            lastErr = lastErr || { type: 'network', msg: e.message };
+            if (attempt === retries) {
+                updateConnectionStatus('error');
+                if (!silent) showNotification(`${label} failed: ${lastErr.msg}`, 'error', 6000);
+                throw e;
+            }
+            await new Promise(r => setTimeout(r, attempt * 800));
+        }
+    }
+}
+
+// ---- Connection status indicator ----
+let _connStatusTimeout = null;
+function updateConnectionStatus(status) {
+    const dot = document.getElementById('connStatusDot');
+    const label = document.getElementById('connStatusLabel');
+    if (!dot) return;
+    clearTimeout(_connStatusTimeout);
+    const states = {
+        ok:          { color: '#34d399', text: '',          title: 'Database connected' },
+        connecting:  { color: '#fbbf24', text: 'saving…',  title: 'Saving to database…' },
+        error:       { color: '#f87171', text: 'DB error',  title: 'Database error — check connection' },
+    };
+    const s = states[status] || states.ok;
+    dot.style.background = s.color;
+    dot.title = s.title;
+    if (label) label.textContent = s.text;
+    if (status === 'ok') {
+        _connStatusTimeout = setTimeout(() => {
+            if (label) label.textContent = '';
+        }, 2000);
+    }
+}
+
+// ---- Audit log writer — fire and forget, never blocks UI ----
+async function writeAuditLog(entry) {
+    try {
+        await fetch(`${CONFIG.SUPABASE.URL}/rest/v1/helios_audit_log`, {
+            method: 'POST',
+            headers: {
+                'apikey': CONFIG.SUPABASE.KEY,
+                'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`,
+                'Content-Type': 'application/json',
+                'Prefer': 'return=minimal'
+            },
+            body: JSON.stringify({
+                action:          entry.action,
+                clinician_name:  entry.clinician_name || 'Unknown',
+                clinician_role:  entry.clinician_role || null,
+                variant_id:      entry.variant_id     || null,
+                variant_name:    entry.variant_name   || null,
+                item_type:       entry.item_type      || null,
+                note:            entry.note           || null,
+                db_change_field: entry.db_change_field|| null,
+                db_change_old:   entry.db_change_old  || null,
+                db_change_new:   entry.db_change_new  || null,
+                review_snapshot: entry.review_snapshot|| null,
+                created_at:      new Date().toISOString()
+            })
+        });
+    } catch(e) { /* non-fatal — audit log failure never blocks clinical work */ }
+}
+
 const STATE = {
     variants: [],
     variantsById: new Map(),
@@ -4065,6 +4418,13 @@ const STATE = {
         apiCalls: 0
     },
 
+    // ---- Write mode ----
+    writeMode: {
+        active: false,
+        expiry: null,       // Date.now() + WRITE_DURATION when activated
+        timerInterval: null // setInterval handle for the countdown
+    },
+
     // ---- Search Intelligence ----
     searchIntelligence: {
         recentSearches: [],
@@ -4082,6 +4442,154 @@ const STATE = {
 // Global variables for evidence modals
 let currentVariantId = null;
 let currentVariantName = '';
+
+// ========== WRITE MODE ==========
+
+function isWriteMode() {
+    const wm = STATE.writeMode;
+    if (!wm.active) return false;
+    if (Date.now() > wm.expiry) {
+        deactivateWriteMode();
+        return false;
+    }
+    return true;
+}
+
+function requireWriteMode(callback, context) {
+    if (isWriteMode()) {
+        callback();
+    } else {
+        STATE.writeMode._pendingAction = callback;
+        openWriteModeModal(context);
+    }
+}
+
+function openWriteModeModal(context) {
+    const modal = document.getElementById('writeModeModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        // Show context message if provided
+        const ctxEl = document.getElementById('writeModeContext');
+        const ctxText = document.getElementById('writeModeContextText');
+        if (ctxEl && ctxText) {
+            if (context) {
+                ctxText.textContent = context;
+                ctxEl.style.display = 'block';
+            } else {
+                ctxEl.style.display = 'none';
+            }
+        }
+        setTimeout(() => {
+            const input = document.getElementById('writeModeInput');
+            if (input) { input.value = ''; input.focus(); }
+            const err = document.getElementById('writeModeError');
+            if (err) err.style.display = 'none';
+        }, 50);
+    }
+}
+
+function closeWriteModeModal() {
+    const modal = document.getElementById('writeModeModal');
+    if (modal) modal.style.display = 'none';
+    STATE.writeMode._pendingAction = null;
+}
+
+function confirmWriteMode() {
+    const input = document.getElementById('writeModeInput');
+    const err = document.getElementById('writeModeError');
+    if (!input) return;
+    const entered = input.value.trim();
+    if (entered !== CONFIG.WRITE_CODE) {
+        if (err) err.style.display = 'block';
+        input.value = '';
+        input.focus();
+        // Shake animation
+        input.style.animation = 'none';
+        void input.offsetWidth;
+        input.style.animation = 'writeModeShake .35s ease';
+        return;
+    }
+    // Correct PIN — activate write mode
+    activateWriteMode();
+    closeWriteModeModal();
+    // Fire the pending action if there was one
+    const pending = STATE.writeMode._pendingAction;
+    STATE.writeMode._pendingAction = null;
+    if (pending) pending();
+}
+
+function toggleWritePINVisibility() {
+    const input = document.getElementById('writeModeInput');
+    const eye = document.getElementById('writePINEye');
+    if (!input) return;
+    const isPassword = input.type === 'password';
+    input.type = isPassword ? 'text' : 'password';
+    if (eye) eye.className = isPassword ? 'fas fa-eye-slash' : 'fas fa-eye';
+}
+
+function activateWriteMode() {
+    const wm = STATE.writeMode;
+    wm.active = true;
+    wm.expiry = Date.now() + CONFIG.WRITE_DURATION;
+    // Clear any existing timer
+    if (wm.timerInterval) clearInterval(wm.timerInterval);
+    // Update button every second with countdown
+    updateWriteModeBtn();
+    wm.timerInterval = setInterval(() => {
+        if (!isWriteMode()) {
+            clearInterval(wm.timerInterval);
+            updateWriteModeBtn();
+            showNotification('Write mode expired — now read only', 'info', 4000);
+        } else {
+            updateWriteModeBtn();
+        }
+    }, 1000);
+    showNotification('Write mode active — 30 minutes', 'success', 3000);
+}
+
+function deactivateWriteMode() {
+    const wm = STATE.writeMode;
+    wm.active = false;
+    wm.expiry = null;
+    if (wm.timerInterval) { clearInterval(wm.timerInterval); wm.timerInterval = null; }
+    updateWriteModeBtn();
+}
+
+function requestWriteMode() {
+    if (isWriteMode()) {
+        // Already active — clicking again deactivates (lock it early)
+        deactivateWriteMode();
+        showNotification('Write mode deactivated', 'info', 2500);
+    } else {
+        openWriteModeModal();
+    }
+}
+
+function updateWriteModeBtn() {
+    const btn = document.getElementById('writeModeBtn');
+    const icon = document.getElementById('writeModeIcon');
+    const label = document.getElementById('writeModeBtnLabel');
+    if (!btn) return;
+    if (isWriteMode()) {
+        const remaining = Math.max(0, Math.ceil((STATE.writeMode.expiry - Date.now()) / 1000));
+        const mins = Math.floor(remaining / 60);
+        const secs = remaining % 60;
+        const timeStr = mins > 0 ? `${mins}m ${secs.toString().padStart(2,'0')}s` : `${secs}s`;
+        btn.style.background = 'rgba(41,121,255,0.12)';
+        btn.style.borderColor = 'rgba(41,121,255,0.4)';
+        btn.style.color = '#60a5fa';
+        if (icon) icon.className = 'fas fa-unlock';
+        if (label) label.textContent = timeStr;
+        btn.title = 'Write mode active — click to lock';
+    } else {
+        btn.style.background = 'rgba(255,255,255,0.04)';
+        btn.style.borderColor = 'rgba(255,255,255,0.1)';
+        btn.style.color = '#5a7aaa';
+        if (icon) icon.className = 'fas fa-lock';
+        if (label) label.textContent = 'Read only';
+        btn.title = 'Enable write mode';
+    }
+}
 
 // ========== DATABASE OPERATIONS ==========
 
@@ -4157,6 +4665,8 @@ async function loadVariants() {
         window.LOADER?.advance('done');
 
         showNotification(`${STATE.variants.length.toLocaleString()} variants loaded in ${initTime}ms`, 'success', 2500);
+        // Seed institutions table on first run (no-op if already populated)
+        seedInstitutionsIfEmpty();
 
     } catch (err) {
         console.error('Load failed:', err);
@@ -4278,18 +4788,19 @@ function logSearch(query, isHit, matchedField, matchedVariantId) {
     if (!query || query.length < CONFIG.UI.MIN_SEARCH_CHARS) return;
     const si = STATE.searchIntelligence;
     const ts = Date.now();
+    const normQ = normaliseQuery(query);
 
     // Recent searches — session, deduped, max 20
-    si.recentSearches = si.recentSearches.filter(r => r.query !== query);
-    si.recentSearches.unshift({ query, isHit, matchedField, ts });
+    si.recentSearches = si.recentSearches.filter(r => r.query !== normQ);
+    si.recentSearches.unshift({ query: normQ, isHit, matchedField, ts });
     if (si.recentSearches.length > 20) si.recentSearches.pop();
 
-    // Global hit / miss counters
+    // Global hit / miss counters — use normalised query as key
     if (isHit) {
-        si.globalHits.set(query, (si.globalHits.get(query) || 0) + 1);
+        si.globalHits.set(normQ, (si.globalHits.get(normQ) || 0) + 1);
     } else {
-        if (!si.globalMisses.has(query)) si.globalMisses.set(query, { count: 0, sessions: new Set() });
-        const m = si.globalMisses.get(query);
+        if (!si.globalMisses.has(normQ)) si.globalMisses.set(normQ, { count: 0, sessions: new Set() });
+        const m = si.globalMisses.get(normQ);
         m.count++;
         m.sessions.add(si.sessionId);
     }
@@ -4311,7 +4822,7 @@ function logSearch(query, isHit, matchedField, matchedVariantId) {
     }
 
     // Persist to Supabase — fire-and-forget, never blocks UI
-    persistSearchEvent(query, isHit, matchedField, matchedVariantId);
+    persistSearchEvent(normQ, isHit, matchedField, matchedVariantId);
 }
 
 // Fetch location once per session via ip-api.com (free, no key, city-level)
@@ -4346,9 +4857,63 @@ async function fetchLocationOnce() {
     return si.locationCache;
 }
 
+// ---- Query normalisation — called before any search log write ----
+function normaliseQuery(q) {
+    return (q || '')
+        .toLowerCase()
+        .trim()
+        // Normalise Greek delta to "del"
+        .replace(/δ/g, 'del')
+        // Remove extra whitespace
+        .replace(/\s+/g, '')
+        // Normalise common HGVS spacing
+        .replace(/>\s*/g, '>')
+        .replace(/\s*>/g, '>')
+        // Canonical alias: deltaF508 → f508del
+        .replace(/^deltaf508$/i, 'f508del')
+        .replace(/^delta-f508$/i, 'f508del');
+}
+
+// ---- Levenshtein distance — fast implementation for short strings ----
+function levenshtein(a, b) {
+    if (a === b) return 0;
+    if (!a.length) return b.length;
+    if (!b.length) return a.length;
+    const dp = Array.from({length: b.length + 1}, (_, i) => i);
+    for (let i = 1; i <= a.length; i++) {
+        let prev = i;
+        for (let j = 1; j <= b.length; j++) {
+            const val = a[i-1] === b[j-1] ? dp[j-1] : Math.min(dp[j-1], dp[j], prev) + 1;
+            dp[j-1] = prev;
+            prev = val;
+        }
+        dp[b.length] = prev;
+    }
+    return dp[b.length];
+}
+
+// ---- Fuzzy match: returns closest variant name within edit distance 2 ----
+function fuzzyMatchVariant(query) {
+    const norm = normaliseQuery(query);
+    if (norm.length < 3) return null;
+    let best = null, bestDist = 3; // threshold = 2, reject if >= 3
+    for (const v of STATE.variants) {
+        const candidates = [v.legacy_name, v.protein_name, v.cdna_name].filter(Boolean).map(normaliseQuery);
+        for (const c of candidates) {
+            if (Math.abs(c.length - norm.length) > 2) continue; // quick length filter
+            const d = levenshtein(norm, c);
+            if (d < bestDist) { bestDist = d; best = v.legacy_name; }
+        }
+    }
+    return best; // null if no close match
+}
+
 async function persistSearchEvent(query, isHit, matchedField, matchedVariantId) {
     try {
+        const normQuery = normaliseQuery(query);
         const loc = await fetchLocationOnce();
+        const hospital = STATE.searchIntelligence.hospital || null;
+
         await fetch(`${CONFIG.SUPABASE.URL}/rest/v1/search_logs`, {
             method: 'POST',
             headers: {
@@ -4358,40 +4923,51 @@ async function persistSearchEvent(query, isHit, matchedField, matchedVariantId) 
                 'Prefer': 'return=minimal'
             },
             body: JSON.stringify({
-                query: query.toLowerCase().trim(),
-                is_hit: isHit,
-                matched_field: matchedField || null,
-                matched_variant_id: matchedVariantId || null,
-                session_id: STATE.searchIntelligence.sessionId,
-                searched_at: new Date().toISOString(),
-                country:   loc.country   || null,
-                region:    loc.region    || null,
-                city:      loc.city      || null,
-                latitude:  loc.latitude  || null,
-                longitude: loc.longitude || null,
-                ip_source:     loc.ip_source || null,
-                hospital_name: STATE.searchIntelligence.hospital || null
+                query:             normQuery,
+                is_hit:            isHit,
+                matched_field:     matchedField || null,
+                matched_variant_id:matchedVariantId || null,
+                session_id:        STATE.searchIntelligence.sessionId,
+                searched_at:       new Date().toISOString(),
+                country:           loc.country   || null,
+                region:            loc.region    || null,
+                city:              loc.city      || null,
+                latitude:          loc.latitude  || null,
+                longitude:         loc.longitude || null,
+                ip_source:         loc.ip_source || null,
+                hospital_name:     hospital
             })
         });
-        // If miss — upsert into miss queue
-        // Use ?on_conflict=query so Supabase knows which column triggers the upsert
+
+        // If miss — check fuzzy match first before logging to miss queue
         if (!isHit) {
-            await fetch(
-                `${CONFIG.SUPABASE.URL}/rest/v1/search_miss_queue?on_conflict=query`,
-                {
-                    method: 'POST',
-                    headers: {
-                        'apikey': CONFIG.SUPABASE.KEY,
-                        'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`,
-                        'Content-Type': 'application/json',
-                        'Prefer': 'resolution=merge-duplicates,return=minimal'
-                    },
-                    body: JSON.stringify({
-                        query: query.toLowerCase().trim(),
-                        last_seen_at: new Date().toISOString()
-                    })
-                }
-            );
+            const closeMatch = fuzzyMatchVariant(normQuery);
+            if (closeMatch) {
+                // Show "did you mean?" suggestion — not a true miss
+                const existing = document.getElementById('searchInput');
+                showNotification(`Did you mean: ${closeMatch}?`, 'info', 5000);
+                // Still log it as a near-miss so we can track spelling patterns
+                // but don't add to miss queue
+            } else {
+                // True miss — upsert into miss queue with top_hospital
+                await fetch(
+                    `${CONFIG.SUPABASE.URL}/rest/v1/search_miss_queue?on_conflict=query`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'apikey': CONFIG.SUPABASE.KEY,
+                            'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`,
+                            'Content-Type': 'application/json',
+                            'Prefer': 'resolution=merge-duplicates,return=minimal'
+                        },
+                        body: JSON.stringify({
+                            query:        normQuery,
+                            last_seen_at: new Date().toISOString(),
+                            top_hospital: hospital || null
+                        })
+                    }
+                );
+            }
         }
     } catch (e) { /* silent — logging never breaks the UI */ }
 }
@@ -4548,7 +5124,26 @@ function geoV5SetView(view,btn) {
 
 async function renderGeoTab() {
     if(!document.getElementById('siGeoMap')) return;
-    if(!window.L){
+
+    // Show geo health badge
+    const si = STATE.searchIntelligence;
+    const badge = document.getElementById('geoHealthBadge');
+    if (badge && si.geoCoverage !== undefined && si.geoCoverage !== null) {
+        const pct = si.geoCoverage;
+        const color = pct >= 70 ? 'rgba(52,211,153,0.7)' : pct >= 30 ? 'rgba(251,191,36,0.7)' : 'rgba(248,113,113,0.7)';
+        const borderColor = pct >= 70 ? 'rgba(52,211,153,0.2)' : pct >= 30 ? 'rgba(251,191,36,0.2)' : 'rgba(248,113,113,0.2)';
+        badge.textContent = `geo coverage ${pct}% (${si.geoWithCoords}/${si.geoTotal} searches)`;
+        badge.style.color = color;
+        badge.style.borderColor = borderColor;
+        badge.style.display = '';
+    }
+
+    // Use cached geo rows if fetched within last 5 minutes
+    const GEO_CACHE_TTL = 5 * 60 * 1000;
+    const cacheAge = window._geoState._fetchedAt ? Date.now() - window._geoState._fetchedAt : Infinity;
+    const useCached = window._geoState.allRows.length > 0 && cacheAge < GEO_CACHE_TTL;
+
+    if (!window.L){
         await Promise.all([
             new Promise((res,rej)=>{ const l=document.createElement('link');l.rel='stylesheet';l.href='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css';l.onload=res;l.onerror=rej;document.head.appendChild(l); }),
             new Promise((res,rej)=>{ const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js';s.onload=res;s.onerror=rej;document.head.appendChild(s); })
@@ -4563,28 +5158,79 @@ async function renderGeoTab() {
         ]);
     }
     try {
-        const res=await fetch(`${CONFIG.SUPABASE.URL}/rest/v1/search_logs?select=query,is_hit,city,country,region,latitude,longitude,hospital_name,searched_at&latitude=not.is.null&order=searched_at.desc&limit=2000`,
-            {headers:{'apikey':CONFIG.SUPABASE.KEY,'Authorization':`Bearer ${CONFIG.SUPABASE.KEY}`}});
-        window._geoState.allRows=await res.json();
+        if (!useCached) {
+            const res=await fetch(`${CONFIG.SUPABASE.URL}/rest/v1/search_logs?select=query,is_hit,city,country,region,latitude,longitude,hospital_name,searched_at&latitude=not.is.null&order=searched_at.desc&limit=2000`,
+                {headers:{'apikey':CONFIG.SUPABASE.KEY,'Authorization':`Bearer ${CONFIG.SUPABASE.KEY}`}});
+            window._geoState.allRows=await res.json();
+            window._geoState._fetchedAt = Date.now();
+        }
     } catch(e){ const n=document.getElementById('geoNoteV4'); if(n) n.textContent='Failed to load location data'; return; }
+
+    // If no geo rows — show a helpful diagnostic instead of an empty map
+    if(!window._geoState.allRows.length){
+        const mapEl=document.getElementById('siGeoMap');
+        if(mapEl){
+            const siState=STATE.searchIntelligence;
+            const totalSearches = siState.geoTotal || 0;
+            const coverage = siState.geoCoverage;
+            let msg, sub;
+            if(totalSearches === 0){
+                msg='No searches recorded yet';
+                sub='Search for CFTR variants to start building geographic intelligence. Each search is automatically geolocated.';
+            } else if(coverage === 0){
+                msg='Geo data not yet populated';
+                sub=`${totalSearches} searches recorded but none have coordinates. The ipapi.co geolocation service may be blocked in your network. Searches made from this session forward will include location data.`;
+            } else {
+                msg='No geolocated searches in this period';
+                sub=`${totalSearches} total searches — try selecting a longer period (30 days / All time) or check that ipapi.co is reachable from your network.`;
+            }
+            mapEl.style.background='#060b14';
+            mapEl.style.display='flex';
+            mapEl.style.flexDirection='column';
+            mapEl.style.alignItems='center';
+            mapEl.style.justifyContent='center';
+            mapEl.style.gap='12px';
+            mapEl.style.padding='40px';
+            mapEl.style.textAlign='center';
+            mapEl.innerHTML=`
+                <div style="width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;">
+                    <i class="fas fa-globe" style="font-size:18px;color:rgba(255,255,255,0.2);"></i>
+                </div>
+                <div style="font-size:14px;font-weight:600;color:rgba(255,255,255,0.55);">${msg}</div>
+                <div style="font-size:11px;color:rgba(255,255,255,0.28);line-height:1.7;max-width:380px;">${sub}</div>
+                ${coverage===0&&totalSearches>0?`<div style="margin-top:8px;font-family:var(--font-mono);font-size:10px;color:rgba(251,191,36,0.6);background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.15);border-radius:6px;padding:8px 14px;">Test: <a href="https://ipapi.co/json/" target="_blank" style="color:#fbbf24;text-decoration:underline;">ipapi.co/json</a> — should return your city</div>`:''}
+            `;
+        }
+        const n=document.getElementById('geoNoteV4'); if(n) n.textContent='No geolocated data in this period';
+        return;
+    }
+
     if(!window._helixMap){
         window._helixMap=L.map('siGeoMap',{zoomControl:true,scrollWheelZoom:true,attributionControl:false});
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:14}).addTo(window._helixMap);
         try {
-            const geoRes=await fetch('https://cdn.jsdelivr.net/npm/spain-atlas@0.1/es/autonomous-regions.json');
+            const geoRes=await fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json');
             if(geoRes.ok){
-                const geoJson=await geoRes.json();
+                const topo=await geoRes.json();
+                // world-atlas is TopoJSON — convert to GeoJSON via topojson-client
+                if(!window.topojson){
+                    await new Promise((res,rej)=>{ const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js';s.onload=res;s.onerror=rej;document.head.appendChild(s); });
+                }
+                const geoJson=window.topojson.feature(topo,topo.objects.countries);
+                // Country name lookup from numeric ISO codes
+                const COUNTRY_NAMES={4:'Afghanistan',8:'Albania',12:'Algeria',24:'Angola',32:'Argentina',36:'Australia',40:'Austria',50:'Bangladesh',56:'Belgium',68:'Bolivia',76:'Brazil',100:'Bulgaria',116:'Cambodia',120:'Cameroon',124:'Canada',144:'Sri Lanka',152:'Chile',156:'China',170:'Colombia',180:'DR Congo',188:'Costa Rica',191:'Croatia',192:'Cuba',196:'Cyprus',203:'Czech Republic',208:'Denmark',218:'Ecuador',818:'Egypt',231:'Ethiopia',246:'Finland',250:'France',276:'Germany',288:'Ghana',300:'Greece',320:'Guatemala',332:'Haiti',340:'Honduras',348:'Hungary',356:'India',360:'Indonesia',364:'Iran',368:'Iraq',372:'Ireland',376:'Israel',380:'Italy',388:'Jamaica',392:'Japan',400:'Jordan',404:'Kenya',410:'South Korea',414:'Kuwait',422:'Lebanon',484:'Mexico',504:'Morocco',508:'Mozambique',524:'Nepal',528:'Netherlands',554:'New Zealand',566:'Nigeria',578:'Norway',586:'Pakistan',591:'Panama',604:'Peru',616:'Poland',620:'Portugal',630:'Puerto Rico',634:'Qatar',642:'Romania',643:'Russia',682:'Saudi Arabia',694:'Sierra Leone',703:'Slovakia',706:'Somalia',724:'Spain',752:'Sweden',756:'Switzerland',760:'Syria',158:'Taiwan',764:'Thailand',788:'Tunisia',792:'Turkey',800:'Uganda',804:'Ukraine',784:'UAE',826:'United Kingdom',840:'USA',858:'Uruguay',862:'Venezuela',704:'Vietnam',887:'Yemen',894:'Zambia',716:'Zimbabwe'};
                 L.geoJSON(geoJson,{
-                    style:{fillColor:'transparent',color:'rgba(96,165,250,0.15)',weight:.8,fillOpacity:0},
+                    style:{fillColor:'transparent',color:'rgba(96,165,250,0.12)',weight:.5,fillOpacity:0},
                     onEachFeature:(f,layer)=>{
-                        layer.on('mouseover',function(){this.setStyle({color:'rgba(96,165,250,0.45)',weight:1,fillColor:'rgba(96,165,250,0.04)',fillOpacity:1});});
-                        layer.on('mouseout', function(){this.setStyle({color:'rgba(96,165,250,0.15)',weight:.8,fillOpacity:0});});
-                        const name=f.properties?.name||f.properties?.NAME_1||'';
+                        layer.on('mouseover',function(){this.setStyle({color:'rgba(96,165,250,0.4)',weight:.8,fillColor:'rgba(96,165,250,0.04)',fillOpacity:1});});
+                        layer.on('mouseout', function(){this.setStyle({color:'rgba(96,165,250,0.12)',weight:.5,fillOpacity:0});});
+                        const id=f.id;
+                        const name=COUNTRY_NAMES[parseInt(id)]||f.properties?.name||'';
                         if(name) layer.bindTooltip(name,{className:'geo-tooltip',sticky:true});
                     }
                 }).addTo(window._helixMap);
             }
-        } catch(e){}
+        } catch(e){ console.warn('[Helix Geo] World atlas failed:',e.message); }
     }
     geoV4RenderMarkers();
 }
@@ -4604,21 +5250,76 @@ function geoV5FilteredRows(){
 
 function geoV4BuildPoints(rows){
     const pts=new Map();
+    // Raw accumulator for coordinate averaging per city group
+    const coordAccum=new Map();
+
     rows.forEach(r=>{
-        const key=r.hospital_name||`${parseFloat(r.latitude).toFixed(3)},${parseFloat(r.longitude).toFixed(3)}`;
-        if(!pts.has(key)) pts.set(key,{key,lat:r.latitude,lon:r.longitude,city:r.city,country:r.country,region:r.region,hospital:r.hospital_name,hospitals:new Set(),hits:0,misses:0,queryMap:{},classCounts:{}});
+        // Priority: named hospital > city+country > raw coordinates
+        // This merges anonymous searches from the same city into one marker
+        let key;
+        if(r.hospital_name && r.hospital_name !== 'Anonymous'){
+            key = r.hospital_name;
+        } else if(r.city && r.country){
+            key = `${r.city.toLowerCase().trim()}__${r.country.toLowerCase().trim()}`;
+        } else if(r.latitude && r.longitude){
+            key = `${parseFloat(r.latitude).toFixed(2)},${parseFloat(r.longitude).toFixed(2)}`;
+        } else {
+            return; // no location at all — skip
+        }
+
+        if(!pts.has(key)){
+            pts.set(key,{
+                key,
+                lat:  r.latitude,
+                lon:  r.longitude,
+                city: r.city,
+                country: r.country,
+                region:  r.region,
+                hospital: r.hospital_name && r.hospital_name !== 'Anonymous' ? r.hospital_name : null,
+                hospitals: new Set(),
+                hits: 0, misses: 0,
+                queryMap: {},
+                classCounts: {},
+                _latSum: 0, _lonSum: 0, _coordCount: 0
+            });
+        }
+
         const p=pts.get(key);
-        if(r.hospital_name) p.hospitals.add(r.hospital_name);
+
+        // Accumulate coordinates for centroid averaging
+        if(r.latitude && r.longitude){
+            p._latSum  += parseFloat(r.latitude);
+            p._lonSum  += parseFloat(r.longitude);
+            p._coordCount++;
+        }
+
+        if(r.hospital_name && r.hospital_name !== 'Anonymous') p.hospitals.add(r.hospital_name);
+
         if(r.is_hit){
             p.hits++;
             let v=STATE.variantsByLegacyName?.get((r.query||'').toUpperCase());
             if(!v) v=STATE.variants?.find(vv=>vv.legacy_name?.toLowerCase()===(r.query||'').toLowerCase());
             if(v?.cftr_class) p.classCounts[v.cftr_class]=(p.classCounts[v.cftr_class]||0)+1;
         } else { p.misses++; }
+
         if(!p.queryMap[r.query]) p.queryMap[r.query]={hit:0,miss:0};
         if(r.is_hit) p.queryMap[r.query].hit++; else p.queryMap[r.query].miss++;
     });
-    return Array.from(pts.values());
+
+    // Replace raw coords with centroid for city-grouped points
+    const result = Array.from(pts.values());
+    result.forEach(p => {
+        if(p._coordCount > 0){
+            p.lat = p._latSum / p._coordCount;
+            p.lon = p._lonSum / p._coordCount;
+        }
+        // Clean up accumulators
+        delete p._latSum; delete p._lonSum; delete p._coordCount;
+        // For city-grouped points, show city as display label if no named hospital
+        if(!p.hospital && p.city) p.hospital = p.city;
+    });
+
+    return result;
 }
 
 /* #4 selection persists + #6 clustering */
@@ -4665,7 +5366,16 @@ function geoV4RenderMarkers(){
         </svg>`;
         const icon=L.divIcon({className:'',html:svgHtml,iconSize:[sz,sz],iconAnchor:[cx,cx]});
         const marker=L.marker([p.lat,p.lon],{icon});
-        marker.bindTooltip(`<strong style="font-size:13px;">${escapeHTML(p.city||'Unknown')}</strong><br><span style="font-family:var(--font-mono);font-size:10px;color:rgba(255,255,255,0.5);">${escapeHTML(p.hospital||p.country||'')}</span><br><span style="font-family:var(--font-mono);font-size:10px;">${p.hits} hits \xB7 ${p.misses} misses \xB7 ${Math.round(hitRate*100)}%</span>`,{className:'geo-tooltip',sticky:true});
+        // Label: named hospital > city > country
+        const displayName = p.hospital || p.city || p.country || 'Unknown';
+        const subLabel    = p.hospital && p.city ? p.city + (p.country ? ', ' + p.country : '')
+                          : p.country || '';
+        marker.bindTooltip(
+            `<strong style="font-size:13px;">${escapeHTML(displayName)}</strong>` +
+            (subLabel ? `<br><span style="font-family:var(--font-mono);font-size:10px;color:rgba(255,255,255,0.5);">${escapeHTML(subLabel)}</span>` : '') +
+            `<br><span style="font-family:var(--font-mono);font-size:10px;">${p.hits} hits · ${p.misses} misses · ${Math.round(hitRate*100)}%</span>`,
+            {className:'geo-tooltip',sticky:true}
+        );
         marker.on('click',()=>{ st.selectedKey=p.key; geoV4RenderMarkers(); geoV4RenderDetail(p); });
         layer.addLayer(marker);
         window._helixMarkers.push(marker);
@@ -4725,36 +5435,54 @@ function geoV4RenderRegions(rows){
     const el=document.getElementById('geoRegionCards'); if(el) el.innerHTML=cards;
 }
 
-/* #2 MISS INTELLIGENCE */
+/* #2 MISS INTELLIGENCE — country-aware */
 function geoV5RenderMissView(){
     const rows=geoV5FilteredRows();
     const missMap=new Map();
     rows.forEach(r=>{
         if(r.is_hit) return;
-        if(!missMap.has(r.query)) missMap.set(r.query,{query:r.query,count:0,institutions:new Set(),countries:new Set(),cities:[]});
+        if(!missMap.has(r.query)) missMap.set(r.query,{query:r.query,count:0,institutions:new Set(),countries:new Set(),countryCounts:{},cities:[]});
         const m=missMap.get(r.query); m.count++;
         if(r.hospital_name) m.institutions.add(r.hospital_name);
-        if(r.country)       m.countries.add(r.country);
+        if(r.country){
+            m.countries.add(r.country);
+            m.countryCounts[r.country]=(m.countryCounts[r.country]||0)+1;
+        }
         if(r.city&&!m.cities.includes(r.city)) m.cities.push(r.city);
     });
-    const sorted=Array.from(missMap.values()).sort((a,b)=>b.institutions.size-a.institutions.size||b.count-a.count);
+    // Sort: primarily by country count (international reach), then institution count, then raw count
+    const sorted=Array.from(missMap.values()).sort((a,b)=>
+        b.countries.size-a.countries.size || b.institutions.size-a.institutions.size || b.count-a.count
+    );
     const tEl=document.getElementById('geoMissTotal'); if(tEl) tEl.textContent=sorted.length+' unique queries';
     const listEl=document.getElementById('geoMissList'); if(!listEl) return;
     if(!sorted.length){ listEl.innerHTML='<div style="padding:40px;text-align:center;color:rgba(255,255,255,0.22);font-size:12px;">No miss data in this period</div>'; return; }
     const maxC=sorted[0].count;
+    const FLAG_MAP={'Spain':'ES','United Kingdom':'GB','France':'FR','Germany':'DE','Italy':'IT','Portugal':'PT','Netherlands':'NL','Belgium':'BE','Sweden':'SE','Denmark':'DK','Norway':'NO','Finland':'FI','Switzerland':'CH','Austria':'AT','USA':'US','Canada':'CA','Australia':'AU','Brazil':'BR','Argentina':'AR','Mexico':'MX','Israel':'IL','Turkey':'TR','Poland':'PL','Czech Republic':'CZ','Ireland':'IE','Greece':'GR','Romania':'RO','Hungary':'HU','Bulgaria':'BG'};
+    const countryFlag=country=>{
+        const code=FLAG_MAP[country];
+        if(!code) return '';
+        return String.fromCodePoint(...[...code].map(c=>0x1F1E6+c.charCodeAt(0)-65));
+    };
     listEl.innerHTML=sorted.map((m,i)=>{
-        const urgency=m.institutions.size>=3?'#fb7185':m.institutions.size>=2?'#fbbf24':'rgba(255,255,255,0.28)';
+        const isMultiCountry=m.countries.size>=2;
+        const isUrgent=m.countries.size>=3||m.institutions.size>=3;
+        const urgency=isUrgent?'#fb7185':isMultiCountry?'#fbbf24':'rgba(255,255,255,0.28)';
         const pct=Math.round(m.count/maxC*100);
         const qSafe=m.query.replace(/'/g,"\\'");
-        return `<div class="geo-v5-miss-row" onclick="geoV5ShowMissDetail('${qSafe}')">
+        // Build country pills (top 4)
+        const topCountries=Object.entries(m.countryCounts).sort((a,b)=>b[1]-a[1]).slice(0,4);
+        const countryPills=topCountries.map(([c,n])=>`<span style="font-size:9px;color:rgba(255,255,255,0.45);background:rgba(255,255,255,0.05);border-radius:4px;padding:1px 5px;white-space:nowrap;">${countryFlag(c)} ${escapeHTML(c)} ${n>1?'<span style="color:rgba(255,255,255,0.25);">×'+n+'</span>':''}</span>`).join('');
+        return `<div class="geo-v5-miss-row" onclick="geoV5ShowMissDetail('${qSafe}')" style="${isUrgent?'background:rgba(248,113,113,0.03);border-left:2px solid rgba(248,113,113,0.3);':'isMultiCountry?\'border-left:2px solid rgba(251,191,36,0.2);\':\''}">
             <div style="width:22px;font-family:var(--font-mono);font-size:9px;color:rgba(255,255,255,0.22);flex-shrink:0;text-align:right;">${i+1}</div>
             <div style="flex:1;min-width:0;">
-                <div style="font-family:var(--font-mono);font-size:12px;color:rgba(255,255,255,0.82);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px;">${escapeHTML(m.query)}</div>
+                <div style="font-family:var(--font-mono);font-size:12px;color:rgba(255,255,255,0.82);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px;">${escapeHTML(m.query)}</div>
+                <div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:4px;">${countryPills}</div>
                 <div style="height:3px;background:rgba(255,255,255,0.07);border-radius:100px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:${urgency};border-radius:100px;"></div></div>
             </div>
-            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0;margin-left:10px;">
-                <span style="font-family:var(--font-mono);font-size:11px;color:${urgency};font-weight:600;">${m.institutions.size} <span style="font-size:8px;font-weight:400;color:rgba(255,255,255,0.25);">inst.</span></span>
-                <span style="font-size:9px;color:rgba(255,255,255,0.25);">${m.count} searches</span>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0;margin-left:10px;">
+                <span style="font-family:var(--font-mono);font-size:13px;color:${urgency};font-weight:700;line-height:1;">${m.countries.size}<span style="font-size:8px;font-weight:400;color:rgba(255,255,255,0.25);"> ${m.countries.size===1?'country':'countries'}</span></span>
+                <span style="font-family:var(--font-mono);font-size:10px;color:rgba(255,255,255,0.3);">${m.institutions.size} inst. · ${m.count} searches</span>
             </div>
             <button class="geo-v5-flag-btn" onclick="event.stopPropagation();showNotification('${qSafe} flagged for curation','info')">+ Add</button>
         </div>`;
@@ -4768,14 +5496,24 @@ function geoV5ShowMissDetail(query){
     rows.forEach(r=>{ const k=r.hospital_name||r.city||r.country||'Unknown'; if(!byInst.has(k)) byInst.set(k,{name:k,country:r.country||'',count:0}); byInst.get(k).count++; });
     const insts=Array.from(byInst.values()).sort((a,b)=>b.count-a.count);
     const countries=[...new Set(rows.map(r=>r.country).filter(Boolean))];
+    // Country breakdown
+    const byCty=new Map();
+    rows.forEach(r=>{ if(!r.country) return; if(!byCty.has(r.country)) byCty.set(r.country,0); byCty.set(r.country,byCty.get(r.country)+1); });
+    const ctyList=Array.from(byCty.entries()).sort((a,b)=>b[1]-a[1]);
+    const FLAG_MAP={'Spain':'ES','United Kingdom':'GB','France':'FR','Germany':'DE','Italy':'IT','Portugal':'PT','Netherlands':'NL','Belgium':'BE','Sweden':'SE','Denmark':'DK','Norway':'NO','Finland':'FI','Switzerland':'CH','Austria':'AT','USA':'US','Canada':'CA','Australia':'AU','Brazil':'BR','Argentina':'AR','Mexico':'MX','Israel':'IL','Turkey':'TR','Poland':'PL','Czech Republic':'CZ','Ireland':'IE','Greece':'GR','Romania':'RO','Hungary':'HU','Bulgaria':'BG'};
+    const cFlag=c=>{const code=FLAG_MAP[c];if(!code)return '';return String.fromCodePoint(...[...code].map(ch=>0x1F1E6+ch.charCodeAt(0)-65));};
     detailEl.innerHTML=`
         <div style="padding:14px 16px 10px;border-bottom:1px solid rgba(255,255,255,0.06);flex-shrink:0;">
             <div style="font-family:var(--font-mono);font-size:15px;font-weight:700;color:#fb7185;margin-bottom:4px;">${escapeHTML(query)}</div>
-            <div style="font-size:11px;color:rgba(255,255,255,0.28);">${rows.length} searches \xB7 ${insts.length} institutions \xB7 ${countries.length} countries</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.28);">${rows.length} searches · ${insts.length} institutions · ${countries.length} ${countries.length===1?'country':'countries'}</div>
         </div>
+        ${ctyList.length?`<div style="padding:10px 14px 8px;border-bottom:1px solid rgba(255,255,255,0.06);flex-shrink:0;">
+            <div style="font-size:9px;font-family:var(--font-mono);color:rgba(255,255,255,0.25);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;">Country breakdown</div>
+            ${ctyList.map(([c,n])=>{const pct=Math.round(n/rows.length*100);return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;"><span style="font-size:12px;flex-shrink:0;">${cFlag(c)}</span><span style="font-size:11px;color:rgba(255,255,255,0.65);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHTML(c)}</span><div style="width:50px;height:3px;background:rgba(255,255,255,0.07);border-radius:100px;overflow:hidden;flex-shrink:0;"><div style="height:100%;width:${pct}%;background:#fb7185;border-radius:100px;"></div></div><span style="font-family:var(--font-mono);font-size:10px;color:rgba(255,255,255,0.32);min-width:18px;text-align:right;">${n}</span></div>`; }).join('')}
+        </div>`:''}
         <div style="flex:1;overflow-y:auto;padding:10px 14px;">
             <div style="font-size:9px;font-family:var(--font-mono);color:rgba(255,255,255,0.25);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;">Searching institutions</div>
-            ${insts.map(inst=>`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04);"><div style="flex:1;font-size:11px;color:rgba(255,255,255,0.65);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHTML(inst.name)}</div><span style="font-family:var(--font-mono);font-size:10px;color:rgba(255,255,255,0.32);">${inst.count}</span></div>`).join('')}
+            ${insts.map(inst=>`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04);"><div style="flex:1;font-size:11px;color:rgba(255,255,255,0.65);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHTML(inst.name)}</div>${inst.country?`<span style="font-size:9px;color:rgba(255,255,255,0.22);">${cFlag(inst.country)}</span>`:''}  <span style="font-family:var(--font-mono);font-size:10px;color:rgba(255,255,255,0.32);">${inst.count}</span></div>`).join('')}
         </div>
         <div style="padding:10px 14px;border-top:1px solid rgba(255,255,255,0.06);flex-shrink:0;">
             <button class="geo-v5-flag-btn" style="width:100%;padding:7px;font-size:10px;justify-content:center;display:flex;align-items:center;gap:6px;" onclick="showNotification('${query.replace(/'/g,"\\'")} queued for variant creation','success')"><i class="fas fa-plus" style="font-size:9px;"></i>Create variant record</button>
@@ -4791,7 +5529,7 @@ function geoV5PopulateCompareSelects(){
     ['geoCompareA','geoCompareB'].forEach(id=>{
         const el=document.getElementById(id); if(!el) return;
         const cur=el.value;
-        el.innerHTML='<option value="">Location…</option>'+pts.map(p=>`<option value="${escapeHTML(p.key)}">${escapeHTML(p.city||p.key)}${p.country?' ('+p.country+')':''}</option>`).join('');
+        el.innerHTML='<option value="">Location…</option>'+pts.map(p=>`<option value="${escapeHTML(p.key)}">${escapeHTML(p.hospital||p.city||p.key)}${p.country?' ('+p.country+')':''}</option>`).join('');
         el.value=cur;
     });
     geoV5RenderCompare();
@@ -4817,7 +5555,7 @@ function geoV5RenderCompare(){
         }).join('');
         const topQ=Object.entries(p.queryMap).sort((a,b)=>(b[1].hit+b[1].miss)-(a[1].hit+a[1].miss)).slice(0,5);
         return `<div style="display:flex;flex-direction:column;overflow:hidden;${side==='A'?'border-right:1px solid rgba(255,255,255,0.06);':''}">
-            <div class="geo-v5-compare-head"><div style="font-size:18px;font-weight:800;letter-spacing:-.03em;color:#fff;margin-bottom:2px;">${escapeHTML(p.city||'Unknown')}</div><div style="font-size:10px;color:rgba(255,255,255,0.3);font-family:var(--font-mono);">${escapeHTML([p.region,p.country].filter(Boolean).join(' \xB7 '))}</div></div>
+            <div class="geo-v5-compare-head"><div style="font-size:18px;font-weight:800;letter-spacing:-.03em;color:#fff;margin-bottom:2px;">${escapeHTML(p.hospital||p.city||'Unknown')}</div><div style="font-size:10px;color:rgba(255,255,255,0.3);font-family:var(--font-mono);">${escapeHTML([p.hospital?p.city:null,p.region,p.country].filter(Boolean).join(' · '))}</div></div>
             <div style="display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid rgba(255,255,255,0.06);">
                 <div style="padding:10px 6px;text-align:center;border-right:1px solid rgba(255,255,255,0.06);"><div style="font-size:20px;font-weight:800;color:#34d399;">${p.hits}</div><div style="font-size:8px;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,0.25);">Hits</div></div>
                 <div style="padding:10px 6px;text-align:center;border-right:1px solid rgba(255,255,255,0.06);"><div style="font-size:20px;font-weight:800;color:#fb7185;">${p.misses}</div><div style="font-size:8px;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,0.25);">Misses</div></div>
@@ -4884,9 +5622,9 @@ function geoV4RenderDetail(p){
     dc.innerHTML=`
         <div style="padding:16px 18px 12px;border-bottom:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.02);flex-shrink:0;">
             <div style="display:inline-flex;align-items:center;gap:5px;font-family:var(--font-mono);font-size:9px;color:#60a5fa;text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;"><span style="width:5px;height:5px;border-radius:50%;background:#60a5fa;display:inline-block;animation:geoPulseDot 2s infinite;"></span>Selected location</div>
-            <div style="font-size:22px;font-weight:800;letter-spacing:-.03em;color:#fff;line-height:1;margin-bottom:4px;">${escapeHTML(p.city||'Unknown')}</div>
-            <div style="font-size:11px;color:rgba(255,255,255,0.32);font-family:var(--font-mono);margin-bottom:${p.hospitals.size?'10px':'0'};">${escapeHTML([p.region,p.country].filter(Boolean).join(' \xB7 '))}</div>
-            ${p.hospitals.size?`<div style="display:flex;flex-wrap:wrap;gap:4px;">${hospPills}</div>`:''}
+            <div style="font-size:22px;font-weight:800;letter-spacing:-.03em;color:#fff;line-height:1;margin-bottom:4px;">${escapeHTML(p.hospital||p.city||'Unknown')}</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.32);font-family:var(--font-mono);margin-bottom:${p.hospitals.size?'10px':'0'};">${escapeHTML([p.hospital?p.city:null,p.region,p.country].filter(Boolean).join(' · '))}</div>
+            ${p.hospitals.size>1?`<div style="display:flex;flex-wrap:wrap;gap:4px;">${hospPills}</div>`:''}
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid rgba(255,255,255,0.06);flex-shrink:0;">
             <div style="padding:14px 10px;text-align:center;border-right:1px solid rgba(255,255,255,0.06);"><div style="font-size:26px;font-weight:800;letter-spacing:-.04em;color:#34d399;line-height:1;margin-bottom:4px;">${p.hits}</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,0.28);font-family:var(--font-mono);">Hits</div></div>
@@ -5635,9 +6373,15 @@ function quickSearch(name) {
 // ========== SIDEBAR TOGGLE ==========
 
 function toggleSidebar() {
-    STATE.ui.sidebarCollapsed = !STATE.ui.sidebarCollapsed;
     const shell = document.getElementById('appShell');
-    shell.classList.toggle('sidebar-collapsed', STATE.ui.sidebarCollapsed);
+    const isMobile = window.innerWidth <= 600;
+    if (isMobile) {
+        shell.classList.toggle('sidebar-open');
+        STATE.ui.sidebarCollapsed = !shell.classList.contains('sidebar-open');
+    } else {
+        STATE.ui.sidebarCollapsed = !STATE.ui.sidebarCollapsed;
+        shell.classList.toggle('sidebar-collapsed', STATE.ui.sidebarCollapsed);
+    }
 }
 
 // ========== RENDER — VARIANT LIST ==========
@@ -5987,15 +6731,56 @@ function renderEvidenceLink(link) {
     const iconMap = { pubmed: 'fa-book-open', cftr2: 'fa-dna', clinvar: 'fa-hospital', other: 'fa-link' };
     const icon = iconMap[link.type?.toLowerCase()] || 'fa-link';
     const typeClass = link.type?.toLowerCase() || 'other';
-    
+
+    // Quality score bar (0-100)
+    const qs = link.quality_score || 0;
+    const qsColor = qs >= 70 ? '#34d399' : qs >= 40 ? '#fbbf24' : '#f87171';
+    const qsLabel = qs >= 70 ? 'High' : qs >= 40 ? 'Moderate' : qs > 0 ? 'Low' : null;
+
+    // Study type badge
+    const STUDY_LABELS = {
+        'RCT': 'RCT', 'randomized': 'RCT', 'clinical_trial': 'Trial',
+        'case_study': 'Case', 'case_report': 'Case', 'review': 'Review',
+        'systematic_review': 'Sys. review', 'functional': 'Functional',
+        'in_vitro': 'In vitro', 'observational': 'Observational', 'cohort': 'Cohort'
+    };
+    const studyLabel = link.study_type ? (STUDY_LABELS[link.study_type] || link.study_type) : null;
+
+    // Claim agreement check
+    const variant = STATE.view.selectedVariant;
+    let classClaim = null, etiClaim = null;
+    if (link.cftr_class_claim && variant?.cftr_class) {
+        const agrees = link.cftr_class_claim === variant.cftr_class;
+        classClaim = { text: `Class ${link.cftr_class_claim}`, agrees };
+    }
+    if (link.eti_claim && variant?.eti_prediction) {
+        const agrees = link.eti_claim === variant.eti_prediction;
+        etiClaim = { text: link.eti_claim.replace('_',' '), agrees };
+    }
+
     return `
-    <a href="${escapeHTML(link.url || '#')}" target="_blank" class="evidence-item" onclick="event.stopPropagation()">
-        <div class="evidence-type-icon ${typeClass}"><i class="fas ${icon}"></i></div>
-        <div class="evidence-info">
-            <div class="evidence-title">${escapeHTML(link.title || 'Untitled')}</div>
-            <div class="evidence-source">${escapeHTML(link.source || link.type || 'Source')}</div>
+    <a href="${escapeHTML(link.url || '#')}" target="_blank" class="evidence-item" onclick="event.stopPropagation()" style="flex-direction:column;align-items:stretch;gap:6px;padding:10px 12px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+            <div class="evidence-type-icon ${typeClass}"><i class="fas ${icon}"></i></div>
+            <div class="evidence-info" style="flex:1;min-width:0;">
+                <div class="evidence-title">${escapeHTML(link.title || 'Untitled')}</div>
+                <div class="evidence-source" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:2px;">
+                    <span>${escapeHTML(link.source || link.type || 'Source')}</span>
+                    ${link.year ? `<span style="color:var(--text-tertiary);">· ${link.year}</span>` : ''}
+                    ${link.journal ? `<span style="color:var(--text-tertiary);font-style:italic;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:120px;">${escapeHTML(link.journal)}</span>` : ''}
+                    ${link.sample_size ? `<span style="color:var(--text-tertiary);">n=${link.sample_size.toLocaleString()}</span>` : ''}
+                    ${link.citation_count > 0 ? `<span style="color:var(--text-tertiary);">${link.citation_count} citations</span>` : ''}
+                </div>
+            </div>
+            <i class="fas fa-external-link-alt evidence-arrow"></i>
         </div>
-        <i class="fas fa-external-link-alt evidence-arrow"></i>
+        ${(qs > 0 || studyLabel || classClaim || etiClaim) ? `
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding-top:4px;border-top:1px solid var(--border);">
+            ${studyLabel ? `<span style="font-size:9px;padding:1px 6px;border-radius:3px;background:rgba(96,165,250,0.1);color:#60a5fa;border:1px solid rgba(96,165,250,0.2);font-family:var(--font-mono);">${escapeHTML(studyLabel)}</span>` : ''}
+            ${qs > 0 ? `<span style="font-size:9px;padding:1px 6px;border-radius:3px;background:rgba(0,0,0,0.2);color:${qsColor};border:1px solid ${qsColor}33;font-family:var(--font-mono);">Q:${qs} ${qsLabel||''}</span>` : ''}
+            ${classClaim ? `<span style="font-size:9px;padding:1px 6px;border-radius:3px;background:${classClaim.agrees?'rgba(52,211,153,0.08)':'rgba(248,113,113,0.08)'};color:${classClaim.agrees?'#34d399':'#f87171'};border:1px solid ${classClaim.agrees?'rgba(52,211,153,0.2)':'rgba(248,113,113,0.2)'};font-family:var(--font-mono);">${classClaim.agrees?'✓':'⚡'} ${escapeHTML(classClaim.text)}</span>` : ''}
+            ${etiClaim ? `<span style="font-size:9px;padding:1px 6px;border-radius:3px;background:${etiClaim.agrees?'rgba(52,211,153,0.08)':'rgba(248,113,113,0.08)'};color:${etiClaim.agrees?'#34d399':'#f87171'};border:1px solid ${etiClaim.agrees?'rgba(52,211,153,0.2)':'rgba(248,113,113,0.2)'};font-family:var(--font-mono);">${etiClaim.agrees?'✓':'⚡'} ETI:${escapeHTML(etiClaim.text)}</span>` : ''}
+        </div>` : ''}
     </a>`;
 }
 
@@ -6018,6 +6803,13 @@ async function loadExistingRoles() {
 }
 
 function showValidationModal(variantName, variantId) {
+    if (!isWriteMode()) {
+        requireWriteMode(
+            () => showValidationModal(variantName, variantId),
+            `You are trying to validate "${variantName}" — enter PIN to continue`
+        );
+        return;
+    }
     STATE.ui.validationContext = { variantName, variantId };
     setText('validateVariantName', variantName);
     ['clinicianName','clinicianRoleInput','validationNotes'].forEach(id => {
@@ -6034,6 +6826,11 @@ function closeValidationModal() {
 }
 
 async function submitValidation() {
+    if (!isWriteMode()) {
+        const name = STATE.ui.validationContext?.variantName || 'this variant';
+        requireWriteMode(() => submitValidation(), `You are trying to validate "${name}" — enter PIN to continue`);
+        return;
+    }
     if (!STATE.ui.validationContext) return;
     const name = document.getElementById('clinicianName').value.trim();
     const role = document.getElementById('clinicianRoleInput').value.trim();
@@ -6148,6 +6945,14 @@ async function loadValidationHistory(variantId) {
 // ========== ANNOTATION ==========
 
 function showAnnotationModal(variantName, field, currentValue) {
+    if (!isWriteMode()) {
+        const fieldLabel = field.replace(/_/g,' ');
+        requireWriteMode(
+            () => showAnnotationModal(variantName, field, currentValue),
+            `You are trying to edit ${fieldLabel} — enter PIN to continue`
+        );
+        return;
+    }
     const variant = STATE.variantsByLegacyName.get(variantName);
     if (!variant) return;
     STATE.ui.annotationContext = { variant, field, currentValue };
@@ -6198,6 +7003,11 @@ function closeAnnotationModal() {
 }
 
 async function saveAnnotation() {
+    if (!isWriteMode()) {
+        const field = STATE.ui.annotationContext?.field?.replace(/_/g,' ') || 'field';
+        requireWriteMode(() => saveAnnotation(), `You are trying to edit ${field} — enter PIN to continue`);
+        return;
+    }
     if (!STATE.ui.annotationContext) return;
     const { variant, field } = STATE.ui.annotationContext;
     const input = document.getElementById('annotationValue');
@@ -6205,16 +7015,10 @@ async function saveAnnotation() {
     let val = input.value || null;
 
     try {
-        const res = await fetch(
-            `${CONFIG.SUPABASE.URL}/rest/v1/variants?id=eq.${variant.id}`,
-            {
-                method: 'PATCH',
-                headers: {
-                    'apikey': CONFIG.SUPABASE.KEY, 'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`,
-                    'Content-Type': 'application/json', 'Prefer': 'return=minimal'
-                },
-                body: JSON.stringify({ [field]: val, updated_at: new Date().toISOString() })
-            }
+        const res = await dbWrite(
+            `variants?id=eq.${variant.id}`,
+            { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ [field]: val, updated_at: new Date().toISOString() }) },
+            { label: `Update ${field.replace(/_/g,' ')}` }
         );
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
@@ -6225,6 +7029,19 @@ async function saveAnnotation() {
         buildSearchIndex();
         calculateMasterStats();
         updateHeaderStats();
+
+        // Write to audit log — fire and forget
+        writeAuditLog({
+            action:         'updated',
+            clinician_name: STATE.searchIntelligence.hospital || 'Unknown',
+            clinician_role: 'Clinician',
+            variant_id:     variant.id,
+            variant_name:   variant.legacy_name,
+            item_type:      'DIRECT_EDIT',
+            db_change_field: field,
+            db_change_old:  String(STATE.ui.annotationContext?.currentValue ?? ''),
+            db_change_new:  String(val ?? '')
+        });
 
         if (STATE.view.selectedVariant?.id === variant.id) {
             STATE.view.selectedVariant = updated;
@@ -6241,6 +7058,13 @@ async function saveAnnotation() {
 // ========== DELETE ==========
 
 function showDeleteModal(name, id) {
+    if (!isWriteMode()) {
+        requireWriteMode(
+            () => showDeleteModal(name, id),
+            `You are trying to delete "${name}" — enter PIN to continue`
+        );
+        return;
+    }
     STATE.ui.deleteContext = { variantName: name, variantId: id };
     setText('deleteVariantName', name);
     document.getElementById('deleteModal').classList.remove('hidden');
@@ -6252,12 +7076,18 @@ function closeDeleteModal() {
 }
 
 async function confirmDeleteVariant() {
+    if (!isWriteMode()) {
+        const name = STATE.ui.deleteContext?.variantName || 'this variant';
+        requireWriteMode(() => confirmDeleteVariant(), `You are trying to delete "${name}" — enter PIN to continue`);
+        return;
+    }
     if (!STATE.ui.deleteContext) return;
     const { variantName, variantId } = STATE.ui.deleteContext;
     try {
-        const res = await fetch(
-            `${CONFIG.SUPABASE.URL}/rest/v1/variants?id=eq.${variantId}`,
-            { method: 'DELETE', headers: { 'apikey': CONFIG.SUPABASE.KEY, 'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}` } }
+        const res = await dbWrite(
+            `variants?id=eq.${variantId}`,
+            { method: 'DELETE' },
+            { label: `Delete ${variantName}` }
         );
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         STATE.variants = STATE.variants.filter(v => v.id !== variantId);
@@ -6270,6 +7100,15 @@ async function confirmDeleteVariant() {
             document.getElementById('variantDetail').classList.add('hidden');
             document.getElementById('detailEmpty').classList.remove('hidden');
         }
+        // Write to audit log
+        writeAuditLog({
+            action:         'deleted',
+            clinician_name: STATE.searchIntelligence.hospital || 'Unknown',
+            clinician_role: 'Clinician',
+            variant_id:     variantId,
+            variant_name:   variantName,
+            item_type:      'DIRECT_DELETE'
+        });
         closeDeleteModal();
         renderVariantList();
         showNotification(`${variantName} deleted`, 'success');
@@ -6282,6 +7121,13 @@ async function confirmDeleteVariant() {
 // ========== IMPORT ==========
 
 function showImportModal() {
+    if (!isWriteMode()) {
+        requireWriteMode(
+            () => showImportModal(),
+            'You are trying to import variants — enter PIN to continue'
+        );
+        return;
+    }
     document.getElementById('importModal').classList.remove('hidden');
     switchImportTab('json');
 }
@@ -6423,6 +7269,10 @@ function previewImportBatch(arr, resultsEl, btn) {
 }
 
 async function executeJsonImport() {
+    if (!isWriteMode()) {
+        requireWriteMode(() => executeJsonImport(), 'You are trying to import variants — enter PIN to continue');
+        return;
+    }
     if (!STATE.ui.validatedJson) return;
     const btn = document.getElementById('executeImportBtn');
     btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Importing…';
@@ -6541,6 +7391,10 @@ async function resolveMissQueueForVariant(variant) {
 }
 
 async function submitManualForm() {
+    if (!isWriteMode()) {
+        requireWriteMode(() => submitManualForm(), 'You are trying to create a new variant — enter PIN to continue');
+        return;
+    }
     const name = document.getElementById('formLegacyName').value.trim();
     const prot = document.getElementById('formProteinName').value.trim();
     const cdna = document.getElementById('formCdnaName').value.trim();
@@ -6689,6 +7543,13 @@ function downloadTemplate() {
 // ========== EVIDENCE ==========
 
 function showEvidenceModal(variantName, variantId) {
+    if (!isWriteMode()) {
+        requireWriteMode(
+            () => showEvidenceModal(variantName, variantId),
+            `You are trying to add evidence to "${variantName}" — enter PIN to continue`
+        );
+        return;
+    }
     currentVariantName = variantName;
     currentVariantId = variantId;
     
@@ -6728,6 +7589,10 @@ function selectEvidenceType(type) {
 }
 
 async function saveEvidenceLink() {
+    if (!isWriteMode()) {
+        requireWriteMode(() => saveEvidenceLink(), 'You are trying to add an evidence link — enter PIN to continue');
+        return;
+    }
     const type = document.getElementById('evidenceType').value;
     const title = document.getElementById('evidenceTitle').value.trim();
     const url = document.getElementById('evidenceUrl').value.trim();
@@ -7115,23 +7980,30 @@ function renderCharts() {
     if (!window.Chart) return;
     const s = STATE.masterStats;
 
+    // Dark-mode safe colour palette
+    const GRID  = 'rgba(99,140,210,0.12)';
+    const TICK  = 'rgba(240,246,255,0.45)';
+    const TIP   = { bg: '#0d1526', border: 'rgba(99,140,210,0.25)', title: '#f0f6ff', body: '#9ab8e0' };
+
     const classCfg = {
         type: 'doughnut',
         data: {
             labels: ['I','II','III','IV','V'],
             datasets: [{
                 data: [s.classI, s.classII, s.classIII, s.classIV, s.classV],
-                backgroundColor: ['#c0392b','#b7610a','#0b6e6d','#1a56a5','#6b3fa0'],
-                borderWidth: 3,
-                borderColor: '#fff'
+                backgroundColor: ['#f87171','#fb923c','#34d399','#60a5fa','#c084fc'],
+                borderWidth: 2,
+                borderColor: '#0a1220'
             }]
         },
-        options: { 
-            responsive: true, 
-            cutout: '68%', 
-            plugins: { 
-                legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 }, color:'rgba(255,255,255,0.75)', padding:10 } } 
-            } 
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '68%',
+            plugins: {
+                legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 }, color: TICK, padding: 10 } },
+                tooltip: { backgroundColor: TIP.bg, borderColor: TIP.border, borderWidth: 1, titleColor: TIP.title, bodyColor: TIP.body }
+            }
         }
     };
 
@@ -7141,18 +8013,24 @@ function renderCharts() {
             labels: ['Responsive','Non-responsive','Unknown'],
             datasets: [{
                 data: [s.responsive, s.nonResponsive, s.unknown],
-                backgroundColor: ['#0b6e6d','#c0392b','#b7610a'],
+                backgroundColor: ['rgba(52,211,153,0.75)','rgba(248,113,113,0.75)','rgba(251,191,36,0.65)'],
+                borderColor:     ['#34d399','#f87171','#fbbf24'],
+                borderWidth: 1,
                 borderRadius: 6,
                 borderSkipped: false
             }]
         },
-        options: { 
-            responsive: true, 
-            plugins: { legend: { display: false } },
-            scales: { 
-                y: { beginAtZero: true, grid: { color: '#f1f5f9' } },
-                x: { grid: { display: false } }
-            } 
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: { backgroundColor: TIP.bg, borderColor: TIP.border, borderWidth: 1, titleColor: TIP.title, bodyColor: TIP.body }
+            },
+            scales: {
+                y: { beginAtZero: true, grid: { color: GRID }, ticks: { color: TICK, font: { size: 10 } } },
+                x: { grid: { display: false }, ticks: { color: TICK, font: { size: 10 } } }
+            }
         }
     };
 
@@ -7162,19 +8040,25 @@ function renderCharts() {
             labels: ['Complete','Partial','Minimal'],
             datasets: [{
                 data: [s.complete, s.clinical - s.complete, s.total - s.clinical],
-                backgroundColor: ['#0b6e6d','#1a56a5','#e4e8ef'],
+                backgroundColor: ['rgba(52,211,153,0.75)','rgba(96,165,250,0.65)','rgba(99,140,210,0.3)'],
+                borderColor:     ['#34d399','#60a5fa','rgba(99,140,210,0.5)'],
+                borderWidth: 1,
                 borderRadius: 6,
                 borderSkipped: false
             }]
         },
-        options: { 
+        options: {
             indexAxis: 'y',
-            responsive: true, 
-            plugins: { legend: { display: false } },
-            scales: { 
-                x: { beginAtZero: true, max: s.total, grid: { color: '#f1f5f9' } },
-                y: { grid: { display: false } }
-            } 
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: { backgroundColor: TIP.bg, borderColor: TIP.border, borderWidth: 1, titleColor: TIP.title, bodyColor: TIP.body }
+            },
+            scales: {
+                x: { beginAtZero: true, max: s.total, grid: { color: GRID }, ticks: { color: TICK, font: { size: 10 } } },
+                y: { grid: { display: false }, ticks: { color: TICK, font: { size: 10 } } }
+            }
         }
     };
 
@@ -7182,12 +8066,7 @@ function renderCharts() {
         const canvas = document.getElementById(id);
         if (!canvas) return;
         if (STATE.ui.charts[id]) STATE.ui.charts[id].destroy();
-        let cfg = id === 'classChart' ? classCfg : id === 'responseChart' ? respCfg : compCfg;
-        // Ensure charts never overflow their fixed-height containers
-        cfg = JSON.parse(JSON.stringify(cfg));
-        cfg.options = cfg.options || {};
-        cfg.options.responsive = true;
-        cfg.options.maintainAspectRatio = false;
+        const cfg = id === 'classChart' ? classCfg : id === 'responseChart' ? respCfg : compCfg;
         STATE.ui.charts[id] = new Chart(canvas, cfg);
     });
 }
@@ -7463,9 +8342,12 @@ const GAP_REGISTRY = new Map(); // variant_id -> gap result
 
 function analyseAndRegisterGap(variant) {
     if (!variant) return null;
+    // Return cached result if variant hasn't changed since last analysis
+    const cached = GAP_REGISTRY.get(variant.id);
+    if (cached && cached._updatedAt === variant.updated_at) return cached;
+
     const result = calculateGapScore(variant);
     if (!result || !variant.id) return result;
-    // Normalise shape for GAP_REGISTRY (used by sidebar chip + intel strip)
     const gap = {
         variant_id:      variant.id,
         gap_score:       result.score,
@@ -7473,27 +8355,409 @@ function analyseAndRegisterGap(variant) {
         missing_types:   result.missing,
         recommendations: result.recommendations,
         color:           gapLevelColor(result.gapLevel),
-        analyzed_at:     new Date().toISOString()
+        analyzed_at:     new Date().toISOString(),
+        _updatedAt:      variant.updated_at  // cache key
     };
     GAP_REGISTRY.set(variant.id, gap);
     variant._gap = gap;
-    // Persist asynchronously with old engine signature
     persistGapScore(variant.id, result.score, result.gapLevel, result.missing, result.recommendations);
     setTimeout(updateGapChip, 0);
     return gap;
 }
 
 
-// ========== HOSPITAL MANAGEMENT ==========
+// ========== HOSPITAL / INSTITUTION MANAGEMENT ==========
 
-const HOSPITAL_KEY  = 'helix_hospital_v1';
-const HOSPITAL_LIST_KEY = 'helix_hospital_list_v1';
+const HOSPITAL_KEY      = 'helix_hospital_v1';
+const HOSPITAL_OBJ_KEY  = 'helix_hospital_obj_v1'; // stores full object {name,city,country,type,id}
 
-// Known hospitals — seeded list, grows from DB over time
+// In-memory cache of institutions from DB — populated once on showHospitalModal
+let _institutionsCache = [];
+
+function getStoredHospital() {
+    try { return localStorage.getItem(HOSPITAL_KEY) || null; } catch { return null; }
+}
+
+function getStoredHospitalObj() {
+    try { return JSON.parse(localStorage.getItem(HOSPITAL_OBJ_KEY) || 'null'); } catch { return null; }
+}
+
+function setStoredHospital(name, obj) {
+    try {
+        localStorage.setItem(HOSPITAL_KEY, name);
+        if (obj) localStorage.setItem(HOSPITAL_OBJ_KEY, JSON.stringify(obj));
+    } catch(e) {}
+}
+
+// ---- Load institutions from DB ----
+async function loadInstitutionsFromDB() {
+    try {
+        const res = await fetch(
+            `${CONFIG.SUPABASE.URL}/rest/v1/institutions?select=id,name,city,country,institution_type,is_verified,usage_count&order=country.asc,name.asc&limit=500`,
+            { headers: { 'apikey': CONFIG.SUPABASE.KEY, 'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}` } }
+        );
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        _institutionsCache = await res.json();
+        return _institutionsCache;
+    } catch(e) {
+        console.warn('[Helix] Institution load failed:', e.message);
+        // Fall back to seeds if DB fails
+        _institutionsCache = HOSPITAL_SEEDS.map(name => ({ name, city: null, country: 'Spain', institution_type: 'hospital', is_verified: true, usage_count: 1 }));
+        return _institutionsCache;
+    }
+}
+
+// ---- Render grouped list ----
+function renderInstitutionGroupedList(institutions, filter) {
+    const el = document.getElementById('hospitalGroupedList');
+    if (!el) return;
+
+    const list = filter
+        ? institutions.filter(i => i.name.toLowerCase().includes(filter.toLowerCase()) ||
+            (i.city||'').toLowerCase().includes(filter.toLowerCase()) ||
+            (i.country||'').toLowerCase().includes(filter.toLowerCase()))
+        : institutions;
+
+    if (!list.length) {
+        el.innerHTML = `<div style="padding:16px;text-align:center;font-size:12px;color:#5a7aaa;">
+            No institutions found — <span onclick="showNewInstitutionForm()" style="color:#60a5fa;cursor:pointer;text-decoration:underline;">register yours</span>
+        </div>`;
+        return;
+    }
+
+    // Group by country
+    const byCountry = new Map();
+    list.forEach(i => {
+        const c = i.country || 'Other';
+        if (!byCountry.has(c)) byCountry.set(c, []);
+        byCountry.get(c).push(i);
+    });
+
+    // Sort countries: Spain first (home base), then alphabetical
+    const countries = [...byCountry.keys()].sort((a, b) => {
+        if (a === 'Spain') return -1;
+        if (b === 'Spain') return 1;
+        return a.localeCompare(b);
+    });
+
+    const TYPE_ICON = { hospital: 'fa-hospital', research: 'fa-flask', university: 'fa-graduation-cap', lab: 'fa-microscope', other: 'fa-building' };
+
+    // Store institutions in a lookup map so onclick can pass just an index
+    window._instLookup = {};
+
+    el.innerHTML = countries.map(country => {
+        const insts = byCountry.get(country);
+        const rows = insts.map(i => {
+            const key = 'inst_' + i.id;
+            window._instLookup[key] = i;
+            return `
+            <div class="hospital-suggestion" style="display:flex;align-items:center;gap:8px;padding:9px 14px;cursor:pointer;"
+                 onclick="selectInstitutionByKey('${key}')">
+                <i class="fas ${TYPE_ICON[i.institution_type] || 'fa-building'}" style="font-size:10px;color:#4a6a99;width:12px;flex-shrink:0;"></i>
+                <div style="flex:1;min-width:0;">
+                    <div style="font-size:12px;color:#f0f6ff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHTML(i.name)}</div>
+                    ${i.city ? `<div style="font-size:10px;color:#5a7aaa;">${escapeHTML(i.city)}</div>` : ''}
+                </div>
+                ${i.is_verified ? `<i class="fas fa-check-circle" style="font-size:9px;color:#34d399;flex-shrink:0;" title="Verified institution"></i>` : ''}
+                <span style="font-size:9px;color:#3a4a6a;font-family:var(--font-mono);">${i.usage_count||1}×</span>
+            </div>`;
+        }).join('');
+
+        return `
+            <div style="border-bottom:1px solid rgba(99,140,210,0.1);">
+                <div style="padding:6px 14px 4px;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#3a4a6a;background:rgba(0,0,0,0.2);position:sticky;top:0;">
+                    ${escapeHTML(country)} <span style="font-weight:400;opacity:.6;">(${insts.length})</span>
+                </div>
+                ${rows}
+            </div>`;
+    }).join('');
+}
+
+// ---- Select by key (index-based, avoids JSON-in-onclick) ----
+function selectInstitutionByKey(key) {
+    const inst = window._instLookup && window._instLookup[key];
+    if (inst) selectInstitutionFromList(JSON.stringify(inst));
+}
+
+// ---- Select from grouped list ----
+function selectInstitutionFromList(jsonStr) {
+    try {
+        const inst = typeof jsonStr === 'string' ? JSON.parse(jsonStr) : jsonStr;
+        const input = document.getElementById('hospitalInput');
+        if (input) input.value = inst.name;
+        const btn = document.getElementById('hospitalConfirmBtn');
+        if (btn) btn.disabled = false;
+        STATE._pendingHospitalObj = inst;
+        // Highlight selected
+        document.querySelectorAll('#hospitalGroupedList .hospital-suggestion').forEach(el => {
+            el.style.background = '';
+        });
+        const suggestions = document.getElementById('hospitalSuggestions');
+        if (suggestions) suggestions.classList.add('hidden');
+    } catch(e) { console.warn('selectInstitutionFromList error:', e); }
+}
+
+// ---- Filter suggestions (search box) ----
+function filterHospitalSuggestions(val) {
+    const btn = document.getElementById('hospitalConfirmBtn');
+    if (btn) btn.disabled = !val || val.trim().length < 2;
+    STATE._pendingHospitalObj = null;
+    renderInstitutionGroupedList(_institutionsCache, val.trim() || null);
+    // Also show dropdown for quick pick
+    if (!val || val.trim().length < 1) {
+        const el = document.getElementById('hospitalSuggestions');
+        if (el) el.classList.add('hidden');
+        return;
+    }
+    const filtered = _institutionsCache
+        .filter(i => i.name.toLowerCase().includes(val.toLowerCase()))
+        .slice(0, 6);
+    renderHospitalSuggestions(filtered);
+}
+
+function renderHospitalSuggestions(list) {
+    const el = document.getElementById('hospitalSuggestions');
+    if (!el) return;
+    if (!list.length) { el.classList.add('hidden'); return; }
+    // Register in lookup
+    if (!window._instLookup) window._instLookup = {};
+    el.innerHTML = list.map(i => {
+        const key = 'inst_sugg_' + (i.id || i.name.replace(/\W/g,''));
+        window._instLookup[key] = i;
+        return `<div class="hospital-suggestion" onclick="selectInstitutionByKey('${key}')">
+            ${escapeHTML(i.name)}${i.city ? ' <span style="font-size:10px;color:#5a7aaa;">— '+escapeHTML(i.city)+'</span>' : ''}
+        </div>`;
+    }).join('');
+    el.classList.remove('hidden');
+}
+
+// ---- Legacy selectHospital (kept for any inline onclick refs) ----
+function selectHospital(name) {
+    const inst = _institutionsCache.find(i => i.name === name) || { name };
+    selectInstitutionFromList(JSON.stringify(inst));
+}
+
+// ---- Show / hide new institution form ----
+function showNewInstitutionForm() {
+    document.getElementById('hospitalNewForm').style.display = 'block';
+    document.getElementById('hospitalNotInList').style.display = 'none';
+    setTimeout(() => document.getElementById('newInstitutionName')?.focus(), 50);
+}
+
+function cancelNewInstitution() {
+    document.getElementById('hospitalNewForm').style.display = 'none';
+    document.getElementById('hospitalNotInList').style.display = 'block';
+    ['newInstitutionName','newInstitutionCity','newInstitutionCountry'].forEach(id => {
+        const el = document.getElementById(id); if (el) el.value = '';
+    });
+    const t = document.getElementById('newInstitutionType'); if (t) t.value = '';
+}
+
+function validateNewInstitution() {
+    const name    = document.getElementById('newInstitutionName')?.value.trim();
+    const city    = document.getElementById('newInstitutionCity')?.value.trim();
+    const country = document.getElementById('newInstitutionCountry')?.value.trim();
+    const type    = document.getElementById('newInstitutionType')?.value;
+    const btn     = document.getElementById('saveNewInstitutionBtn');
+    if (btn) {
+        const valid = name && city && country && type;
+        btn.disabled = !valid;
+        btn.style.opacity = valid ? '1' : '.5';
+    }
+}
+
+async function saveNewInstitution() {
+    const name    = document.getElementById('newInstitutionName')?.value.trim();
+    const city    = document.getElementById('newInstitutionCity')?.value.trim();
+    const country = document.getElementById('newInstitutionCountry')?.value.trim();
+    const type    = document.getElementById('newInstitutionType')?.value;
+    if (!name || !city || !country || !type) return;
+
+    // Duplicate check — fuzzy match against existing names
+    const duplicate = _institutionsCache.find(i =>
+        i.name.toLowerCase().replace(/\s+/g,'') === name.toLowerCase().replace(/\s+/g,'')
+    );
+    if (duplicate) {
+        showNotification(`Similar institution already exists: "${duplicate.name}"`, 'warning');
+        selectInstitutionFromList(JSON.stringify(duplicate));
+        cancelNewInstitution();
+        return;
+    }
+
+    const btn = document.getElementById('saveNewInstitutionBtn');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; }
+
+    try {
+        const res = await fetch(`${CONFIG.SUPABASE.URL}/rest/v1/institutions`, {
+            method: 'POST',
+            headers: {
+                'apikey': CONFIG.SUPABASE.KEY,
+                'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`,
+                'Content-Type': 'application/json',
+                'Prefer': 'return=representation'
+            },
+            body: JSON.stringify({ name, city, country, institution_type: type })
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const [saved] = await res.json();
+        // Add to local cache and re-render
+        _institutionsCache.push(saved);
+        _institutionsCache.sort((a,b) => (a.country||'').localeCompare(b.country||'') || a.name.localeCompare(b.name));
+        selectInstitutionFromList(JSON.stringify(saved));
+        cancelNewInstitution();
+        renderInstitutionGroupedList(_institutionsCache, null);
+        showNotification(`"${name}" registered — thank you!`, 'success');
+    } catch(e) {
+        showNotification(`Failed to save institution: ${e.message}`, 'error');
+        if (btn) { btn.disabled = false; btn.innerHTML = 'Save & select'; }
+    }
+}
+
+// ---- Update usage count when institution is confirmed ----
+async function updateInstitutionUsage(institutionId) {
+    if (!institutionId) return;
+    try {
+        // Use RPC-style upsert — increment usage_count and update last_used_at
+        await fetch(
+            `${CONFIG.SUPABASE.URL}/rest/v1/institutions?id=eq.${institutionId}`,
+            {
+                method: 'PATCH',
+                headers: {
+                    'apikey': CONFIG.SUPABASE.KEY,
+                    'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`,
+                    'Content-Type': 'application/json',
+                    'Prefer': 'return=minimal'
+                },
+                body: JSON.stringify({ last_used_at: new Date().toISOString() })
+            }
+        );
+    } catch(e) { /* non-fatal */ }
+}
+
+// ---- Show modal ----
+async function showHospitalModal() {
+    const modal = document.getElementById('hospitalModal');
+    if (!modal) return;
+    modal.style.display = 'flex';
+    // Load from DB
+    const institutions = await loadInstitutionsFromDB();
+    renderInstitutionGroupedList(institutions, null);
+    const input = document.getElementById('hospitalInput');
+    if (input) setTimeout(() => input.focus(), 100);
+}
+
+function initHospital() {
+    const stored = getStoredHospital();
+    if (stored) {
+        updateHospitalBadge(stored);
+        STATE.searchIntelligence.hospital = stored;
+    } else {
+        setTimeout(showHospitalModal, 800);
+    }
+}
+
+async function confirmHospital() {
+    const input = document.getElementById('hospitalInput');
+    const name = input?.value?.trim();
+    if (!name || name.length < 2) return;
+
+    // Use pending object if selected from list, otherwise just name
+    const obj = STATE._pendingHospitalObj || { name };
+    STATE._pendingHospitalObj = null;
+
+    setStoredHospital(name, obj);
+    STATE.searchIntelligence.hospital = name;
+    STATE.searchIntelligence.hospitalObj = obj;
+    updateHospitalBadge(name);
+
+    // Update usage count in DB
+    if (obj.id) await updateInstitutionUsage(obj.id);
+
+    const modal = document.getElementById('hospitalModal');
+    if (modal) modal.style.display = 'none';
+    showNotification(`Welcome from ${name}`, 'success', 3000);
+}
+
+function skipHospital() {
+    setStoredHospital('Anonymous');
+    STATE.searchIntelligence.hospital = 'Anonymous';
+    const modal = document.getElementById('hospitalModal');
+    if (modal) modal.style.display = 'none';
+}
+
+function changeHospital() {
+    try {
+        localStorage.removeItem(HOSPITAL_KEY);
+        localStorage.removeItem(HOSPITAL_OBJ_KEY);
+    } catch(e) {}
+    STATE.searchIntelligence.hospital = null;
+    STATE.searchIntelligence.hospitalObj = null;
+    const input = document.getElementById('hospitalInput');
+    if (input) input.value = '';
+    showHospitalModal();
+}
+
+function updateHospitalBadge(name) {
+    const badge = document.getElementById('hospitalBadge');
+    const text  = document.getElementById('hospitalBadgeText');
+    if (!badge || !text) return;
+    const display = name.length > 28 ? name.slice(0,26) + '…' : name;
+    text.textContent = display;
+    badge.style.display = name && name !== 'Anonymous' ? '' : 'none';
+}
+
+// ---- Seed institutions table on first run ----
+async function seedInstitutionsIfEmpty() {
+    try {
+        // Check if table already has data
+        const res = await fetch(
+            `${CONFIG.SUPABASE.URL}/rest/v1/institutions?select=id&limit=1`,
+            { headers: { 'apikey': CONFIG.SUPABASE.KEY, 'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`, 'Prefer': 'count=exact', 'Range-Unit': 'items', 'Range': '0-0' } }
+        );
+        if (!res.ok) return;
+        const count = parseInt(res.headers.get('Content-Range')?.split('/')[1] || '0');
+        if (count > 0) return; // already seeded
+
+        // Insert seeds
+        const seeds = [
+            { name: 'CHUAC — Complejo Hospitalario Universitario de A Coruña',    city: 'A Coruña',   country: 'Spain',   institution_type: 'hospital',  is_verified: true },
+            { name: 'Hospital Universitario Central de Asturias (HUCA)',           city: 'Oviedo',     country: 'Spain',   institution_type: 'hospital',  is_verified: true },
+            { name: 'Hospital Universitario La Paz',                               city: 'Madrid',     country: 'Spain',   institution_type: 'hospital',  is_verified: true },
+            { name: "Hospital Vall d'Hebron",                                      city: 'Barcelona',  country: 'Spain',   institution_type: 'hospital',  is_verified: true },
+            { name: 'Hospital Universitario Virgen del Rocío',                     city: 'Sevilla',    country: 'Spain',   institution_type: 'hospital',  is_verified: true },
+            { name: 'Hospital Universitario 12 de Octubre',                        city: 'Madrid',     country: 'Spain',   institution_type: 'hospital',  is_verified: true },
+            { name: 'Hospital Universitario La Fe',                                city: 'Valencia',   country: 'Spain',   institution_type: 'hospital',  is_verified: true },
+            { name: 'Hospital Universitario Reina Sofía',                          city: 'Córdoba',    country: 'Spain',   institution_type: 'hospital',  is_verified: true },
+            { name: 'Hospital Universitario Miguel Servet',                        city: 'Zaragoza',   country: 'Spain',   institution_type: 'hospital',  is_verified: true },
+            { name: 'Hospital Clínic',                                             city: 'Barcelona',  country: 'Spain',   institution_type: 'hospital',  is_verified: true },
+            { name: 'Hospital Universitario Ramón y Cajal',                        city: 'Madrid',     country: 'Spain',   institution_type: 'hospital',  is_verified: true },
+            { name: 'Hospital General Universitario Gregorio Marañón',             city: 'Madrid',     country: 'Spain',   institution_type: 'hospital',  is_verified: true },
+            { name: 'Hospital Universitario Marqués de Valdecilla',                city: 'Santander',  country: 'Spain',   institution_type: 'hospital',  is_verified: true },
+            { name: 'Hospital Universitario de Cruces',                            city: 'Bilbao',     country: 'Spain',   institution_type: 'hospital',  is_verified: true },
+            { name: 'Complejo Hospitalario Universitario de Santiago (CHUS)',      city: 'Santiago de Compostela', country: 'Spain', institution_type: 'hospital', is_verified: true },
+            { name: 'Hospital Universitario Son Espases',                          city: 'Palma',      country: 'Spain',   institution_type: 'hospital',  is_verified: true },
+            { name: 'Great Ormond Street Hospital',                                city: 'London',     country: 'United Kingdom', institution_type: 'hospital', is_verified: true },
+            { name: 'Royal Brompton Hospital',                                     city: 'London',     country: 'United Kingdom', institution_type: 'hospital', is_verified: true },
+            { name: 'Hôpital Necker-Enfants Malades',                             city: 'Paris',      country: 'France',  institution_type: 'hospital',  is_verified: true },
+            { name: 'Hannover Medical School (MHH)',                               city: 'Hannover',   country: 'Germany', institution_type: 'university', is_verified: true },
+            { name: 'Boston Children\'s Hospital',                                 city: 'Boston',     country: 'USA',     institution_type: 'hospital',  is_verified: true },
+            { name: 'Cincinnati Children\'s Hospital',                             city: 'Cincinnati', country: 'USA',     institution_type: 'hospital',  is_verified: true },
+        ];
+
+        await fetch(`${CONFIG.SUPABASE.URL}/rest/v1/institutions`, {
+            method: 'POST',
+            headers: {
+                'apikey': CONFIG.SUPABASE.KEY, 'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`,
+                'Content-Type': 'application/json', 'Prefer': 'return=minimal'
+            },
+            body: JSON.stringify(seeds)
+        });
+        console.log('[Helix] Institutions table seeded with', seeds.length, 'entries');
+    } catch(e) { /* non-fatal */ }
+}
 const HOSPITAL_SEEDS = [
     'CHUAC — Complejo Hospitalario Universitario de A Coruña',
     'Hospital Universitario Central de Asturias (HUCA)',
-    'Complejo Hospitalario Universitario de A Coruña (CHUAC)',
     'Hospital Universitario La Paz — Madrid',
     "Hospital Vall d'Hebron — Barcelona",
     'Hospital Universitario Virgen del Rocío — Sevilla',
@@ -7510,124 +8774,6 @@ const HOSPITAL_SEEDS = [
     'Hospital Universitario Son Espases — Palma',
     'Other / International',
 ];
-
-function getStoredHospital() {
-    try { return localStorage.getItem(HOSPITAL_KEY) || null; } catch { return null; }
-}
-
-function setStoredHospital(name) {
-    try {
-        localStorage.setItem(HOSPITAL_KEY, name);
-        // Add to known list
-        const list = getHospitalList();
-        if (name && !list.includes(name)) {
-            list.unshift(name);
-            localStorage.setItem(HOSPITAL_LIST_KEY, JSON.stringify(list.slice(0,50)));
-        }
-    } catch(e) {}
-}
-
-function getHospitalList() {
-    try {
-        const stored = JSON.parse(localStorage.getItem(HOSPITAL_LIST_KEY) || '[]');
-        // Merge with seeds, deduplicated
-        const all = [...new Set([...stored, ...HOSPITAL_SEEDS])];
-        return all;
-    } catch { return HOSPITAL_SEEDS; }
-}
-
-function initHospital() {
-    const stored = getStoredHospital();
-    if (stored) {
-        // Already set — show badge, don't prompt
-        updateHospitalBadge(stored);
-        STATE.searchIntelligence.hospital = stored;
-    } else {
-        // First visit — show modal after variants load
-        setTimeout(showHospitalModal, 800);
-    }
-}
-
-function showHospitalModal() {
-    const modal = document.getElementById('hospitalModal');
-    if (modal) {
-        modal.style.display = 'flex';
-        // Pre-populate suggestions
-        renderHospitalSuggestions(getHospitalList().slice(0,8));
-        const input = document.getElementById('hospitalInput');
-        if (input) setTimeout(() => input.focus(), 100);
-    }
-}
-
-function filterHospitalSuggestions(val) {
-    const btn = document.getElementById('hospitalConfirmBtn');
-    if (btn) btn.disabled = !val || val.trim().length < 2;
-    if (!val || val.trim().length < 1) {
-        renderHospitalSuggestions(getHospitalList().slice(0,8));
-        return;
-    }
-    const filtered = getHospitalList().filter(h =>
-        h.toLowerCase().includes(val.toLowerCase())
-    ).slice(0,8);
-    renderHospitalSuggestions(filtered);
-}
-
-function renderHospitalSuggestions(list) {
-    const el = document.getElementById('hospitalSuggestions');
-    if (!el) return;
-    if (!list.length) { el.classList.add('hidden'); return; }
-    el.innerHTML = list.map(h =>
-        `<div class="hospital-suggestion" onclick="selectHospital('${escapeAttr(h)}')">${escapeHTML(h)}</div>`
-    ).join('');
-    el.classList.remove('hidden');
-}
-
-function selectHospital(name) {
-    const input = document.getElementById('hospitalInput');
-    if (input) input.value = name;
-    const el = document.getElementById('hospitalSuggestions');
-    if (el) el.classList.add('hidden');
-    const btn = document.getElementById('hospitalConfirmBtn');
-    if (btn) btn.disabled = false;
-}
-
-function confirmHospital() {
-    const input = document.getElementById('hospitalInput');
-    const name = input?.value?.trim();
-    if (!name || name.length < 2) return;
-    setStoredHospital(name);
-    STATE.searchIntelligence.hospital = name;
-    updateHospitalBadge(name);
-    const modal = document.getElementById('hospitalModal');
-    if (modal) modal.style.display = 'none';
-    showNotification(`Welcome from ${name}`, 'success', 3000);
-}
-
-function skipHospital() {
-    setStoredHospital('Anonymous');
-    STATE.searchIntelligence.hospital = 'Anonymous';
-    const modal = document.getElementById('hospitalModal');
-    if (modal) modal.style.display = 'none';
-}
-
-function changeHospital() {
-    // Allow user to change their hospital — clear stored and re-show modal
-    try { localStorage.removeItem(HOSPITAL_KEY); } catch(e) {}
-    STATE.searchIntelligence.hospital = null;
-    const input = document.getElementById('hospitalInput');
-    if (input) input.value = '';
-    showHospitalModal();
-}
-
-function updateHospitalBadge(name) {
-    const badge = document.getElementById('hospitalBadge');
-    const text  = document.getElementById('hospitalBadgeText');
-    if (!badge || !text) return;
-    // Truncate long names for the badge
-    const display = name.length > 28 ? name.slice(0,26)+'…' : name;
-    text.textContent = display;
-    badge.style.display = name && name !== 'Anonymous' ? '' : 'none';
-}
 
 // ========== RESEARCH GAP SCORING ENGINE ==========
 // Scores each variant 0-100 based on data completeness, evidence,
@@ -8180,6 +9326,26 @@ async function loadSearchIntelligence() {
             }));
         }
 
+        // ---- 4. Geo coverage health check — how many rows have coordinates ----
+        try {
+            const geoTotalRes = await fetch(
+                `${CONFIG.SUPABASE.URL}/rest/v1/search_logs?select=id&limit=1`,
+                { headers: { ...headers, 'Prefer': 'count=exact', 'Range-Unit': 'items', 'Range': '0-0' } }
+            );
+            const geoGeoRes = await fetch(
+                `${CONFIG.SUPABASE.URL}/rest/v1/search_logs?select=id&latitude=not.is.null&limit=1`,
+                { headers: { ...headers, 'Prefer': 'count=exact', 'Range-Unit': 'items', 'Range': '0-0' } }
+            );
+            STATE.system.apiCalls += 2;
+            if (geoTotalRes.ok && geoGeoRes.ok) {
+                const totalCount = parseInt(geoTotalRes.headers.get('Content-Range')?.split('/')[1] || '0');
+                const geoCount   = parseInt(geoGeoRes.headers.get('Content-Range')?.split('/')[1] || '0');
+                si.geoCoverage   = totalCount > 0 ? Math.round((geoCount / totalCount) * 100) : null;
+                si.geoTotal      = totalCount;
+                si.geoWithCoords = geoCount;
+            }
+        } catch(e) { /* non-fatal */ }
+
     } catch(e) {
         // Non-fatal — analytics will just show session data only
         console.warn('Search intelligence hydration failed:', e.message);
@@ -8416,8 +9582,11 @@ Object.assign(window, {
     analyseAndRegisterGap, renderGapQueue, updateGapChip,
     renderGapQueue, renderCommandCentre, calculateGapScore,
     showHospitalModal, confirmHospital, skipHospital, changeHospital,
-    selectHospital, filterHospitalSuggestions,
-    toggleBookmark, isBookmarked
+    selectHospital, selectInstitutionFromList, selectInstitutionByKey, filterHospitalSuggestions,
+    showNewInstitutionForm, cancelNewInstitution, validateNewInstitution, saveNewInstitution,
+    toggleBookmark, isBookmarked,
+    requestWriteMode, confirmWriteMode, closeWriteModeModal, toggleWritePINVisibility,
+    normaliseQuery, fuzzyMatchVariant, writeAuditLog, dbWrite
 });
 </script>
 <style>
@@ -8465,7 +9634,7 @@ Object.assign(window, {
 #heliosOverlay {
     position: fixed;
     inset: 0;
-    z-index: 99000;
+    z-index: 99990;
     background: var(--helios-bg);
     display: none;
     flex-direction: column;
@@ -9354,7 +10523,7 @@ Object.assign(window, {
 <!-- ================================================================
      HELIOS FULL-SCREEN OVERLAY
      ================================================================ -->
-<div id="heliosOverlay">
+<div id="heliosOverlay" style="display:none;">
 
     <!-- Header -->
     <div class="helios-header">
@@ -9944,13 +11113,15 @@ function hFetch(path, opts = {}) {
 // ---- Open / Close ----
 function openHelios() {
     const overlay = document.getElementById('heliosOverlay');
-    overlay.classList.add('open');
+    if (!overlay) return;
+    overlay.style.display = 'flex';
+    // Small delay so display:flex is painted before animation starts
+    requestAnimationFrame(() => overlay.classList.add('open'));
     HELIOS.open = true;
     const list = document.getElementById('heliosInboxList');
     if (list) list.innerHTML = `<div class="helios-empty"><div class="helios-spinner" style="margin:0 auto 16px;"></div><p style="color:var(--helios-text2);font-size:13px;">Loading…</p></div>`;
     heliosUpdateGreeting();
     heliosTab('inbox');
-    // Load calibration + inbox in parallel — calibration needed before items render
     requestAnimationFrame(() => setTimeout(async () => {
         await heliosLoadCalibration();
         await heliosLoadInbox();
@@ -9959,11 +11130,14 @@ function openHelios() {
 
 function closeHelios() {
     const overlay = document.getElementById('heliosOverlay');
+    if (!overlay) return;
     overlay.classList.add('closing');
+    overlay.classList.remove('open');
     setTimeout(() => {
-        overlay.classList.remove('open', 'closing');
+        overlay.classList.remove('closing');
+        overlay.style.display = 'none';
         HELIOS.open = false;
-    }, 200);
+    }, 210);
 }
 
 // ---- Tab switching ----
@@ -10147,13 +11321,37 @@ function renderHeliosItem(item) {
         ? `<span style="font-size:10px;padding:2px 8px;border-radius:4px;background:${item.status==='approved'?'rgba(52,211,153,0.12)':item.status==='rejected'?'rgba(248,113,113,0.1)':'rgba(96,165,250,0.1)'};color:${item.status==='approved'?'var(--helios-green)':item.status==='rejected'?'var(--helios-red)':'var(--helios-blue)'};">${item.status.toUpperCase()}</span>`
         : '';
 
-    const evHTML = evidence.slice(0,3).map(e => `
-        <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--helios-border);font-size:11px;">
-            <span style="color:var(--helios-text3);font-family:var(--helios-mono);">${e.source||'—'}</span>
-            <span style="flex:1;color:var(--helios-text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHTML(e.title||'Untitled')}</span>
-            ${e.year ? `<span style="color:var(--helios-text3);font-family:var(--helios-mono);">${e.year}</span>` : ''}
-            ${e.url  ? `<a href="${escapeHTML(e.url)}" target="_blank" style="color:var(--helios-sun);font-size:10px;"><i class="fas fa-external-link-alt"></i></a>` : ''}
-        </div>`).join('');
+    const evHTML = evidence.length ? `
+        <div style="margin-bottom:12px;">
+            <div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--helios-text3);margin-bottom:8px;font-family:var(--helios-mono);">
+                Evidence payload — ${evidence.length} source${evidence.length!==1?'s':''}
+            </div>
+            ${evidence.slice(0,5).map(e => {
+                const isEti    = /trikafta|kalydeco|ivacaftor|elexacaftor|lumacaftor|modulator|ETI/i.test(e.title||'');
+                const isCls    = /class|functional|protein|trafficking|gating|splice/i.test(e.title||'');
+                const isRecent = e.year && e.year >= new Date().getFullYear() - 3;
+                return `<div style="display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid var(--helios-border);">
+                    <div style="flex-shrink:0;margin-top:2px;">
+                        ${isEti  ? `<span style="font-size:8px;padding:1px 5px;border-radius:3px;background:rgba(52,211,153,0.1);color:var(--helios-green);border:1px solid rgba(52,211,153,0.2);font-family:var(--helios-mono);">ETI</span>` : ''}
+                        ${isCls  ? `<span style="font-size:8px;padding:1px 5px;border-radius:3px;background:rgba(96,165,250,0.1);color:var(--helios-blue);border:1px solid rgba(96,165,250,0.2);font-family:var(--helios-mono);">CLASS</span>` : ''}
+                        ${!isEti && !isCls ? `<span style="font-size:8px;padding:1px 5px;border-radius:3px;background:rgba(255,255,255,0.05);color:var(--helios-text3);font-family:var(--helios-mono);">REF</span>` : ''}
+                    </div>
+                    <div style="flex:1;min-width:0;">
+                        <div style="font-size:11px;color:var(--helios-text);line-height:1.4;margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHTML(e.title||'')}">
+                            ${escapeHTML(e.title||'Untitled')}
+                        </div>
+                        <div style="font-size:10px;color:var(--helios-text3);font-family:var(--helios-mono);display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                            ${e.journal ? `<span>${escapeHTML(e.journal)}</span>` : ''}
+                            ${e.year    ? `<span style="color:${isRecent?'var(--helios-green)':'var(--helios-text3)'};">${e.year}${isRecent?' ·new':''}</span>` : ''}
+                            ${e.authors ? `<span style="color:var(--helios-text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px;">${escapeHTML(e.authors)}</span>` : ''}
+                            ${e.pmid    ? `<span style="color:var(--helios-text3);">PMID:${escapeHTML(e.pmid)}</span>` : ''}
+                        </div>
+                    </div>
+                    ${e.url ? `<a href="${escapeHTML(e.url)}" target="_blank" style="flex-shrink:0;color:var(--helios-sun);font-size:11px;opacity:.7;margin-top:2px;" title="Open in PubMed"><i class="fas fa-external-link-alt"></i></a>` : ''}
+                </div>`;
+            }).join('')}
+            ${evidence.length > 5 ? `<div style="font-size:10px;color:var(--helios-text3);padding:6px 0;font-family:var(--helios-mono);">+${evidence.length-5} more sources in payload</div>` : ''}
+        </div>` : '';
 
     const diffHTML = item.proposed_field ? `
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0;">
@@ -10201,8 +11399,8 @@ function renderHeliosItem(item) {
             ${item.bot_reasoning ? `<div class="helios-evidence-box"><strong style="color:var(--helios-text);font-size:11px;">Reasoning:</strong><br>${escapeHTML(item.bot_reasoning)}</div>` : ''}
             <!-- Diff -->
             ${diffHTML}
-            <!-- Evidence -->
-            ${evHTML ? `<div style="margin-bottom:10px;">${evHTML}</div>` : ''}
+            <!-- Evidence payload -->
+            ${evHTML}
             <!-- Actions -->
             ${!isDone ? `
             <div class="helios-actions">
@@ -10254,6 +11452,11 @@ async function heliosGetClinicianIdentity() {
 }
 
 async function heliosApprove(itemId) {
+    if (!isWriteMode()) {
+        const item = HELIOS.pendingItems.find(i => i.id === itemId);
+        requireWriteMode(() => heliosApprove(itemId), `You are trying to approve a Helios item${item?.variant_name ? ' for ' + item.variant_name : ''} — enter PIN to continue`);
+        return;
+    }
     const item = HELIOS.pendingItems.find(i => i.id === itemId);
     if (!item) return;
 
@@ -10275,6 +11478,10 @@ async function heliosApprove(itemId) {
 }
 
 async function heliosApproveWithNote(itemId) {
+    if (!isWriteMode()) {
+        requireWriteMode(() => heliosApproveWithNote(itemId), 'You are trying to approve a Helios item with a note — enter PIN to continue');
+        return;
+    }
     const item = HELIOS.pendingItems.find(i => i.id === itemId);
     if (!item) return;
     const note = prompt(`Approving: ${item.bot_summary}\n\nAdd a clinical note (required for URGENT items):`);
@@ -10291,6 +11498,11 @@ async function heliosApproveWithNote(itemId) {
 }
 
 async function heliosReject(itemId) {
+    if (!isWriteMode()) {
+        const item = HELIOS.pendingItems.find(i => i.id === itemId);
+        requireWriteMode(() => heliosReject(itemId), `You are trying to reject a Helios item${item?.variant_name ? ' for ' + item.variant_name : ''} — enter PIN to continue`);
+        return;
+    }
     const item = HELIOS.pendingItems.find(i => i.id === itemId);
     if (!item) return;
     const note = prompt(`Rejecting: ${item.bot_summary}\n\nReason for rejection (optional):`);
@@ -10304,6 +11516,11 @@ async function heliosReject(itemId) {
 }
 
 async function heliosDefer(itemId) {
+    if (!isWriteMode()) {
+        const item = HELIOS.pendingItems.find(i => i.id === itemId);
+        requireWriteMode(() => heliosDefer(itemId), `You are trying to defer a Helios item${item?.variant_name ? ' for ' + item.variant_name : ''} — enter PIN to continue`);
+        return;
+    }
     const item = HELIOS.pendingItems.find(i => i.id === itemId);
     if (!item) return;
     const clinician = await heliosGetClinicianIdentity();
@@ -10331,6 +11548,11 @@ async function heliosDefer(itemId) {
 
 // ---- Mark Exceptional ----
 async function heliosMarkExceptional(itemId) {
+    if (!isWriteMode()) {
+        const item = HELIOS.pendingItems.find(i => i.id === itemId);
+        requireWriteMode(() => heliosMarkExceptional(itemId), `You are trying to mark ${item?.variant_name || 'a variant'} as exceptional — enter PIN to continue`);
+        return;
+    }
     const item = HELIOS.pendingItems.find(i => i.id === itemId);
     if (!item || !item.variant_id) return;
     const note = prompt(`Marking ${item.variant_name} as an exceptional case.\n\nClinical justification (required — recorded in audit trail):`);
@@ -10590,6 +11812,10 @@ async function heliosAddNote(itemId) {
 }
 
 async function heliosApproveAllRoutine() {
+    if (!isWriteMode()) {
+        requireWriteMode(() => heliosApproveAllRoutine(), 'You are trying to bulk-approve all routine Helios items — enter PIN to continue');
+        return;
+    }
     const routine = HELIOS.pendingItems.filter(i => i.priority === 'ROUTINE' && i.status === 'pending');
     if (!routine.length) return;
     const ok = confirm(`Approve all ${routine.length} routine items? This will apply any proposed DB changes.`);
@@ -10942,21 +12168,45 @@ async function heliosScanExternal() {
         try {
             const papers = await heliosPubMedSearch(v.legacy_name);
             if (papers.length > 0) {
-                await heliosCreatePendingItem({
-                    item_type:       'NEW_EVIDENCE',
-                    variant_id:      v.id,
-                    variant_name:    v.legacy_name,
-                    bot_summary:     `${papers.length} PubMed paper${papers.length > 1 ? 's' : ''} found for ${v.legacy_name}`,
-                    bot_reasoning:   `PubMed returned ${papers.length} results. Review to determine if any should be added as evidence.`,
-                    bot_confidence:  80,
-                    evidence_payload: JSON.stringify(papers),
-                    scan_source:     'PUBMED',
-                    scan_run_id:     runId,
-                    priority:        'ROUTINE'
-                });
-                findings++;
-                heliosLog('success', `  ✓ ${papers.length} papers found`);
-            }
+            // Build structured summary per paper type
+            const recentPapers = papers.filter(p => p.year && p.year >= new Date().getFullYear() - 3);
+            const classClues   = papers.filter(p => p.title && /class|functional|protein|trafficking|gating/i.test(p.title));
+            const etiClues     = papers.filter(p => p.title && /trikafta|kalydeco|lumacaftor|ivacaftor|elexacaftor|modulator|ETI/i.test(p.title));
+
+            const reasoning = [
+                `PubMed returned ${papers.length} result${papers.length!==1?'s':''} for "${v.legacy_name} CFTR".`,
+                recentPapers.length  ? `${recentPapers.length} published in the last 3 years — recent evidence available.` : 'No publications in the last 3 years.',
+                classClues.length    ? `${classClues.length} paper${classClues.length!==1?'s':''} may contain functional class data.` : '',
+                etiClues.length      ? `${etiClues.length} paper${etiClues.length!==1?'s':''} may discuss modulator response.` : '',
+                !v.cftr_class        ? `⚠ No CFTR class assigned — evidence review is urgent.` : '',
+                !v.eti_prediction || v.eti_prediction === 'unknown' ? `⚠ ETI response unknown — check papers for modulator trial data.` : '',
+                'Review each paper and add relevant sources to the evidence chain.'
+            ].filter(Boolean).join(' ');
+
+            const confidence = Math.min(
+                60
+                + (recentPapers.length  > 0 ? 10 : 0)
+                + (classClues.length    > 0 ? 10 : 0)
+                + (etiClues.length      > 0 ? 10 : 0)
+                + (!v.cftr_class        ? 10 : 0),
+                95
+            );
+
+            await heliosCreatePendingItem({
+                item_type:        'NEW_EVIDENCE',
+                variant_id:       v.id,
+                variant_name:     v.legacy_name,
+                bot_summary:      `${papers.length} PubMed paper${papers.length > 1 ? 's' : ''} found — ${recentPapers.length} recent${etiClues.length ? ', ' + etiClues.length + ' ETI-related' : ''}`,
+                bot_reasoning:    reasoning,
+                bot_confidence:   confidence,
+                evidence_payload: JSON.stringify(papers),
+                scan_source:      'PUBMED',
+                scan_run_id:      runId,
+                priority:         (!v.cftr_class || !v.eti_prediction || v.eti_prediction === 'unknown') ? 'URGENT' : 'ROUTINE'
+            });
+            findings++;
+            heliosLog('success', `  ✓ ${papers.length} papers — conf ${confidence}% — ${(!v.cftr_class)?'URGENT':'routine'}`);
+        }
         } catch(e) {
             heliosLog('warn', `  ⚠ PubMed search failed for ${v.legacy_name}`);
         }
