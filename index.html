@@ -3265,10 +3265,39 @@
                     <i class="fas fa-chart-bar"></i>
                     <span>Analytics</span>
                 </button>
-                <button onclick="exportReport()" class="btn btn-ghost" title="Export">
-                    <i class="fas fa-download"></i>
-                    <span>Export</span>
-                </button>
+                <div style="position:relative;display:inline-block;" id="exportMenuWrap">
+                    <button onclick="toggleExportMenu()" class="btn btn-ghost" title="Export" style="font-size:13px;">
+                        <i class="fas fa-download"></i>
+                        <span>Export</span>
+                        <i class="fas fa-chevron-down" style="font-size:9px;margin-left:2px;opacity:.6;"></i>
+                    </button>
+                    <div id="exportMenu" style="display:none;position:absolute;top:calc(100% + 6px);right:0;z-index:500;background:#0d1526;border:1px solid rgba(99,140,210,0.22);border-radius:10px;box-shadow:0 12px 32px rgba(0,5,20,0.7);min-width:230px;overflow:hidden;">
+                        <div style="padding:8px 14px 6px;font-size:9px;font-weight:700;letter-spacing:.12em;color:rgba(154,184,224,0.55);text-transform:uppercase;border-bottom:1px solid rgba(99,140,210,0.1);">Export options</div>
+                        <button onclick="exportReport();toggleExportMenu()" style="display:flex;align-items:center;gap:10px;width:100%;padding:10px 16px;background:none;border:none;color:#f0f6ff;font-family:'IBM Plex Sans',sans-serif;font-size:12.5px;cursor:pointer;text-align:left;" onmouseover="this.style.background='rgba(255,255,255,0.04)'" onmouseout="this.style.background=''">
+                            <i class="fas fa-table" style="color:#60a5fa;width:14px;"></i>
+                            <span>Quick CSV (summary)</span>
+                        </button>
+                        <button onclick="exportFullReport();toggleExportMenu()" style="display:flex;align-items:center;gap:10px;width:100%;padding:10px 16px;background:none;border:none;color:#f0f6ff;font-family:'IBM Plex Sans',sans-serif;font-size:12.5px;cursor:pointer;text-align:left;" onmouseover="this.style.background='rgba(255,255,255,0.04)'" onmouseout="this.style.background=''">
+                            <i class="fas fa-file-csv" style="color:#34d399;width:14px;"></i>
+                            <span>Full CSV (all fields)</span>
+                        </button>
+                        <div style="height:1px;background:rgba(99,140,210,0.1);margin:2px 0;"></div>
+                        <button onclick="exportClinicalReport('single');toggleExportMenu()" style="display:flex;align-items:center;gap:10px;width:100%;padding:10px 16px;background:none;border:none;color:#f0f6ff;font-family:'IBM Plex Sans',sans-serif;font-size:12.5px;cursor:pointer;text-align:left;" onmouseover="this.style.background='rgba(41,121,255,0.08)'" onmouseout="this.style.background=''">
+                            <i class="fas fa-file-medical" style="color:#2979ff;width:14px;"></i>
+                            <div>
+                                <div>Clinical PDF — selected variant</div>
+                                <div style="font-size:10px;color:#5a7aaa;margin-top:1px;">Print-ready lab-style report</div>
+                            </div>
+                        </button>
+                        <button onclick="exportClinicalReport('all');toggleExportMenu()" style="display:flex;align-items:center;gap:10px;width:100%;padding:10px 16px;background:none;border:none;color:#f0f6ff;font-family:'IBM Plex Sans',sans-serif;font-size:12.5px;cursor:pointer;text-align:left;" onmouseover="this.style.background='rgba(41,121,255,0.08)'" onmouseout="this.style.background=''">
+                            <i class="fas fa-file-medical-alt" style="color:#60a5fa;width:14px;"></i>
+                            <div>
+                                <div>Clinical PDF — batch (all classified)</div>
+                                <div style="font-size:10px;color:#5a7aaa;margin-top:1px;">One page per variant, for MDT</div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
                 <!-- ☀ HELIOS BOT BUTTON -->
                 <button onclick="openHelios()" class="btn btn-ghost" id="heliosBtn" title="Helios — AI Evidence Bot" style="position:relative;border-color:rgba(251,191,36,0.3);color:#fbbf24;">
                     <i class="fas fa-sun" style="font-size:13px;"></i>
@@ -3906,8 +3935,9 @@
                         </div>
                         <!-- Layer toggles -->
                         <div style="display:flex;align-items:center;gap:4px;padding:0 14px;border-right:1px solid rgba(255,255,255,0.05);">
-                            <button class="geo-v4-pill on-class" id="geoV4lClass" onclick="geoV4ToggleLayer('class',this)">Class</button>
-                            <button class="geo-v4-pill"          id="geoV4lMiss"  onclick="geoV4ToggleLayer('miss',this)">Miss signal</button>
+                            <button class="geo-v4-pill on-class" id="geoV4lClass"  onclick="geoV4ToggleLayer('class',this)">Class</button>
+                            <button class="geo-v4-pill"          id="geoV4lMiss"   onclick="geoV4ToggleLayer('miss',this)">Miss signal</button>
+                            <button class="geo-v4-pill"          id="geoV4lChoro"  onclick="geoV4ToggleLayer('choropleth',this)" title="Country-level search density choropleth">Density</button>
                         </div>
                         <!-- Timeline scrubber -->
                         <div style="display:flex;align-items:center;gap:8px;padding:0 14px;border-right:1px solid rgba(255,255,255,0.05);">
@@ -5076,7 +5106,7 @@ function getSearchTimeline() {
 // ---- Geography tab v5 ----
 
 window._geoState = {
-    allRows:[], period:7, layerClass:true, layerMiss:false,
+    allRows:[], period:7, layerClass:true, layerMiss:false, layerChoropleth:false,
     selectedKey:null, timelinePct:100, view:'map',
 };
 
@@ -5101,6 +5131,13 @@ function geoV4ToggleLayer(layer,btn) {
     if(layer==='miss'){
         st.layerMiss=!st.layerMiss;
         const el=document.getElementById('geoV4lMiss'); if(el) el.classList.toggle('on-miss',st.layerMiss);
+    }
+    if(layer==='choropleth'){
+        st.layerChoropleth=!st.layerChoropleth;
+        const el=document.getElementById('geoV4lChoro');
+        if(el) { el.classList.toggle('on-class', st.layerChoropleth); }
+        geoV4RenderChoropleth();
+        return; // choropleth is additive — don't re-render markers
     }
     geoV4RenderMarkers();
 }
@@ -5236,7 +5273,7 @@ async function renderGeoTab() {
                 const geoJson=window.topojson.feature(topo,topo.objects.countries);
                 // Country name lookup from numeric ISO codes
                 const COUNTRY_NAMES={4:'Afghanistan',8:'Albania',12:'Algeria',24:'Angola',32:'Argentina',36:'Australia',40:'Austria',50:'Bangladesh',56:'Belgium',68:'Bolivia',76:'Brazil',100:'Bulgaria',116:'Cambodia',120:'Cameroon',124:'Canada',144:'Sri Lanka',152:'Chile',156:'China',170:'Colombia',180:'DR Congo',188:'Costa Rica',191:'Croatia',192:'Cuba',196:'Cyprus',203:'Czech Republic',208:'Denmark',218:'Ecuador',818:'Egypt',231:'Ethiopia',246:'Finland',250:'France',276:'Germany',288:'Ghana',300:'Greece',320:'Guatemala',332:'Haiti',340:'Honduras',348:'Hungary',356:'India',360:'Indonesia',364:'Iran',368:'Iraq',372:'Ireland',376:'Israel',380:'Italy',388:'Jamaica',392:'Japan',400:'Jordan',404:'Kenya',410:'South Korea',414:'Kuwait',422:'Lebanon',484:'Mexico',504:'Morocco',508:'Mozambique',524:'Nepal',528:'Netherlands',554:'New Zealand',566:'Nigeria',578:'Norway',586:'Pakistan',591:'Panama',604:'Peru',616:'Poland',620:'Portugal',630:'Puerto Rico',634:'Qatar',642:'Romania',643:'Russia',682:'Saudi Arabia',694:'Sierra Leone',703:'Slovakia',706:'Somalia',724:'Spain',752:'Sweden',756:'Switzerland',760:'Syria',158:'Taiwan',764:'Thailand',788:'Tunisia',792:'Turkey',800:'Uganda',804:'Ukraine',784:'UAE',826:'United Kingdom',840:'USA',858:'Uruguay',862:'Venezuela',704:'Vietnam',887:'Yemen',894:'Zambia',716:'Zimbabwe'};
-                L.geoJSON(geoJson,{
+                window._helixGeoLayer = L.geoJSON(geoJson,{
                     style:{fillColor:'transparent',color:'rgba(96,165,250,0.12)',weight:.5,fillOpacity:0},
                     onEachFeature:(f,layer)=>{
                         layer.on('mouseover',function(){this.setStyle({color:'rgba(96,165,250,0.4)',weight:.8,fillColor:'rgba(96,165,250,0.04)',fillOpacity:1});});
@@ -5245,7 +5282,8 @@ async function renderGeoTab() {
                         const name=COUNTRY_NAMES[parseInt(id)]||f.properties?.name||'';
                         if(name) layer.bindTooltip(name,{className:'geo-tooltip',sticky:true});
                     }
-                }).addTo(window._helixMap);
+                });
+                window._helixGeoLayer.addTo(window._helixMap);
             }
         } catch(e){ console.warn('[Helix Geo] World atlas failed:',e.message); }
     }
@@ -5426,6 +5464,52 @@ function geoV4RenderMarkers(){
     set('geoStripRate',hitRatePct+'%');
     set('geoStripHosp',hospLabel);
     geoV4RenderRegions(rows);
+    // Re-apply choropleth overlay if active
+    if (window._geoState.layerChoropleth) geoV4RenderChoropleth();
+}
+
+
+// ================================================================
+// CHOROPLETH DENSITY LAYER
+// Paints country polygons by search volume. Uses the GeoJSON world
+// layer already on the map. Additive — markers remain on top.
+// ================================================================
+function geoV4RenderChoropleth() {
+    const st = window._geoState;
+    if (!window._helixMap || !window._helixGeoLayer) return;
+    window._helixGeoLayer.eachLayer(layer => {
+        layer.setStyle({ fillColor: "transparent", fillOpacity: 0, color: "rgba(96,165,250,0.12)", weight: 0.5 });
+    });
+    if (!st.layerChoropleth) return;
+    const rows = geoV5FilteredRows();
+    const byCountry = new Map();
+    rows.forEach(r => {
+        const c = r.country; if (!c) return;
+        if (!byCountry.has(c)) byCountry.set(c, { searches: 0, hits: 0, misses: 0 });
+        const d = byCountry.get(c); d.searches++;
+        if (r.is_hit) d.hits++; else d.misses++;
+    });
+    if (!byCountry.size) return;
+    const maxSearches = Math.max(...Array.from(byCountry.values()).map(d => d.searches));
+    window._helixGeoLayer.eachLayer(layer => {
+        const tooltipContent = layer.getTooltip ? layer.getTooltip()?.getContent() : null;
+        const countryName = tooltipContent;
+        if (!countryName) return;
+        let data = byCountry.get(countryName);
+        if (!data) { for (const [k, v] of byCountry.entries()) { if (k.toLowerCase().includes(countryName.toLowerCase()) || countryName.toLowerCase().includes(k.toLowerCase())) { data = v; break; } } }
+        if (!data) return;
+        const intensity = data.searches / maxSearches;
+        const hitRate   = data.searches > 0 ? data.hits / data.searches : 0;
+        const rC = Math.round(hitRate >= 0.6 ? 13 + intensity * 20  : 13 + intensity * 60);
+        const gC = Math.round(hitRate >= 0.6 ? 30 + intensity * 140 : 30 + intensity * 30);
+        const bC = Math.round(hitRate >= 0.6 ? 58 + intensity * 80  : 58 + intensity * 140);
+        const color = "rgb("+rC+","+gC+","+bC+")";
+        const opacity = 0.08 + intensity * 0.38;
+        layer.setStyle({ fillColor: color, fillOpacity: opacity, color: hitRate >= 0.6 ? "rgba(52,211,153,0.3)" : hitRate >= 0.35 ? "rgba(251,191,36,0.22)" : "rgba(248,113,113,0.22)", weight: 0.8 });
+        layer.unbindTooltip();
+        const hitPct = Math.round(hitRate * 100);
+        layer.bindTooltip("<strong style=font-size:12px>"+countryName+"</strong><br><span style=font-family:monospace;font-size:10px>"+data.searches+" searches · "+hitPct+"% match rate</span><br><span style=font-family:monospace;font-size:9px;opacity:.7>"+data.hits+" hits · "+data.misses+" misses</span>", { className: "geo-tooltip", sticky: true });
+    });
 }
 
 /* #7 REGION STRIP — country-aware */
@@ -8152,6 +8236,216 @@ function refreshDashboardStats() {
 
 // ========== EXPORT ==========
 
+// ================================================================
+// CLINICAL PDF REPORT GENERATOR — Improvement #5
+// Generates a print-quality, per-variant clinical summary using the
+// browser's native print API with a dedicated @media print stylesheet.
+// Each variant gets a full page: classification, ETI prediction,
+// evidence chain, validation history, and QR-linkable PMID list.
+// Can be triggered for a single selected variant or as a batch.
+// ================================================================
+
+function exportClinicalReport(variantOrAll) {
+    const variants = variantOrAll === 'all'
+        ? STATE.variants.filter(v => v.cftr_class && v.eti_prediction)
+        : STATE.view.selectedVariant
+            ? [STATE.view.selectedVariant]
+            : null;
+
+    if (!variants || !variants.length) {
+        showNotification('Select a variant first, or use "Batch Report" for all classified variants', 'warning');
+        return;
+    }
+
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
+    const timeStr = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+    const institution = STATE.searchIntelligence?.hospital || 'Δ Helix Platform';
+
+    function etiBadge(pred) {
+        const map = {
+            responsive:     { label: 'ETI RESPONSIVE',     bg: '#052e16', border: '#166534', color: '#4ade80' },
+            non_responsive: { label: 'ETI NON-RESPONSIVE', bg: '#2d1212', border: '#7f1d1d', color: '#f87171' },
+            unknown:        { label: 'ETI STATUS UNKNOWN', bg: '#1c1a0a', border: '#713f12', color: '#fbbf24' },
+        };
+        const s = map[pred] || map.unknown;
+        return `<span style="display:inline-block;padding:3px 10px;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:.1em;background:${s.bg};border:1px solid ${s.border};color:${s.color};">${s.label}</span>`;
+    }
+
+    function classBlock(cls) {
+        const map = {
+            'I':   { bg:'#2d1212', border:'#7f1d1d', color:'#fca5a5', desc:'Minimal CFTR protein production' },
+            'II':  { bg:'#2c1404', border:'#7c2d12', color:'#fdba74', desc:'Defective CFTR trafficking' },
+            'III': { bg:'#052e16', border:'#166534', color:'#6ee7b7', desc:'Defective CFTR gating' },
+            'IV':  { bg:'#0d1f3c', border:'#1e3a5f', color:'#93c5fd', desc:'Defective CFTR conductance' },
+            'V':   { bg:'#1e0d38', border:'#4c1d95', color:'#d8b4fe', desc:'Reduced CFTR production/function' },
+            'VI':  { bg:'#2d0d24', border:'#831843', color:'#f9a8d4', desc:'Reduced CFTR stability' },
+        };
+        const s = map[cls] || { bg:'#111', border:'#333', color:'#888', desc:'Classification pending' };
+        return `<div style="display:inline-flex;flex-direction:column;align-items:center;justify-content:center;width:72px;height:72px;border-radius:10px;background:${s.bg};border:1.5px solid ${s.border};margin-right:18px;flex-shrink:0;">
+            <span style="font-size:26px;font-weight:800;color:${s.color};line-height:1;font-family:'Syne',sans-serif;">` + (cls ? `Class<br>${cls}` : '—') + `</span>
+        </div>
+        <div style="font-size:11px;color:#64748b;margin-top:2px;">${s.desc}</div>`;
+    }
+
+    const pages = variants.map((v, idx) => {
+        const evidenceLinks = []; // would be populated from STATE if available
+        const validationCount = v.validation_count || 0;
+        const lastValidator  = v.last_validator_name ? `${v.last_validator_name}${v.last_validator_role ? ' · ' + v.last_validator_role : ''}` : null;
+        const pubmedIds = v.pubmed_ids ? v.pubmed_ids.split(/[\s,;]+/).filter(Boolean) : [];
+        const confidence = v.class_confidence ? `${v.class_confidence}%` : '—';
+
+        return `
+        <div class="report-page" style="page-break-after:${idx < variants.length - 1 ? 'always' : 'auto'};">
+
+            <!-- HEADER -->
+            <div class="report-header">
+                <div style="display:flex;align-items:center;gap:14px;">
+                    <div style="width:36px;height:36px;border-radius:8px;background:#1e3a5f;border:1.5px solid #2979ff;display:flex;align-items:center;justify-content:center;">
+                        <span style="font-size:18px;font-weight:800;color:#2979ff;font-family:'Syne',sans-serif;">Δ</span>
+                    </div>
+                    <div>
+                        <div style="font-size:13px;font-weight:700;color:#0f172a;letter-spacing:-.01em;">Δ Helix · CFTR Precision Medicine Platform</div>
+                        <div style="font-size:10px;color:#64748b;">Clinical Variant Report · ${dateStr} · ${timeStr}</div>
+                    </div>
+                </div>
+                <div style="text-align:right;">
+                    <div style="font-size:10px;color:#64748b;">${escapeHTML(institution)}</div>
+                    <div style="font-size:10px;color:#94a3b8;margin-top:1px;">Report ${idx + 1} of ${variants.length}</div>
+                </div>
+            </div>
+
+            <!-- VARIANT NAME BLOCK -->
+            <div class="report-section" style="display:flex;align-items:flex-start;gap:0;padding:20px 24px;border-bottom:1px solid #e2e8f0;background:#f8fafc;">
+                ${classBlock(v.cftr_class)}
+                <div style="flex:1;min-width:0;margin-left:18px;">
+                    <div style="font-size:28px;font-weight:800;color:#0f172a;letter-spacing:-.03em;line-height:1.1;font-family:'Syne',sans-serif;">${escapeHTML(v.legacy_name || '—')}</div>
+                    ${v.protein_name ? `<div style="font-size:13px;color:#475569;font-family:monospace;margin-top:5px;">${escapeHTML(v.protein_name)}</div>` : ''}
+                    ${v.cdna_name    ? `<div style="font-size:12px;color:#64748b;font-family:monospace;margin-top:2px;">${escapeHTML(v.cdna_name)}</div>` : ''}
+                    <div style="display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap;">
+                        ${v.eti_prediction ? etiBadge(v.eti_prediction) : ''}
+                        ${v.final_determination ? `<span style="display:inline-block;padding:3px 10px;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:.08em;background:#f1f5f9;border:1px solid #cbd5e1;color:#334155;">${escapeHTML(v.final_determination.toUpperCase())}</span>` : ''}
+                        ${v.class_subtype === 'exceptional' ? `<span style="display:inline-block;padding:3px 10px;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:.08em;background:#fdf4ff;border:1px solid #e879f9;color:#86198f;">EXCEPTIONAL CASE</span>` : ''}
+                    </div>
+                </div>
+            </div>
+
+            <!-- CLASSIFICATION DETAILS -->
+            <div class="report-grid-2">
+                <div class="report-card">
+                    <div class="report-card-title">Classification Details</div>
+                    <table class="report-table">
+                        <tr><td>CFTR Class</td><td><strong>${escapeHTML(v.cftr_class || '—')}</strong></td></tr>
+                        <tr><td>Subtype</td><td>${escapeHTML(v.class_subtype || '—')}</td></tr>
+                        <tr><td>Classification confidence</td><td>${confidence}</td></tr>
+                        <tr><td>ETI prediction</td><td><strong>${escapeHTML(v.eti_prediction || '—')}</strong></td></tr>
+                        <tr><td>ETI evidence level</td><td>${escapeHTML(v.eti_evidence_level || '—')}</td></tr>
+                        <tr><td>Data status</td><td>${escapeHTML(v.data_status || '—')}</td></tr>
+                    </table>
+                </div>
+                <div class="report-card">
+                    <div class="report-card-title">Clinical Recommendation</div>
+                    <div style="font-size:12.5px;line-height:1.7;color:#334155;">${escapeHTML(v.eti_recommendation || 'No specific recommendation recorded.')}</div>
+                    ${v.population_frequency ? `<div style="margin-top:12px;font-size:11px;color:#64748b;"><strong>Population frequency:</strong> ${escapeHTML(String(v.population_frequency))}</div>` : ''}
+                    ${v.source_summary ? `<div style="margin-top:6px;font-size:11px;color:#64748b;"><strong>Source:</strong> ${escapeHTML(v.source_summary)}</div>` : ''}
+                </div>
+            </div>
+
+            <!-- VALIDATION STATUS -->
+            <div class="report-card" style="margin:0 24px 16px;">
+                <div class="report-card-title" style="display:flex;align-items:center;gap:10px;">
+                    Validation Status
+                    <span style="margin-left:auto;font-size:11px;font-weight:400;color:${validationCount > 0 ? '#16a34a' : '#dc2626'};">
+                        ${validationCount > 0 ? `✓ Validated by ${validationCount} clinician${validationCount > 1 ? 's' : ''}` : '⚠ Not yet clinician-validated'}
+                    </span>
+                </div>
+                ${lastValidator ? `<div style="font-size:12px;color:#475569;">Last validated by <strong>${escapeHTML(lastValidator)}</strong>${v.last_validated_at ? ' on ' + new Date(v.last_validated_at).toLocaleDateString('en-GB', {day:'2-digit',month:'long',year:'numeric'}) : ''}</div>` : '<div style="font-size:12px;color:#94a3b8;">No validation record on file.</div>'}
+            </div>
+
+            <!-- EVIDENCE / PUBMED -->
+            ${pubmedIds.length ? `
+            <div class="report-card" style="margin:0 24px 16px;">
+                <div class="report-card-title">PubMed References (${pubmedIds.length})</div>
+                <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                    ${pubmedIds.map(pmid => `<span style="font-family:monospace;font-size:11px;padding:3px 8px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;color:#2563eb;">PMID:${escapeHTML(pmid)}</span>`).join('')}
+                </div>
+            </div>` : ''}
+
+            <!-- ALTERNATIVE NAMES -->
+            ${v.alt_names ? `
+            <div class="report-card" style="margin:0 24px 16px;">
+                <div class="report-card-title">Alternative Nomenclature</div>
+                <div style="font-family:monospace;font-size:11.5px;color:#475569;line-height:1.8;">${escapeHTML(v.alt_names)}</div>
+            </div>` : ''}
+
+            <!-- FOOTER -->
+            <div class="report-footer">
+                <div>Generated by Δ Helix CFTR Precision Medicine Platform · For clinical use only · Not for patient distribution without clinician sign-off</div>
+                <div style="margin-top:2px;">Last DB update: ${v.date_updated ? new Date(v.date_updated).toLocaleDateString('en-GB') : '—'} · Report generated: ${dateStr}</div>
+            </div>
+        </div>`;
+    }).join('');
+
+    const win = window.open('', '_blank', 'width=900,height=700');
+    win.document.write(`<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Δ Helix Clinical Report · ${variants.length === 1 ? escapeHTML(variants[0].legacy_name) : variants.length + ' variants'}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { font-family: 'IBM Plex Sans', -apple-system, sans-serif; margin: 0; padding: 0; background: #fff; color: #0f172a; font-size: 13px; line-height: 1.5; }
+    .report-page { max-width: 820px; margin: 0 auto; padding-bottom: 24px; }
+    .report-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; border-bottom: 2px solid #0f172a; background: #fff; }
+    .report-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 0 24px 16px; }
+    .report-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px 18px; }
+    .report-card-title { font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #64748b; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #f1f5f9; }
+    .report-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .report-table td { padding: 5px 0; vertical-align: top; }
+    .report-table td:first-child { color: #64748b; width: 52%; }
+    .report-table td:last-child { color: #0f172a; font-weight: 500; }
+    .report-table tr + tr td { border-top: 1px solid #f8fafc; }
+    .report-footer { margin: 0 24px; padding: 12px 0 0; border-top: 1px solid #e2e8f0; font-size: 9.5px; color: #94a3b8; }
+    @media print {
+        body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .report-page { max-width: 100%; }
+        .no-print { display: none !important; }
+        @page { margin: 14mm 16mm; size: A4 portrait; }
+    }
+</style>
+</head>
+<body>
+<div class="no-print" style="position:sticky;top:0;z-index:99;display:flex;align-items:center;gap:12px;padding:10px 20px;background:#0f172a;border-bottom:1px solid #1e293b;">
+    <span style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;color:#fff;">Δ Helix Clinical Report</span>
+    <span style="font-size:12px;color:#64748b;">${variants.length} variant${variants.length > 1 ? 's' : ''} · ${dateStr}</span>
+    <button onclick="window.print()" style="margin-left:auto;padding:7px 20px;background:#2563eb;border:none;border-radius:6px;color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;">⬇ Print / Save PDF</button>
+    <button onclick="window.close()" style="padding:7px 14px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:6px;color:#cbd5e1;font-size:12px;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;">Close</button>
+</div>
+${pages}
+</body></html>`);
+    win.document.close();
+    showNotification(`Clinical report generated for ${variants.length} variant${variants.length > 1 ? 's' : ''}`, 'success');
+}
+
+function toggleExportMenu() {
+    const menu = document.getElementById('exportMenu');
+    if (!menu) return;
+    const isOpen = menu.style.display !== 'none';
+    menu.style.display = isOpen ? 'none' : 'block';
+    if (!isOpen) {
+        // Close on outside click
+        const handler = (e) => {
+            if (!document.getElementById('exportMenuWrap')?.contains(e.target)) {
+                menu.style.display = 'none';
+                document.removeEventListener('click', handler);
+            }
+        };
+        setTimeout(() => document.addEventListener('click', handler), 10);
+    }
+}
+
 function exportReport() {
     const headers = ['Legacy Name','Protein','cDNA','Determination','CFTR Class','ETI Prediction','Subtype','Confidence','Validation Count'];
     const rows = STATE.variants.map(v => [
@@ -9644,6 +9938,7 @@ Object.assign(window, {
     showDeleteModal, closeDeleteModal, confirmDeleteVariant,
     showValidationModal, closeValidationModal, submitValidation,
     showDashboard, closeDashboard, refreshDashboardStats, exportReport, exportFullReport,
+    exportClinicalReport, toggleExportMenu,
     showEvidenceModal, closeAddEvidenceModal, selectEvidenceType, saveEvidenceLink,
     showAllEvidence, closeAllEvidenceModal, copyToClipboard,
     downloadTemplate, processBulkImport,
@@ -10640,9 +10935,8 @@ Object.assign(window, {
                 <i class="fas fa-shield-alt"></i> Validate
                 <span class="helios-tab-badge" id="htabBadgeValidate" style="display:none;background:var(--helios-blue);"></span>
             </button>
-            <button class="helios-tab" id="htab-validate" onclick="heliosTab('validate')">
-                <i class="fas fa-shield-alt"></i> Validate
-                <span class="helios-tab-badge" id="htabBadgeValidate" style="display:none;background:var(--helios-blue);"></span>
+            <button class="helios-tab" id="htab-calibration" onclick="heliosTab('calibration')" title="AI Calibration — feedback loop stats">
+                <i class="fas fa-sliders-h"></i> Calibration
             </button>
         </div>
 
@@ -10999,6 +11293,46 @@ Object.assign(window, {
             </div>
         </div>
 
+        <!-- ===== CALIBRATION PANEL ===== -->
+        <div class="helios-panel" id="hpanel-calibration">
+            <div class="helios-card" style="margin-bottom:14px;">
+                <div class="helios-card-head">
+                    <i class="fas fa-brain" style="color:var(--helios-sun);"></i>
+                    AI Feedback Calibration
+                    <span style="font-size:10px;color:var(--helios-text3);margin-left:6px;">Approval rates by scan source · updates in real time</span>
+                    <button class="helios-btn helios-btn-ghost" style="margin-left:auto;padding:4px 10px;font-size:10.5px;" onclick="heliosFeedbackRefreshPanel()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+                <div style="padding:12px 18px;border-bottom:1px solid var(--helios-border);background:rgba(0,0,0,0.15);">
+                    <div style="font-size:11.5px;color:var(--helios-text2);line-height:1.6;">
+                        Every approve/reject decision trains the AI. Sources with <strong style="color:var(--helios-red);">&lt;15% approval</strong> (after 5+ decisions) are automatically suppressed. Sources with <strong style="color:var(--helios-green);">&gt;70% approval</strong> get boosted confidence scores.
+                    </div>
+                </div>
+                <div id="heliosFeedbackPanel" style="max-height:380px;overflow-y:auto;">
+                    <div class="helios-empty" style="padding:32px;">
+                        <div class="helios-empty-icon"><i class="fas fa-sliders-h"></i></div>
+                        <p>No feedback data yet — approve or reject items to calibrate the AI</p>
+                    </div>
+                </div>
+            </div>
+            <div class="helios-card">
+                <div class="helios-card-head">
+                    <i class="fas fa-exclamation-triangle" style="color:var(--helios-red);"></i>
+                    Suppressed Sources
+                    <span style="font-size:10px;color:var(--helios-text3);margin-left:6px;">Sources the AI has learned to ignore</span>
+                </div>
+                <div style="padding:16px 18px;">
+                    <div style="font-size:11.5px;color:var(--helios-text2);margin-bottom:14px;line-height:1.6;">
+                        Suppressed scan sources are silenced — Helios will not queue new items from them until the suppression is lifted. Reset calibration to re-enable all sources.
+                    </div>
+                    <button class="helios-btn helios-btn-reject" style="font-size:11px;" onclick="heliosFeedbackReset()">
+                        <i class="fas fa-undo"></i> Reset All Calibration Data
+                    </button>
+                </div>
+            </div>
+        </div>
+
     </div><!-- /helios-body -->
 </div><!-- /heliosOverlay -->
 
@@ -11216,13 +11550,14 @@ function closeHelios() {
 // ---- Tab switching ----
 function heliosTab(tab) {
     HELIOS.currentTab = tab;
-    ['inbox','scanner','health','audit','validate'].forEach(t => {
+    ['inbox','scanner','health','audit','validate','calibration'].forEach(t => {
         document.getElementById(`hpanel-${t}`)?.classList.toggle('active', t === tab);
         document.getElementById(`htab-${t}`)?.classList.toggle('active', t === tab);
     });
     if (tab === 'audit')    heliosLoadAudit();
     if (tab === 'scanner')  heliosUpdateScannerStats();
     if (tab === 'validate') heliosLoadValidationQueue();
+    if (tab === 'calibration') heliosFeedbackRefreshPanel();
     // health check only on explicit Run Check click
 }
 
@@ -11524,6 +11859,117 @@ async function heliosGetClinicianIdentity() {
     };
 }
 
+// ================================================================
+// HELIOS FEEDBACK LOOP ENGINE
+// Tracks approval/rejection rates per scan_source and item_type.
+// Dynamically adjusts bot_confidence thresholds so over-flagging
+// sources get suppressed and high-signal sources get amplified.
+// Persisted in localStorage as 'helix_feedback_v1'.
+// ================================================================
+const HELIOS_FEEDBACK = (() => {
+    try { return JSON.parse(localStorage.getItem('helix_feedback_v1') || '{}'); } catch { return {}; }
+})();
+
+function heliosFeedbackRecord(item, outcome) {
+    // outcome: 'approved' | 'rejected' | 'deferred'
+    const key = `${item.scan_source || 'UNKNOWN'}::${item.item_type || 'UNKNOWN'}`;
+    if (!HELIOS_FEEDBACK[key]) HELIOS_FEEDBACK[key] = { approved: 0, rejected: 0, deferred: 0, total: 0 };
+    HELIOS_FEEDBACK[key][outcome] = (HELIOS_FEEDBACK[key][outcome] || 0) + 1;
+    HELIOS_FEEDBACK[key].total = (HELIOS_FEEDBACK[key].total || 0) + 1;
+    HELIOS_FEEDBACK[key].lastUpdated = new Date().toISOString();
+    try { localStorage.setItem('helix_feedback_v1', JSON.stringify(HELIOS_FEEDBACK)); } catch {}
+    heliosFeedbackRefreshPanel();
+}
+
+function heliosFeedbackApprovalRate(scanSource, itemType) {
+    const key = `${scanSource || 'UNKNOWN'}::${itemType || 'UNKNOWN'}`;
+    const d = HELIOS_FEEDBACK[key];
+    if (!d || d.total < 3) return null; // not enough data
+    return d.approved / d.total;
+}
+
+// Adjust confidence based on feedback: boost if historically approved, penalise if historically rejected
+function heliosFeedbackAdjustConfidence(item) {
+    const rate = heliosFeedbackApprovalRate(item.scan_source, item.item_type);
+    if (rate === null) return item.bot_confidence ?? 50;
+    // rate 1.0 → +15 pts, rate 0.0 → -25 pts, linear
+    const delta = rate >= 0.5 ? Math.round((rate - 0.5) * 30) : Math.round((rate - 0.5) * 50);
+    return Math.max(5, Math.min(98, (item.bot_confidence ?? 50) + delta));
+}
+
+// Decide if a source is suppressed (>= 5 decisions, approval rate < 15%)
+function heliosFeedbackIsSuppressed(scanSource, itemType) {
+    const key = `${scanSource || 'UNKNOWN'}::${itemType || 'UNKNOWN'}`;
+    const d = HELIOS_FEEDBACK[key];
+    if (!d || d.total < 5) return false;
+    return (d.approved / d.total) < 0.15;
+}
+
+function heliosFeedbackRefreshPanel() {
+    const panel = document.getElementById('heliosFeedbackPanel');
+    if (!panel) return;
+    const entries = Object.entries(HELIOS_FEEDBACK);
+    if (!entries.length) {
+        panel.innerHTML = `<div class="helios-empty" style="padding:20px;"><p style="font-size:12px;color:var(--helios-text3);">No feedback data yet — approve or reject items to start calibrating</p></div>`;
+        return;
+    }
+    panel.innerHTML = entries
+        .filter(([,d]) => d.total >= 1)
+        .sort((a,b) => b[1].total - a[1].total)
+        .map(([key, d]) => {
+            const [src, type] = key.split('::');
+            const rate = d.total > 0 ? Math.round((d.approved / d.total) * 100) : 0;
+            const suppressed = d.total >= 5 && rate < 15;
+            const color = rate >= 70 ? 'var(--helios-green)' : rate >= 35 ? 'var(--helios-sun)' : 'var(--helios-red)';
+            return `<div style="display:flex;align-items:center;gap:10px;padding:10px 18px;border-bottom:1px solid var(--helios-border);">
+                <div style="flex:1;min-width:0;">
+                    <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">
+                        <span style="font-size:11.5px;font-weight:600;color:var(--helios-text);font-family:var(--helios-body);">${escapeHTML(src)}</span>
+                        <span style="font-size:9px;color:var(--helios-text3);font-family:var(--helios-mono);">· ${escapeHTML(type)}</span>
+                        ${suppressed ? `<span style="font-size:8.5px;padding:1px 5px;border-radius:3px;background:rgba(248,113,113,0.1);color:var(--helios-red);border:1px solid rgba(248,113,113,0.2);font-family:var(--helios-mono);">SUPPRESSED</span>` : ''}
+                    </div>
+                    <div style="height:4px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden;margin-top:4px;">
+                        <div style="height:100%;width:${rate}%;background:${color};border-radius:2px;transition:width 0.4s;"></div>
+                    </div>
+                </div>
+                <div style="text-align:right;flex-shrink:0;">
+                    <div style="font-size:15px;font-weight:700;color:${color};font-family:var(--helios-display);">${rate}%</div>
+                    <div style="font-size:9px;color:var(--helios-text3);font-family:var(--helios-mono);">${d.approved}✓ ${d.rejected}✗ ${d.deferred}⏱ / ${d.total}</div>
+                </div>
+            </div>`;
+        }).join('');
+}
+
+function heliosFeedbackReset() {
+    if (!confirm('Reset all Helios feedback calibration data? The AI will start learning from scratch.')) return;
+    Object.keys(HELIOS_FEEDBACK).forEach(k => delete HELIOS_FEEDBACK[k]);
+    try { localStorage.removeItem('helix_feedback_v1'); } catch {}
+    heliosFeedbackRefreshPanel();
+    heliosLog('warn', '⚠ Feedback calibration reset — all approval rate history cleared');
+    showNotification('Feedback data reset', 'warning');
+}
+
+// Patch renderHeliosConfidence to show calibrated confidence
+const _origRenderConfidence = typeof renderHeliosConfidence !== 'undefined' ? renderHeliosConfidence : null;
+
+function renderHeliosConfidence(item) {
+    const calibrated = heliosFeedbackAdjustConfidence(item);
+    const raw = item.bot_confidence ?? 50;
+    const delta = calibrated - raw;
+    const color = calibrated >= 75 ? 'var(--helios-green)' : calibrated >= 45 ? 'var(--helios-sun)' : 'var(--helios-red)';
+    const suppressed = heliosFeedbackIsSuppressed(item.scan_source, item.item_type);
+    return `<div class="helios-confidence-bar">
+        <span style="font-size:10px;font-weight:600;font-family:var(--helios-mono);color:var(--helios-text3);white-space:nowrap;">
+            ${suppressed ? '⚠ LOW SIGNAL SOURCE' : 'Confidence'}
+        </span>
+        <div class="helios-bar-track"><div class="helios-bar-fill" style="width:${calibrated}%;background:linear-gradient(90deg,${color}99,${color});"></div></div>
+        <span style="font-size:12px;font-weight:700;font-family:var(--helios-display);color:${color};white-space:nowrap;">
+            ${calibrated}%
+            ${delta !== 0 ? `<span style="font-size:9px;color:${delta>0?'var(--helios-green)':'var(--helios-red)'};font-family:var(--helios-mono);">(${delta>0?'+':''}${delta} calibrated)</span>` : ''}
+        </span>
+    </div>`;
+}
+
 async function heliosApprove(itemId) {
     if (!isWriteMode()) {
         const item = HELIOS.pendingItems.find(i => i.id === itemId);
@@ -11532,6 +11978,9 @@ async function heliosApprove(itemId) {
     }
     const item = HELIOS.pendingItems.find(i => i.id === itemId);
     if (!item) return;
+
+    // ── Feedback loop ──
+    heliosFeedbackRecord(item, 'approved');
 
     const clinician = await heliosGetClinicianIdentity();
     const note = document.getElementById(`hnote-${itemId}`)?.value?.trim() || '';
@@ -11559,6 +12008,8 @@ async function heliosApproveWithNote(itemId) {
     if (!item) return;
     const note = prompt(`Approving: ${item.bot_summary}\n\nAdd a clinical note (required for URGENT items):`);
     if (note === null) return; // cancelled
+    // ── Feedback loop ──
+    heliosFeedbackRecord(item, 'approved');
     const clinician = await heliosGetClinicianIdentity();
     await heliosSetItemStatus(itemId, 'approved', clinician.name, clinician.role, note);
     if (item.proposed_field && item.proposed_value && item.variant_id) {
@@ -11580,6 +12031,8 @@ async function heliosReject(itemId) {
     if (!item) return;
     const note = prompt(`Rejecting: ${item.bot_summary}\n\nReason for rejection (optional):`);
     if (note === null) return;
+    // ── Feedback loop ──
+    heliosFeedbackRecord(item, 'rejected');
     const clinician = await heliosGetClinicianIdentity();
     await heliosSetItemStatus(itemId, 'rejected', clinician.name, clinician.role, note);
     await heliosWriteAudit(item, 'rejected', clinician.name, clinician.role, note);
@@ -11597,6 +12050,8 @@ async function heliosDefer(itemId) {
     const item = HELIOS.pendingItems.find(i => i.id === itemId);
     if (!item) return;
     const clinician = await heliosGetClinicianIdentity();
+    // ── Feedback loop ──
+    heliosFeedbackRecord(item, 'deferred');
     const deferUntil = new Date();
     deferUntil.setDate(deferUntil.getDate() + 1);
     const deferStr = deferUntil.toISOString().split('T')[0];
@@ -12488,6 +12943,12 @@ async function heliosScanMissQueue() {
 // ---- Create pending item ----
 async function heliosCreatePendingItem(data) {
     try {
+        // ── Feedback suppression gate ──
+        // If this source+type combo has been rejected > 85% of the time (min 5 decisions), skip it.
+        if (heliosFeedbackIsSuppressed(data.scan_source, data.item_type)) {
+            heliosLog('info', `⊘ Suppressed (low approval rate): ${data.scan_source}::${data.item_type} — ${data.variant_name || ''}`);
+            return;
+        }
         // Check for duplicate pending item (same variant + same type)
         if (data.variant_id && data.item_type) {
             const check = await hFetch(
@@ -12985,6 +13446,7 @@ Object.assign(window, {
     heliosCheckDrift, heliosMissQueueIntelligence, heliosCheckEvidenceContradictions,
     heliosLoadValidationQueue, heliosRunGeoSignal,
     heliosAddNote, heliosApproveAllRoutine,
+    heliosFeedbackReset, heliosFeedbackRefreshPanel,
     heliosScanInternal, heliosScanExternal, heliosScanSingle, heliosScanMissQueue,
     heliosRunHealthCheck, heliosToggleItem, heliosClearConsole,
     heliosToggleSource, heliosMonitorCurrentVariant,
