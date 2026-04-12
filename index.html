@@ -3273,6 +3273,16 @@
                     <i class="fas fa-hospital" style="font-size:9px;"></i>
                     <span id="hospitalBadgeText">—</span>
                 </span>
+                <button onclick="helixHistoryBack()" id="helixHistoryBack" class="btn btn-ghost" title="No history" style="padding:0 8px;height:36px;opacity:0.3;transition:opacity .2s;">
+                    <i class="fas fa-arrow-left" style="font-size:12px;"></i>
+                </button>
+                <button onclick="helixHistoryForward()" id="helixHistoryFwd" class="btn btn-ghost" title="Nothing ahead" style="padding:0 8px;height:36px;opacity:0.3;transition:opacity .2s;">
+                    <i class="fas fa-arrow-right" style="font-size:12px;"></i>
+                </button>
+                <button onclick="kbOpenCommandPalette()" class="btn btn-ghost" title="Command palette (⌘K)" style="padding:0 10px;height:36px;gap:5px;">
+                    <i class="fas fa-terminal" style="font-size:11px;"></i>
+                    <kbd style="font-size:9px;padding:1px 5px;border-radius:3px;background:rgba(255,255,255,0.06);color:var(--text-tertiary);font-family:var(--font-mono);">⌘K</kbd>
+                </button>
                 <button onclick="showDashboard()" class="btn btn-ghost" title="Analytics" style="font-size:13px;">
                     <i class="fas fa-chart-bar"></i>
                     <span>Analytics</span>
@@ -3362,6 +3372,8 @@
             </div>
             <!-- Intelligent search dropdown -->
             <div class="search-dropdown hidden" id="searchDropdown"></div>
+            <!-- Miss quick-add pill -->
+            <div id="missActionContainer"></div>
         </div>
 
         <!-- View filters -->
@@ -3411,6 +3423,10 @@
         <!-- List meta -->
         <div class="list-meta">
             <span class="list-meta-count"><span id="listCount">—</span> variants</span>
+            <button id="helixBatchToggle" onclick="helixToggleBatchMode()" title="Select multiple variants for batch validation"
+                style="font-size:10px;padding:2px 8px;border-radius:5px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:var(--text-tertiary);cursor:pointer;font-family:var(--font-body);transition:all .15s;margin-left:4px;">
+                <i class="fas fa-check-square" style="font-size:9px;margin-right:3px;"></i>Select
+            </button>
             <button class="list-meta-sort" onclick="toggleSort()">
                 <i class="fas fa-sort-alpha-down" id="sortIcon"></i>
                 <span id="sortLabel">A–Z</span>
@@ -3497,6 +3513,9 @@
                 </button>
                 <button class="tab" id="tabBulk" onclick="switchImportTab('bulk')">
                     <i class="fas fa-layer-group"></i> Bulk CSV
+                </button>
+                <button class="tab" id="tabWizard" onclick="closeImportModal();openClassificationWizard();" style="border-color:rgba(41,121,255,0.3);color:var(--brand);">
+                    <i class="fas fa-magic"></i> Wizard
                 </button>
             </div>
 
@@ -6575,6 +6594,8 @@ function selectVariant(name, fromSearch) {
     const variant = STATE.variantsByLegacyName.get(name);
     if (!variant) return;
     STATE.view.selectedVariant = variant;
+    helixHistoryPush(variant);   // ← history
+    helixHideMissAction();       // ← hide miss pill on successful select
     renderVariantList(); // update selection highlight
     renderVariantDetail(variant, fromSearch || false);
     // Flash the row green if this came from a search
@@ -6688,7 +6709,8 @@ function renderVariantList() {
         };
 
         return `
-        <div class="variant-row ${isSelected ? 'selected' : ''}" onclick="selectVariant('${escapeAttr(v.legacy_name)}')">
+        <div class="variant-row ${isSelected ? 'selected' : ''}" onclick="${STATE.batchMode ? `helixToggleBatchSelect(${v.id},event)` : `selectVariant('${escapeAttr(v.legacy_name)}')`}">
+            ${STATE.batchMode ? `<div style="display:flex;align-items:center;padding:0 8px;flex-shrink:0;"><input type="checkbox" id="batchCb-${v.id}" ${STATE.batchSelected.has(v.id)?'checked':''} onclick="helixToggleBatchSelect(${v.id},event)" style="width:16px;height:16px;accent-color:var(--brand);cursor:pointer;flex-shrink:0;"></div>` : ''}
             <div class="row-accent ${cls}"></div>
             <div class="row-content">
                 <div class="row-top">
@@ -6866,6 +6888,7 @@ function renderVariantDetail(variant, fromSearch) {
                         ${dataField('Evidence Level', variant.eti_evidence_level, 'eti_evidence_level', variant)}
                         ${dataField('Recommendation', variant.eti_recommendation, 'eti_recommendation', variant)}
                     </div>
+                    ${renderETITimeline(variant)}
                 </div>
             </div>
         </div>
@@ -6952,10 +6975,26 @@ function renderVariantDetail(variant, fromSearch) {
             </div>
         </div>
         ` : ''}
+
+        <!-- Clinical Notes Thread -->
+        <div class="detail-section" style="margin-top:0">
+            <div class="section-header">
+                <div class="section-header-icon" style="background:rgba(251,191,36,0.1);color:#fbbf24"><i class="fas fa-sticky-note"></i></div>
+                <span class="section-title">Clinical Notes</span>
+                <span style="font-size:11px;color:var(--text-tertiary);margin-left:4px;">Persistent · visible to all clinicians</span>
+            </div>
+            <div class="section-body" style="padding:12px 16px;" id="variantNotes-${variant.id}">
+                <div style="font-size:11px;color:var(--text-tertiary);padding:8px 0;"><i class="fas fa-spinner fa-spin"></i> Loading notes…</div>
+            </div>
+        </div>
     `;
 
     // Load validation history async
     setTimeout(() => loadValidationHistory(variant.id), 100);
+    // Load variant notes async
+    setTimeout(() => loadVariantNotes(variant.id), 120);
+    // Inject quality scoring fields into evidence modal (idempotent)
+    setTimeout(() => injectEvidenceQualityFields(), 50);
 }
 
 function dataField(label, value, field, variant) {
@@ -8779,6 +8818,9 @@ function triggerMissFlash() {
         void input.offsetWidth;
         input.classList.add('miss-flash');
         setTimeout(() => input.classList.remove('miss-flash'), 420);
+        // Show quick-add pill
+        const q = input.value.trim();
+        if (q.length >= 2) helixShowMissAction(q);
     }
 }
 
@@ -9708,6 +9750,571 @@ function initSearch() {
         }
     });
 }
+
+// ================================================================
+// IMPROVEMENT 1 — FULL KEYBOARD NAVIGATION
+// ↑↓  navigate variant list    Enter  select highlighted
+// /   focus search (any ctx)   Escape clear / close
+// ⌘K  command palette          ←→    back/forward history
+// ================================================================
+
+const KB = {
+    highlightIndex: -1,  // which row in current page is keyboard-highlighted
+};
+
+// Upgrade initSearch to wire ↑↓ Enter on the search input
+const _origInitSearch = initSearch;
+function initSearch() {
+    _origInitSearch();
+    const input = document.getElementById('searchInput');
+    if (!input) return;
+
+    // Remove old keydown listener and replace with upgraded version
+    input.addEventListener('keydown', e => {
+        const page  = STATE.view.filteredVariants.slice(
+            (STATE.view.currentPage - 1) * CONFIG.UI.ITEMS_PER_PAGE,
+            STATE.view.currentPage * CONFIG.UI.ITEMS_PER_PAGE
+        );
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            KB.highlightIndex = Math.min(KB.highlightIndex + 1, page.length - 1);
+            kbHighlightRow(KB.highlightIndex);
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            KB.highlightIndex = Math.max(KB.highlightIndex - 1, 0);
+            kbHighlightRow(KB.highlightIndex);
+        } else if (e.key === 'Enter' && KB.highlightIndex >= 0 && page[KB.highlightIndex]) {
+            e.preventDefault();
+            selectVariant(page[KB.highlightIndex].legacy_name, true);
+            KB.highlightIndex = -1;
+        }
+    });
+
+    // Reset highlight when input changes
+    input.addEventListener('input', () => { KB.highlightIndex = -1; });
+}
+
+function kbHighlightRow(idx) {
+    // Remove previous highlight
+    document.querySelectorAll('.variant-row.kb-focus').forEach(r => r.classList.remove('kb-focus'));
+    const rows = document.querySelectorAll('#variantList .variant-row');
+    if (rows[idx]) {
+        rows[idx].classList.add('kb-focus');
+        rows[idx].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+}
+
+// Global hotkeys — separate from search input
+document.addEventListener('keydown', e => {
+    const tag = document.activeElement?.tagName;
+    const inInput = ['INPUT','TEXTAREA','SELECT'].includes(tag);
+    const anyModalOpen = ['importModal','annotationModal','validationModal',
+        'deleteModal','addEvidenceModal','allEvidenceModal']
+        .some(id => !document.getElementById(id)?.classList.contains('hidden'));
+
+    // ⌘K / Ctrl+K — command palette
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        kbOpenCommandPalette();
+        return;
+    }
+
+    // ← → — back / forward history (not in input)
+    if (!inInput && !anyModalOpen) {
+        if (e.key === 'ArrowLeft'  && e.altKey) { e.preventDefault(); helixHistoryBack();    return; }
+        if (e.key === 'ArrowRight' && e.altKey) { e.preventDefault(); helixHistoryForward(); return; }
+    }
+
+    // Tab within variant list — move focus
+    if (!inInput && !anyModalOpen) {
+        const page = STATE.view.filteredVariants.slice(
+            (STATE.view.currentPage - 1) * CONFIG.UI.ITEMS_PER_PAGE,
+            STATE.view.currentPage * CONFIG.UI.ITEMS_PER_PAGE
+        );
+        if (e.key === 'j' || e.key === 'J') {
+            e.preventDefault();
+            KB.highlightIndex = Math.min(KB.highlightIndex + 1, page.length - 1);
+            kbHighlightRow(KB.highlightIndex);
+        } else if (e.key === 'k' || e.key === 'K') {
+            e.preventDefault();
+            KB.highlightIndex = Math.max(KB.highlightIndex - 1, 0);
+            kbHighlightRow(KB.highlightIndex);
+        } else if (e.key === 'Enter' && KB.highlightIndex >= 0 && page[KB.highlightIndex]) {
+            e.preventDefault();
+            selectVariant(page[KB.highlightIndex].legacy_name, true);
+        } else if (e.key === 'p' && (e.metaKey || e.ctrlKey)) {
+            e.preventDefault();
+            exportClinicalReport('single');
+        }
+    }
+});
+
+// ---- Command Palette ----
+function kbOpenCommandPalette() {
+    if (document.getElementById('helixCmdPalette')) {
+        document.getElementById('helixCmdPalette').remove();
+        return;
+    }
+    const overlay = document.createElement('div');
+    overlay.id = 'helixCmdPalette';
+    Object.assign(overlay.style, {
+        position: 'fixed', inset: '0', zIndex: '99998',
+        background: 'rgba(4,8,15,0.75)', backdropFilter: 'blur(8px)',
+        display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
+        paddingTop: '14vh',
+    });
+    overlay.innerHTML = `
+        <div style="width:min(580px,90vw);background:#0d1526;border:1px solid rgba(41,121,255,0.35);border-radius:14px;box-shadow:0 24px 64px rgba(0,5,20,0.85);overflow:hidden;">
+            <div style="display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid rgba(99,140,210,0.13);">
+                <i class="fas fa-terminal" style="font-size:12px;color:var(--brand);"></i>
+                <input id="cmdPaletteInput" placeholder="Search variants or commands…" autocomplete="off"
+                    style="flex:1;background:none;border:none;outline:none;font-size:14px;color:var(--text-primary);font-family:var(--font-body);">
+                <kbd style="font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(255,255,255,0.06);color:var(--text-tertiary);font-family:var(--font-mono);">ESC</kbd>
+            </div>
+            <div id="cmdPaletteResults" style="max-height:380px;overflow-y:auto;"></div>
+            <div style="padding:8px 18px;border-top:1px solid rgba(99,140,210,0.08);display:flex;gap:16px;font-size:10px;color:var(--text-tertiary);font-family:var(--font-mono);">
+                <span><kbd style="background:rgba(255,255,255,0.06);padding:1px 5px;border-radius:3px;">↑↓</kbd> navigate</span>
+                <span><kbd style="background:rgba(255,255,255,0.06);padding:1px 5px;border-radius:3px;">↵</kbd> select</span>
+                <span><kbd style="background:rgba(255,255,255,0.06);padding:1px 5px;border-radius:3px;">ESC</kbd> close</span>
+            </div>
+        </div>`;
+    document.body.appendChild(overlay);
+    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+
+    const inp = document.getElementById('cmdPaletteInput');
+    const res = document.getElementById('cmdPaletteResults');
+    let cpIdx = -1;
+
+    const COMMANDS = [
+        { label: 'Open Helios AI', icon: 'fa-sun', action: () => openHelios() },
+        { label: 'Analytics Dashboard', icon: 'fa-chart-bar', action: () => showDashboard() },
+        { label: 'Add Variant', icon: 'fa-plus', action: () => showImportModal() },
+        { label: 'Export Clinical PDF', icon: 'fa-file-medical', action: () => exportClinicalReport('single') },
+        { label: 'Batch PDF Report', icon: 'fa-file-medical-alt', action: () => exportClinicalReport('all') },
+        { label: 'Export CSV', icon: 'fa-file-csv', action: () => exportReport() },
+        { label: 'Back', icon: 'fa-arrow-left', action: () => helixHistoryBack() },
+        { label: 'Forward', icon: 'fa-arrow-right', action: () => helixHistoryForward() },
+    ];
+
+    function renderCmdResults(query) {
+        const q = query.toLowerCase().trim();
+        const variantMatches = q.length >= 2
+            ? STATE.variants.filter(v =>
+                v.legacy_name?.toLowerCase().includes(q) ||
+                v.protein_name?.toLowerCase().includes(q)
+              ).slice(0, 6).map(v => ({
+                label: v.legacy_name,
+                sub: v.protein_name || (v.cftr_class ? 'Class ' + v.cftr_class : ''),
+                icon: 'fa-dna',
+                action: () => { selectVariant(v.legacy_name); overlay.remove(); }
+              }))
+            : [];
+        const cmdMatches = COMMANDS.filter(c => !q || c.label.toLowerCase().includes(q));
+        const all = [...variantMatches, ...cmdMatches];
+        cpIdx = -1;
+        if (!all.length) {
+            res.innerHTML = `<div style="padding:24px;text-align:center;font-size:12px;color:var(--text-tertiary);">No results</div>`;
+            return;
+        }
+        res.innerHTML = all.map((item, i) => `
+            <div class="cmd-row" data-idx="${i}" onclick="cmdPaletteSelect(${i})"
+                style="display:flex;align-items:center;gap:12px;padding:10px 18px;cursor:pointer;border-bottom:1px solid rgba(99,140,210,0.06);transition:background .1s;"
+                onmouseover="this.style.background='rgba(41,121,255,0.07)'" onmouseout="this.style.background=cpIdx===${i}?'rgba(41,121,255,0.1)':''">
+                <i class="fas ${item.icon}" style="font-size:12px;color:var(--brand);width:16px;text-align:center;flex-shrink:0;"></i>
+                <div style="flex:1;min-width:0;">
+                    <div style="font-size:13px;color:var(--text-primary);">${escapeHTML(item.label)}</div>
+                    ${item.sub ? `<div style="font-size:10.5px;color:var(--text-tertiary);font-family:var(--font-mono);">${escapeHTML(item.sub)}</div>` : ''}
+                </div>
+            </div>`).join('');
+        window._cmdPaletteActions = all.map(a => a.action);
+    }
+
+    window.cmdPaletteSelect = (idx) => {
+        if (window._cmdPaletteActions?.[idx]) {
+            overlay.remove();
+            window._cmdPaletteActions[idx]();
+        }
+    };
+
+    inp.addEventListener('input', () => renderCmdResults(inp.value));
+    inp.addEventListener('keydown', e => {
+        const rows = res.querySelectorAll('.cmd-row');
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            cpIdx = Math.min(cpIdx + 1, rows.length - 1);
+            rows.forEach((r,i) => r.style.background = i === cpIdx ? 'rgba(41,121,255,0.1)' : '');
+            rows[cpIdx]?.scrollIntoView({ block: 'nearest' });
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            cpIdx = Math.max(cpIdx - 1, 0);
+            rows.forEach((r,i) => r.style.background = i === cpIdx ? 'rgba(41,121,255,0.1)' : '');
+            rows[cpIdx]?.scrollIntoView({ block: 'nearest' });
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            if (cpIdx >= 0) cmdPaletteSelect(cpIdx);
+            else if (rows.length === 1) cmdPaletteSelect(0);
+        } else if (e.key === 'Escape') { overlay.remove(); }
+    });
+
+    renderCmdResults('');
+    setTimeout(() => inp.focus(), 30);
+}
+
+// CSS for kb-focus row highlight
+(function() {
+    const s = document.createElement('style');
+    s.textContent = `
+        .variant-row.kb-focus {
+            background: rgba(41,121,255,0.09) !important;
+            border-color: rgba(41,121,255,0.28) !important;
+            outline: none;
+        }
+        .variant-row.kb-focus .row-accent { background: var(--brand) !important; }
+        #helixCmdPalette { animation: fadeIn 120ms ease; }
+    `;
+    document.head.appendChild(s);
+})();
+
+// ================================================================
+// IMPROVEMENT 2 — VARIANT HISTORY / BACK-FORWARD NAVIGATION
+// Keeps a 20-item stack of visited variants. Alt+← / Alt+→ navigate.
+// Back button appears in detail header when history exists.
+// ================================================================
+
+const HELIX_HISTORY = { stack: [], cursor: -1, max: 20 };
+
+function helixHistoryPush(variant) {
+    if (!variant) return;
+    // Don't push if same as current
+    if (HELIX_HISTORY.stack[HELIX_HISTORY.cursor]?.id === variant.id) return;
+    // Truncate forward stack
+    HELIX_HISTORY.stack = HELIX_HISTORY.stack.slice(0, HELIX_HISTORY.cursor + 1);
+    HELIX_HISTORY.stack.push({ id: variant.id, name: variant.legacy_name });
+    if (HELIX_HISTORY.stack.length > HELIX_HISTORY.max) HELIX_HISTORY.stack.shift();
+    HELIX_HISTORY.cursor = HELIX_HISTORY.stack.length - 1;
+    helixHistoryUpdateUI();
+}
+
+function helixHistoryBack() {
+    if (HELIX_HISTORY.cursor <= 0) { showNotification('No previous variant', 'info', 1800); return; }
+    HELIX_HISTORY.cursor--;
+    const entry = HELIX_HISTORY.stack[HELIX_HISTORY.cursor];
+    if (entry) { selectVariant(entry.name); helixHistoryUpdateUI(); }
+}
+
+function helixHistoryForward() {
+    if (HELIX_HISTORY.cursor >= HELIX_HISTORY.stack.length - 1) { showNotification('No next variant', 'info', 1800); return; }
+    HELIX_HISTORY.cursor++;
+    const entry = HELIX_HISTORY.stack[HELIX_HISTORY.cursor];
+    if (entry) { selectVariant(entry.name); helixHistoryUpdateUI(); }
+}
+
+function helixHistoryUpdateUI() {
+    const backBtn = document.getElementById('helixHistoryBack');
+    const fwdBtn  = document.getElementById('helixHistoryFwd');
+    if (backBtn) backBtn.style.opacity = HELIX_HISTORY.cursor > 0 ? '1' : '0.3';
+    if (fwdBtn)  fwdBtn.style.opacity  = HELIX_HISTORY.cursor < HELIX_HISTORY.stack.length - 1 ? '1' : '0.3';
+    // Update tooltip with variant names
+    const prev = HELIX_HISTORY.stack[HELIX_HISTORY.cursor - 1];
+    const next = HELIX_HISTORY.stack[HELIX_HISTORY.cursor + 1];
+    if (backBtn) backBtn.title = prev ? `Back: ${prev.name}` : 'No history';
+    if (fwdBtn)  fwdBtn.title  = next ? `Forward: ${next.name}` : 'Nothing ahead';
+}
+
+// ================================================================
+// IMPROVEMENT 3 — INLINE QUICK-ADD FROM MISS
+// When a search misses, a "Quick-add" pill appears below the search
+// box with the query pre-filled. One click opens the import modal
+// with the legacy name already filled in.
+// ================================================================
+
+function helixShowMissAction(query) {
+    helixHideMissAction();
+    const container = document.getElementById('missActionContainer');
+    if (!container || !query) return;
+    container.innerHTML = `
+        <div id="missActionPill" style="
+            display:flex;align-items:center;gap:8px;
+            padding:6px 10px 6px 12px;
+            background:rgba(248,113,113,0.07);
+            border:1px solid rgba(248,113,113,0.22);
+            border-radius:8px;margin-top:6px;
+            animation:fadeIn 180ms ease;
+        ">
+            <i class="fas fa-exclamation-circle" style="font-size:10px;color:#f87171;flex-shrink:0;"></i>
+            <span style="font-size:11.5px;color:var(--text-secondary);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                "<strong style="color:var(--text-primary);">${escapeHTML(query)}</strong>" not found
+            </span>
+            <button onclick="helixQuickAddFromMiss('${escapeAttr(query)}')" style="
+                padding:3px 10px;border-radius:5px;
+                background:rgba(248,113,113,0.12);
+                border:1px solid rgba(248,113,113,0.3);
+                color:#fca5a5;font-size:10.5px;font-weight:600;
+                cursor:pointer;font-family:var(--font-body);
+                white-space:nowrap;flex-shrink:0;
+                transition:background .15s;
+            " onmouseover="this.style.background='rgba(248,113,113,0.22)'" onmouseout="this.style.background='rgba(248,113,113,0.12)'">
+                + Add variant
+            </button>
+            <button onclick="helixHideMissAction()" style="background:none;border:none;color:var(--text-tertiary);cursor:pointer;padding:2px 4px;font-size:11px;">✕</button>
+        </div>`;
+}
+
+function helixHideMissAction() {
+    const c = document.getElementById('missActionContainer');
+    if (c) c.innerHTML = '';
+}
+
+function helixQuickAddFromMiss(query) {
+    helixHideMissAction();
+    clearSearch();
+    showImportModal();
+    setTimeout(() => {
+        const nameField = document.getElementById('importLegacyName') ||
+                          document.getElementById('manualLegacyName') ||
+                          document.querySelector('#manualImportPanel input[placeholder*="F508"]') ||
+                          document.querySelector('#importModal input[type="text"]');
+        if (nameField) {
+            nameField.value = query;
+            nameField.dispatchEvent(new Event('input'));
+            nameField.focus();
+        }
+    }, 350);
+    showNotification(`Pre-filled "${query}" — add clinical details and save`, 'info', 4000);
+}
+
+// ================================================================
+// IMPROVEMENT 4 — ETI EVIDENCE TIMELINE
+// Renders evidence links chronologically in the ETI card with
+// quality scores, study type, and a visual year axis.
+// Shows at a glance: when was the evidence established, is it
+// RCT-level or in-vitro, and has it been contested recently.
+// ================================================================
+
+function renderETITimeline(variant) {
+    const links = (variant.evidence_links || [])
+        .filter(l => l.eti_claim || l.year)
+        .sort((a, b) => (a.year || 0) - (b.year || 0));
+
+    if (!links.length) return '';
+
+    const minYear = Math.min(...links.map(l => l.year || 2000));
+    const maxYear = Math.max(...links.map(l => l.year || new Date().getFullYear()));
+    const range   = Math.max(1, maxYear - minYear);
+
+    const studyColors = {
+        'RCT':          '#34d399',
+        'Clinical':     '#60a5fa',
+        'Observational':'#fbbf24',
+        'In vitro':     '#c084fc',
+        'Review':       '#9ab8e0',
+        'Case':         '#fb923c',
+    };
+
+    function studyColor(link) {
+        const t = (link.study_type || link.source || '').toLowerCase();
+        if (t.includes('rct') || t.includes('randomis') || t.includes('randomiz')) return studyColors['RCT'];
+        if (t.includes('clinical') || t.includes('trial')) return studyColors['Clinical'];
+        if (t.includes('vitro') || t.includes('lab')) return studyColors['In vitro'];
+        if (t.includes('observ') || t.includes('cohort') || t.includes('retrospect')) return studyColors['Observational'];
+        if (t.includes('review') || t.includes('meta')) return studyColors['Review'];
+        if (t.includes('case')) return studyColors['Case'];
+        return 'var(--text-tertiary)';
+    }
+
+    function studyLabel(link) {
+        const t = (link.study_type || link.source || '').toLowerCase();
+        if (t.includes('rct') || t.includes('randomis') || t.includes('randomiz')) return 'RCT';
+        if (t.includes('clinical') || t.includes('trial')) return 'Clinical';
+        if (t.includes('vitro') || t.includes('lab')) return 'In vitro';
+        if (t.includes('review') || t.includes('meta')) return 'Review';
+        if (t.includes('case')) return 'Case';
+        return link.source || 'Ref';
+    }
+
+    const timelineItems = links.map(link => {
+        const pct  = range > 0 ? Math.round(((link.year || minYear) - minYear) / range * 100) : 50;
+        const col  = studyColor(link);
+        const lbl  = studyLabel(link);
+        const qs   = link.quality_score || 5;
+        const agrees = link.eti_claim && variant.eti_prediction &&
+            link.eti_claim.toLowerCase() === variant.eti_prediction.toLowerCase();
+        const contested = link.eti_claim && variant.eti_prediction &&
+            link.eti_claim.toLowerCase() !== variant.eti_prediction.toLowerCase();
+
+        return `
+        <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);" title="${escapeHTML(link.title||'')}">
+            <div style="flex-shrink:0;width:38px;text-align:right;">
+                <span style="font-size:10px;font-family:var(--font-mono);color:var(--text-tertiary);">${link.year || '—'}</span>
+            </div>
+            <div style="flex-shrink:0;width:2px;background:${col};border-radius:2px;margin-top:3px;height:calc(100% + 8px);min-height:18px;"></div>
+            <div style="flex:1;min-width:0;">
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;flex-wrap:wrap;">
+                    <span style="font-size:9px;padding:1px 5px;border-radius:3px;background:${col}22;color:${col};border:1px solid ${col}44;font-family:var(--font-mono);font-weight:700;">${escapeHTML(lbl)}</span>
+                    ${agreed => agreed ? '<span style="font-size:9px;color:#34d399;">✓ Confirms ETI</span>' : ''}${agrees ? '<span style="font-size:9px;color:#34d399;">✓ Confirms ETI</span>' : ''}
+                    ${contested ? '<span style="font-size:9px;color:#f87171;">⚡ Contradicts ETI</span>' : ''}
+                    <span style="font-size:9px;color:var(--text-tertiary);margin-left:auto;font-family:var(--font-mono);">Q:${qs}/10</span>
+                </div>
+                <div style="font-size:11px;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${escapeHTML(link.title||'')}">
+                    ${escapeHTML(link.title || link.source || 'Reference')}
+                </div>
+                ${link.eti_claim ? `<div style="font-size:10px;color:var(--text-tertiary);margin-top:2px;">Claims: <em>${escapeHTML(link.eti_claim)}</em></div>` : ''}
+            </div>
+        </div>`;
+    }).join('');
+
+    // Year axis
+    const axisLabels = [];
+    for (let y = minYear; y <= maxYear; y += Math.max(1, Math.round(range / 4))) {
+        axisLabels.push(`<span style="flex:1;font-size:9px;font-family:var(--font-mono);color:var(--text-tertiary);">${y}</span>`);
+    }
+
+    return `
+    <div style="margin-top:12px;border-top:1px solid var(--border);padding-top:12px;">
+        <div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:8px;display:flex;align-items:center;gap:8px;">
+            <i class="fas fa-history" style="font-size:9px;"></i>
+            Evidence timeline · ${links.length} source${links.length !== 1 ? 's' : ''}
+            <div style="display:flex;gap:8px;margin-left:auto;flex-wrap:wrap;">
+                ${Object.entries(studyColors).map(([k,c]) => `<span style="font-size:8px;display:flex;align-items:center;gap:3px;"><span style="width:6px;height:6px;border-radius:50%;background:${c};display:inline-block;"></span>${k}</span>`).join('')}
+            </div>
+        </div>
+        <div style="max-height:220px;overflow-y:auto;padding-right:4px;">
+            ${timelineItems}
+        </div>
+    </div>`;
+}
+
+// ================================================================
+// IMPROVEMENT 5 — PRINT STYLESHEET
+// Hides chrome, renders only the variant detail as a clean white
+// clinical document. Works with browser File → Print → Save as PDF.
+// ================================================================
+
+(function injectPrintStyles() {
+    const style = document.createElement('style');
+    style.textContent = `
+@media print {
+    /* Hide everything except the detail panel */
+    .app-header, .app-sidebar, #helixOfflineBanner,
+    #helixCompareTray, #heliosSweep, .activity-ribbon,
+    .detail-actions, .section-action, .field-edit,
+    .btn, #intelStrip, .intel-pill,
+    .modal-overlay:not(#dashboardModal),
+    #loadingScreen, .sidebar-toggle {
+        display: none !important;
+    }
+
+    html, body {
+        overflow: visible !important;
+        height: auto !important;
+        background: #fff !important;
+        color: #0f172a !important;
+        font-size: 12pt;
+    }
+
+    .app-shell {
+        display: block !important;
+        height: auto !important;
+    }
+
+    .app-main {
+        grid-column: 1 / -1 !important;
+        overflow: visible !important;
+        min-height: auto !important;
+        background: #fff !important;
+    }
+
+    .main-inner {
+        max-width: 100% !important;
+        padding: 0 !important;
+    }
+
+    #variantDetail {
+        display: block !important;
+    }
+
+    /* Print header — injected before detail */
+    .print-header {
+        display: flex !important;
+        align-items: center;
+        justify-content: space-between;
+        padding-bottom: 12pt;
+        border-bottom: 1.5pt solid #0f172a;
+        margin-bottom: 16pt;
+    }
+
+    /* Force white backgrounds on all cards */
+    .detail-header, .detail-section, .eti-card,
+    .data-field, .val-history, .evidence-list {
+        background: #fff !important;
+        border-color: #cbd5e1 !important;
+        box-shadow: none !important;
+        color: #0f172a !important;
+    }
+
+    .detail-legacy, .section-title, .eti-label,
+    .field-label, .field-value, .priority-name {
+        color: #0f172a !important;
+    }
+
+    .detail-protein, .eti-sub, .field-label,
+    .evidence-source, .val-entry-name {
+        color: #475569 !important;
+    }
+
+    /* Keep class badge colours */
+    .detail-class-block { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+    /* Force evidence and validation sections visible */
+    .detail-section { page-break-inside: avoid; }
+
+    /* Print footer */
+    @page {
+        margin: 16mm 18mm;
+        @bottom-center {
+            content: "Δ Helix CFTR Precision Medicine · Confidential Clinical Document · " counter(page) " of " counter(pages);
+            font-size: 8pt;
+            color: #94a3b8;
+        }
+    }
+}`;
+    document.head.appendChild(style);
+})();
+
+// Print-header injection — called when printing
+window.addEventListener('beforeprint', () => {
+    const v = STATE.view.selectedVariant;
+    if (!v) return;
+    const existing = document.getElementById('helixPrintHeader');
+    if (existing) existing.remove();
+    const hdr = document.createElement('div');
+    hdr.id = 'helixPrintHeader';
+    hdr.className = 'print-header';
+    hdr.innerHTML = `
+        <div>
+            <div style="font-family:'Syne',sans-serif;font-size:18pt;font-weight:800;color:#0f172a;">Δ Helix CFTR Report</div>
+            <div style="font-size:9pt;color:#64748b;margin-top:2pt;">CFTR Precision Medicine Platform · Clinical Document</div>
+        </div>
+        <div style="text-align:right;font-size:9pt;color:#64748b;">
+            <div>${new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'})}</div>
+            <div>${STATE.searchIntelligence?.hospital || 'Δ Helix'}</div>
+        </div>`;
+    const detail = document.getElementById('variantDetail');
+    if (detail) detail.prepend(hdr);
+});
+window.addEventListener('afterprint', () => {
+    document.getElementById('helixPrintHeader')?.remove();
+});
+
+// ================================================================
+// WIRE EVERYTHING IN
+// ================================================================
+Object.assign(window, {
+    helixHistoryBack, helixHistoryForward, helixHistoryPush,
+    helixShowMissAction, helixHideMissAction, helixQuickAddFromMiss,
+    kbOpenCommandPalette, cmdPaletteSelect: window.cmdPaletteSelect,
+    renderETITimeline,
+});
 
 // ========== EVENT LISTENERS ==========
 
@@ -14018,11 +14625,635 @@ function helixRenderCompareTray() {
 const _origRenderVariantDetail = renderVariantDetail;
 // (patched below after definition to avoid hoisting issues)
 
-// Expose on window
-Object.assign(window, {
-    helixPinVariant, helixClearPin, helixRetryOnline,
-    helixLoadTrends, heliosScheduledScan, heliosAmbientStop
+// ================================================================
+// IMPROVEMENT 1 — CLASSIFICATION WIZARD
+// Step-by-step decision tree that walks through CFTR class logic
+// and proposes a class + ETI prediction based on answers.
+// Steps: protein production → trafficking → gating → conductance
+// Opens as a full-overlay wizard modal. On completion it pre-fills
+// the manual import form with the proposed classification.
+// ================================================================
+
+const WIZARD_STEPS = [
+    {
+        id: 'protein',
+        question: 'Does this variant produce any functional CFTR protein?',
+        hint: 'Nonsense, frameshift, and splice variants that cause premature stop codons typically produce no protein.',
+        options: [
+            { label: 'No — minimal/no protein produced', value: 'no', next: 'result_I' },
+            { label: 'Yes — protein is produced', value: 'yes', next: 'trafficking' },
+            { label: 'Reduced amount (partial loss)', value: 'partial', next: 'result_V' },
+        ]
+    },
+    {
+        id: 'trafficking',
+        question: 'Does the CFTR protein reach the cell surface (plasma membrane)?',
+        hint: 'Class II variants (e.g. F508del) are misfolded and retained in the ER by quality control.',
+        options: [
+            { label: 'No — trapped in ER / misfolded', value: 'no', next: 'result_II' },
+            { label: 'Yes — reaches cell surface', value: 'yes', next: 'gating' },
+        ]
+    },
+    {
+        id: 'gating',
+        question: 'Does the CFTR channel open and close correctly (gate properly)?',
+        hint: 'Class III variants (e.g. G551D) reach the surface but the channel rarely opens. Highly responsive to ivacaftor.',
+        options: [
+            { label: 'No — gating defect, channel rarely opens', value: 'no', next: 'result_III' },
+            { label: 'Yes — gates correctly', value: 'yes', next: 'conductance' },
+        ]
+    },
+    {
+        id: 'conductance',
+        question: 'Is chloride conductance (ion flow through the channel) normal?',
+        hint: 'Class IV variants conduct reduced chloride. Class VI variants are unstable at the surface.',
+        options: [
+            { label: 'No — reduced conductance', value: 'reduced', next: 'result_IV' },
+            { label: 'Yes — normal conductance but unstable surface expression', value: 'unstable', next: 'result_VI' },
+            { label: 'Uncertain / mixed picture', value: 'uncertain', next: 'result_VUS' },
+        ]
+    },
+];
+
+const WIZARD_RESULTS = {
+    result_I:   { class: 'I',   eti: 'non_responsive', confidence: 'High',
+        title: 'Class I — No functional protein',
+        desc: 'Nonsense, frameshift, or aberrant splicing. Minimal protein produced. Not currently responsive to ETI modulator therapy.',
+        badge: '#f87171', note: 'May benefit from nonsense suppression (e.g. ataluren) or future gene therapy approaches.' },
+    result_II:  { class: 'II',  eti: 'responsive', confidence: 'High',
+        title: 'Class II — Protein processing defect',
+        desc: 'Misfolded protein, degraded before reaching cell surface. ETI (elexacaftor/tezacaftor/ivacaftor) is indicated — highest clinical evidence for F508del.',
+        badge: '#fb923c', note: 'F508del is the canonical Class II variant. Other Class II variants should be confirmed in a lab assay.' },
+    result_III: { class: 'III', eti: 'responsive', confidence: 'High',
+        title: 'Class III — Gating defect',
+        desc: 'CFTR reaches cell surface but channel rarely opens. Strongly responsive to ivacaftor (Kalydeco) and ETI combination.',
+        badge: '#34d399', note: 'G551D is the canonical Class III. Check ClinicalTrials.gov for other Class III variants in active studies.' },
+    result_IV:  { class: 'IV',  eti: 'responsive', confidence: 'Moderate',
+        title: 'Class IV — Conductance defect',
+        desc: 'CFTR reaches cell surface and gates, but reduced chloride flow. Mild phenotype. ETI may be beneficial — confirm with functional data.',
+        badge: '#60a5fa', note: 'R117H is a well-characterised Class IV variant. Context-dependent — consider ivacaftor monotherapy.' },
+    result_V:   { class: 'V',   eti: 'responsive', confidence: 'Moderate',
+        title: 'Class V — Reduced synthesis / splicing',
+        desc: 'Some functional protein produced — milder phenotype. Splicing mutations or reduced mRNA stability. ETI may provide benefit.',
+        badge: '#c084fc', note: 'Phenotype varies widely. Functional assay data strongly recommended before treatment decision.' },
+    result_VI:  { class: 'VI',  eti: 'responsive', confidence: 'Low',
+        title: 'Class VI — Unstable at cell surface',
+        desc: 'Full-length CFTR present but rapidly degraded. Reduced surface stability. Limited evidence for ETI — may benefit in combination.',
+        badge: '#f472b6', note: 'Relatively rare class. Check for dual compound heterozygotes where the second allele drives phenotype.' },
+    result_VUS: { class: null,  eti: 'unknown', confidence: 'Low',
+        title: 'Variant of Uncertain Significance',
+        desc: 'Classification cannot be determined from available information. Functional testing is required.',
+        badge: '#9ab8e0', note: 'Submit for functional assay at a CFTR lab. Consider CFTR2 database and ClinVar for existing data.' },
+};
+
+let _wizardPath = [];
+let _wizardCurrentStep = null;
+
+function openClassificationWizard() {
+    if (document.getElementById('classWizardOverlay')) return;
+    _wizardPath = [];
+    _wizardCurrentStep = WIZARD_STEPS[0];
+
+    const overlay = document.createElement('div');
+    overlay.id = 'classWizardOverlay';
+    Object.assign(overlay.style, {
+        position: 'fixed', inset: '0', zIndex: '99997',
+        background: 'rgba(4,8,15,0.82)', backdropFilter: 'blur(10px)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        animation: 'fadeIn 150ms ease',
+    });
+    overlay.innerHTML = `
+        <div id="classWizardBox" style="
+            width:min(600px,92vw);background:#0d1526;
+            border:1px solid rgba(41,121,255,0.3);border-radius:16px;
+            box-shadow:0 32px 80px rgba(0,5,20,0.9);
+            display:flex;flex-direction:column;max-height:90vh;overflow:hidden;">
+            <div style="display:flex;align-items:center;gap:12px;padding:18px 22px 16px;border-bottom:1px solid rgba(99,140,210,0.13);flex-shrink:0;">
+                <div style="width:36px;height:36px;border-radius:9px;background:rgba(41,121,255,0.12);border:1px solid rgba(41,121,255,0.25);display:flex;align-items:center;justify-content:center;">
+                    <i class="fas fa-magic" style="color:var(--brand);font-size:13px;"></i>
+                </div>
+                <div>
+                    <div style="font-family:var(--font-display);font-size:15px;font-weight:700;color:var(--text-primary);">CFTR Classification Wizard</div>
+                    <div style="font-size:11px;color:var(--text-tertiary);">Answer each question to determine the functional class and ETI eligibility</div>
+                </div>
+                <button onclick="closeClassificationWizard()" style="margin-left:auto;background:none;border:none;color:var(--text-tertiary);cursor:pointer;font-size:16px;padding:4px 8px;">&times;</button>
+            </div>
+            <div id="wizardProgress" style="height:3px;background:rgba(41,121,255,0.12);flex-shrink:0;">
+                <div id="wizardProgressBar" style="height:100%;background:linear-gradient(90deg,var(--brand-dark),var(--brand));transition:width .4s cubic-bezier(.4,0,.2,1);width:0%;"></div>
+            </div>
+            <div id="wizardContent" style="flex:1;overflow-y:auto;padding:24px 22px;"></div>
+            <div id="wizardFooter" style="display:flex;align-items:center;justify-content:space-between;padding:14px 22px;border-top:1px solid rgba(99,140,210,0.1);flex-shrink:0;background:rgba(0,0,0,0.15);">
+                <button id="wizardBack" onclick="wizardBack()" style="padding:8px 16px;border-radius:7px;border:1px solid rgba(99,140,210,0.2);background:none;color:var(--text-secondary);font-size:12px;cursor:pointer;font-family:var(--font-body);opacity:0.4;pointer-events:none;">← Back</button>
+                <span id="wizardStepLabel" style="font-size:10px;font-family:var(--font-mono);color:var(--text-tertiary);">Step 1 of 4</span>
+                <div></div>
+            </div>
+        </div>`;
+    document.body.appendChild(overlay);
+    wizardRender(WIZARD_STEPS[0]);
+}
+
+function closeClassificationWizard() {
+    document.getElementById('classWizardOverlay')?.remove();
+}
+
+function wizardRender(step) {
+    const content = document.getElementById('wizardContent');
+    const stepIdx = WIZARD_STEPS.findIndex(s => s.id === step.id);
+    const total   = WIZARD_STEPS.length;
+    const pct     = Math.round((stepIdx / total) * 100);
+
+    document.getElementById('wizardProgressBar').style.width = pct + '%';
+    document.getElementById('wizardStepLabel').textContent = `Step ${stepIdx + 1} of ${total}`;
+
+    const backBtn = document.getElementById('wizardBack');
+    if (_wizardPath.length > 0) {
+        backBtn.style.opacity = '1'; backBtn.style.pointerEvents = 'auto';
+    } else {
+        backBtn.style.opacity = '0.4'; backBtn.style.pointerEvents = 'none';
+    }
+
+    content.innerHTML = `
+        <div style="margin-bottom:20px;">
+            <div style="font-size:17px;font-weight:600;color:var(--text-primary);line-height:1.4;margin-bottom:8px;">${escapeHTML(step.question)}</div>
+            <div style="font-size:12px;color:var(--text-tertiary);line-height:1.6;background:rgba(41,121,255,0.05);border:1px solid rgba(41,121,255,0.1);border-radius:8px;padding:10px 13px;">
+                <i class="fas fa-info-circle" style="color:var(--brand);margin-right:5px;font-size:10px;"></i>${escapeHTML(step.hint)}
+            </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+            ${step.options.map((opt, i) => `
+            <button onclick="wizardChoose('${escapeAttr(opt.next)}')" style="
+                display:flex;align-items:center;gap:14px;
+                padding:14px 18px;border-radius:10px;
+                background:rgba(255,255,255,0.02);
+                border:1.5px solid rgba(99,140,210,0.15);
+                color:var(--text-primary);font-size:13.5px;
+                text-align:left;cursor:pointer;font-family:var(--font-body);
+                transition:all .15s;width:100%;"
+                onmouseover="this.style.background='rgba(41,121,255,0.07)';this.style.borderColor='rgba(41,121,255,0.35)';"
+                onmouseout="this.style.background='rgba(255,255,255,0.02)';this.style.borderColor='rgba(99,140,210,0.15)';">
+                <div style="width:28px;height:28px;border-radius:50%;border:1.5px solid rgba(99,140,210,0.3);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-family:var(--font-mono);color:var(--text-tertiary);">${String.fromCharCode(65+i)}</div>
+                <div style="flex:1;">${escapeHTML(opt.label)}</div>
+                <i class="fas fa-chevron-right" style="font-size:10px;color:var(--text-tertiary);flex-shrink:0;"></i>
+            </button>`).join('')}
+        </div>`;
+}
+
+function wizardChoose(next) {
+    _wizardPath.push(_wizardCurrentStep);
+    if (WIZARD_RESULTS[next]) {
+        wizardShowResult(WIZARD_RESULTS[next]);
+    } else {
+        const step = WIZARD_STEPS.find(s => s.id === next);
+        if (step) { _wizardCurrentStep = step; wizardRender(step); }
+    }
+}
+
+function wizardBack() {
+    if (!_wizardPath.length) return;
+    _wizardCurrentStep = _wizardPath.pop();
+    wizardRender(_wizardCurrentStep);
+}
+
+function wizardShowResult(result) {
+    document.getElementById('wizardProgressBar').style.width = '100%';
+    document.getElementById('wizardStepLabel').textContent = 'Classification complete';
+    document.getElementById('wizardBack').style.opacity = '0.4';
+    document.getElementById('wizardBack').style.pointerEvents = 'none';
+
+    const content = document.getElementById('wizardContent');
+    content.innerHTML = `
+        <div style="text-align:center;padding:8px 0 16px;">
+            <div style="width:64px;height:64px;border-radius:16px;background:${result.badge}18;border:1.5px solid ${result.badge}44;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;">
+                ${result.class ? `<span style="font-family:var(--font-display);font-size:26px;font-weight:800;color:${result.badge};">
+                    ${result.class}</span>` : '<i class="fas fa-question" style="font-size:22px;color:var(--text-tertiary);"></i>'}
+            </div>
+            <div style="font-family:var(--font-display);font-size:19px;font-weight:700;color:var(--text-primary);margin-bottom:8px;">${escapeHTML(result.title)}</div>
+            <div style="font-size:12.5px;color:var(--text-secondary);line-height:1.7;margin-bottom:16px;max-width:420px;margin-left:auto;margin-right:auto;">${escapeHTML(result.desc)}</div>
+            <div style="display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:8px;background:${result.eti === 'responsive' ? 'rgba(52,211,153,0.08)' : result.eti === 'non_responsive' ? 'rgba(248,113,113,0.08)' : 'rgba(251,191,36,0.08)'};border:1px solid ${result.eti === 'responsive' ? 'rgba(52,211,153,0.22)' : result.eti === 'non_responsive' ? 'rgba(248,113,113,0.22)' : 'rgba(251,191,36,0.22)'};margin-bottom:16px;">
+                <i class="fas ${result.eti === 'responsive' ? 'fa-check-circle' : result.eti === 'non_responsive' ? 'fa-times-circle' : 'fa-question-circle'}" style="color:${result.eti === 'responsive' ? '#34d399' : result.eti === 'non_responsive' ? '#f87171' : '#fbbf24'};font-size:13px;"></i>
+                <span style="font-size:12px;font-weight:600;color:${result.eti === 'responsive' ? '#34d399' : result.eti === 'non_responsive' ? '#f87171' : '#fbbf24'};">
+                    ETI: ${result.eti === 'responsive' ? 'Responsive' : result.eti === 'non_responsive' ? 'Non-responsive' : 'Unknown'} · Confidence: ${result.confidence}</span>
+            </div>
+            <div style="font-size:11.5px;color:var(--text-tertiary);background:rgba(251,191,36,0.05);border:1px solid rgba(251,191,36,0.15);border-radius:8px;padding:10px 14px;text-align:left;line-height:1.6;">
+                <i class="fas fa-lightbulb" style="color:#fbbf24;margin-right:5px;font-size:10px;"></i>${escapeHTML(result.note)}
+            </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:16px;">
+            <button onclick="wizardApplyToForm(${JSON.stringify(result).replace(/"/g,'&quot;')})" style="flex:2;padding:11px;border-radius:8px;background:var(--brand);border:none;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .15s;" onmouseover="this.style.background='var(--brand-dark)'" onmouseout="this.style.background='var(--brand)'">
+                <i class="fas fa-arrow-right" style="margin-right:6px;font-size:11px;"></i>Apply to import form
+            </button>
+            <button onclick="closeClassificationWizard()" style="flex:1;padding:11px;border-radius:8px;background:rgba(255,255,255,0.04);border:1px solid rgba(99,140,210,0.2);color:var(--text-secondary);font-size:13px;cursor:pointer;font-family:var(--font-body);">Close</button>
+        </div>`;
+}
+
+function wizardApplyToForm(result) {
+    closeClassificationWizard();
+    showImportModal();
+    setTimeout(() => {
+        switchImportTab('form');
+        setTimeout(() => {
+            const classEl = document.getElementById('formClass');
+            const etiEl   = document.getElementById('formEtiResponse');
+            const confEl  = document.getElementById('formConfidence');
+            if (classEl && result.class) classEl.value = result.class;
+            if (etiEl   && result.eti)   etiEl.value   = result.eti;
+            if (confEl  && result.confidence) confEl.value = result.confidence;
+            showNotification(`Applied: Class ${result.class || 'VUS'} · ETI ${result.eti}`, 'success', 3000);
+        }, 150);
+    }, 200);
+}
+
+Object.assign(window, { openClassificationWizard, closeClassificationWizard, wizardChoose, wizardBack, wizardApplyToForm });
+
+// ================================================================
+// IMPROVEMENT 2 — PER-VARIANT NOTES / COMMENT THREAD
+// Each variant has a persistent sticky-note thread stored in
+// variant_notes table. Notes appear in the detail view below
+// the evidence section. Supports multiple authors, timestamps,
+// and edit/delete for write-mode users.
+// ================================================================
+
+async function loadVariantNotes(variantId) {
+    const container = document.getElementById(`variantNotes-${variantId}`);
+    if (!container) return;
+    container.innerHTML = `<div style="font-size:11px;color:var(--text-tertiary);padding:8px 0;"><i class="fas fa-spinner fa-spin"></i> Loading notes…</div>`;
+    try {
+        const r = await fetch(
+            `${CONFIG.SUPABASE.URL}/rest/v1/variant_notes?variant_id=eq.${variantId}&order=created_at.asc`,
+            { headers: { 'apikey': CONFIG.SUPABASE.KEY, 'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}` } }
+        );
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        const notes = await r.json();
+        renderVariantNotes(variantId, notes);
+    } catch(e) {
+        container.innerHTML = `<div style="font-size:11px;color:var(--text-tertiary);padding:8px 0;">Notes unavailable (variant_notes table may need creating)</div>`;
+    }
+}
+
+function renderVariantNotes(variantId, notes) {
+    const container = document.getElementById(`variantNotes-${variantId}`);
+    if (!container) return;
+    const notesHTML = notes.length ? notes.map(n => {
+        const initials = (n.author_name || '?').split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
+        const ts = n.created_at ? new Date(n.created_at).toLocaleString('en-GB', {day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
+        return `<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);">
+            <div style="width:28px;height:28px;border-radius:50%;background:var(--brand-light);border:1px solid var(--brand-mid);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--brand);flex-shrink:0;">${escapeHTML(initials)}</div>
+            <div style="flex:1;min-width:0;">
+                <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:3px;">
+                    <span style="font-size:12px;font-weight:600;color:var(--text-primary);">${escapeHTML(n.author_name || 'Clinician')}</span>
+                    ${n.author_role ? `<span style="font-size:10px;padding:1px 6px;border-radius:3px;background:rgba(41,121,255,0.08);color:var(--brand);">${escapeHTML(n.author_role)}</span>` : ''}
+                    <span style="font-size:10px;color:var(--text-tertiary);margin-left:auto;">${escapeHTML(ts)}</span>
+                </div>
+                <div style="font-size:12.5px;color:var(--text-secondary);line-height:1.6;white-space:pre-wrap;">${escapeHTML(n.note_text || '')}</div>
+            </div>
+        </div>`;
+    }).join('') : `<div style="font-size:11px;color:var(--text-tertiary);padding:8px 0;text-align:center;">No notes yet — be the first to add one</div>`;
+
+    container.innerHTML = `
+        <div style="max-height:220px;overflow-y:auto;">${notesHTML}</div>
+        <div style="display:flex;gap:8px;margin-top:10px;align-items:flex-end;">
+            <textarea id="noteInput-${variantId}" placeholder="Add a clinical note…" rows="2"
+                style="flex:1;background:rgba(4,8,15,0.5);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-family:var(--font-body);font-size:12.5px;padding:8px 12px;resize:none;outline:none;transition:border-color .15s;"
+                onfocus="this.style.borderColor='rgba(41,121,255,0.4)'" onblur="this.style.borderColor='var(--border)'"
+                onkeydown="if(e.key==='Enter'&&(e.metaKey||e.ctrlKey)){saveVariantNote(${variantId});e.preventDefault();}"></textarea>
+            <button onclick="saveVariantNote(${variantId})" style="padding:8px 14px;border-radius:8px;background:var(--brand);border:none;color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-body);flex-shrink:0;height:36px;transition:background .15s;" onmouseover="this.style.background='var(--brand-dark)'" onmouseout="this.style.background='var(--brand)'">
+                <i class="fas fa-paper-plane" style="font-size:11px;"></i>
+            </button>
+        </div>
+        <div style="font-size:9.5px;color:var(--text-tertiary);margin-top:4px;text-align:right;">⌘↵ to submit</div>`;
+}
+
+async function saveVariantNote(variantId) {
+    if (!isWriteMode()) {
+        requireWriteMode(() => saveVariantNote(variantId), 'You are trying to add a clinical note — enter PIN to continue');
+        return;
+    }
+    const input = document.getElementById(`noteInput-${variantId}`);
+    const text  = input?.value?.trim();
+    if (!text) return;
+
+    const clinician = await heliosGetClinicianIdentity();
+    try {
+        const r = await fetch(`${CONFIG.SUPABASE.URL}/rest/v1/variant_notes`, {
+            method: 'POST',
+            headers: { 'apikey': CONFIG.SUPABASE.KEY, 'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+            body: JSON.stringify({ variant_id: variantId, note_text: text, author_name: clinician.name, author_role: clinician.role, created_at: new Date().toISOString() })
+        });
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        showNotification('Note saved', 'success', 2000);
+        loadVariantNotes(variantId);
+    } catch(e) {
+        showNotification(`Failed to save note: ${e.message}`, 'error');
+    }
+}
+
+Object.assign(window, { loadVariantNotes, saveVariantNote });
+
+// ================================================================
+// IMPROVEMENT 3 — KEYBOARD SHORTCUT CHEATSHEET
+// Press ? from anywhere (not in an input) to open a reference card
+// showing all keyboard shortcuts. Auto-closes on Escape or click.
+// ================================================================
+
+document.addEventListener('keydown', e => {
+    if (e.key === '?' && !['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName)) {
+        e.preventDefault();
+        helixToggleShortcutHelp();
+    }
 });
+
+function helixToggleShortcutHelp() {
+    const existing = document.getElementById('helixShortcutOverlay');
+    if (existing) { existing.remove(); return; }
+
+    const overlay = document.createElement('div');
+    overlay.id = 'helixShortcutOverlay';
+    Object.assign(overlay.style, {
+        position: 'fixed', inset: '0', zIndex: '99996',
+        background: 'rgba(4,8,15,0.75)', backdropFilter: 'blur(8px)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        animation: 'fadeIn 120ms ease',
+    });
+
+    const groups = [
+        { title: 'Navigation', shortcuts: [
+            ['/', 'Focus search'],
+            ['↑ ↓ or j / k', 'Move through variant list'],
+            ['Enter', 'Select highlighted variant'],
+            ['Escape', 'Clear search / close modals'],
+            ['Alt + ←', 'Go back in history'],
+            ['Alt + →', 'Go forward in history'],
+        ]},
+        { title: 'Actions', shortcuts: [
+            ['⌘K', 'Command palette'],
+            ['⌘P', 'Print / save clinical PDF'],
+            ['?', 'Show this help panel'],
+        ]},
+        { title: 'Helios AI', shortcuts: [
+            ['Helios button', 'Open AI inbox'],
+            ['Scan controls', 'Run consistency / literature scan'],
+            ['Calibration tab', 'View AI feedback loop stats'],
+        ]},
+        { title: 'Variant detail', shortcuts: [
+            ['Columns icon', 'Pin for side-by-side compare'],
+            ['Edit (pencil)', 'Annotate any field'],
+            ['+ Validate', 'Add clinical validation'],
+            ['Export menu', 'CSV · Clinical PDF · Batch PDF'],
+        ]},
+    ];
+
+    const cols = groups.map(g => `
+        <div>
+            <div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border);">${escapeHTML(g.title)}</div>
+            ${g.shortcuts.map(([k,d]) => `
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:7px;">
+                <kbd style="font-family:var(--font-mono);font-size:10px;padding:2px 8px;border-radius:4px;background:rgba(255,255,255,0.06);border:1px solid rgba(99,140,210,0.2);color:var(--text-secondary);white-space:nowrap;flex-shrink:0;">${escapeHTML(k)}</kbd>
+                <span style="font-size:11.5px;color:var(--text-secondary);">${escapeHTML(d)}</span>
+            </div>`).join('')}
+        </div>`).join('');
+
+    overlay.innerHTML = `
+        <div style="width:min(720px,94vw);background:#0d1526;border:1px solid rgba(99,140,210,0.2);border-radius:14px;box-shadow:0 24px 64px rgba(0,5,20,0.85);overflow:hidden;">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid rgba(99,140,210,0.13);">
+                <div style="font-family:var(--font-display);font-size:14px;font-weight:700;color:var(--text-primary);">
+                    <i class="fas fa-keyboard" style="color:var(--brand);margin-right:8px;font-size:12px;"></i>Keyboard Shortcuts
+                </div>
+                <button onclick="document.getElementById('helixShortcutOverlay').remove()" style="background:none;border:none;color:var(--text-tertiary);cursor:pointer;font-size:16px;padding:2px 6px;">&times;</button>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;padding:20px 22px;">${cols}</div>
+            <div style="padding:10px 22px;border-top:1px solid rgba(99,140,210,0.08);text-align:center;font-size:10px;color:var(--text-tertiary);font-family:var(--font-mono);">Press <kbd style="background:rgba(255,255,255,0.06);padding:1px 5px;border-radius:3px;border:1px solid rgba(99,140,210,0.15);">?</kbd> or <kbd style="background:rgba(255,255,255,0.06);padding:1px 5px;border-radius:3px;border:1px solid rgba(99,140,210,0.15);">Escape</kbd> to close</div>
+        </div>`;
+    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+    document.body.appendChild(overlay);
+}
+
+Object.assign(window, { helixToggleShortcutHelp });
+
+// ================================================================
+// IMPROVEMENT 4 — EVIDENCE QUALITY SCORING UI
+// Adds a visual 1-10 quality slider + study type selector to the
+// Add Evidence modal. Quality score drives Helios confidence
+// weighting and ETI timeline visual priority.
+// ================================================================
+
+function injectEvidenceQualityFields() {
+    const notesGroup = document.getElementById('evidenceNotes')?.closest('.form-group');
+    if (!notesGroup || document.getElementById('evidenceQualityGroup')) return;
+
+    const qualGroup = document.createElement('div');
+    qualGroup.className = 'form-group';
+    qualGroup.id = 'evidenceQualityGroup';
+    qualGroup.innerHTML = `
+        <label class="form-label">Evidence Quality <span style="color:var(--text-tertiary);font-weight:400;">(1–10 · drives Helios confidence weighting)</span></label>
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:rgba(4,8,15,0.4);border:1px solid var(--border);border-radius:8px;">
+            <span style="font-size:10px;font-family:var(--font-mono);color:var(--text-tertiary);white-space:nowrap;">Case report</span>
+            <input type="range" id="evidenceQuality" min="1" max="10" value="5" step="1"
+                style="flex:1;accent-color:var(--brand);cursor:pointer;"
+                oninput="document.getElementById('evidenceQualityVal').textContent=this.value;document.getElementById('evidenceQualityLabel').textContent=evidenceQualityLabel(+this.value);">
+            <span style="font-size:10px;font-family:var(--font-mono);color:var(--text-tertiary);white-space:nowrap;">RCT / Meta</span>
+            <div style="text-align:center;min-width:44px;">
+                <div style="font-family:var(--font-display);font-size:20px;font-weight:800;color:var(--brand);" id="evidenceQualityVal">5</div>
+                <div style="font-size:9px;color:var(--text-tertiary);font-family:var(--font-mono);" id="evidenceQualityLabel">Moderate</div>
+            </div>
+        </div>`;
+
+    const studyGroup = document.createElement('div');
+    studyGroup.className = 'form-group';
+    studyGroup.innerHTML = `
+        <label class="form-label">Study Type</label>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;" id="studyTypeGrid">
+            ${['RCT','Clinical trial','Observational','In vitro','Review / Meta','Case report'].map(t =>
+                `<button type="button" onclick="selectStudyType(this,'${escapeAttr(t)}')"
+                    style="padding:6px;border-radius:6px;border:1px solid var(--border);background:rgba(4,8,15,0.4);color:var(--text-secondary);font-size:11px;cursor:pointer;font-family:var(--font-body);transition:all .15s;"
+                    onmouseover="if(!this.classList.contains('st-active'))this.style.borderColor='rgba(41,121,255,0.35)'"
+                    onmouseout="if(!this.classList.contains('st-active'))this.style.borderColor='var(--border)'">${escapeHTML(t)}</button>`
+            ).join('')}
+        </div>
+        <input type="hidden" id="evidenceStudyType" value="">`;
+
+    notesGroup.parentNode.insertBefore(qualGroup, notesGroup);
+    notesGroup.parentNode.insertBefore(studyGroup, notesGroup);
+}
+
+function evidenceQualityLabel(v) {
+    if (v >= 9) return 'Excellent';
+    if (v >= 7) return 'High';
+    if (v >= 5) return 'Moderate';
+    if (v >= 3) return 'Low';
+    return 'Very low';
+}
+
+function selectStudyType(btn, type) {
+    document.querySelectorAll('#studyTypeGrid button').forEach(b => {
+        b.classList.remove('st-active');
+        b.style.background   = 'rgba(4,8,15,0.4)';
+        b.style.borderColor  = 'var(--border)';
+        b.style.color        = 'var(--text-secondary)';
+    });
+    btn.classList.add('st-active');
+    btn.style.background  = 'rgba(41,121,255,0.1)';
+    btn.style.borderColor = 'rgba(41,121,255,0.4)';
+    btn.style.color       = 'var(--brand)';
+    document.getElementById('evidenceStudyType').value = type;
+}
+
+Object.assign(window, { selectStudyType, evidenceQualityLabel });
+
+// Patch saveEvidenceLink to include quality_score and study_type
+const _origSaveEvidenceLink = saveEvidenceLink;
+async function saveEvidenceLink() {
+    if (!isWriteMode()) {
+        requireWriteMode(() => saveEvidenceLink(), 'You are trying to add an evidence link — enter PIN to continue');
+        return;
+    }
+    const type       = document.getElementById('evidenceType').value;
+    const title      = document.getElementById('evidenceTitle').value.trim();
+    const url        = document.getElementById('evidenceUrl').value.trim();
+    const source     = document.getElementById('evidenceSource').value.trim();
+    const notes      = document.getElementById('evidenceNotes').value.trim();
+    const quality    = parseInt(document.getElementById('evidenceQuality')?.value || '5', 10);
+    const studyType  = document.getElementById('evidenceStudyType')?.value || '';
+    const msgDiv     = document.getElementById('evidenceMessage');
+    const btn        = document.getElementById('saveEvidenceBtn');
+
+    if (!type)  { msgDiv.innerHTML = '<span style="color:var(--error)">Select source type</span>'; return; }
+    if (!title) { msgDiv.innerHTML = '<span style="color:var(--error)">Title required</span>'; return; }
+    if (!url)   { msgDiv.innerHTML = '<span style="color:var(--error)">URL required</span>'; return; }
+
+    try {
+        btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        const res = await fetch(`${CONFIG.SUPABASE.URL}/rest/v1/evidence_links`, {
+            method: 'POST',
+            headers: { 'apikey': CONFIG.SUPABASE.KEY, 'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+            body: JSON.stringify({
+                variant_id: currentVariantId, type, title, url,
+                source: source || type, notes: notes || null,
+                quality_score: quality,
+                study_type: studyType || null,
+                date_added: new Date().toISOString(),
+                fingerprint: btoa(encodeURIComponent((url||'').slice(0,60))).slice(0,40)
+            })
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const saved = await res.json();
+        const variant = STATE.variants.find(v => v.id === currentVariantId);
+        if (variant) {
+            if (!variant.evidence_links) variant.evidence_links = [];
+            variant.evidence_links.push(saved[0] || saved);
+        }
+        if (STATE.view.selectedVariant?.id === currentVariantId) renderVariantDetail(variant);
+        msgDiv.innerHTML = '<span style="color:var(--success)">✓ Saved</span>';
+        showNotification('Evidence link added', 'success');
+        setTimeout(closeAddEvidenceModal, 1000);
+    } catch(err) {
+        msgDiv.innerHTML = `<span style="color:var(--error)">${err.message}</span>`;
+        btn.disabled = false; btn.innerHTML = '<i class="fas fa-save"></i> Save';
+    }
+}
+Object.assign(window, { saveEvidenceLink });
+
+// ================================================================
+// IMPROVEMENT 5 — BATCH VALIDATION
+// A "Select" toggle on the sidebar enables checkbox mode.
+// Checked variants are collected into STATE.batchSelected.
+// A floating action bar at the bottom of the sidebar shows
+// "Validate X selected" — one click opens the validation modal
+// pre-configured for batch.
+// ================================================================
+
+STATE.batchMode  = false;
+STATE.batchSelected = new Set();
+
+function helixToggleBatchMode() {
+    STATE.batchMode = !STATE.batchMode;
+    STATE.batchSelected.clear();
+    const btn = document.getElementById('helixBatchToggle');
+    if (btn) {
+        btn.style.background   = STATE.batchMode ? 'rgba(41,121,255,0.12)' : 'rgba(255,255,255,0.04)';
+        btn.style.borderColor  = STATE.batchMode ? 'rgba(41,121,255,0.4)'  : 'rgba(255,255,255,0.1)';
+        btn.style.color        = STATE.batchMode ? 'var(--brand)'           : 'var(--text-tertiary)';
+        btn.title              = STATE.batchMode ? 'Exit selection mode'     : 'Select multiple variants';
+    }
+    renderVariantList();
+    helixUpdateBatchBar();
+}
+
+function helixToggleBatchSelect(variantId, e) {
+    e.stopPropagation();
+    if (STATE.batchSelected.has(variantId)) STATE.batchSelected.delete(variantId);
+    else STATE.batchSelected.add(variantId);
+    helixUpdateBatchBar();
+    // Update just this row's checkbox
+    const cb = document.getElementById(`batchCb-${variantId}`);
+    if (cb) cb.checked = STATE.batchSelected.has(variantId);
+}
+
+function helixUpdateBatchBar() {
+    let bar = document.getElementById('helixBatchBar');
+    if (!STATE.batchMode || STATE.batchSelected.size === 0) {
+        if (bar) { bar.style.transform = 'translateY(100%)'; setTimeout(() => bar?.remove(), 250); }
+        return;
+    }
+    if (!bar) {
+        bar = document.createElement('div');
+        bar.id = 'helixBatchBar';
+        Object.assign(bar.style, {
+            position: 'absolute', bottom: '28px', left: '0', right: '0',
+            background: '#0d1526', borderTop: '1px solid rgba(41,121,255,0.3)',
+            padding: '10px 14px', display: 'flex', alignItems: 'center', gap: '8px',
+            transform: 'translateY(100%)', transition: 'transform .25s cubic-bezier(.4,0,.2,1)',
+            zIndex: '200',
+        });
+        document.getElementById('appSidebar')?.appendChild(bar);
+        requestAnimationFrame(() => { bar.style.transform = 'translateY(0)'; });
+    }
+    const n = STATE.batchSelected.size;
+    bar.innerHTML = `
+        <span style="font-size:11.5px;color:var(--text-secondary);flex:1;">${n} variant${n!==1?'s':''} selected</span>
+        <button onclick="helixBatchValidate()" style="padding:6px 12px;border-radius:6px;background:var(--brand);border:none;color:#fff;font-size:11.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .15s;" onmouseover="this.style.background='var(--brand-dark)'" onmouseout="this.style.background='var(--brand)'">
+            <i class="fas fa-check-circle" style="margin-right:4px;font-size:10px;"></i>Validate ${n}
+        </button>
+        <button onclick="STATE.batchSelected.clear();helixUpdateBatchBar();renderVariantList();" style="padding:6px 10px;border-radius:6px;border:1px solid rgba(99,140,210,0.2);background:none;color:var(--text-tertiary);font-size:11px;cursor:pointer;">Clear</button>`;
+}
+
+async function helixBatchValidate() {
+    if (STATE.batchSelected.size === 0) return;
+    if (!isWriteMode()) {
+        requireWriteMode(() => helixBatchValidate(), `You are trying to batch-validate ${STATE.batchSelected.size} variants — enter PIN to continue`);
+        return;
+    }
+    const name = prompt(`Batch validating ${STATE.batchSelected.size} variant${STATE.batchSelected.size!==1?'s':''}.\n\nYour name:`);
+    if (!name?.trim()) return;
+    const role = prompt('Your role (e.g. Clinical Geneticist):');
+    if (!role?.trim()) return;
+    const notes = prompt('Validation note (optional — applies to all):') || '';
+
+    let done = 0;
+    for (const id of STATE.batchSelected) {
+        try {
+            await fetch(`${CONFIG.SUPABASE.URL}/rest/v1/validation_history`, {
+                method: 'POST',
+                headers: { 'apikey': CONFIG.SUPABASE.KEY, 'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+                body: JSON.stringify({ variant_id: id, clinician_name: name.trim(), clinician_role: role.trim(), action: 'VALIDATED', notes: notes || null, created_at: new Date().toISOString() })
+            });
+            const v = STATE.variants.find(x => x.id === id);
+            if (v) { v.validation_count = (v.validation_count || 0) + 1; v.last_validator_name = name.trim(); v.last_validator_role = role.trim(); v.last_validated_at = new Date().toISOString(); }
+            done++;
+        } catch {}
+    }
+    showNotification(`${done} variant${done!==1?'s':''} validated by ${name.trim()}`, 'success');
+    STATE.batchSelected.clear();
+    STATE.batchMode = false;
+    calculateMasterStats();
+    updateHeaderStats();
+    renderVariantList();
+    helixUpdateBatchBar();
+    const bt = document.getElementById('helixBatchToggle');
+    if (bt) { bt.style.background = ''; bt.style.borderColor = ''; bt.style.color = ''; }
+}
+
+Object.assign(window, { helixToggleBatchMode, helixToggleBatchSelect, helixBatchValidate, helixUpdateBatchBar });
+
 </script>
 </body>
 </html>
