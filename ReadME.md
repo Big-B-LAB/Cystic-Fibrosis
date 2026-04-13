@@ -1,5 +1,5 @@
-# Δ Helix — CFTR Precision Medicine Platform
-## Technical Documentation v3.0
+# NeumuacFQ — CFTR Precision Medicine Platform
+## Technical Documentation v4.0
 
 ---
 
@@ -9,28 +9,39 @@
 2. [Architecture](#2-architecture)
 3. [Data Model](#3-data-model)
 4. [Core Algorithms](#4-core-algorithms)
-5. [Helios Evidence Engine](#5-helios-evidence-engine)
-6. [Search Intelligence Layer](#6-search-intelligence-layer)
-7. [Geographic Intelligence](#7-geographic-intelligence)
-8. [Security Model](#8-security-model)
-9. [Performance Characteristics](#9-performance-characteristics)
-10. [Deployment](#10-deployment)
+5. [Search Engine](#5-search-engine)
+6. [Helios Evidence Engine](#6-helios-evidence-engine)
+7. [Robotic Autonomous Search](#7-robotic-autonomous-search)
+8. [Compound Heterozygosity Engine](#8-compound-heterozygosity-engine)
+9. [ACMG/AMP Classification Framework](#9-acmgamp-classification-framework)
+10. [Clinical Reference System](#10-clinical-reference-system)
+11. [Clinical Reports & MDT Output](#11-clinical-reports--mdt-output)
+12. [Search Intelligence Layer](#12-search-intelligence-layer)
+13. [Geographic Intelligence](#13-geographic-intelligence)
+14. [Security Model](#14-security-model)
+15. [Performance Characteristics](#15-performance-characteristics)
+16. [Deployment](#16-deployment)
+17. [Roadmap](#17-roadmap)
 
 ---
 
 ## 1. System Overview
 
-Δ Helix is a clinical-grade variant curation and precision medicine decision support platform for Cystic Fibrosis (CF). It maintains a curated database of CFTR gene variants and provides clinicians with real-time access to classification data, ETI (Elexacaftor/Tezacaftor/Ivacaftor) response predictions, evidence chains, and automated consistency checking.
+NeumuacFQ is a clinical-grade CFTR variant curation and precision medicine decision support platform for Cystic Fibrosis (CF). It maintains a curated database of CFTR gene variants and provides clinicians with real-time access to classification data, ETI (Elexacaftor/Tezacaftor/Ivacaftor) response predictions, compound genotype analysis, ACMG/AMP pathogenicity scoring, evidence chains, and autonomous AI-driven evidence surveillance.
 
-The platform serves two primary clinical functions:
+The platform serves three primary clinical functions:
 
-**Variant lookup** — clinicians at CF centres search for specific variants by any nomenclature (legacy name, HGVS protein notation, HGVS cDNA notation, or alternative names) to retrieve classification and treatment guidance.
+**Variant lookup** — clinicians search for specific variants by any nomenclature (legacy name, HGVS protein notation, HGVS cDNA notation, or alternative names) and receive immediate classification, clinical reference data, modulator eligibility, and ACMG scoring.
 
-**Variant curation** — authorised users curate, validate, and enrich variant records with evidence links, clinical determinations, and classification assignments. All curation activity is subject to automated consistency checking by the Helios Evidence Engine before changes are accepted.
+**Compound genotype analysis** — two alleles entered, full clinical prediction output including phenotype severity, sweat chloride range, pancreatic sufficiency probability, per-modulator eligibility, newborn screening detection, and one-click MDT report generation.
+
+**Variant curation** — authorised users curate and enrich variant records. All curation is subject to automated consistency checking by the Helios Evidence Engine. The robotic search engine autonomously queries PubMed, ClinVar, and CFTR2 when a variant is not found, bringing literature directly to the curator's inbox.
 
 ### Key Statistics (Production)
-- 2,237 CFTR variants under active curation
-- 1,339 complete records (class, ETI prediction, HGVS notation)
+- **2,237** CFTR variants under active curation
+- **1,339** complete records (class, ETI prediction, HGVS notation)
+- **18,700+** lines of code · **359** functions · **1.3 MB** self-contained
+- **16** active database tables
 - Live clinical use across multiple CF centres in Spain and internationally
 - Real-time geographic search intelligence across all sessions
 
@@ -40,73 +51,92 @@ The platform serves two primary clinical functions:
 
 ### 2.1 Technology Stack
 
-The platform is a single-page application (SPA) delivered as a static HTML file hosted on GitHub Pages. All persistent state is managed through a Supabase backend.
+The platform is a single-page application (SPA) delivered as a static HTML file. All persistent state is managed through a Supabase backend.
 
 | Layer | Technology |
 |---|---|
 | Frontend | Vanilla JavaScript (ES2020+), HTML5, CSS3 |
-| Styling | Tailwind CSS (CDN), custom CSS variable design system |
-| Charts | Chart.js |
+| Charts | Chart.js (CDN) |
+| Geographic map | Leaflet.js + MarkerCluster (CDN) |
 | Backend | Supabase (PostgreSQL + PostgREST REST API) |
-| Hosting | GitHub Pages (static) |
+| Hosting | GitHub Pages or any static file server |
+| Offline cache | IndexedDB (browser-native) |
 | Fonts | IBM Plex Sans, IBM Plex Mono, Syne (Google Fonts) |
+| External APIs | NCBI E-utilities (PubMed + ClinVar), ipapi.co (geolocation) |
 
 ### 2.2 Application Architecture
 
-The application follows a single-module architecture with explicit separation of concerns through named sections:
-
 ```
-CONFIG          — Runtime configuration (Supabase URL, UI constants)
-STATE           — Global application state (variants, search index, view state)
-Database Layer  — loadVariants(), CRUD operations via Supabase REST
-Search Engine   — buildSearchIndex(), searchVariants()
-View Layer      — renderVariantList(), renderVariantDetail()
-Intelligence    — Search logging, gap scoring, geographic analysis
-Helios Engine   — Autonomous consistency checking and evidence analysis
+CONFIG              — Runtime configuration (Supabase URL, UI constants, write PIN)
+STATE               — Global application state (variants, search index, view state)
+Database Layer      — loadVariants(), CRUD via Supabase REST, dbWrite() wrapper
+Search Engine       — buildSearchIndex(), searchVariants(), normaliseQueryWithSteps()
+Nomenclature Layer  — AA3TO1 map, IVS/rsID/chromosomal normalisation, alias table
+View Layer          — renderVariantList(), renderVariantDetail()
+Clinical Layer      — renderClinicalReferencePanel(), renderACMGPanel()
+Compound Het Engine — computeCompoundHetVerdict(), MODULATOR_MAP
+Genotype Calculator — openCompoundGenotypeCalculator(), generateMDTReport()
+Intelligence Layer  — Search logging, gap scoring, geographic analysis
+Helios Engine       — Autonomous consistency checking, evidence surveillance
+Robotic Search      — triggerRoboticSearchOnMiss(), multi-source concurrent scan
+Offline Engine      — HELIX_CACHE (IndexedDB), failed-save queue
 ```
 
 ### 2.3 State Management
 
-All application state is held in a single `STATE` object that is never serialised — it exists only in memory for the duration of a session. The key sub-objects are:
+All application state is held in a single `STATE` object that exists only in memory for the duration of a session:
 
 ```javascript
 STATE = {
-    variants: [],              // Full variant array loaded at init
-    variantsById: Map,         // O(1) lookup by numeric ID
-    variantsByLegacyName: Map, // O(1) lookup by legacy name string
+    variants: [],               // Full variant array loaded at init
+    variantsById: Map,          // O(1) lookup by numeric ID
+    variantsByLegacyName: Map,  // O(1) lookup by legacy name string
     searchIndex: {
-        lookup: Map,           // normalised term → Set<variantId>
+        lookup: Map,            // normalised term → Set<variantId>
+        stats: {}
     },
-    masterStats: {},           // Pre-computed aggregate statistics
+    masterStats: {},            // Pre-computed aggregate statistics
     view: {
-        filteredVariants: [],  // Current filtered/searched result set
-        selectedVariant: null, // Currently displayed variant
-        searchQuery: '',       // Live search query
-        currentPage: 1
+        filteredVariants: [],   // Current filtered/searched result set
+        selectedVariant: null,  // Currently displayed variant
+        searchQuery: '',        // Live search query
+        currentPage: 1,
+        sortAsc: true,
+        dataViewMode: 'all',
+        classFilter: 'all'
     },
     searchIntelligence: {
-        sessionId: string,     // Random session identifier
-        locationCache: {},     // IP geolocation (fetched once per session)
-        hospital: string       // Clinician's institution (localStorage)
+        sessionId: string,      // sess_ + 8 random alphanumeric chars
+        locationCache: {},      // IP geolocation (fetched once per session)
+        hospital: string,       // Clinician institution (localStorage)
+        recentSearches: [],     // Session hit/miss history (max 20)
+        globalHits: Map,        // Query → hit count this session
+        globalMisses: Map,      // Query → { count, sessions }
+        _lastSearchTier: number // 0=exact 1=prefix 2=substr 3=fuzzy 4=phonetic
+    },
+    writeMode: {
+        active: boolean,
+        expiry: timestamp,
+        timerInterval: handle
     }
 }
 ```
 
 ### 2.4 Initialisation Sequence
 
-On page load the system executes the following sequence:
+1. Render loading screen with animated SVG rings + NeumuacFQ logo
+2. `loadClassRules()` + `loadJournalImpacts()` — parallel, non-blocking DB-driven config
+3. `loadVariants()` — paginated fetch from Supabase (1,000 records per page with evidence links joined)
+4. `buildSearchIndex()` — construct in-memory inverted index
+5. `calculateMasterStats()` — compute aggregate counts by class, ETI, validation status
+6. `initSearch()` — attach input event listeners with dual debounce (180ms UI, 1200ms log)
+7. `loadSearchIntelligence()` — fetch historical search logs and miss queue for dashboard
+8. `initHospital()` — retrieve or prompt for institution identity from localStorage
+9. `fetchLocationOnce()` — single IP geolocation call for geographic search logging
+10. `runSurveillanceAlerts()` — silent background check of monitored variants (3s delay)
+11. Loading screen fade-out, application ready
 
-1. Render loading screen with animated canvas
-2. Call `loadVariants()` — paginated fetch from Supabase (500 records per page)
-3. `buildSearchIndex()` — construct in-memory inverted index from loaded variants
-4. `calculateMasterStats()` — compute aggregate counts by class, ETI prediction, validation status
-5. `initSearch()` — attach input event listeners with dual debounce (180ms UI, 1200ms logging)
-6. `loadSearchIntelligence()` — fetch historical search logs and miss queue for the session dashboard
-7. `initHospital()` — retrieve or prompt for institution identity from localStorage
-8. `fetchLocationOnce()` — single IP geolocation call for geographic search logging
-9. Loading screen fade-out, application ready
-
-Total typical initialisation time: 1.2–2.8 seconds depending on variant count and network latency.
+Typical initialisation: **1.2–2.8 seconds** depending on variant count and network latency. On Supabase failure, IndexedDB offline cache is served automatically with a clear banner.
 
 ---
 
@@ -114,411 +144,639 @@ Total typical initialisation time: 1.2–2.8 seconds depending on variant count 
 
 ### 3.1 Core Tables
 
-**`variants`** — The primary clinical record for each CFTR variant.
+**`variants`** — Primary clinical record for each CFTR variant.
 
 | Field | Type | Description |
 |---|---|---|
-| `id` | bigint | Auto-incrementing primary key |
 | `legacy_name` | text UNIQUE | Traditional mutation name (e.g. F508del, G551D) |
 | `protein_name` | text | HGVS protein notation (e.g. p.Phe508del) |
 | `cdna_name` | text | HGVS cDNA notation (e.g. c.1521_1523delCTT) |
+| `alt_names` | text | Space/comma/semicolon-separated alternative names |
 | `cftr_class` | text | Functional class I–VI, II/III compound |
-| `class_subtype` | text | Modifier: true, presumed, exceptional, atypical, standard |
+| `class_subtype` | text | true, presumed, exceptional, atypical, standard |
 | `eti_prediction` | text | responsive, non_responsive, unknown |
 | `final_determination` | text | CF-causing, VUS, non CF-causing |
+| `clinical_alert` | text | **Computed column** — contextual treatment guidance |
 | `validation_count` | integer | Number of clinician validations |
 | `search_hit_count` | integer | Total successful searches for this variant |
-| `clinical_alert` | text | Database-computed alert text based on class and subtype |
+| `changed_prev` | text | Whether classification changed from prior version |
 
-The `clinical_alert` field is a PostgreSQL computed column that generates contextual treatment guidance based on class/subtype combinations, ensuring alert text is always consistent with classification.
+The `clinical_alert` field is a PostgreSQL computed column generating contextual treatment warnings (e.g. *"⚠️ EXCEPTIONAL Class I — Consider ETI despite typical Class I rules"*) based on class/subtype combinations. Surfaced as a colour-coded banner in every variant detail view.
 
-**`evidence_links`** — Evidence sources attached to variants.
+**`evidence_links`** — Evidence sources with classification claims.
 
-Each evidence link carries `cftr_class_claim` and `eti_claim` fields — the classification assertions made by that source. These fields are the input to the Helios evidence contradiction engine.
+Each link carries `cftr_class_claim`, `eti_claim`, `quality_score`, `study_type`, `journal`, `year`, `authors`, and `fingerprint`. The claim fields are the primary input to the Helios contradiction engine.
 
-**`search_logs`** — Every search event, hit or miss, with full geographic context.
+**`search_logs`** — Every search event (hit or miss) with full geographic context.
 
-Captures `query`, `is_hit`, `matched_field`, `hospital_name`, `country`, `city`, `latitude`, `longitude`, `session_id`. This table is the data source for all geographic intelligence features.
+Captures `query`, `is_hit`, `matched_field`, `hospital_name`, `country`, `city`, `latitude`, `longitude`, `session_id`. Primary data source for all geographic intelligence features.
 
 **`search_miss_queue`** — Aggregated failed search queries.
 
-Maintains `miss_count` and `unique_sessions` per query. Updated on each miss via PostgreSQL `ON CONFLICT` upsert. Drives the Miss Queue Intelligence engine.
+Maintains `miss_count`, `unique_sessions`, `top_hospital`, and `notes` per query. Updated via PostgreSQL `ON CONFLICT` upsert. Drives robotic search triggering and miss queue intelligence.
 
 ### 3.2 Helios-specific Tables
 
-**`helios_pending_review`** — The primary Helios inbox. All automated findings queue here before any DB modification occurs.
+**`helios_pending_review`** — Primary Helios inbox. All AI findings queue here before any DB modification. Item types: `NEW_EVIDENCE`, `CONTRADICTION`, `DRIFT_ALERT`, `MISS_RESOLVED`, `PATTERN_SIGNAL`, `REGIONAL_SIGNAL`, `INTERNAL_LOGIC`, `INTERNAL_NAMING`, `INTERNAL_ORPHAN`, `INTERNAL_DUPLICATE`, `EXTERNAL_GUIDELINE`.
 
-**`helios_audit_log`** — Immutable record of every clinician decision on a Helios finding, including the full `review_snapshot` JSON at the time of decision.
+**`helios_audit_log`** — Append-only record of every clinician decision. Stores `review_snapshot` (full JSONB state at decision time), field-level change diff (`db_change_field`, `db_change_old`, `db_change_new`), clinician name and role, timestamp.
 
-**`helios_bot_runs`** — Operational metadata for each scan execution: type, status, variants scanned, findings created, error count, duration.
+**`helios_bot_runs`** — Operational metadata: scan type, status, variants scanned, findings created, error count, duration.
 
-**`helios_monitor_targets`** — Variants under continuous background monitoring.
+**`helios_monitor_targets`** — Variants under continuous background literature surveillance.
+
+### 3.3 Research & Governance Tables
+
+| Table | Purpose |
+|---|---|
+| `contradictions` | Detected evidence contradictions, CRITICAL/HIGH/MEDIUM/LOW severity |
+| `cftr_variants_archive` | Version snapshot on every classification-critical field change |
+| `cftr_class_rules` | Admin-editable class descriptions — DB-driven, not hardcoded |
+| `research_gaps` | Computed gap scores (0–100) per variant |
+| `validation_history` | Per-variant clinician validation records with role and timestamp |
+| `variant_evidence` | Structured evidence linked to `evidence_sources` reliability registry |
+| `journal_impacts` | Impact factor cache for evidence quality scoring |
+| `institutions` | Verified institution registry for multi-centre attribution |
+| `variant_notes` | Persistent clinical notes per variant, visible to all clinicians |
 
 ---
 
 ## 4. Core Algorithms
 
-### 4.1 Search Index — Inverted Map with HGVS Prefix Stripping
+### 4.1 Search Index Construction
 
-The search index is built on application load and rebuilt after any variant is added, edited, or deleted.
+`buildSearchIndex()` constructs an inverted index (Map: normalised term → Set of variant IDs) at startup. For each variant, indexed keys include:
 
-**Index construction** (`buildSearchIndex`):
+- Legacy name (lowercased, HGVS prefix stripped)
+- Protein name (lowercased, `p.` stripped)
+- cDNA name (lowercased, `c.` stripped; nucleotide change portion also indexed separately)
+- All alternative names (split on space/comma/semicolon)
+- Positional numbers ≥3 digits (supports "508", "551", "1282" numeric searches)
 
-For each variant, all name fields are tokenised and stored in a `Map<string, Set<variantId>>`:
+Result: ~15,000–20,000 index entries for a 2,237-variant database. Search time: **< 5ms** in typical browsers.
 
-```
-Fields indexed: legacy_name, protein_name, cdna_name, alt_names
-Normalisation: lowercase, trim
-HGVS stripping: p. prefix removed (protein), c. prefix removed (cDNA), r. prefix removed (RNA)
-alt_names: split on whitespace, comma, and semicolon
-```
+### 4.2 Gap Scoring
 
-Each name is stored twice — once with the prefix intact and once without — so queries like "Phe508del" and "p.Phe508del" both resolve correctly.
+Each variant receives a gap score (0–100) via `calculateGapScore()`:
 
-**Query execution** (`searchVariants`):
-
-```
-1. Normalise query: lowercase, trim
-2. Produce stripped form: remove p. / c. / r. prefix
-3. Iterate index: for each (key, ids) where key.includes(raw) OR key.includes(stripped)
-   → add all ids to matchedIds Set
-4. Resolve ids → variant objects
-5. Sort by match specificity:
-   rank 0 — exact match on any primary field
-   rank 1 — prefix match (query is prefix of field)
-   rank 2 — substring match
-```
-
-The use of `includes()` rather than exact matching allows partial nomenclature queries. A search for "508" returns F508del, p.Phe508del, and any variant containing 508 in any indexed field — which is clinically appropriate because clinicians often search by residue number.
-
-Minimum query length is 2 characters (configurable via `CONFIG.UI.MIN_SEARCH_CHARS`).
-
-**Dual debounce logging:**
-
-The search input uses two independent timers:
-- 180ms debounce for UI filtering (fast response)
-- 1200ms debounce for search logging (avoids polluting logs with partial keystrokes)
-
-Only the final settled query after 1200ms is logged to `search_logs`. Intermediate keystrokes are discarded.
-
-### 4.2 Research Gap Scoring Engine
-
-Each variant receives a gap score (0–100) representing urgency of research need. Higher scores indicate more critical data gaps. The score drives the Research Gap Queue in the dashboard and the Validation Priority Queue in Helios.
-
-**Scoring weights:**
-
-| Condition | Weight |
+| Criterion | Weight |
 |---|---|
 | No CFTR class assigned | 25 |
-| No ETI prediction (or unknown) | 20 |
+| No ETI prediction | 20 |
+| No final determination | 15 |
 | No evidence links | 15 |
-| No protein name (HGVS) | 8 |
-| No cDNA name (HGVS) | 8 |
-| Fewer than 3 evidence sources | 7 |
-| No clinical determination | 7 |
-| No validation + high search demand (≥5 searches) | 10 |
-| No validation (low demand) | 4 |
-| High search demand ≥10 searches | 10 |
+| Fewer than 3 evidence sources | 8 |
+| No validation + high search demand (≥5 hits) | 12 |
+| High search demand (≥10 hits) | 5 |
 
-Total maximum: 110 (capped at 100).
+Gap levels: CRITICAL (≥75) · SEVERE (≥55) · MODERATE (≥35) · MINOR (≥15) · ADEQUATE (<15). Weights configurable via `cftr_class_rules` table without code changes.
 
-**Gap levels:**
+### 4.3 Master Statistics
 
-| Level | Score range |
-|---|---|
-| CRITICAL | 75–100 |
-| SEVERE | 55–74 |
-| MODERATE | 35–54 |
-| MINOR | 15–34 |
-| ADEQUATE | 0–14 |
+`calculateMasterStats()` computes aggregate counts used throughout the UI — total by class, ETI distribution, exceptional count, validation coverage, data completeness — recomputed after every write operation.
 
-Gap scores are persisted asynchronously to the `research_gaps` table (DELETE + INSERT pattern for each variant on each analysis). The persistence never blocks the UI — it fires in the background via a non-awaited Promise.
+### 4.4 Evidence Quality Scoring
 
-### 4.3 Validation Priority Queue
+Papers scored 1–10 by `scoreEvidenceQuality()`:
 
-The validation queue in the Helios Validate tab orders unvalidated variants by clinical urgency using a composite score:
-
-```
-urgency_score = min(search_hit_count × 8, 50)   // demand signal, capped
-              + (cftr_class assigned ? 12 : 0)    // complete records are more urgent to validate
-              + (eti_prediction set ? 12 : 0)
-              + (protein_name set ? 6 : 0)
-              + (cdna_name set ? 6 : 0)
-              + min((days_since_update / 10), 14) // staleness
-              + (no cftr_class ? 10 : 0)          // high uncertainty boost
-```
-
-Variants with urgency score ≥ 70 are labelled HIGH, ≥ 40 MEDIUM, below 40 LOW.
-
-This deliberately weights search demand heavily — a variant searched 10 times by clinicians but never validated (score ~80+) is treated as more urgent than a well-documented variant that has simply not been formally validated.
+- Base: 5
+- Journal impact factor from `journal_impacts` cache: `min(10, round(2 + IF/3))`
+- Recency bonus: +1 if published within last 2 years
 
 ---
 
-## 5. Helios Evidence Engine
+## 5. Search Engine
 
-Helios is the automated clinical evidence review system within Δ Helix. It operates on a strict clinician-in-the-loop principle: Helios reads data freely and proposes changes, but writes to the `variants` table only after explicit clinician approval.
+### 5.1 Nomenclature Intelligence
 
-### 5.1 Architecture Principle
+`normaliseQueryWithSteps()` transforms clinical typing patterns into searchable keys and records each transformation step for UI display (clinician sees: *"searching as f508del — three-letter AA → single letter"*):
+
+**All 20 amino acids, mid-string:**
 
 ```
-Helios reads:   variants, evidence_links, search_logs, search_miss_queue, helios_audit_log
-Helios writes:  helios_pending_review (findings)
-                helios_audit_log (after clinician decision)
-                variants (only via heliosApplyDBChange, only after approval)
-                helios_bot_runs (scan metadata)
-                helios_monitor_targets (monitor management)
+Phe→F  Gly→G  Arg→R  Trp→W  Asn→N  Asp→D  His→H  Lys→K
+Leu→L  Pro→P  Thr→T  Val→V  Ile→I  Ser→S  Ala→A  Cys→C
+Gln→Q  Glu→E  Met→M  Tyr→Y
 ```
 
-This separation means Helios findings are always proposals, never direct modifications. The audit trail is therefore complete — every change to the variants table that originated from Helios has a corresponding approved entry in `helios_audit_log`.
+**Termination codon synonyms** → `x`: Ter, Stop, Opal, Amber, Ochre
 
-### 5.2 Calibration Engine
+**Special handling:**
+- Greek/Unicode: `δ`, `Δ` → `del`
+- HGVS prefixes stripped: `p.`, `c.`, `r.`, `m.`, `n.`
+- IVS notation: `IVS` → `ivs` (preserved for index lookup)
+- Chromosomal positions: `chr7:117,559,590` → stripped entirely
+- rsID: passed through unchanged (e.g. `rs75527207`)
+- Hyphens and spaces removed within variant names
 
-The calibration engine is loaded on Helios open and provides confidence scores that adapt based on observed clinician decisions.
+**Canonical alias table (12+):**
 
-**Biological priors** — before any clinical data exists, each item type has a prior confidence based on the strength of the underlying biological rule:
-
-| Item Type | Prior |
+| Input | Normalised to |
 |---|---|
-| INTERNAL_ORPHAN | 88% |
-| INTERNAL_LOGIC | 82% |
-| DRIFT_ALERT | 78% |
-| CONTRADICTION | 80% |
-| NEW_EVIDENCE | 72% |
-| INTERNAL_NAMING | 65% |
-| MISS_RESOLVED | 60% |
+| `ΔF508`, `deltaf508`, `delta-f508` | `f508del` |
+| `phef508del`, `phe508del`, `df508` | `f508del` |
+| `W1282Stop`, `W1282Ter` | `w1282x` |
+| `G542Stop`, `G542Ter` | `g542x` |
+| `R553Stop`, `R1162Stop` | `r553x`, `r1162x` |
 
-**Bayesian blending** — as clinicians make decisions, the displayed confidence shifts from prior toward observed approval rate:
+### 5.2 Search Tiers
 
-```
-weight = min(n / (CALIBRATION_THRESHOLD × 2), 1.0)
-blended = prior × (1 − weight) + observed_approval_rate × weight
-```
+Results sorted by match quality (0 = best):
 
-`CALIBRATION_THRESHOLD = 5`. Below 5 decisions the score is labelled PRIOR. Above 5 it transitions to LIVE and the label shows the number of decisions driving the calibration.
+| Tier | Type | Example |
+|---|---|---|
+| 0 | Exact match | `G542X` → G542X |
+| 1 | Prefix / positional number | `G551` → G551D; `508` → all 508-position variants |
+| 2 | Substring | `del` → all deletion variants |
+| 3 | Fuzzy Levenshtein ≤ 2 edits | `G55D` → G551D |
+| 4 | Phonetic (consonant skeleton) | near-miss typographic variants |
 
-**Decision speed tracking** — median time between item creation and clinician decision is computed per item type. If the median is below 15 seconds, a warning is shown on the confidence block indicating possible rubber-stamping.
+Fuzzy matching only runs when no direct match exists.
 
-**Divergence detection** — if the most recent 5 decisions on an item type differ from the historical approval rate by more than 30 percentage points, a divergence warning is displayed. This flags cases where clinical consensus may be shifting.
+### 5.3 Auto-Select Behaviour
 
-### 5.3 Consistency Check Rules
+**Single result:** immediately selected, detail panel opens, dropdown closes.
 
-The internal scan applies these rules to every variant in the database:
+**Tier-0 exact match in multiple results:** immediately selected regardless of total count. List jumps to the correct page (e.g. G542X on page 2 of 31 results), row scrolls into view. No manual pagination required.
 
-**Rule 1 — Class III logic (URGENT, 85% confidence)**
-
-Class III variants (gating defects) are biologically responsive to ETI modulators. If `cftr_class = 'III'` and `eti_prediction ≠ 'responsive'` and `class_subtype ≠ 'exceptional'`, a finding is created proposing `eti_prediction → responsive`.
-
-**Rule 2 — Class I exception check (ROUTINE, 50% confidence)**
-
-Class I variants (nonsense/stop mutations) are typically non-responsive to ETI. If `cftr_class = 'I'` and `eti_prediction = 'responsive'` and `class_subtype ≠ 'exceptional'`, a ROUTINE finding is created proposing `class_subtype → exceptional` and prompting clinical justification. The system does not propose changing the ETI prediction directly because Class I exceptional cases are documented in the literature.
-
-The `class_subtype = 'exceptional'` check acts as a permanent suppression flag — once a clinician uses Mark Exceptional and provides written justification, that variant never triggers this rule again.
-
-**Rule 3 — Orphan variant (ROUTINE, 90% confidence)**
-
-If `cftr_class` is null and `search_hit_count ≥ 3`, the variant has high clinical demand but no classification. Finding created to flag for literature review.
-
-**Rule 4 — HGVS protein notation (ROUTINE, 60% confidence)**
-
-If `protein_name` does not start with `p.` or `p.(`, a naming issue is flagged.
-
-**Rule 5 — HGVS cDNA notation (ROUTINE, 60% confidence)**
-
-If `cdna_name` does not start with `c.`, a naming issue is flagged.
-
-**Deduplication** — before creating any pending item, the system checks for an existing pending item with the same `variant_id` and `item_type`. Duplicate findings are silently skipped, preventing the inbox from filling with repeated scans of the same issue.
-
-### 5.4 Evidence Contradiction Engine
-
-When `heliosCheckEvidenceContradictions()` runs, it:
-
-1. Fetches all evidence links with non-null `cftr_class_claim` or `eti_claim`
-2. Groups links by `variant_id`
-3. For each variant, compares `cftr_class_claim` values against the current `cftr_class`
-4. Contradicting sources are weighted by `quality_score` (1–10)
-5. If contradicting weight exceeds confirming weight → URGENT; otherwise ROUTINE
-6. The proposed value is the highest quality-score contradicting claim
-
-ETI contradictions are always flagged as URGENT because an incorrect ETI prediction directly affects treatment decisions.
-
-### 5.5 Miss Queue Intelligence
-
-The miss queue intelligence engine scores unmatched search queries by cross-institutional demand:
-
-```
-score = 0
-if unique_sessions ≥ 3: score += 40   (cross-institutional confirmed)
-if miss_count ≥ 5:       score += 30   (high frequency)
-if days_since_last ≤ 7:  score += 20   (recent — active clinical need)
-if top_hospital exists:  score += 10   (known source)
-
-if score < 40: skip (not significant)
-priority = score ≥ 70 ? URGENT : ROUTINE
-confidence = min(50 + score, 95)
+```javascript
+// Condition: top result is an exact match
+tier === 0 && topResult.legacy_name.toLowerCase() === normaliseQuery(q)
 ```
 
-This means a query searched 6 times across 3 different institutions in the past week scores 90/100 and generates an URGENT finding.
+### 5.4 Tier-Aware Search Feedback
 
-### 5.6 Drift Detection
+Visual feedback fires **only on tier-0 exact match**. Substring, fuzzy, and phonetic matches are visually silent — they are helpful but not confirmation signals.
 
-The drift engine compares current variant field values against the last approved Helios changes recorded in the audit log. If a field that was approved as value X now has value Y, a DRIFT_ALERT URGENT finding is created.
+| Visual signal | Condition |
+|---|---|
+| **Green sustained edge** on row | Tier-0, data complete and/or validated |
+| **Amber sustained edge** on row | Tier-0, data incomplete or unvalidated |
+| Header sweep animation | Tier-0 exact match |
+| Detail panel entry glow | Tier-0 exact match |
+| Amber-to-green gradient sweep | Exceptional variant |
+| Full-screen amber wash | Exceptional variant only |
+| No signal | Tier 1–4, or browse selection |
 
-This detects cases where a manually edited value reverts or overrides a Helios-approved change — a pattern that can indicate either an error or a deliberate clinical decision that should be formally documented.
+Edges persist until the search is cleared. Data quality assessed live:
 
-### 5.7 Geographic Signal
+```javascript
+function variantDataQuality(variant) {
+    // confirmed → green edge | incomplete → amber edge
+    const complete  = hasClass && hasETI;
+    const evidenced = evidence_links.length > 0 || validated;
+    if (complete && evidenced) return 'confirmed';
+    if (complete)              return 'complete';
+    return 'incomplete';
+}
+```
 
-The geographic signal engine reads recent successful `search_logs` and groups searches by matched variant, counting unique hospitals and countries. Variants searched from 2+ distinct hospitals or countries are surfaced as cross-institutional demand signals.
+### 5.5 Live Miss Card
 
-For HIGH urgency signals (3+ hospitals or 3+ countries) on unvalidated or unclassified variants, a REGIONAL_SIGNAL URGENT finding is automatically created in the inbox.
+When a variant is not found, the search dropdown transforms into a live miss card:
 
-### 5.8 Clinician Decision Flow
+- Robotic scan status: pulsing indicator while searching, confirmation once queued
+- Cross-institutional demand: *"3 other sessions searched this term"*
+- Similar variants already in the database with edit distance shown
+- External links: CFTR2, ClinVar, PubMed, LOVD
+- Clinical note field: annotates `search_miss_queue.notes` for curators before they leave
+
+### 5.6 Cross-Session History
+
+Recent successful searches persisted in `localStorage` (max 50 entries). Shown on empty input focus with relative timestamps (*"3h ago"*, *"yesterday"*). One-click re-run.
+
+---
+
+## 6. Helios Evidence Engine
+
+Helios operates on the governance principle: **the AI proposes, the clinician decides.** The bot reads freely from the database but writes only to `helios_pending_review`. All modifications to `variants` require explicit clinician approval.
+
+### 6.1 Inbox Tabs
+
+| Tab | Contents |
+|---|---|
+| Inbox | All pending review items, filterable by urgency / item type |
+| Scanner | Manual scan controls: internal scan, external PubMed, single variant |
+| Validation queue | Variants awaiting clinical validation |
+| Calibration | Bot confidence feedback and accuracy tracking over time |
+| Audit | Complete action log with field-level diffs |
+| Health check | Database integrity diagnostics |
+
+### 6.2 Item Types Generated
+
+| Type | Trigger |
+|---|---|
+| `NEW_EVIDENCE` | PubMed papers found for unclassified or poorly-evidenced variants |
+| `CONTRADICTION` | Evidence `cftr_class_claim` or `eti_claim` contradicts current classification |
+| `DRIFT_ALERT` | Classification may be outdated based on new literature |
+| `MISS_RESOLVED` | Robotic scan found literature for a searched-but-missing variant |
+| `REGIONAL_SIGNAL` | Variant searched from 3+ institutions, unvalidated or unclassified |
+| `INTERNAL_LOGIC` | Class I marked ETI responsive without exceptional documentation |
+| `INTERNAL_NAMING` | HGVS notation format violations (missing `p.` or `c.` prefix) |
+| `INTERNAL_ORPHAN` | No CFTR class, searched 3+ times by clinicians |
+| `EXTERNAL_GUIDELINE` | New guideline publication detected |
+
+### 6.3 Evidence Contradiction Detection
+
+`heliosCheckEvidenceContradictions()` reads all `evidence_links` with populated `cftr_class_claim` or `eti_claim`. For each variant:
+
+1. Group claims by variant
+2. Compare against current `cftr_class` / `eti_prediction`
+3. Weight by source `quality_score`
+4. Contradicting weight > confirming weight → priority `URGENT`
+5. **Persists to `contradictions` table** (not just in-memory) at CRITICAL/HIGH/MEDIUM severity
+
+### 6.4 Internal Consistency Scan
+
+`heliosCheckVariantConsistency()` evaluates every variant against logical rules — Class I + ETI responsive without exceptional marking, missing HGVS prefixes, unclassified variants with high search demand, duplicate name detection.
+
+### 6.5 Literature Surveillance
+
+`runSurveillanceAlerts()` runs 3 seconds after page load:
+
+1. Fetches `helios_monitor_targets` not checked in 7 days
+2. PubMed search per monitored variant (400ms between requests, respecting rate limits)
+3. Filters for papers since `last_checked_at`
+4. New papers → `NEW_EVIDENCE` Helios item
+5. Updates `last_checked_at`
+
+### 6.6 Clinician Decision Flow
 
 ```
 Helios finding created (URGENT or ROUTINE)
        ↓
-Clinician opens inbox, reviews reasoning + confidence + diff
+Clinician opens inbox → reviews: bot reasoning, confidence %, proposed change vs current
        ↓
-       ├── Approve → heliosApplyDBChange() writes to variants
-       │             heliosWriteAudit() records decision
-       │
-       ├── Approve & Sign → same as approve, requires written note
-       │
-       ├── Mark Exceptional → writes class_subtype = 'exceptional'
-       │                       suppresses future flags for this variant
-       │                       requires written clinical justification
-       │
-       ├── Reject → status = rejected, note recorded
-       │
-       └── Defer → status = deferred, deferred_until = tomorrow
-                   defer_count incremented
-                   automatically resurfaced when deferred_until passes
+       ├── Approve           → applies DB change, writes audit entry
+       ├── Approve with note  → same, requires written clinical justification
+       ├── Mark Exceptional   → writes class_subtype='exceptional',
+       │                        suppresses future flags for this variant
+       ├── Reject             → status='rejected', note recorded
+       └── Defer              → status='deferred', deferred_until=tomorrow
+                                defer_count incremented
+                                auto-resurfaced when date passes
 ```
 
----
+### 6.7 Calibration System
 
-## 6. Search Intelligence Layer
-
-### 6.1 Session Architecture
-
-Each browser session receives a random `session_id` (`sess_` + 8 random alphanumeric characters). This identifier is used throughout the session for search logging without requiring authentication — it provides session-level aggregation without tracking individuals.
-
-### 6.2 Geographic Enrichment
-
-On first search within a session, `fetchLocationOnce()` makes a single request to `https://ipapi.co/json/` to retrieve country, region, city, and coordinates. The result is cached in `STATE.searchIntelligence.locationCache` for the rest of the session. All subsequent search log entries in that session carry the same geographic context without additional API calls.
-
-### 6.3 Hit/Miss Logging
-
-Every settled search (after 1200ms debounce) generates a `search_logs` entry. For misses, the query is also upserted into `search_miss_queue` using PostgreSQL `ON CONFLICT (query) DO UPDATE` to maintain a running count without duplicates.
-
-The separation between UI debounce (180ms) and log debounce (1200ms) is intentional — it prevents every partial keystroke from generating a log entry while keeping the UI responsive.
-
-### 6.4 Search Intelligence Dashboard
-
-The analytics dashboard reads accumulated `search_logs` and `search_miss_queue` data to render:
-
-- Hit rate over time (timeline chart)
-- Top hit variants (bar chart)
-- Top miss queries (signal list)
-- Geographic distribution (map with clustering by country/city)
-- Hospital-level breakdown
+Reads `helios_audit_log` approved/rejected decisions. Computes per-`item_type` precision rates. Adjusts confidence scoring for future findings. Cached per session.
 
 ---
 
-## 7. Geographic Intelligence
+## 7. Robotic Autonomous Search
 
-### 7.1 Search Log Geographic Data
+When a clinician searches for a variant not in the database, NeumuacFQ automatically triggers a multi-source robotic scan — **no curator button required**.
 
-Every search event carries: `country`, `region`, `city`, `latitude`, `longitude`, `hospital_name`. The combination of these fields allows analysis at multiple granularity levels — from individual hospital queries to country-level demand patterns.
+### 7.1 Full Flow
 
-### 7.2 Geographic Map Rendering
-
-The geo tab aggregates `search_logs` geographically, clustering points by proximity. Each cluster shows:
-- Dominant CFTR class searched in that region
-- Hit rate for that region
-- Number of distinct hospitals
-- Most searched variants
-
-This allows epidemiological insight — identifying geographic regions with high search demand for specific variant classes, which may indicate local population genetics or referral patterns.
-
-### 7.3 Cross-Institutional Demand Signal
-
-The `heliosRunGeoSignal()` function operates on matched searches (hits), not misses. It identifies variants that are actively used clinically across multiple institutions — this is a different signal from the miss queue, which captures unrecognised variants. A variant that is found in the database but searched from 5 different countries is a signal that it warrants priority validation and evidence enrichment, even if it's already classified.
-
----
-
-## 8. Security Model
-
-### 8.1 Supabase Row Level Security
-
-The Supabase project has Row Level Security (RLS) enabled. The publishable key embedded in the application grants read access to public variant data and write access to search logs and Helios review queues. It does not grant direct write access to the `variants` table from the client.
-
-All modifications to `variants` go through Helios's `heliosApplyDBChange()` function, which is only called after explicit clinician approval of a pending review item. This is an application-layer constraint, not a database-layer constraint.
-
-For production environments with expanded user bases, backend proxy pattern should be implemented — the current publishable key is appropriate for a trusted clinical environment with known users.
-
-### 8.2 Audit Immutability
-
-The `helios_audit_log` table records every clinician decision with:
-- `review_snapshot` — the full state of the pending item at decision time (JSONB)
-- `clinician_name` — from localStorage institution identity
-- `clinician_role` — role string from the validation modal
-- `db_change_field` / `db_change_old` / `db_change_new` — field-level change record
-- `created_at` — timestamp
-
-The audit log is append-only — Helios never updates or deletes audit entries. This provides a complete history of all data changes that passed through the review workflow.
-
----
-
-## 9. Performance Characteristics
-
-### 9.1 Variant Loading
-
-Variants are loaded in paginated batches of 500, with evidence links joined inline (`select=*,evidence_links(*)`). A 2,237-variant database loads in approximately 3–4 requests with typical response times of 300–600ms per page on the Supabase free tier.
-
-### 9.2 Search Performance
-
-The inverted index allows O(n) search where n is the number of terms in the index (not the number of variants). With approximately 3–4 indexed terms per variant and prefix stripping doubling the term count, a 2,237-variant database produces roughly 15,000–20,000 index entries. The `includes()` scan over this set completes in under 5ms in typical browsers.
-
-### 9.3 Helios Scan Performance
-
-The internal consistency scan iterates all variants sequentially. To avoid blocking the event loop, it yields every 20 variants using `await new Promise(r => setTimeout(r, 50))`. A 2,237-variant scan takes approximately 5–8 seconds at this throttle rate, which is appropriate given that scans are not real-time operations.
-
-External scans (PubMed) impose a 350ms delay between requests to respect NCBI Entrez rate limits (3 requests/second for unauthenticated access, 10/second with an API key).
-
-### 9.4 Calibration Load
-
-The calibration engine makes two parallel requests on Helios open: one to `helios_audit_log` (limit 500) and one to `helios_pending_review` (limit 500). Both resolve in under 400ms typically. Calibration data is cached in `HELIOS.calibration` for the duration of the session — it does not reload on each inbox refresh.
-
----
-
-## 10. Deployment
-
-### 10.1 Current Setup
-
-- Source: single `index.html` file (approximately 11,500 lines)
-- Hosting: GitHub Pages, served from repository root or `/docs` folder
-- Domain: `[username].github.io/[repository-name]`
-- HTTPS: enforced by GitHub Pages (required for IP geolocation API)
-
-### 10.2 Supabase Configuration
-
-Required tables: `variants`, `evidence_links`, `search_logs`, `search_miss_queue`, `validation_history`, `helios_pending_review`, `helios_audit_log`, `helios_bot_runs`, `helios_monitor_targets`, `research_gaps`
-
-CORS origins to add in Supabase Dashboard → API Settings:
 ```
-https://[username].github.io
+Clinician types unknown variant name
+       ↓
+persistSearchEvent() → miss logged to search_miss_queue (ON CONFLICT upsert)
+       ↓ (500ms delay, completely non-blocking)
+triggerRoboticSearchOnMiss(normQuery)
+       ↓
+Three sources scanned concurrently via Promise.allSettled():
+   roboticPubMedSearch()   — 8 results via NCBI esearch + esummary
+   roboticClinVarSearch()  — 5 clinical records via NCBI clinvar
+   roboticCFTR2Search()    — 3 CFTR2-reference publications via targeted PubMed
+       ↓
+scoreEvidenceQuality()      — weight papers by journal_impacts table
+deriveClassificationProposal() — class hint from title keyword analysis
+       ↓
+INSERT into helios_pending_review — pre-filled dossier with all evidence attached
+       ↓
+Clinician notification: "NeumuacFQ is searching PubMed · ClinVar · CFTR2 robotically.
+                         Check Helios inbox within 24h."
+       ↓
+Curator one-click Approve → variant created in DB, miss queue resolved,
+                             version archived in cftr_variants_archive
 ```
 
-### 10.3 Known Limitations
+**Time from miss to live variant: under 24 hours with no manual literature search.**
 
-**Single file architecture** — the current codebase is a single HTML file of approximately 11,500 lines. This works well for the current stage but will require modularisation (ES modules or a bundler such as Vite) as the codebase grows beyond one developer.
+### 7.2 Rate Limiting
 
-**Client-side key** — the Supabase publishable key is embedded in the HTML. This is acceptable for a trusted clinical environment with RLS enabled, but should be replaced with a backend proxy pattern before any public-facing deployment.
-
-**Session identity** — clinician identity is stored in `localStorage` as a self-reported institution name. This is appropriate for the current collaborative environment but is not an authentication system. For regulated clinical use, integration with an identity provider (e.g. NHS login, hospital SSO) would be required.
-
-**PubMed rate limits** — the NCBI Entrez API allows 3 unauthenticated requests per second. The external scan is throttled accordingly. For higher-volume scanning, registering for an NCBI API key increases this to 10 requests/second.
+NCBI Entrez: 3 req/s unauthenticated. Concurrent (not sequential) scanning minimises wall time. Each request uses `AbortSignal.timeout(8000)`. Duplicate scan prevention via `ROBOTIC_SCAN_QUEUE` Set.
 
 ---
 
-*Document version: 1.0 | Platform version: 3.0.0-PRODUCTION | Last updated: April 2026*
+## 8. Compound Heterozygosity Engine
+
+Accessible via the **Genotype** button in the main header toolbar.
+
+### 8.1 Modulator Eligibility Map
+
+```javascript
+MODULATOR_MAP = {
+    'Trikafta (ETI)':    ≥1 F508del allele OR both alleles ETI-responsive,
+    'Kalydeco (IVA)':    ≥1 Class III or IV allele,
+    'Symdeko (TEZ/IVA)': ≥1 F508del allele,
+    'Orkambi (LUM/IVA)': BOTH alleles F508del (homozygous only)
+}
+```
+
+23 variants with FDA/EMA ivacaftor monotherapy approval: G551D, G1244E, G1349D, G178R, G551S, S1251N, S1255P, S549N, S549R, R117H + 13 additional gating mutations.
+
+### 8.2 Dominant Allele
+
+Class rank: I=6, II=5, III=4, IV=3, V=2, VI=1. Higher rank = worse function = dominant phenotype driver.
+
+### 8.3 Calculator Output
+
+For two variant names (full database autocomplete):
+
+- Phenotype severity (classic CF · moderate-severe · mild/CFTR-RD)
+- Expected sweat chloride range (from dominant allele class)
+- Residual CFTR function estimate
+- Pancreatic sufficiency probability
+- Age of onset
+- CFTR-related disorder association
+- Newborn screening detection across all three panels
+- Per-modulator eligibility for all four approved modulators
+- ETI mismatch warning when alleles conflict
+- One-click **Generate MDT Report**
+
+If either allele is not in the database, robotic search fires automatically.
+
+### 8.4 Compare Tray
+
+Pin any variant → select a second → compound het tray appears at the bottom of screen with the clinical verdict and per-modulator eligibility panel. Updates live as the second variant changes.
+
+---
+
+## 9. ACMG/AMP Classification Framework
+
+Automatically computed for every variant. Based on Richards et al., *Genetics in Medicine* 17:405–423 (2015).
+
+### 9.1 Criteria
+
+**Pathogenic evidence (auto-assessed where data available):**
+
+| Code | Criterion | Auto-trigger condition |
+|---|---|---|
+| PVS1 | Null variant, LOF disease mechanism | Class I + CF-causing determination |
+| PS3 | Functional study: damaging effect | evidence_link with study_type='functional' |
+| PS4 | Prevalence elevated in affected individuals | validation_count ≥ 3 |
+| PM2 | Absent/very low frequency in population | population_frequency < 0.001 |
+| PM4 | In-frame indel | name contains del/ins/dup, non-Class I |
+| PP3 | Computational evidence: damaging | Classes I, II, or III |
+| PP5 | Reputable source reports pathogenic | source_summary includes 'CFTR2' |
+
+**Benign evidence:**
+
+| Code | Criterion | Auto-trigger condition |
+|---|---|---|
+| BA1 | Allele frequency > 5% | population_frequency > 0.05 |
+| BS1 | Allele frequency > 1% | population_frequency > 0.01 |
+| BP4 | Computational: no impact | ETI non-responsive + no class |
+
+### 9.2 Classification Thresholds
+
+| Score | Classification |
+|---|---|
+| ≥ 10 | Pathogenic |
+| 6–9 | Likely pathogenic |
+| 0–5 | Uncertain significance |
+| −6 to −1 | Likely benign |
+| ≤ −7 | Benign |
+
+Displayed in every variant detail with met criteria highlighted. Score and classification also appear in the Clinical PDF and MDT Report. Clearly labelled as automated — expert review required before clinical reporting.
+
+---
+
+## 10. Clinical Reference System
+
+Every variant detail panel shows class-specific reference data from hardcoded tables (no additional DB queries):
+
+### 10.1 Class Reference Data
+
+| Class | Sweat Cl⁻ | Residual CFTR | Pancreatic sufficiency | Onset | Primary modulator |
+|---|---|---|---|---|---|
+| I | ≥80 mmol/L | <1% | <5% | Neonatal | ETI if ≥1 responsive allele |
+| II | ≥80 mmol/L | 0–3% | <10% | Neonatal/infancy | ETI strongly indicated |
+| III | 60–100 mmol/L | 1–5% | 10–25% | Infancy–childhood | Ivacaftor / ETI |
+| IV | 30–60 mmol/L | 5–30% | 30–70% | Childhood–adulthood | Ivacaftor may benefit |
+| V | 30–70 mmol/L | 3–10% | 40–80% | Childhood–adulthood | ETI uncertain |
+| VI | 40–80 mmol/L | 5–25% | 25–60% | Variable | Under investigation |
+
+All labelled as population-level estimates, not patient-specific.
+
+### 10.2 Newborn Screening Panels
+
+| Panel | Variants |
+|---|---|
+| UK CLAPA | 27 variants: F508del, G542X, G551D, R117H, N1303K, W1282X, R553X + 20 others |
+| ACMG 23+4 | 23 ACMG core variants |
+| EU Consensus | 17 pan-European variants |
+
+Panel membership shown per variant: *"This variant is included in X national NBS panel(s) — would be detected at birth."* Non-panel variants explicitly noted.
+
+### 10.3 Ivacaftor vs ETI Distinction
+
+The panel explicitly distinguishes ivacaftor monotherapy eligibility from Trikafta eligibility — these are different clinical indications frequently conflated in practice. *"Ivacaftor monotherapy approved"* shown for the 23 FDA/EMA-labelled gating mutations, separate from the Class II ETI indication.
+
+---
+
+## 11. Clinical Reports & MDT Output
+
+### 11.1 Clinical Variant PDF
+
+Generated by `exportClinicalReport()` — single variant or batch (all classified). Opens in a print-optimised popup window (A4, correct margins).
+
+**Contents:** NeumuacFQ logo · variant name block with badges · classification details + ACMG score · clinical reference grid (sweat chloride, residual function, pancreatic sufficiency, onset, CFTR-RD, modulator) · NBS panel inclusion · clinical recommendation · validation status · PubMed references · legal footer.
+
+### 11.2 MDT Report
+
+Generated by `generateMDTReport()` from the Compound Genotype Calculator. Structured as a clinical letter for MDT correspondence.
+
+**Contents:** NeumuacFQ logo · institution + date · genotype section (both alleles with ACMG classification) · clinical prediction grid (6 fields) · therapeutic eligibility table (per modulator + Trikafta eligibility + dominant allele) · ACMG/AMP table for both alleles · NBS detection status · legal disclaimer (*"For MDT discussion only. Not a substitute for clinical genetics assessment or specialist genetics review."*).
+
+### 11.3 Research Exports
+
+**Filtered cohort CSV** — exports current filter state, not the full database. Includes gap scores and clinical alerts. For grant applications and literature reviews.
+
+**IRB data package (JSON)** — full provenance per variant: nomenclature, classification, therapeutic, validation, evidence, gap analysis, demand signal. For IRB submissions.
+
+**Search Intelligence PDF** — auto-generated research report with hit rate analysis, miss queue, top variants, geographic distribution, institutional context.
+
+---
+
+## 12. Search Intelligence Layer
+
+### 12.1 Session Architecture
+
+Each session receives a random `session_id` (`sess_` + 8 alphanumeric characters) — provides session-level aggregation without tracking individuals or requiring authentication.
+
+### 12.2 Dual Debounce
+
+```
+Keystroke → 180ms  → UI filter updates (always responsive)
+Keystroke → 1200ms → search_logs INSERT + search_miss_queue UPSERT
+```
+
+Prevents every partial keystroke from generating a log entry while keeping the UI instantaneous.
+
+### 12.3 Geographic Enrichment
+
+On first search, `fetchLocationOnce()` calls `ipapi.co/json/` once — city-level geolocation, cached for the full session. All subsequent log entries in the session carry the same geographic context at zero additional API cost.
+
+### 12.4 Dashboard Tabs
+
+**Overview** — Hit rate, unique queries, field breakdown (which nomenclature type is searched most), session sparkline, coverage bar, miss queue chip.
+
+**Miss queue** — All unresolved misses sorted by cross-institutional demand. Misses from 3+ institutions auto-escalate to Helios URGENT.
+
+**Geography** — Leaflet map with marker clusters, choropleth overlay (hit rate by country), period filters (7d / 30d / all time), per-location hit rate bars.
+
+**Velocity heatmap** — Hour-of-day × day-of-week search volume from `search_logs`. Green = high hit rate. Blue = high miss rate. Shows when clinical demand peaks — useful for staffing and surveillance scheduling.
+
+**Co-search clusters** — Variant pairs searched together in the same session. Identifies potential compound het pairs from real clinical behaviour. Cross-institutional pairs highlighted. Click any pair to load both into the compare tray.
+
+**Gap queue** — Variants ranked by research gap score with configurable weights.
+
+---
+
+## 13. Geographic Intelligence
+
+### 13.1 Data Structure
+
+Every `search_logs` entry: `country`, `region`, `city`, `latitude`, `longitude`, `hospital_name`. Supports analysis from individual hospital level to country level.
+
+### 13.2 Cross-Institutional Demand Signal
+
+`heliosRunGeoSignal()` identifies variants searched from multiple institutions in recent logs. A variant searched from 5 different countries warrants priority validation and evidence enrichment even if it's already classified — this is clinically active data. For HIGH signals (3+ hospitals or 3+ countries) on unvalidated/unclassified variants, a `REGIONAL_SIGNAL URGENT` Helios item is created automatically.
+
+### 13.3 Co-Search Intelligence
+
+`renderCoSearchClusters()` reads session co-occurrences — variants searched together in the same session. Groups by session, builds pair counts, ranks by frequency, identifies compound het candidates from real usage patterns. Directly actionable: click any pair to load both into the compound het compare tray.
+
+---
+
+## 14. Security Model
+
+### 14.1 Supabase Row Level Security
+
+RLS enabled on all tables. The `sb_publishable_*` key in the HTML grants read access to variant data and write access to search logs and Helios queues. It does not grant direct write access to `variants`.
+
+All variant modifications go through Helios's review approval flow or through `saveAnnotation()` which requires write-mode PIN activation. This is an application-layer constraint — for production with a broader user base, a backend proxy pattern should replace the client-side key.
+
+### 14.2 Write Mode
+
+PIN-gated, 30-minute sessions. All writes go through `dbWrite()`:
+- 3-retry with exponential backoff (800ms × attempt)
+- Error classification: network / validation / permission / duplicate / server
+- Failed-save queue in `localStorage` — queued writes replay automatically on reconnect
+- Connection indicator in header (green / amber-saving / red-error dot)
+
+### 14.3 Audit Trail
+
+**`helios_audit_log`** — append-only. Every decision stores: `review_snapshot` (full JSONB state), `db_change_field` / `db_change_old` / `db_change_new`, `clinician_name`, `clinician_role`, `created_at`.
+
+**`cftr_variants_archive`** — version snapshot triggered on every change to `cftr_class`, `eti_prediction`, `final_determination`, `class_subtype`, or `eti_evidence_level`. Full classification history is recoverable at any point in time.
+
+### 14.4 Formal Dispute Workflow
+
+The dispute button (⚖) on every variant allows a second clinician to formally challenge a classification. Requires: name/role, proposed correct value, evidence/reasoning. Writes to `contradictions` at CRITICAL severity and escalates to Helios URGENT immediately. Audit logged.
+
+---
+
+## 15. Performance Characteristics
+
+### 15.1 Variant Loading
+
+Paginated batches of 1,000 with evidence links joined inline (`select=*,evidence_links(*)`). A 2,237-variant database: ~3 requests at 300–600ms each on Supabase free tier.
+
+### 15.2 Search Performance
+
+O(1) Map lookups for the inverted index. ~15,000–20,000 index entries for 2,237 variants. Complete search (all tiers, including phonetic): **< 5ms** in typical browsers. Levenshtein fuzzy matching only runs when no direct match is found.
+
+### 15.3 Helios Scan Performance
+
+Internal consistency scan yields every 20 variants (`await setTimeout(50ms)`) to avoid blocking the event loop. Full 2,237-variant scan: **5–8 seconds** at this throttle.
+
+External PubMed scans: 350ms between requests (NCBI Entrez limit: 3 req/s unauthenticated; register an API key for 10 req/s).
+
+### 15.4 Calibration Load
+
+Two parallel requests on Helios open: `helios_audit_log` (limit 500) + `helios_pending_review` (limit 500). Both resolve in < 400ms typically. Cached per session.
+
+### 15.5 Offline Mode
+
+Full dataset cached to IndexedDB on every successful load. On startup failure: serves from cache with offline banner. Write operations queue locally in `localStorage` key `helix_failed_saves_v1` and replay on reconnect.
+
+---
+
+## 16. Deployment
+
+### 16.1 Current Setup
+
+- Single `neumuacFQ.html` (~18,700 lines, 1.3 MB including embedded logo as base64 JPEG)
+- Hosting: GitHub Pages or any static HTTPS file server
+- HTTPS required (ipapi.co geolocation requires secure context)
+
+### 16.2 Configuration
+
+```javascript
+// neumuacFQ.html — CONFIG block
+const CONFIG = {
+    SUPABASE: {
+        URL:  'https://[project-ref].supabase.co',
+        KEY:  'sb_publishable_[key]'    // publishable key with RLS enabled
+    },
+    UI: {
+        ITEMS_PER_PAGE:  25,
+        SEARCH_DELAY:    180,    // ms — UI filter debounce
+        LOG_DELAY:       1200,   // ms — search event log debounce
+        MIN_SEARCH_CHARS: 2
+    },
+    WRITE_CODE:     '[PIN]',             // change before deployment
+    WRITE_DURATION: 30 * 60 * 1000      // 30 minutes
+};
+```
+
+### 16.3 Supabase Setup
+
+Required tables (see Section 3): `variants`, `evidence_links`, `search_logs`, `search_miss_queue`, `validation_history`, `helios_pending_review`, `helios_audit_log`, `helios_bot_runs`, `helios_monitor_targets`, `research_gaps`, `contradictions`, `cftr_variants_archive`, `cftr_class_rules`, `institutions`, `journal_impacts`, `variant_notes`
+
+CORS origins — Supabase Dashboard → API Settings:
+```
+https://[your-domain]
+```
+
+### 16.4 Known Limitations
+
+**Single file architecture** — 18,700+ lines. Works well at current scale. Will benefit from ES module decomposition (`Vite` or native `import`) as the team grows beyond one developer.
+
+**Client-side key** — publishable key visible in HTML source. Acceptable with RLS for a trusted clinical team; replace with a backend proxy for any public-facing deployment.
+
+**Session identity** — institution name in `localStorage` is self-reported, not authenticated. For regulated clinical use requiring individual audit trails, integration with an identity provider (NHS login, hospital SSO, SAML 2.0 / OIDC) is required.
+
+**PubMed rate limits** — 3 unauthenticated req/s. Register an NCBI API key for 10 req/s if higher-volume robotic scanning is needed.
+
+---
+
+## 17. Roadmap
+
+Three features that would make NeumuacFQ citable in a peer-reviewed methods paper:
+
+**1. Functional study data layer**
+Structured fields for Ussing chamber measurements, organoid swelling assays, Fischer rat thyroid cell assays. Currently the ACMG PS3 criterion (functional study) is inferred from `evidence_link.study_type` — it should be first-class structured data with quantitative values and assay metadata.
+
+**2. Population stratification**
+R117H with 5T/7T/9T poly-T tract and TG repeat context has radically different clinical penetrance — currently modelled as a single variant. Haplotype modifier fields and ancestry-stratified allele frequencies from gnomAD are required to model this correctly.
+
+**3. Classification history UI**
+`cftr_variants_archive` writes a snapshot on every classification change. A timeline view in the variant detail panel showing *when* a variant moved from VUS to CF-causing, *what evidence* triggered it, and *which Helios approval* authorised the change would provide the audit trail needed for clinical governance and peer review.
+
+---
+
+## Acknowledgements
+
+Built on CFTR2 variant database reference data (Johns Hopkins University / University of North Carolina). ACMG/AMP classification criteria per Richards et al., *Genetics in Medicine* 17:405–423 (2015). Modulator eligibility per current EMA/FDA prescribing information. NBS panel composition per CLAPA UK, ACMG, and European Cystic Fibrosis Society consensus. Geographic data via ipapi.co. Map tiles via CartoDB.
+
+---
+
+*NeumuacFQ v4.0 · Servicio de Neumología · CHUAC — Complexo Hospitalario Universitario de A Coruña*
+*For clinical and research use · Not for patient distribution without clinician sign-off*
+*Document version: 2.0 · Platform version: 4.0.0-PRODUCTION · Last updated: April 2026*
