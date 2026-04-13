@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>NeumuacACFG | CFTR Precision Medicine Platform</title>
+    <title>NeumuacFQ | CFTR Precision Medicine Platform</title>
 
     <!-- Fonts & Icons -->   
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -76,7 +76,7 @@
 
     <style>
         /* ============================================================
-           NeumuacACFG v4 — CFTR PRECISION MEDICINE PLATFORM
+           NeumuacFQ v4 — CFTR PRECISION MEDICINE PLATFORM
            Architecture: Collapsible sidebar + full-width detail
            Features: Full CRUD, Validation, Evidence, Import/Export, Analytics
            ============================================================ */
@@ -3750,7 +3750,7 @@
             </div>
         </div>
 
-        <div class="load-title">NeumuacACFG</div>
+        <div class="load-title">NeumuacFQ</div>
         <div class="load-sub">CFTR Precision Medicine Platform</div>
 
         <div class="load-bar-wrap">
@@ -3783,7 +3783,7 @@
      ================================================================ -->
 <div id="hospitalModal" class="hospital-modal-overlay" style="display:none;">
     <div class="hospital-modal" style="width:480px;max-height:90vh;overflow-y:auto;">
-        <div class="hospital-modal-logo">NeumuacACFG</div>
+        <div class="hospital-modal-logo">NeumuacFQ</div>
         <div class="hospital-modal-sub">CFTR Precision Medicine Platform</div>
         <h3>Which institution are you searching from?</h3>
         <p>This helps us track which variants are most searched at each clinical centre — enabling regional prevalence insights and prioritising research gaps by institution.</p>
@@ -3876,7 +3876,7 @@
                 </svg>
             </div>
             <div class="brand-text" id="brandText">
-                <div class="brand-name">NeumuacACFG</div>
+                <div class="brand-name">NeumuacFQ</div>
                 <div class="brand-sub">CFTR Precision Medicine</div>
             </div>
         </div>
@@ -4966,7 +4966,7 @@
      ================================================================ -->
 <script>
 /* ================================================================
-   NeumuacACFG v4 — CFTR PRECISION MEDICINE PLATFORM
+   NeumuacFQ v4 — CFTR PRECISION MEDICINE PLATFORM
    Features: Full CRUD, Validation, Evidence, Import/Export, Analytics
    Architecture: Collapsible sidebar + full-width detail
    Design: Clean & Clinical (IBM Plex)
@@ -5018,7 +5018,7 @@ async function persistContradictionToDB(variantId, field, severity, details) {
                 created_at:   new Date().toISOString()
             })
         });
-    } catch(e) { console.warn('[NeumuacACFG] Contradiction persist failed:', e.message); }
+    } catch(e) { console.warn('[NeumuacFQ] Contradiction persist failed:', e.message); }
 }
 
 // ========== PHASE 1: VERSION ARCHIVE ==========
@@ -5046,7 +5046,7 @@ async function archiveVariantVersion(variant) {
                 archived_at:              new Date().toISOString()
             })
         });
-    } catch(e) { console.warn('[NeumuacACFG] Archive write failed:', e.message); }
+    } catch(e) { console.warn('[NeumuacFQ] Archive write failed:', e.message); }
 }
 
 // ========== PHASE 1: cftr_class_rules LOADER ==========
@@ -5057,13 +5057,14 @@ const CLASS_RULES_CACHE = {};
 async function loadClassRules() {
     try {
         const res = await fetch(`${CONFIG.SUPABASE.URL}/rest/v1/cftr_class_rules?select=cftr_class,class_name,description,typical_eti_response,modulators_effective,clinical_notes`, {
-            headers: { 'apikey': CONFIG.SUPABASE.KEY, 'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}` }
+            headers: { 'apikey': CONFIG.SUPABASE.KEY, 'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}` },
+            signal: AbortSignal.timeout(6000)
         });
-        if (!res.ok) return;
+        if (!res.ok) return; // table may not exist yet — silent fallback
         const rules = await res.json();
         rules.forEach(r => { CLASS_RULES_CACHE[r.cftr_class] = r; });
-        console.log('[NeumuacACFG] Class rules loaded from DB:', Object.keys(CLASS_RULES_CACHE).length);
-    } catch(e) { console.warn('[NeumuacACFG] Class rules fallback to hardcoded:', e.message); }
+        console.log('[NeumuacFQ] Class rules loaded from DB:', Object.keys(CLASS_RULES_CACHE).length);
+    } catch(e) { console.warn('[NeumuacFQ] Class rules fallback to hardcoded:', e.message); }
 }
 
 function getClassDescription(cftrClass) {
@@ -5090,7 +5091,7 @@ async function triggerRoboticSearchOnMiss(query, missId) {
     if (ROBOTIC_SCAN_QUEUE.has(query)) return; // already scanning
     ROBOTIC_SCAN_QUEUE.add(query);
 
-    console.log(`[NeumuacACFG Robotic] Auto-triggered scan for: "${query}"`);
+    console.log(`[NeumuacFQ Robotic] Auto-triggered scan for: "${query}"`);
 
     try {
         // Mark miss as in_review immediately
@@ -5114,7 +5115,7 @@ async function triggerRoboticSearchOnMiss(query, missId) {
         const totalFindings = pubmedPapers.length + clinvarHits.length + cftr2Hits.length;
 
         if (totalFindings === 0) {
-            console.log(`[NeumuacACFG Robotic] No findings for "${query}" across all sources`);
+            console.log(`[NeumuacFQ Robotic] No findings for "${query}" across all sources`);
             ROBOTIC_SCAN_QUEUE.delete(query);
             return;
         }
@@ -5177,9 +5178,9 @@ async function triggerRoboticSearchOnMiss(query, missId) {
         showNotification(`Robotic scan complete for "${query}" — ${sourceSummary} · Review in Helios`, 'info', 6000);
         if (typeof heliosUpdateBadge === 'function') heliosUpdateBadge();
 
-        console.log(`[NeumuacACFG Robotic] Scan complete: ${totalFindings} findings, confidence ${confidence}%`);
+        console.log(`[NeumuacFQ Robotic] Scan complete: ${totalFindings} findings, confidence ${confidence}%`);
     } catch(e) {
-        console.error('[NeumuacACFG Robotic] Scan failed:', e.message);
+        console.error('[NeumuacFQ Robotic] Scan failed:', e.message);
     } finally {
         ROBOTIC_SCAN_QUEUE.delete(query);
     }
@@ -5275,12 +5276,13 @@ const JOURNAL_IMPACT_CACHE = {};
 async function loadJournalImpacts() {
     try {
         const res = await fetch(`${CONFIG.SUPABASE.URL}/rest/v1/journal_impacts?select=journal_name,impact_factor,quartile&limit=500`, {
-            headers: { 'apikey': CONFIG.SUPABASE.KEY, 'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}` }
+            headers: { 'apikey': CONFIG.SUPABASE.KEY, 'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}` },
+            signal: AbortSignal.timeout(6000)
         });
-        if (!res.ok) return;
+        if (!res.ok) return; // table may not exist yet — silent fallback
         const data = await res.json();
         data.forEach(j => { JOURNAL_IMPACT_CACHE[j.journal_name?.toLowerCase()] = j; });
-        console.log('[NeumuacACFG] Journal impact cache loaded:', Object.keys(JOURNAL_IMPACT_CACHE).length, 'journals');
+        console.log('[NeumuacFQ] Journal impact cache loaded:', Object.keys(JOURNAL_IMPACT_CACHE).length, 'journals');
     } catch(e) {}
 }
 
@@ -5314,7 +5316,7 @@ function deriveClassificationProposal(papers, clinvarHits) {
 
 function buildRoboticReasoning(query, papers, clinvar, cftr2, proposal, recentCount, etiRelated) {
     const lines = [
-        `NeumuacACFG robotic scan for "${query}" completed across PubMed, ClinVar, and CFTR2.`,
+        `NeumuacFQ robotic scan for "${query}" completed across PubMed, ClinVar, and CFTR2.`,
         papers.length   ? `PubMed: ${papers.length} paper${papers.length!==1?'s':''} found${recentCount ? `, ${recentCount} published in the last 3 years` : ''}.` : 'PubMed: no results.',
         clinvar.length  ? `ClinVar: ${clinvar.length} clinical record${clinvar.length!==1?'s':''} found.` : 'ClinVar: no results.',
         cftr2.length    ? `CFTR2/reference: ${cftr2.length} relevant publication${cftr2.length!==1?'s':''}.` : '',
@@ -5790,7 +5792,7 @@ async function loadVariants() {
                 showNotification(`Offline mode — ${STATE.variants.length.toLocaleString()} variants from cache`, 'warning', 5000);
                 return; // don't fall through to error state
             }
-        } catch(cacheErr) { console.warn('[Helix] Cache fallback failed:', cacheErr.message); }
+        } catch(cacheErr) { console.warn('[NeumuacFQ] Cache fallback failed:', cacheErr.message); }
 
         showListError(err.message);
         showNotification('Database connection failed', 'error');
@@ -5998,13 +6000,13 @@ async function fetchLocationOnce() {
                 longitude: d.longitude    || null,
                 ip_source: 'ipapi.co'
             };
-            console.log('[Helix Geo] Location resolved:', si.locationCache.city, si.locationCache.country);
+            console.log('[NeumuacFQ Geo] Location resolved:', si.locationCache.city, si.locationCache.country);
         } else {
-            console.warn('[Helix Geo] ipapi.co returned no city:', d);
+            console.warn('[NeumuacFQ Geo] ipapi.co returned no city:', d);
             si.locationCache = {};
         }
     } catch(e) {
-        console.warn('[Helix Geo] Location fetch failed:', e.message);
+        console.warn('[NeumuacFQ Geo] Location fetch failed:', e.message);
         si.locationCache = {}; // don't retry this session
     }
     return si.locationCache;
@@ -6191,7 +6193,7 @@ async function persistSearchEvent(query, isHit, matchedField, matchedVariantId) 
                 setTimeout(() => triggerRoboticSearchOnMiss(normQuery, null), 500);
                 // Show clinician a status message so the search is not silent
                 showNotification(
-                    `"${query}" not found — NeumuacACFG is searching PubMed, ClinVar & CFTR2 robotically. Check Helios inbox within 24h.`,
+                    `"${query}" not found — NeumuacFQ is searching PubMed, ClinVar & CFTR2 robotically. Check Helios inbox within 24h.`,
                     'info', 7000
                 );
             }
@@ -6467,7 +6469,7 @@ async function renderGeoTab() {
                 });
                 window._helixGeoLayer.addTo(window._helixMap);
             }
-        } catch(e){ console.warn('[Helix Geo] World atlas failed:',e.message); }
+        } catch(e){ console.warn('[NeumuacFQ Geo] World atlas failed:',e.message); }
     }
     geoV4RenderMarkers();
 }
@@ -9482,7 +9484,7 @@ function exportClinicalReport(variantOrAll) {
     const now = new Date();
     const dateStr = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
     const timeStr = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-    const institution = STATE.searchIntelligence?.hospital || 'NeumuacACFG';
+    const institution = STATE.searchIntelligence?.hospital || 'NeumuacFQ';
 
     function etiBadge(pred) {
         const map = {
@@ -9527,7 +9529,7 @@ function exportClinicalReport(variantOrAll) {
                         <span style="font-size:18px;font-weight:800;color:#2979ff;font-family:'Syne',sans-serif;">Δ</span>
                     </div>
                     <div>
-                        <div style="font-size:13px;font-weight:700;color:#0f172a;letter-spacing:-.01em;">NeumuacACFG · CFTR Precision Medicine Platform</div>
+                        <div style="font-size:13px;font-weight:700;color:#0f172a;letter-spacing:-.01em;">NeumuacFQ · CFTR Precision Medicine Platform</div>
                         <div style="font-size: 11px;color:#64748b;">Clinical Variant Report · ${dateStr} · ${timeStr}</div>
                     </div>
                 </div>
@@ -9602,7 +9604,7 @@ function exportClinicalReport(variantOrAll) {
 
             <!-- FOOTER -->
             <div class="report-footer">
-                <div>Generated by NeumuacACFG CFTR Precision Medicine Platform · For clinical use only · Not for patient distribution without clinician sign-off</div>
+                <div>Generated by NeumuacFQ CFTR Precision Medicine Platform · For clinical use only · Not for patient distribution without clinician sign-off</div>
                 <div style="margin-top:2px;">Last DB update: ${v.date_updated ? new Date(v.date_updated).toLocaleDateString('en-GB') : '—'} · Report generated: ${dateStr}</div>
             </div>
         </div>`;
@@ -9613,7 +9615,7 @@ function exportClinicalReport(variantOrAll) {
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>NeumuacACFG Clinical Report · ${variants.length === 1 ? escapeHTML(variants[0].legacy_name) : variants.length + ' variants'}</title>
+<title>NeumuacFQ Clinical Report · ${variants.length === 1 ? escapeHTML(variants[0].legacy_name) : variants.length + ' variants'}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet">
 <style>
@@ -9640,7 +9642,7 @@ function exportClinicalReport(variantOrAll) {
 </head>
 <body>
 <div class="no-print" style="position:sticky;top:0;z-index:99;display:flex;align-items:center;gap:12px;padding:10px 20px;background:#0f172a;border-bottom:1px solid #1e293b;">
-    <span style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;color:#fff;">NeumuacACFG Clinical Report</span>
+    <span style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;color:#fff;">NeumuacFQ Clinical Report</span>
     <span style="font-size:12px;color:#64748b;">${variants.length} variant${variants.length > 1 ? 's' : ''} · ${dateStr}</span>
     <button onclick="window.print()" style="margin-left:auto;padding:7px 20px;background:#2563eb;border:none;border-radius:6px;color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;">⬇ Print / Save PDF</button>
     <button onclick="window.close()" style="padding:7px 14px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:6px;color:#cbd5e1;font-size:12px;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;">Close</button>
@@ -9694,7 +9696,7 @@ function exportReport() {
         v.cftr_class, v.eti_prediction, v.class_subtype, v.class_confidence,
         v.validation_count || 0
     ]);
-    generateCSV(headers, rows, `neumuacACFG-export-${getCurrentDate()}.csv`);
+    generateCSV(headers, rows, `NeumuacFQ-export-${getCurrentDate()}.csv`);
     showNotification('Export complete', 'success');
 }
 
@@ -9718,7 +9720,7 @@ function exportFullReport() {
         v.last_validated_at || ''
     ]);
     
-    generateCSV(headers, rows, `neumuacACFG-full-report-${getCurrentDate()}.csv`);
+    generateCSV(headers, rows, `neumuacFQ-full-report-${getCurrentDate()}.csv`);
     showNotification('Full export complete', 'success');
 }
 
@@ -9957,7 +9959,7 @@ function helixShowDetailMissState(query) {
     const panel = document.getElementById('detailEmptyMissPanel');
 
     if (title) title.textContent = `"${query}" not found in database`;
-    if (sub)   sub.textContent   = 'This CFTR variant is not currently classified in NeumuacACFG. Search an external database or add it if you have clinical evidence.';
+    if (sub)   sub.textContent   = 'This CFTR variant is not currently classified in NeumuacFQ. Search an external database or add it if you have clinical evidence.';
     if (ql)    ql.style.display  = 'none';
 
     if (panel) {
@@ -10005,7 +10007,7 @@ function helixShowDetailMissState(query) {
                         onmouseover="this.style.background='rgba(248,113,113,0.12)'"
                         onmouseout="this.style.background='rgba(248,113,113,0.05)'">
                     <i class="fas fa-plus"></i>
-                    Add this variant to NeumuacACFG
+                    Add this variant to NeumuacFQ
                 </button>
             </div>`;
     }
@@ -10102,7 +10104,7 @@ async function loadInstitutionsFromDB() {
         _institutionsCache = await res.json();
         return _institutionsCache;
     } catch(e) {
-        console.warn('[Helix] Institution load failed:', e.message);
+        console.warn('[NeumuacFQ] Institution load failed:', e.message);
         // Fall back to seeds if DB fails
         _institutionsCache = HOSPITAL_SEEDS.map(name => ({ name, city: null, country: 'Spain', institution_type: 'hospital', is_verified: true, usage_count: 1 }));
         return _institutionsCache;
@@ -10454,7 +10456,7 @@ async function seedInstitutionsIfEmpty() {
             },
             body: JSON.stringify(seeds)
         });
-        console.log('[Helix] Institutions table seeded with', seeds.length, 'entries');
+        console.log('[NeumuacFQ] Institutions table seeded with', seeds.length, 'entries');
     } catch(e) { /* non-fatal */ }
 }
 const HOSPITAL_SEEDS = [
@@ -10872,7 +10874,7 @@ function updateSearchDropdown(query, results) {
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
                     <i class="fas fa-search-minus" style="color:#f87171;font-size:11px;flex-shrink:0;"></i>
                     <span style="font-size:12px;font-weight:600;color:var(--text-primary);font-family:var(--font-mono);">${escapeHTML(query)}</span>
-                    <span style="font-size:10px;color:var(--text-tertiary);">not in NeumuacACFG</span>
+                    <span style="font-size:10px;color:var(--text-tertiary);">not in NeumuacFQ</span>
                     ${otherSessions > 0 ? `<span style="margin-left:auto;font-size:10px;padding:1px 7px;border-radius:10px;background:rgba(251,191,36,0.1);color:#fbbf24;border:1px solid rgba(251,191,36,0.2);">${otherSessions} other session${otherSessions!==1?'s':''} searched this</span>` : ''}
                 </div>
                 <div style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:6px;
@@ -10880,7 +10882,7 @@ function updateSearchDropdown(query, results) {
                      border:1px solid ${isScanning ? 'rgba(41,121,255,0.2)' : 'rgba(52,211,153,0.2)'};">
                     ${isScanning ? `
                         <div style="width:8px;height:8px;border-radius:50%;background:#2979ff;animation:neuPulse 1s ease-in-out infinite;flex-shrink:0;"></div>
-                        <span style="font-size:11px;color:#60a5fa;font-weight:600;">NeumuacACFG is searching PubMed · ClinVar · CFTR2 robotically…</span>
+                        <span style="font-size:11px;color:#60a5fa;font-weight:600;">NeumuacFQ is searching PubMed · ClinVar · CFTR2 robotically…</span>
                     ` : `
                         <i class="fas fa-check-circle" style="color:#34d399;font-size:11px;flex-shrink:0;"></i>
                         <span style="font-size:11px;color:#34d399;font-weight:600;">Robotic scan queued — check Helios inbox within 24h</span>
@@ -11492,7 +11494,7 @@ function helixShowMissAction(query) {
                         <span style="font-family:var(--font-mono);color:#fca5a5;">"${escapeHTML(query)}"</span> is not in this database
                     </div>
                     <div style="font-size:11px;color:var(--text-tertiary);margin-top:3px;line-height:1.4;">
-                        This variant has not been classified in NeumuacACFG yet. Search external databases below, or add it if you have clinical evidence.
+                        This variant has not been classified in NeumuacFQ yet. Search external databases below, or add it if you have clinical evidence.
                     </div>
                 </div>
                 <button onclick="helixHideMissAction()" style="background:none;border:none;color:var(--text-tertiary);cursor:pointer;padding:2px;font-size:12px;flex-shrink:0;line-height:1;">✕</button>
@@ -11539,7 +11541,7 @@ function helixShowMissAction(query) {
                 " onmouseover="this.style.background='rgba(248,113,113,0.15)'"
                    onmouseout="this.style.background='rgba(248,113,113,0.08)'">
                     <i class="fas fa-plus-circle" style="font-size:12px;"></i>
-                    Add "${escapeHTML(query.length > 20 ? query.slice(0,18)+'…' : query)}" to NeumuacACFG
+                    Add "${escapeHTML(query.length > 20 ? query.slice(0,18)+'…' : query)}" to NeumuacFQ
                 </button>
             </div>
         </div>`;
@@ -11757,7 +11759,7 @@ function renderETITimeline(variant) {
     @page {
         margin: 16mm 18mm;
         @bottom-center {
-            content: "NeumuacACFG CFTR Precision Medicine · Confidential Clinical Document · " counter(page) " of " counter(pages);
+            content: "NeumuacFQ CFTR Precision Medicine · Confidential Clinical Document · " counter(page) " of " counter(pages);
             font-size: 8pt;
             color: #94a3b8;
         }
@@ -11777,12 +11779,12 @@ window.addEventListener('beforeprint', () => {
     hdr.className = 'print-header';
     hdr.innerHTML = `
         <div>
-            <div style="font-family:'Syne',sans-serif;font-size:18pt;font-weight:800;color:#0f172a;">NeumuacACFG CFTR Report</div>
+            <div style="font-family:'Syne',sans-serif;font-size:18pt;font-weight:800;color:#0f172a;">NeumuacFQ CFTR Report</div>
             <div style="font-size:9pt;color:#64748b;margin-top:2pt;">CFTR Precision Medicine Platform · Clinical Document</div>
         </div>
         <div style="text-align:right;font-size:9pt;color:#64748b;">
             <div>${new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'})}</div>
-            <div>${STATE.searchIntelligence?.hospital || 'NeumuacACFG'}</div>
+            <div>${STATE.searchIntelligence?.hospital || 'NeumuacFQ'}</div>
         </div>`;
     const detail = document.getElementById('variantDetail');
     if (detail) detail.prepend(hdr);
@@ -13142,7 +13144,7 @@ Object.assign(window, {
             </div>
             <div>
                 <div class="helios-logo-name">Helios</div>
-                <div class="helios-logo-sub">AI Evidence Bot · NeumuacACFG</div>
+                <div class="helios-logo-sub">AI Evidence Bot · NeumuacFQ</div>
             </div>
         </div>
 
@@ -13182,7 +13184,7 @@ Object.assign(window, {
 
         <button class="helios-close" onclick="closeHelios()">
             <i class="fas fa-arrow-left" style="font-size: 11px;"></i>
-            ← Back to NeumuacACFG
+            ← Back to NeumuacFQ
         </button>
     </div>
 
@@ -15748,8 +15750,8 @@ async function helixSaveSnapshot() {
             method: 'POST',
             body: JSON.stringify(snapshot)
         });
-        console.log('[Helix] Daily snapshot saved:', snapshot.snapshot_date);
-    } catch(e) { console.warn('[Helix] Snapshot save failed (table may not exist yet):', e.message); }
+        console.log('[NeumuacFQ] Daily snapshot saved:', snapshot.snapshot_date);
+    } catch(e) { console.warn('[NeumuacFQ] Snapshot save failed (table may not exist yet):', e.message); }
 }
 
 // Save snapshot once per day — check localStorage timestamp
@@ -16201,7 +16203,7 @@ async function renderCoSearchClusters() {
 // Compound het prompt when 2+ variant hits in same session.
 // ================================================================
 
-const SEARCH_HISTORY_KEY = 'neumuacACFG_search_history_v1';
+const SEARCH_HISTORY_KEY = 'neumuacFQ_search_history_v1';
 const MAX_HISTORY = 50;
 
 function getSearchHistory() {
@@ -16679,7 +16681,7 @@ function exportFilteredCohort(format = 'csv') {
         ? `Filtered: ${STATE.view.activeFilters.join(', ')} — `
         : 'All variants — ';
 
-    generateCSV(headers, rows, `neumuacACFG-cohort-${dateStr}.csv`);
+    generateCSV(headers, rows, `neumuacFQ-cohort-${dateStr}.csv`);
     showNotification(`Cohort export: ${variants.length} variants (${filterNote}current filter)`, 'success');
 }
 
@@ -16694,11 +16696,11 @@ function exportIRBPackage() {
     const dateStr = new Date().toISOString();
     const pkg = {
         export_metadata: {
-            system:         'NeumuacACFG CFTR Precision Medicine Platform',
+            system:         'NeumuacFQ CFTR Precision Medicine Platform',
             export_date:    dateStr,
             variant_count:  variants.length,
             filter_applied: STATE.view.activeFilters || [],
-            disclaimer:     'For research and clinical use only. NeumuacACFG v3. Verify all classifications before clinical decision-making.'
+            disclaimer:     'For research and clinical use only. NeumuacFQ v4. Verify all classifications before clinical decision-making.'
         },
         variants: variants.map(v => {
             const gap = calculateGapScore(v);
@@ -16753,7 +16755,7 @@ function exportIRBPackage() {
     const blob = new Blob([JSON.stringify(pkg, null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `neumuacACFG-IRB-package-${new Date().toISOString().slice(0,10)}.json`;
+    a.download = `neumuacFQ-IRB-package-${new Date().toISOString().slice(0,10)}.json`;
     a.click();
     URL.revokeObjectURL(a.href);
     showNotification(`IRB data package exported — ${variants.length} variants with full provenance`, 'success');
@@ -16778,7 +16780,7 @@ async function runSurveillanceAlerts() {
         const targets = await res.json();
         if (!targets.length) return;
 
-        console.log(`[NeumuacACFG Surveillance] Checking ${targets.length} monitored variant${targets.length!==1?'s':''}…`);
+        console.log(`[NeumuacFQ Surveillance] Checking ${targets.length} monitored variant${targets.length!==1?'s':''}…`);
 
         for (const target of targets) {
             try {
@@ -16820,7 +16822,7 @@ async function runSurveillanceAlerts() {
                     body: JSON.stringify({ last_checked_at: new Date().toISOString() })
                 });
 
-                console.log(`[NeumuacACFG Surveillance] ${target.variant_name}: ${recentPapers.length} new papers → Helios inbox`);
+                console.log(`[NeumuacFQ Surveillance] ${target.variant_name}: ${recentPapers.length} new papers → Helios inbox`);
             } catch(e) { /* silent per target */ }
         }
 
@@ -16919,7 +16921,7 @@ function helixRenderCompareTray() {
     tray.innerHTML = `
         <div style="display:flex;align-items:center;gap:10px;padding:8px 16px;border-bottom:1px solid rgba(99,140,210,0.13);background:rgba(0,0,0,0.2);">
             <i class="fas fa-dna" style="font-size:11px;color:var(--brand);"></i>
-            <span style="font-size:11px;font-weight:700;color:var(--text-primary);letter-spacing:-.01em;">NeumuacACFG — Compound Heterozygote Engine</span>
+            <span style="font-size:11px;font-weight:700;color:var(--text-primary);letter-spacing:-.01em;">NeumuacFQ — Compound Heterozygote Engine</span>
             ${compHetVerdict ? `<span style="font-size:11px;padding:2px 10px;border-radius:4px;font-weight:700;
                 background:${compHetVerdict.eligibility_color}18;color:${compHetVerdict.eligibility_color};
                 border:1px solid ${compHetVerdict.eligibility_color}40;">${compHetVerdict.eligibility_label}</span>` : ''}
@@ -17421,8 +17423,7 @@ function selectStudyType(btn, type) {
 
 Object.assign(window, { selectStudyType, evidenceQualityLabel });
 
-// Patch saveEvidenceLink to include quality_score and study_type
-const _origSaveEvidenceLink = saveEvidenceLink;
+// saveEvidenceLink — includes quality_score and study_type
 async function saveEvidenceLink() {
     if (!isWriteMode()) {
         requireWriteMode(() => saveEvidenceLink(), 'You are trying to add an evidence link — enter PIN to continue');
@@ -17771,7 +17772,6 @@ function helixShowDuplicateWarning(dupes, onConfirm) {
 }
 
 const _origSubmitManualForm = submitManualForm;
-async 
 function helixChartDrillFilter(type, value, label) {
     let filtered = STATE.variants;
     if (type === 'class')    filtered = STATE.variants.filter(v => v.cftr_class === value);
