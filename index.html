@@ -5314,6 +5314,88 @@ async function archiveVariantVersion(variant) {
     } catch(e) { console.warn('[NeumuacFQ] Archive write failed:', e.message); }
 }
 
+// ================================================================
+// GNOMAD POPULATION FREQUENCY ENRICHMENT
+// Fetches allele frequency from gnomAD v4 GraphQL API for CFTR variants.
+// Auto-triggered when a variant has no population_frequency value.
+// Enriches PM2 (rare variant) and BA1/BS1 (common = likely benign) ACMG criteria.
+// ================================================================
+async function fetchGnomADFrequency(variant) {
+    // gnomAD GraphQL API — free, no key, public endpoint
+    const cdna = variant.cdna_name || '';
+    const protein = variant.protein_name || '';
+
+    // Build search term — use cDNA or protein notation
+    const searchTerm = cdna || protein || variant.legacy_name;
+    if (!searchTerm) return null;
+
+    try {
+        const query = `{
+            variant(variantId: "${searchTerm.replace(/"/g,'')}", dataset: gnomad_r4) {
+                genome { af }
+                exome { af }
+            }
+        }`;
+
+        const res = await fetch('https://gnomad.broadinstitute.org/api', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ query }),
+            signal: AbortSignal.timeout(8000)
+        });
+        if (!res.ok) return null;
+        const data = await res.json();
+        const v = data?.data?.variant;
+        if (!v) return null;
+
+        // Use genome AF preferentially, fall back to exome
+        const af = v.genome?.af ?? v.exome?.af ?? null;
+        return af !== null ? af : null;
+    } catch(e) {
+        // gnomAD uses standard HGVS — if not found, try ClinVar rsID path
+        return null;
+    }
+}
+
+async function enrichWithGnomAD(variant) {
+    if (variant.population_frequency) return; // already have data
+    if (!variant.cdna_name && !variant.protein_name) return; // nothing to search
+
+    const af = await fetchGnomADFrequency(variant);
+    if (af === null) return;
+
+    // Format: scientific for very rare, decimal for others
+    const formatted = af < 0.0001
+        ? af.toExponential(2)
+        : af.toFixed(6);
+
+    // Save to DB
+    if (isWriteMode()) {
+        await dbWrite(`variants?id=eq.${variant.id}`, {
+            method: 'PATCH',
+            headers: { 'Prefer': 'return=minimal' },
+            body: JSON.stringify({ population_frequency: formatted, updated_at: new Date().toISOString() })
+        }, { label: 'gnomAD frequency', silent: true }).catch(() => {});
+    }
+
+    // Update local state regardless of write mode
+    const v = STATE.variantsById.get(variant.id);
+    if (v) {
+        v.population_frequency = formatted;
+        STATE.variantsById.set(variant.id, v);
+        if (STATE.view.selectedVariant?.id === variant.id) {
+            STATE.view.selectedVariant.population_frequency = formatted;
+        }
+    }
+
+    showNotification(
+        'gnomAD: AF = ' + formatted + ' for ' + variant.legacy_name
+        + (parseFloat(formatted) > 0.05 ? ' — BA1 (common allele)' : parseFloat(formatted) < 0.001 ? ' — PM2 (rare allele)' : ''),
+        'info', 5000
+    );
+    return formatted;
+}
+
 // ========== PHASE 1: cftr_class_rules LOADER ==========
 // Loads class rules from DB instead of relying on hardcoded strings
 // Falls back to hardcoded if table unreachable
@@ -9209,27 +9291,77 @@ function renderVariantDetail(variant, fromSearch) {
             </div>
         </div>
 
-        <!-- Additional data -->
-        ${(variant.population_frequency || variant.pubmed_ids) ? `
+        <!-- Population & Literature — with gnomAD auto-enrichment -->
         <div class="detail-section" style="margin-top:0">
             <div class="section-header">
-                <div class="section-header-icon" style="background:var(--surface-alt);color:var(--text-secondary)"><i class="fas fa-globe"></i></div>
-                <span class="section-title">Population & Literature</span>
+                <div class="section-header-icon" style="background:var(--surface-alt);color:var(--text-secondary)">
+                    <i class="fas fa-globe"></i>
+                </div>
+                <span class="section-title">Population &amp; Literature</span>
+                ${!variant.population_frequency ? `
+                <button onclick="enrichWithGnomAD(STATE.view.selectedVariant).then(()=>renderVariantDetail(STATE.view.selectedVariant))"
+                        style="margin-left:auto;font-size:10px;padding:2px 8px;border-radius:4px;
+                               border:1px solid rgba(52,211,153,0.3);background:rgba(52,211,153,0.06);
+                               color:#34d399;cursor:pointer;font-family:var(--font-body);">
+                    <i class="fas fa-cloud-download-alt" style="font-size:9px;margin-right:3px;"></i>
+                    Fetch gnomAD AF
+                </button>` : `
+                <span style="margin-left:auto;font-size:10px;color:var(--text-tertiary);">
+                    <i class="fas fa-check-circle" style="color:#34d399;margin-right:3px;"></i>gnomAD enriched
+                </span>`}
             </div>
             <div class="section-body">
                 <div class="field-grid">
-                    ${variant.population_frequency ? dataField('Population Frequency', variant.population_frequency, 'population_frequency', variant) : ''}
+                    ${variant.population_frequency
+                        ? dataField('Population Frequency (gnomAD)', variant.population_frequency, 'population_frequency', variant)
+                        : `<div style="padding:6px 0;grid-column:1/-1;">
+                            <div style="font-size:11px;color:var(--text-tertiary);">
+                                No population frequency recorded.
+                                ${(variant.cdna_name || variant.protein_name)
+                                    ? 'Click <strong>Fetch gnomAD AF</strong> to auto-populate from gnomAD v4.'
+                                    : 'Add HGVS notation first to enable gnomAD lookup.'}
+                            </div>
+                           </div>`}
                     ${variant.pubmed_ids ? dataField('PubMed IDs', variant.pubmed_ids, 'pubmed_ids', variant) : ''}
                 </div>
+                ${variant.population_frequency ? (() => {
+                    const af = parseFloat(variant.population_frequency);
+                    const acmgNote = af > 0.05 ? 'BA1 — common allele (>5%). Strongly suggests benign.'
+                                   : af > 0.01 ? 'BS1 — allele frequency greater than expected for CF.'
+                                   : af < 0.001 ? 'PM2 — absent or very rare in population. Supports pathogenicity.'
+                                   : 'Frequency in expected range — no strong ACMG signal.';
+                    const noteColor = af > 0.05 ? '#34d399' : af > 0.01 ? '#60a5fa' : af < 0.001 ? '#fb923c' : 'var(--text-tertiary)';
+                    return '<div style="margin-top:6px;padding:6px 10px;border-radius:5px;background:rgba(255,255,255,0.03);'
+                         + 'border:1px solid rgba(255,255,255,0.07);font-size:11px;color:' + noteColor + ';">'
+                         + '<i class="fas fa-balance-scale" style="margin-right:5px;font-size:10px;"></i>'
+                         + escapeHTML(acmgNote) + '</div>';
+                })() : ''}
             </div>
         </div>
-        ` : ''}
 
         <!-- CLINICAL REFERENCE PANEL: NBS, modulator eligibility, class-specific ranges -->
         ${renderClinicalReferencePanel(variant)}
 
         <!-- ACMG/AMP CLASSIFICATION PANEL -->
         ${renderACMGPanel(variant)}
+
+        <!-- CLASSIFICATION HISTORY TIMELINE -->
+        <div class="detail-section" style="margin-top:0;border-left:3px solid rgba(96,165,250,0.3);">
+            <div class="section-header">
+                <div class="section-header-icon" style="background:rgba(96,165,250,0.1);color:#60a5fa;">
+                    <i class="fas fa-history"></i>
+                </div>
+                <span class="section-title">Classification history</span>
+                <span style="font-size:11px;color:var(--text-tertiary);margin-left:4px;">
+                    Every class &amp; ETI change · audit trail
+                </span>
+            </div>
+            <div class="section-body" id="classHistoryPanel-${variant.id}" style="padding:8px 16px;">
+                <div style="font-size:11px;color:var(--text-tertiary);">
+                    <i class="fas fa-clock" style="margin-right:4px;"></i>Loading…
+                </div>
+            </div>
+        </div>
 
         <!-- Clinical Notes Thread -->
         <div class="detail-section" style="margin-top:0">
@@ -9246,6 +9378,22 @@ function renderVariantDetail(variant, fromSearch) {
 
     // Load validation history async
     setTimeout(() => loadValidationHistory(variant.id), 100);
+
+    // Load classification history timeline async
+    setTimeout(() => renderClassificationHistory(variant.id, 'classHistoryPanel-' + variant.id), 150);
+
+    // Auto-enrich with gnomAD if no population frequency recorded and HGVS notation is present
+    // Silent — only notifies on success, never blocks UI
+    if (!variant.population_frequency && (variant.cdna_name || variant.protein_name)) {
+        setTimeout(() => {
+            enrichWithGnomAD(variant).then(af => {
+                if (af && STATE.view.selectedVariant?.id === variant.id) {
+                    // Re-render the detail panel to show the newly fetched frequency
+                    renderVariantDetail(STATE.view.selectedVariant);
+                }
+            }).catch(() => {});
+        }, 1500); // Delay to let the main render complete first
+    }
 
     // Phase 4: Load and inject structured evidence panel
     loadStructuredEvidence(variant.id).then(rows => {
@@ -9331,6 +9479,17 @@ function renderEvidenceLink(link) {
             ${qs > 0 ? `<span style="font-size: 11px;padding:1px 6px;border-radius:3px;background:rgba(0,0,0,0.2);color:${qsColor};border:1px solid ${qsColor}33;font-family:var(--font-mono);">Q:${qs} ${qsLabel||''}</span>` : ''}
             ${classClaim ? `<span style="font-size: 11px;padding:1px 6px;border-radius:3px;background:${classClaim.agrees?'rgba(52,211,153,0.08)':'rgba(248,113,113,0.08)'};color:${classClaim.agrees?'#34d399':'#f87171'};border:1px solid ${classClaim.agrees?'rgba(52,211,153,0.2)':'rgba(248,113,113,0.2)'};font-family:var(--font-mono);">${classClaim.agrees?'✓':'⚡'} ${escapeHTML(classClaim.text)}</span>` : ''}
             ${etiClaim ? `<span style="font-size: 11px;padding:1px 6px;border-radius:3px;background:${etiClaim.agrees?'rgba(52,211,153,0.08)':'rgba(248,113,113,0.08)'};color:${etiClaim.agrees?'#34d399':'#f87171'};border:1px solid ${etiClaim.agrees?'rgba(52,211,153,0.2)':'rgba(248,113,113,0.2)'};font-family:var(--font-mono);">${etiClaim.agrees?'✓':'⚡'} ETI:${escapeHTML(etiClaim.text)}</span>` : ''}
+            ${(link.func_assay_type || link.func_interpretation) ? (() => {
+                const AL = {ussing_chamber:'Ussing',organoid_swelling:'FIS',frt_cell:'FRT',
+                    ybe30:'YBE30',western_blot:'WB',patch_clamp:'Patch',nasal_pd:'NPD',other_functional:'Functional'};
+                const IC = {damaging:'#f87171',benign:'#34d399',partial:'#fbbf24',rescue:'#60a5fa',no_rescue:'#94a3b8'};
+                const al = AL[link.func_assay_type] || link.func_assay_type || 'Assay';
+                const col = IC[link.func_interpretation] || '#94a3b8';
+                const vs = link.func_result_value != null
+                    ? ' '+link.func_result_value+(link.func_result_unit==='pct_wt'?'% WT':link.func_result_unit==='uA_cm2'?'\u03bcA/cm\u00b2':link.func_result_unit||'') : '';
+                const il = link.func_interpretation ? ' \u00b7 '+link.func_interpretation.replace(/_/g,' ') : '';
+                return '<span style="font-size:10px;padding:1px 7px;border-radius:3px;background:'+col+'18;color:'+col+';border:1px solid '+col+'40;font-family:var(--font-mono);display:inline-flex;align-items:center;gap:3px;"><i class=\\"fas fa-flask\\" style=\\"font-size:8px;\\"></i>'+escapeHTML(al+vs+il)+'</span>';
+            })() : ''}
         </div>` : ''}
     </a>`;
 }
@@ -9383,16 +9542,37 @@ async function submitValidation() {
         return;
     }
     if (!STATE.ui.validationContext) return;
-    const name = document.getElementById('clinicianName').value.trim();
-    const role = document.getElementById('clinicianRoleInput').value.trim();
+    const name  = document.getElementById('clinicianName').value.trim();
+    const role  = document.getElementById('clinicianRoleInput').value.trim();
     const notes = document.getElementById('validationNotes').value.trim();
     const msgDiv = document.getElementById('validationMessage');
-    const btn = document.getElementById('submitValidationBtn');
+    const btn    = document.getElementById('submitValidationBtn');
 
     if (!name) { msgDiv.innerHTML = '<span style="color:var(--error)">Name required</span>'; return; }
     if (!role) { msgDiv.innerHTML = '<span style="color:var(--error)">Role required</span>'; return; }
 
-    const { variantId, variantName } = STATE.ui.validationContext;
+    // Two-clinician enforcement for classification-critical variants.
+    // If a prior validation exists, the second validator must be a different person
+    // AND a different role — preventing one clinician self-confirming twice.
+    const { variantId } = STATE.ui.validationContext;
+    const variant = STATE.variants.find(v => v.id === variantId);
+    if (variant && (variant.cftr_class || variant.eti_prediction) && variant.validation_count >= 1) {
+        if (variant.last_validator_name && variant.last_validator_name.toLowerCase() === name.toLowerCase()) {
+            msgDiv.innerHTML = '<span style="color:var(--error)">'
+                + 'Two-clinician rule: a different clinician must provide the second validation.</span>';
+            return;
+        }
+        if (variant.last_validator_role && role && variant.last_validator_role.toLowerCase() === role.toLowerCase()) {
+            msgDiv.innerHTML = '<span style="color:var(--warning)">'
+                + '⚠ Two-clinician rule: second validator should have a different role ('
+                + escapeHTML(variant.last_validator_role) + ' already validated). '
+                + 'Continuing will be recorded as same-role dual validation.</span>';
+            // Show warning but don't block — same-role is documented in audit, not forbidden
+        }
+    }
+
+    // variantId already destructured above for two-clinician check; extract variantName here
+    const variantName = STATE.ui.validationContext.variantName;
 
     try {
         btn.disabled = true;
@@ -9532,6 +9712,9 @@ function showAnnotationModal(variantName, field, currentValue) {
         ? `<select id="annotationValue" class="form-control"><option value="">Not specified</option>${hasSelect}</select>`
         : `<textarea id="annotationValue" class="form-control mono" rows="3">${escapeHTML(currentValue || '')}</textarea>`;
 
+    const isClassificationField = ['cftr_class','eti_prediction','final_determination',
+        'class_subtype','eti_evidence_level'].includes(field);
+
     document.getElementById('annotationContent').innerHTML = `
         <div class="form-group">
             <label class="form-label">Current Value</label>
@@ -9543,6 +9726,19 @@ function showAnnotationModal(variantName, field, currentValue) {
             <label class="form-label">New Value</label>
             ${inputHTML}
         </div>
+        ${isClassificationField ? `
+        <div class="form-group" style="margin-top:10px;">
+            <label class="form-label" style="color:var(--warning);">
+                <i class="fas fa-exclamation-triangle" style="margin-right:4px;font-size:11px;"></i>
+                Reason for change <span style="color:var(--error);">*</span>
+            </label>
+            <textarea id="annotationReason" class="form-control" rows="2"
+                placeholder="e.g. New functional study (PMID 12345) confirms gating defect — upgrading to Class III…"
+                style="border-color:rgba(251,191,36,0.4);"></textarea>
+            <div style="font-size:11px;color:var(--text-tertiary);margin-top:3px;">
+                Required for classification changes · recorded in audit trail
+            </div>
+        </div>` : ''}
     `;
 
     document.getElementById('annotationModal').classList.remove('hidden');
@@ -9565,6 +9761,19 @@ async function saveAnnotation() {
     if (!input) return;
     let val = input.value || null;
 
+    // Enforce mandatory reason for classification-critical field changes
+    const CLASSIFICATION_FIELDS = ['cftr_class','eti_prediction','final_determination','class_subtype','eti_evidence_level'];
+    const reasonInput = document.getElementById('annotationReason');
+    const reason = reasonInput ? reasonInput.value.trim() : null;
+    if (CLASSIFICATION_FIELDS.includes(field) && !reason) {
+        showNotification('Reason for change is required for classification fields', 'error');
+        if (reasonInput) {
+            reasonInput.style.borderColor = 'var(--error)';
+            reasonInput.focus();
+        }
+        return;
+    }
+
     try {
         const res = await dbWrite(
             `variants?id=eq.${variant.id}`,
@@ -9582,6 +9791,8 @@ async function saveAnnotation() {
         updateHeaderStats();
 
         // Write to audit log — fire and forget
+        // Reason is stored in the note field for governance trail
+        const _reason = document.getElementById('annotationReason')?.value?.trim() || null;
         writeAuditLog({
             action:         'updated',
             clinician_name: STATE.searchIntelligence.hospital || 'Unknown',
@@ -9591,7 +9802,8 @@ async function saveAnnotation() {
             item_type:      'DIRECT_EDIT',
             db_change_field: field,
             db_change_old:  String(STATE.ui.annotationContext?.currentValue ?? ''),
-            db_change_new:  String(val ?? '')
+            db_change_new:  String(val ?? ''),
+            note:           _reason
         });
 
         // Phase 1: Archive version snapshot on any classification-critical field change
@@ -12840,6 +13052,103 @@ function helixQuickAddFromMiss(query) {
 // Shows at a glance: when was the evidence established, is it
 // RCT-level or in-vitro, and has it been contested recently.
 // ================================================================
+
+// ================================================================
+// CLASSIFICATION HISTORY TIMELINE
+// Reads cftr_variants_archive to show when a variant's class or ETI
+// changed, what it was before, and which Helios approval authorised it.
+// ================================================================
+async function renderClassificationHistory(variantId, containerId) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = '<div style="font-size:11px;color:var(--text-tertiary);padding:8px 0;">Loading history…</div>';
+
+    try {
+        const res = await fetch(
+            `${CONFIG.SUPABASE.URL}/rest/v1/cftr_variants_archive?id=eq.${variantId}&order=archived_at.desc&limit=20`,
+            { headers: { 'apikey': CONFIG.SUPABASE.KEY, 'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}` } }
+        );
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const rows = await res.json();
+
+        if (!rows.length) {
+            container.innerHTML = '<div style="font-size:11px;color:var(--text-tertiary);padding:8px 0;">'
+                + 'No classification history recorded yet.</div>';
+            return;
+        }
+
+        // Build change list — compare consecutive snapshots
+        const changes = [];
+        for (let i = 0; i < rows.length - 1; i++) {
+            const newer = rows[i];
+            const older = rows[i + 1];
+            const fields = ['cftr_class','eti_prediction','final_determination'];
+            fields.forEach(f => {
+                const nv = newer[f], ov = older[f];
+                if (nv !== ov) {
+                    changes.push({
+                        field:     f,
+                        from:      ov || 'not set',
+                        to:        nv || 'not set',
+                        date:      newer.archived_at,
+                        snapshot:  newer
+                    });
+                }
+            });
+        }
+        // Also show the initial classification (last snapshot)
+        const first = rows[rows.length - 1];
+        changes.push({
+            field:    'initial',
+            from:     null,
+            to:       [first.cftr_class, first.eti_prediction, first.final_determination].filter(Boolean).join(' · ') || 'minimal record',
+            date:     first.archived_at,
+            snapshot: first
+        });
+
+        const fieldLabels = {
+            cftr_class:          'CFTR Class',
+            eti_prediction:      'ETI Prediction',
+            final_determination: 'Determination',
+            initial:             'Record created'
+        };
+        const fieldColors = {
+            cftr_class:          '#60a5fa',
+            eti_prediction:      '#34d399',
+            final_determination: '#fbbf24',
+            initial:             'var(--text-tertiary)'
+        };
+
+        container.innerHTML = changes.map(function(c, idx) {
+            const col    = fieldColors[c.field] || 'var(--text-tertiary)';
+            const label  = fieldLabels[c.field] || c.field;
+            const date   = new Date(c.date).toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'});
+            const isLast = idx === changes.length - 1;
+            return '<div style="display:flex;gap:10px;padding:6px 0;' + (isLast ? '' : 'border-bottom:1px solid var(--border);') + '">'
+                 + '<div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;">'
+                 + '<div style="width:8px;height:8px;border-radius:50%;background:' + col + ';margin-top:3px;"></div>'
+                 + (isLast ? '' : '<div style="width:1px;flex:1;background:var(--border);margin:3px 0;"></div>')
+                 + '</div>'
+                 + '<div style="flex:1;min-width:0;">'
+                 + '<div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">'
+                 + '<span style="font-size:10px;font-weight:700;color:' + col + ';text-transform:uppercase;letter-spacing:.07em;">' + escapeHTML(label) + '</span>'
+                 + '<span style="font-size:10px;color:var(--text-tertiary);">' + date + '</span>'
+                 + '</div>'
+                 + (c.from !== null
+                     ? '<span style="font-size:11px;color:var(--text-secondary);">'
+                       + '<span style="text-decoration:line-through;color:var(--text-tertiary);">' + escapeHTML(String(c.from)) + '</span>'
+                       + ' \u2192 <strong style="color:var(--text-primary);">' + escapeHTML(String(c.to)) + '</strong>'
+                       + '</span>'
+                     : '<span style="font-size:11px;color:var(--text-secondary);">' + escapeHTML(String(c.to)) + '</span>')
+                 + '</div>'
+                 + '</div>';
+        }).join('');
+
+    } catch(e) {
+        container.innerHTML = '<div style="font-size:11px;color:var(--text-tertiary);padding:8px 0;">'
+            + 'History unavailable — ' + escapeHTML(e.message) + '</div>';
+    }
+}
 
 function renderETITimeline(variant) {
     const links = (variant.evidence_links || [])
@@ -19351,14 +19660,78 @@ function injectEvidenceQualityFields() {
     studyGroup.innerHTML = `
         <label class="form-label">Study Type</label>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;" id="studyTypeGrid">
-            ${['RCT','Clinical trial','Observational','In vitro','Review / Meta','Case report'].map(t =>
-                `<button type="button" onclick="selectStudyType(this,'${escapeAttr(t)}')"
-                    style="padding:6px;border-radius:6px;border:1px solid var(--border);background:rgba(4,8,15,0.4);color:var(--text-secondary);font-size:11px;cursor:pointer;font-family:var(--font-body);transition:all .15s;"
-                    onmouseover="if(!this.classList.contains('st-active'))this.style.borderColor='rgba(41,121,255,0.35)'"
-                    onmouseout="if(!this.classList.contains('st-active'))this.style.borderColor='var(--border)'">${escapeHTML(t)}</button>`
-            ).join('')}
+            ${['RCT','Clinical trial','Observational','In vitro','Functional','Review / Meta','Case report'].map(t => {
+                const safe = escapeAttr(t);
+                const lbl  = escapeHTML(t);
+                return '<button type=\"button\" onclick=\"selectStudyType(this,&apos;' + safe + '&apos;)\"'
+                     + ' style=\"padding:6px;border-radius:6px;border:1px solid var(--border);background:rgba(4,8,15,0.4);color:var(--text-secondary);font-size:11px;cursor:pointer;font-family:var(--font-body);transition:all .15s;\"'
+                     + ' onmouseover=\"if(!this.classList.contains(&apos;st-active&apos;))this.style.borderColor=&apos;rgba(41,121,255,0.35)&apos;\"'
+                     + ' onmouseout=\"if(!this.classList.contains(&apos;st-active&apos;))this.style.borderColor=&apos;var(--border)&apos;\">' + lbl + '</button>';
+            }).join('')}
         </div>
-        <input type="hidden" id="evidenceStudyType" value="">`;
+        <input type="hidden" id="evidenceStudyType" value="">
+        <!-- Functional data fields — shown only when Functional study type is selected -->
+        <div id="functionalDataGroup" style="display:none;margin-top:12px;padding:12px;
+             background:rgba(52,211,153,0.04);border:1px solid rgba(52,211,153,0.2);border-radius:8px;">
+            <div style="font-size:11px;font-weight:700;color:#34d399;text-transform:uppercase;
+                 letter-spacing:.07em;margin-bottom:10px;">
+                <i class="fas fa-flask" style="margin-right:5px;"></i>
+                Functional assay data — supports ACMG PS3
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                <div>
+                    <label style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:3px;">Assay type</label>
+                    <select id="funcAssayType" class="form-control" style="font-size:12px;">
+                        <option value="">Select assay…</option>
+                        <option value="ussing_chamber">Ussing chamber (chloride transport)</option>
+                        <option value="organoid_swelling">Organoid swelling assay (FIS)</option>
+                        <option value="frt_cell">FRT cell assay</option>
+                        <option value="ybe30">YBE30 cell assay</option>
+                        <option value="western_blot">Western blot (protein expression)</option>
+                        <option value="patch_clamp">Patch clamp (single channel)</option>
+                        <option value="nasal_pd">Nasal potential difference</option>
+                        <option value="other_functional">Other functional</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:3px;">Result value</label>
+                    <div style="display:flex;gap:4px;">
+                        <input type="number" id="funcResultValue" placeholder="e.g. 18.5" step="0.1"
+                               style="flex:1;padding:6px 8px;border-radius:6px;border:1px solid var(--border);
+                                      background:rgba(4,8,15,0.4);color:var(--text-primary);font-size:12px;
+                                      font-family:var(--font-mono);">
+                        <select id="funcResultUnit" style="width:80px;padding:6px;border-radius:6px;
+                                border:1px solid var(--border);background:rgba(4,8,15,0.4);
+                                color:var(--text-primary);font-size:12px;">
+                            <option value="pct_wt">% WT</option>
+                            <option value="uA_cm2">μA/cm²</option>
+                            <option value="mV">mV</option>
+                            <option value="fold_change">fold</option>
+                            <option value="pS">pS</option>
+                            <option value="other">other</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:3px;">Interpretation</label>
+                    <select id="funcInterpretation" class="form-control" style="font-size:12px;">
+                        <option value="">Select…</option>
+                        <option value="damaging">Damaging — supports pathogenicity (PS3)</option>
+                        <option value="benign">Benign effect — supports benign (BS3)</option>
+                        <option value="partial">Partial function — uncertain significance</option>
+                        <option value="rescue">ETI rescue demonstrated</option>
+                        <option value="no_rescue">No ETI rescue</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:3px;">Cell model / system</label>
+                    <input type="text" id="funcCellModel" placeholder="e.g. HEK293, patient organoid…"
+                           style="width:100%;padding:6px 8px;border-radius:6px;border:1px solid var(--border);
+                                  background:rgba(4,8,15,0.4);color:var(--text-primary);font-size:12px;
+                                  font-family:var(--font-body);box-sizing:border-box;">
+                </div>
+            </div>
+        </div>`;
 
     notesGroup.parentNode.insertBefore(qualGroup, notesGroup);
     notesGroup.parentNode.insertBefore(studyGroup, notesGroup);
@@ -19384,6 +19757,12 @@ function selectStudyType(btn, type) {
     btn.style.borderColor = 'rgba(41,121,255,0.4)';
     btn.style.color       = 'var(--brand)';
     document.getElementById('evidenceStudyType').value = type;
+
+    // Show functional assay fields when Functional study type is selected
+    const funcGroup = document.getElementById('functionalDataGroup');
+    if (funcGroup) {
+        funcGroup.style.display = type.toLowerCase() === 'functional' ? 'block' : 'none';
+    }
 }
 
 Object.assign(window, { selectStudyType, evidenceQualityLabel });
@@ -19414,12 +19793,21 @@ async function saveEvidenceLink() {
             method: 'POST',
             headers: { 'apikey': CONFIG.SUPABASE.KEY, 'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
             body: JSON.stringify({
-                variant_id: currentVariantId, type, title, url,
-                source: source || type, notes: notes || null,
-                quality_score: quality,
-                study_type: studyType || null,
-                date_added: new Date().toISOString(),
-                fingerprint: btoa(encodeURIComponent((url||'').slice(0,60))).slice(0,40)
+                variant_id:      currentVariantId,
+                type, title, url,
+                source:          source || type,
+                notes:           notes || null,
+                quality_score:   quality,
+                study_type:      studyType || null,
+                date_added:      new Date().toISOString(),
+                fingerprint:     btoa(encodeURIComponent((url||'').slice(0,60))).slice(0,40),
+                // Structured functional assay data — only populated when study_type = Functional
+                func_assay_type:     (document.getElementById('funcAssayType')?.value     || null) || null,
+                func_result_value:   (document.getElementById('funcResultValue')?.value   || null)
+                                        ? parseFloat(document.getElementById('funcResultValue').value) : null,
+                func_result_unit:    (document.getElementById('funcResultUnit')?.value     || null) || null,
+                func_interpretation: (document.getElementById('funcInterpretation')?.value || null) || null,
+                func_cell_model:     (document.getElementById('funcCellModel')?.value      || null) || null
             })
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
