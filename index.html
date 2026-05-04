@@ -29,7 +29,8 @@
                     https://gnomad.broadinstitute.org
                     https://api.ipapi.com
                     https://ipapi.co
-                    https://cdn.jsdelivr.net;
+                    https://cdn.jsdelivr.net
+                    https://*.basemaps.cartocdn.com;
         upgrade-insecure-requests;
     ">
 
@@ -7253,9 +7254,21 @@ async function renderGeoTab() {
     }
     try {
         if (!useCached) {
-            const res=await fetch(`${CONFIG.SUPABASE.URL}/rest/v1/search_logs?select=query,is_hit,city,country,region,latitude,longitude,hospital_name,searched_at&latitude=not.is.null&order=searched_at.desc&limit=2000`,
-                {headers:{'apikey':CONFIG.SUPABASE.KEY,'Authorization':`Bearer ${CONFIG.SUPABASE.KEY}`}});
-            window._geoState.allRows=await res.json();
+            // Try with latitude filter first; fall back gracefully if that column
+            // doesn't exist yet (Supabase returns 400 for unknown column names)
+            let res = await fetch(
+                `${CONFIG.SUPABASE.URL}/rest/v1/search_logs?select=query,is_hit,city,country,region,latitude,longitude,hospital_name,searched_at&latitude=not.is.null&order=searched_at.desc&limit=2000`,
+                {headers:{'apikey':CONFIG.SUPABASE.KEY,'Authorization':`Bearer ${CONFIG.SUPABASE.KEY}`}}
+            );
+            if (res.status === 400 || res.status === 404) {
+                // latitude/longitude columns don't exist yet — fetch without geo filter
+                res = await fetch(
+                    `${CONFIG.SUPABASE.URL}/rest/v1/search_logs?select=query,is_hit,city,country,hospital_name,searched_at&order=searched_at.desc&limit=2000`,
+                    {headers:{'apikey':CONFIG.SUPABASE.KEY,'Authorization':`Bearer ${CONFIG.SUPABASE.KEY}`}}
+                );
+            }
+            const rows = res.ok ? await res.json() : [];
+            window._geoState.allRows = Array.isArray(rows) ? rows : [];
             window._geoState._fetchedAt = Date.now();
         }
     } catch(e){ const n=document.getElementById('geoNoteV4'); if(n) n.textContent='Failed to load location data'; return; }
@@ -7301,6 +7314,9 @@ async function renderGeoTab() {
 
     if(!window._helixMap){
         window._helixMap=L.map('siGeoMap',{zoomControl:false,scrollWheelZoom:true,attributionControl:false});
+        // Default world view — Europe-centred at zoom 2.
+        // Without this, Leaflet has no viewport and renders a blank canvas.
+        window._helixMap.setView([40, 10], 2);
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png',{maxZoom:14,opacity:0.55}).addTo(window._helixMap);
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png',{maxZoom:14,opacity:0.25}).addTo(window._helixMap);
         L.control.zoom({position:'bottomright'}).addTo(window._helixMap);
@@ -7329,6 +7345,12 @@ async function renderGeoTab() {
             }
         } catch(e){ console.warn('[NeumuacFQ Geo] World atlas failed:',e.message); }
     }
+
+    // invalidateSize: recalculates map dimensions after the container was hidden.
+    // Without this, tiles render into a 0×0 viewport on first open.
+    requestAnimationFrame(() => {
+        if (window._helixMap) window._helixMap.invalidateSize();
+    });
     geoV4RenderMarkers();
 }
 
