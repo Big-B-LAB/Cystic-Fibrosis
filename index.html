@@ -4470,6 +4470,8 @@
                         <i class="fas fa-times" style="font-size:9px;margin-right:3px;"></i>clear
                     </button>
                 </div>
+                <!-- Active filter summary bar — FIX #11 -->
+                <div id="activeFilterBar" style="display:none;padding:0;"></div>
                 <!-- Divider -->
                 <div class="search-divider"></div>
                 <!-- Filter chips row (moved inside card) -->
@@ -6747,6 +6749,9 @@ function searchVariants(query) {
         .map(([id]) => STATE.variantsById.get(id))
         .filter(Boolean);
 
+    // FIX #8: expose scores map so applyFilterChain can demand-boost within tiers
+    STATE.searchIntelligence._lastScores = scores;
+
     let matchedField = null;
     if (results.length > 0) {
         const v = results[0];
@@ -8582,20 +8587,23 @@ function applyStructuredFilters(variants, filters) {
 
 function applyFilterChain() {
     let filtered = [...STATE.variants];
+    const q = STATE.view.searchQuery || '';
 
-    if (STATE.view.searchQuery.length >= CONFIG.UI.MIN_SEARCH_CHARS) {
-        // Parse structured tokens (class:III eti:responsive etc.) out of the query
-        const { nameQuery, filters } = parseStructuredQuery(STATE.view.searchQuery);
+    // FIX #4 — Raise effective min for alpha queries (3 chars) vs numeric (2 chars).
+    // "de" returning hundreds of results was noise; "508" at 3 chars is still meaningful.
+    const isNumericQuery = /^\d+$/.test(q.trim());
+    const effectiveMin   = isNumericQuery ? 2 : 3;
+    const shouldSearch   = q.length >= effectiveMin;
+
+    // ── Search / structured filter ────────────────────────────────────────────
+    if (shouldSearch) {
+        const { nameQuery, filters } = parseStructuredQuery(q);
         const hasStructured = Object.keys(filters).length > 0;
-
-        // Run name search on the remainder (may be empty string = show all)
-        if (nameQuery.length >= CONFIG.UI.MIN_SEARCH_CHARS) {
+        if (nameQuery.length >= effectiveMin) {
             filtered = searchVariants(nameQuery);
         }
-        // Apply structured filters on top
         if (hasStructured) {
             filtered = applyStructuredFilters(filtered, filters);
-            // Show structured filter indicator in search result bar
             STATE.view._structuredFilters = filters;
         } else {
             STATE.view._structuredFilters = null;
@@ -8604,60 +8612,177 @@ function applyFilterChain() {
         STATE.view._structuredFilters = null;
     }
 
+    // ── Data-view mode ────────────────────────────────────────────────────────
     switch (STATE.view.dataViewMode) {
         case 'responsive':  filtered = filtered.filter(v => v.eti_prediction === 'responsive'); break;
         case 'exceptional': filtered = filtered.filter(v => v.class_subtype === 'exceptional'); break;
         case 'complete':    filtered = filtered.filter(v => v.data_status === 'complete_clinical'); break;
     }
 
+    // ── Missing-data chip ─────────────────────────────────────────────────────
     if (STATE.view.activeFilter === 'missing') {
         filtered = filtered.filter(hasMissingData);
     }
 
-    if (STATE.view.classFilter !== 'all') {
+    // ── FIX #1 #2: Class filter is BYPASSED during active search ─────────────
+    // A clinician typing "F508del" with Class I active MUST find F508del (Class II).
+    // The class dots change visual emphasis but never hide search results.
+    // In browse mode (no query) the class filter works exactly as before.
+    const classFilterActive = STATE.view.classFilter !== 'all';
+    if (classFilterActive && !shouldSearch) {
         filtered = filtered.filter(v => v.cftr_class === STATE.view.classFilter);
     }
 
-    // Sort — multiple clinical orderings supported
-    const sortMode = STATE.view.sortMode || 'alpha';
-    switch (sortMode) {
-        case 'alpha':
-            filtered.sort((a, b) => STATE.view.sortAsc
-                ? (a.legacy_name || '').localeCompare(b.legacy_name || '')
-                : (b.legacy_name || '').localeCompare(a.legacy_name || ''));
-            break;
-        case 'demand':
-            // Most clinically searched first — recency-weighted
-            filtered.sort((a, b) => {
-                const scoreA = (a.search_hit_count || 0) * (a.last_searched_at ? Math.max(0.5, 1 - (Date.now() - new Date(a.last_searched_at)) / (90 * 86400000)) : 0.5);
-                const scoreB = (b.search_hit_count || 0) * (b.last_searched_at ? Math.max(0.5, 1 - (Date.now() - new Date(b.last_searched_at)) / (90 * 86400000)) : 0.5);
-                return STATE.view.sortAsc ? scoreA - scoreB : scoreB - scoreA;
-            });
-            break;
-        case 'gap':
-            // Highest gap score first (most incomplete + most searched)
-            filtered.sort((a, b) => {
-                const ga = calculateGapScore(a).score;
-                const gb = calculateGapScore(b).score;
-                return STATE.view.sortAsc ? ga - gb : gb - ga;
-            });
-            break;
-        case 'validated':
-            // Least validated first
-            filtered.sort((a, b) => STATE.view.sortAsc
-                ? (a.validation_count || 0) - (b.validation_count || 0)
-                : (b.validation_count || 0) - (a.validation_count || 0));
-            break;
-        default:
-            filtered.sort((a, b) => STATE.view.sortAsc
-                ? (a.legacy_name || '').localeCompare(b.legacy_name || '')
-                : (b.legacy_name || '').localeCompare(a.legacy_name || ''));
+    // ── FIX #7: Cross-class escape hatch ─────────────────────────────────────
+    // If search returns 0 results with a class filter active, calculate how many
+    // matches exist across all classes so the empty state can show an escape hatch.
+    if (shouldSearch && filtered.length === 0 && classFilterActive) {
+        const { nameQuery, filters } = parseStructuredQuery(q);
+        let crossClass = nameQuery.length >= effectiveMin ? searchVariants(nameQuery) : [...STATE.variants];
+        if (Object.keys(filters).length) crossClass = applyStructuredFilters(crossClass, filters);
+        STATE.view._crossClassCount   = crossClass.length;
+        STATE.view._crossClassResults = crossClass.slice(0, 5);
+    } else {
+        STATE.view._crossClassCount   = 0;
+        STATE.view._crossClassResults = [];
     }
+
+    // ── FIX #8: Demand boost within search tiers ─────────────────────────────
+    // Within each match tier, variants searched more often appear first.
+    // Clinically: "G551D" (searched 500×) should beat an obscure prefix match.
+    if (shouldSearch && filtered.length > 1) {
+        const tierMap = STATE.searchIntelligence._lastScores;
+        if (tierMap && tierMap.size) {
+            filtered.sort((a, b) => {
+                const ta = tierMap.get(a.id) ?? 9;
+                const tb = tierMap.get(b.id) ?? 9;
+                if (ta !== tb) return ta - tb;
+                return (b.search_hit_count || 0) - (a.search_hit_count || 0);
+            });
+        }
+    }
+
+    // ── Browse-mode sort (only when no search active) ─────────────────────────
+    if (!shouldSearch) {
+        const sortMode = STATE.view.sortMode || 'alpha';
+        switch (sortMode) {
+            case 'demand':
+                filtered.sort((a, b) => {
+                    const sa = (a.search_hit_count||0) * (a.last_searched_at ? Math.max(0.5,1-(Date.now()-new Date(a.last_searched_at))/(90*86400000)) : 0.5);
+                    const sb = (b.search_hit_count||0) * (b.last_searched_at ? Math.max(0.5,1-(Date.now()-new Date(b.last_searched_at))/(90*86400000)) : 0.5);
+                    return STATE.view.sortAsc ? sa - sb : sb - sa;
+                }); break;
+            case 'gap':
+                filtered.sort((a, b) => { const ga=calculateGapScore(a).score,gb=calculateGapScore(b).score; return STATE.view.sortAsc?ga-gb:gb-ga; }); break;
+            case 'validated':
+                filtered.sort((a, b) => STATE.view.sortAsc?(a.validation_count||0)-(b.validation_count||0):(b.validation_count||0)-(a.validation_count||0)); break;
+            default: // alpha
+                filtered.sort((a, b) => STATE.view.sortAsc?(a.legacy_name||'').localeCompare(b.legacy_name||''):(b.legacy_name||'').localeCompare(a.legacy_name||''));
+        }
+    }
+
+    // ── FIX #11: Compute active filter summary for display ───────────────────
+    const summary = [];
+    if (STATE.view.dataViewMode !== 'all') summary.push(STATE.view.dataViewMode);
+    if (STATE.view.activeFilter === 'missing') summary.push('missing data');
+    if (classFilterActive) summary.push(`Class ${STATE.view.classFilter}`);
+    STATE.view._activeFilterSummary = summary;
 
     STATE.view.filteredVariants = filtered;
     STATE.view.currentPage = 1;
+    _persistFilterState();
     renderVariantList();
     updatePagination();
+    _renderActiveFilterBar();
+}
+
+// ── FIX #11: Active filter summary bar ───────────────────────────────────────
+// Shows a compact pill row under the search box whenever non-default filters
+// are active, so clinicians always know what's narrowing the list.
+function _renderActiveFilterBar() {
+    const bar = document.getElementById('activeFilterBar');
+    if (!bar) return;
+    const summary = STATE.view._activeFilterSummary || [];
+    const q = STATE.view.searchQuery || '';
+    const classActive = STATE.view.classFilter !== 'all';
+    const searching = q.length >= (/^\d+$/.test(q.trim()) ? 2 : 3);
+
+    // Show class dim-indicator during search (filter bypassed but still active visually)
+    const classDimNote = classActive && searching
+        ? `<span style="font-size:9px;padding:1px 6px;border-radius:3px;
+               background:rgba(251,191,36,0.08);color:#fbbf24;border:1px solid rgba(251,191,36,0.2);">
+               <i class="fas fa-eye-slash" style="font-size:8px;margin-right:2px;"></i>
+               Class ${STATE.view.classFilter} filter paused during search
+           </span>`
+        : '';
+
+    if (!summary.length && !classDimNote) {
+        bar.style.display = 'none';
+        return;
+    }
+    bar.style.display = 'flex';
+    const pills = summary
+        .filter(f => !(classActive && searching && f === `Class ${STATE.view.classFilter}`))
+        .map(f => `<span style="display:inline-flex;align-items:center;gap:4px;font-size:9px;padding:1px 6px;
+                       border-radius:3px;background:rgba(41,121,255,0.1);color:#60a5fa;
+                       border:1px solid rgba(41,121,255,0.2);">${escapeHTML(f)}
+                       <span onclick="_removeFilter('${escapeAttr(f)}')"
+                             style="cursor:pointer;opacity:.6;font-size:10px;margin-left:1px;">&times;</span>
+                   </span>`).join('');
+    const clearAll = summary.length
+        ? `<button onclick="_clearAllFilters()" style="font-size:9px;color:var(--text-tertiary);
+               background:none;border:none;cursor:pointer;padding:0;margin-left:2px;">clear all</button>`
+        : '';
+    bar.innerHTML = `<div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;padding:4px 10px 2px;">
+        ${pills}${classDimNote}${clearAll}
+    </div>`;
+}
+
+function _removeFilter(label) {
+    if (label === `Class ${STATE.view.classFilter}`) setClassFilter('all');
+    else if (label === 'missing data') filterVariants('all');
+    else if (['responsive','exceptional','complete'].includes(label)) setDataView('all');
+    else applyFilterChain();
+}
+
+function _clearAllFilters() {
+    STATE.view.classFilter   = 'all';
+    STATE.view.activeFilter  = null;
+    STATE.view.dataViewMode  = 'all';
+    ['all','I','II','III','IV','V','VI'].forEach(c => {
+        const el = document.getElementById(c === 'all' ? 'cdot-all' : `cdot-${c}`);
+        if (el) el.classList.toggle('active', c === 'all');
+    });
+    document.querySelectorAll('.filter-chip').forEach(el => el.classList.remove('active'));
+    document.getElementById('chip-all')?.classList.add('active');
+    applyFilterChain();
+}
+
+// ── FIX #9: Quick-access dropdown from DB recency (no local history) ──────────
+function _renderQuickAccessDropdown(variants) {
+    const dd = document.getElementById('searchDropdown');
+    if (!dd || !variants.length) return;
+    dd.innerHTML = `
+        <div style="padding:6px 12px 4px;font-size:9px;font-weight:700;text-transform:uppercase;
+                    letter-spacing:.08em;color:var(--text-tertiary);">Recently searched</div>
+        ${variants.map(v => {
+            const etiCol   = v.eti_prediction==='responsive'?'#34d399':v.eti_prediction==='non_responsive'?'#f87171':'#5a7aaa';
+            const etiLabel = v.eti_prediction==='responsive'?'ETI ✓':v.eti_prediction==='non_responsive'?'ETI ✗':'ETI ?';
+            return `<div class="sd-item" onclick="selectVariant('${escapeAttr(v.legacy_name)}',true);document.getElementById('searchDropdown').classList.add('hidden');">
+                <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;">
+                    <i class="fas fa-clock" style="font-size:9px;color:var(--text-tertiary);flex-shrink:0;"></i>
+                    <div style="flex:1;min-width:0;font-size:13px;font-weight:600;color:var(--text-primary);
+                                font-family:var(--font-mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                        ${escapeHTML(v.legacy_name)}
+                    </div>
+                    <div style="display:flex;align-items:center;gap:5px;flex-shrink:0;">
+                        ${v.cftr_class?`<span style="font-size:10px;font-weight:700;color:var(--text-secondary);">Class ${escapeHTML(v.cftr_class)}</span>`:''}
+                        <span style="font-size:10px;font-weight:600;color:${etiCol};">${etiLabel}</span>
+                    </div>
+                </div>
+            </div>`;
+        }).join('')}`;
+    dd.classList.remove('hidden');
 }
 
 function _persistFilterState() {
@@ -9039,12 +9164,37 @@ function renderVariantList() {
         const escapedQ   = escapeHTML(q || '');
         const isRunning  = LOOKUP_JOB_STATE.activeQuery === q && LOOKUP_JOB_STATE.status === 'running';
         const isDone     = LOOKUP_JOB_STATE.activeQuery === q && (LOOKUP_JOB_STATE.status === 'done' || LOOKUP_JOB_STATE.status === 'notfound');
+
+        // FIX #7 — cross-class escape hatch
+        // If results exist in other classes, show them with a "remove class filter" CTA
+        const crossCount   = STATE.view._crossClassCount || 0;
+        const crossResults = STATE.view._crossClassResults || [];
+        const crossHatch   = crossCount > 0 ? `
+            <div style="margin-top:14px;padding:10px 14px;background:rgba(251,191,36,0.06);
+                        border:1px solid rgba(251,191,36,0.2);border-radius:8px;text-align:left;">
+                <div style="font-size:11px;font-weight:700;color:#fbbf24;margin-bottom:6px;">
+                    <i class="fas fa-filter" style="margin-right:5px;"></i>
+                    Class ${escapeHTML(STATE.view.classFilter)} filter is hiding ${crossCount} match${crossCount!==1?'es':''}
+                </div>
+                <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px;">
+                    ${crossResults.map(v=>`<span style="font-family:var(--font-mono);color:var(--text-secondary);">${escapeHTML(v.legacy_name)}</span> <span style="font-size:9px;color:var(--text-tertiary);">(Class ${escapeHTML(v.cftr_class||'?')})</span>`).join(', ')}
+                    ${crossCount > 5 ? ` and ${crossCount - 5} more…` : ''}
+                </div>
+                <button onclick="setClassFilter('all')" style="font-size:11px;font-weight:700;
+                    padding:5px 14px;border-radius:6px;border:1px solid rgba(251,191,36,0.35);
+                    background:rgba(251,191,36,0.1);color:#fbbf24;cursor:pointer;font-family:var(--font-body);">
+                    <i class="fas fa-times" style="margin-right:4px;font-size:9px;"></i>
+                    Remove class filter — show all ${crossCount} result${crossCount!==1?'s':''}
+                </button>
+            </div>` : '';
+
         container.innerHTML = `
             <div class="list-empty" style="padding:22px 16px 18px;">
                 <div class="list-empty-icon"><i class="fas fa-search"></i></div>
                 <p style="font-family:var(--font-mono);font-size:13px;color:var(--text-secondary);">"${escapedQ}"</p>
-                <p style="margin-top:4px;font-size:11px;color:var(--text-tertiary);">not in local database</p>
-                ${isRunning ? `
+                <p style="margin-top:4px;font-size:11px;color:var(--text-tertiary);">not in local database${STATE.view.classFilter !== 'all' && !crossCount ? ` (Class ${escapeHTML(STATE.view.classFilter)} filter active)` : ''}</p>
+                ${crossHatch}
+                ${!crossCount ? (isRunning ? `
                 <div class="neu-lookup-running" style="margin-top:16px;">
                     <div style="width:10px;height:10px;border:2px solid rgba(41,121,255,0.3);border-top-color:#2979ff;border-radius:50%;animation:neuSpin 0.8s linear infinite;flex-shrink:0;"></div>
                     <span style="flex:1;">Searching ClinVar · CFTR2 · PubMed…</span>
@@ -9062,7 +9212,7 @@ function renderVariantList() {
                     </svg>
                     <span style="font-weight:500;">Look up <span style="font-family:var(--font-mono);color:#c7deff;">"${escapedQ}"</span> externally</span>
                 </button>
-                <p style="margin-top:7px;font-size:10px;color:var(--text-tertiary);text-align:center;letter-spacing:0.03em;">ClinVar · CFTR2 · PubMed · Runs in background</p>`}
+                <p style="margin-top:7px;font-size:10px;color:var(--text-tertiary);text-align:center;letter-spacing:0.03em;">ClinVar · CFTR2 · PubMed · Runs in background</p>`) : ''}
             </div>`;
         return;
     }
@@ -11937,10 +12087,15 @@ function generateCSV(headers, rows, filename) {
 // ========== PAGINATION ==========
 
 function updatePagination() {
+    const q = STATE.view.searchQuery || '';
+    const isSearching = q.length >= (/^\d+$/.test(q.trim()) ? 2 : 3);
     const total = Math.ceil(STATE.view.filteredVariants.length / CONFIG.UI.ITEMS_PER_PAGE);
     const ctrl = document.getElementById('listPagination');
     if (!ctrl) return;
-    ctrl.style.display = total > 1 ? 'flex' : 'none';
+    // FIX #10: suppress pagination during search — all scored results visible at once
+    // Search results are already ranked; hiding page 2+ defeats the scoring.
+    // The ITEMS_PER_PAGE cap still applies for performance, but the UI hides the nav.
+    ctrl.style.display = (!isSearching && total > 1) ? 'flex' : 'none';
     setText('currentPage', STATE.view.currentPage);
     setText('totalPages', total);
     const prev = document.getElementById('prevBtn');
@@ -13525,38 +13680,70 @@ function initSearch() {
     const clear = document.getElementById('searchClear');
     if (!input) return;
 
+    // FIX #5 — structured syntax hint on placeholder (cycles so it's always visible)
+    const HINTS = [
+        'Search variants, cDNA, protein…',
+        'Try: class:III',
+        'Try: eti:responsive',
+        'Try: 508 or G551D',
+        'Try: missing:class',
+        'Try: class:II eti:responsive',
+    ];
+    let hintIdx = 0;
+    const rotatePlaceholder = () => {
+        if (!input.value) {
+            input.placeholder = HINTS[hintIdx % HINTS.length];
+            hintIdx++;
+        }
+    };
+    rotatePlaceholder();
+    setInterval(rotatePlaceholder, 3500);
+
     input.addEventListener('input', function() {
         const val = this.value;
         clear?.classList.toggle('hidden', !val);
-        KB.highlightIndex = -1; // reset keyboard highlight on input change
+        KB.highlightIndex = -1;
 
         clearTimeout(STATE.ui.searchTimeout);
         STATE.ui.searchTimeout = setTimeout(() => {
             STATE.view.searchQuery = val;
             applyFilterChain();
+
+            // FIX #3 — dropdown and list now driven by same applyFilterChain result
             const r = STATE.searchIntelligence._lastResult;
-            if (r && val.trim().length >= CONFIG.UI.MIN_SEARCH_CHARS) {
+            const effectiveMin = /^\d+$/.test(val.trim()) ? 2 : 3;
+            if (r && val.trim().length >= effectiveMin) {
                 updateSearchDropdown(val.trim(), STATE.view.filteredVariants);
             } else {
-                const dd = document.getElementById('searchDropdown');
-                if (dd) dd.classList.add('hidden');
+                document.getElementById('searchDropdown')?.classList.add('hidden');
+            }
+
+            // FIX #6 — auto-open single result after a brief settle pause
+            // (separate from the 80ms auto-select in renderVariantList which needs Enter)
+            clearTimeout(STATE.ui._singleResultTimeout);
+            if (STATE.view.filteredVariants.length === 1 && val.trim().length >= effectiveMin) {
+                STATE.ui._singleResultTimeout = setTimeout(() => {
+                    const only = STATE.view.filteredVariants[0];
+                    if (only && STATE.view.searchQuery === val) {
+                        selectVariant(only.legacy_name, true);
+                        document.getElementById('searchDropdown')?.classList.add('hidden');
+                    }
+                }, 600); // 600ms settle — long enough to avoid mid-type flicker
             }
         }, CONFIG.UI.SEARCH_DELAY);
 
         clearTimeout(STATE.ui.logTimeout);
         STATE.ui.logTimeout = setTimeout(() => {
             const r = STATE.searchIntelligence._lastResult;
-            if (r && r.query === val.trim() && val.trim().length >= CONFIG.UI.MIN_SEARCH_CHARS) {
+            if (r && r.query === val.trim() && val.trim().length >= ((/^\d+$/.test(val.trim()) ? 2 : 3))) {
                 logSearch(r.query, r.isHit, r.matchedField, r.matchedVariantId);
             }
         }, CONFIG.UI.LOG_DELAY);
     });
 
     input.addEventListener('keydown', e => {
-        // Escape — clear search
         if (e.key === 'Escape') { clearSearch(); return; }
 
-        // ↑↓ arrow keys — navigate variant list
         const page = STATE.view.filteredVariants.slice(
             (STATE.view.currentPage - 1) * CONFIG.UI.ITEMS_PER_PAGE,
             STATE.view.currentPage * CONFIG.UI.ITEMS_PER_PAGE
@@ -13573,15 +13760,13 @@ function initSearch() {
             kbHighlightRow(KB.highlightIndex);
             return;
         }
-
-        // Enter — select highlighted row, or auto-select if single exact match
         if (e.key === 'Enter') {
+            clearTimeout(STATE.ui._singleResultTimeout);
             if (KB.highlightIndex >= 0 && page[KB.highlightIndex]) {
                 e.preventDefault();
                 selectVariant(page[KB.highlightIndex].legacy_name, true);
                 KB.highlightIndex = -1;
             } else if (STATE.view.filteredVariants.length === 1) {
-                // Single result — select it directly, no arrow key needed
                 e.preventDefault();
                 selectVariant(STATE.view.filteredVariants[0].legacy_name, true);
                 KB.highlightIndex = -1;
@@ -13590,17 +13775,32 @@ function initSearch() {
                 STATE.view.searchQuery = input.value;
                 applyFilterChain();
                 const r = STATE.searchIntelligence._lastResult;
-                if (r && input.value.trim().length >= CONFIG.UI.MIN_SEARCH_CHARS) {
+                if (r && input.value.trim().length >= 2) {
                     logSearch(r.query, r.isHit, r.matchedField, r.matchedVariantId);
                 }
             }
         }
     });
 
-    // Area 4: show search history when input focused and empty
+    // FIX #9 — show session history on focus even when no local storage history
     input.addEventListener('focus', () => {
-        if (!input.value.trim()) renderSearchHistoryDropdown();
+        if (!input.value.trim()) {
+            const history = (typeof getSearchHistory === 'function') ? getSearchHistory() : [];
+            if (history.length > 0) {
+                renderSearchHistoryDropdown();
+            } else {
+                // Show recently active variants from STATE as a fallback
+                const recent = [...STATE.variants]
+                    .filter(v => v.last_searched_at)
+                    .sort((a, b) => new Date(b.last_searched_at) - new Date(a.last_searched_at))
+                    .slice(0, 6);
+                if (recent.length) {
+                    _renderQuickAccessDropdown(recent);
+                }
+            }
+        }
     });
+
     input.addEventListener('blur', () => {
         setTimeout(() => {
             const dd = document.getElementById('searchDropdown');
