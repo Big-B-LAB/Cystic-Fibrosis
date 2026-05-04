@@ -49,7 +49,14 @@
           integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
           crossorigin="anonymous"
           referrerpolicy="no-referrer">
-    <!-- Tailwind CDN removed — replaced with minimal inline utilities -->
+    <!-- ================================================================
+         LAYER 1 — UTILITY PRIMITIVES
+         Minimal hand-rolled utility classes covering every Tailwind class
+         actually used in this file. Load order: this block first, then
+         the full NeumuacFQ design system below. Rules here are intentionally
+         low-specificity (single class selectors) so the design system always
+         wins on conflict. Do NOT add component styles here — utility only.
+         ================================================================ -->
     <style>
         /* Minimal utility layer — covers all Tailwind classes actually used in this file */
         .flex { display: flex; }
@@ -118,6 +125,12 @@
     -->
     <!-- chart.js lazy load placeholder — do not remove this comment -->
 
+    <!-- ================================================================
+         LAYER 2 — NeumuacFQ DESIGN SYSTEM
+         Full component library, design tokens, layout system, and all
+         component-specific CSS. Intentionally loads after the utility
+         layer so component rules take precedence on any shared class.
+         ================================================================ -->
     <style>
         /* ============================================================
            NeumuacFQ v4 — CFTR PRECISION MEDICINE PLATFORM
@@ -131,7 +144,8 @@
             --font-mono: 'IBM Plex Mono', 'SF Mono', monospace;
 
             /* Core palette — deep navy system */
-            --white: #0d1526;     /* named --bg-elevated in new code — see alias above */
+            --white: #0d1526;     /* DEPRECATED — use --bg-card. Kept for legacy class references. */
+            --bg-card: #0d1526;   /* Card/surface background — the value --white should have had */
             --surface: #080f1d;
             --surface-alt: #0a1220;
             --border: rgba(99,140,210,0.13);
@@ -145,10 +159,11 @@
             --brand: #2979ff;
 
             /* ---- Design tokens: opacity tiers (document-aligned) ----
-               Three tiers only per semantic color — no more scattered opacity values */
+               These alias the canonical CFTR class variables defined below in
+               the "CFTR Class system" section. Aliases prevent duplication. */
             /* Class I / error */
-            --class-i-fill:   rgba(248,113,113,0.08);
-            --class-i-border: rgba(248,113,113,0.22);
+            --class-i-fill:   rgba(248,113,113,0.08);  /* alias of --class-i-bg */
+            --class-i-border: rgba(248,113,113,0.22);  /* single source of truth — also set in CFTR section below; keep in sync */
             /* Class II / warning-orange */
             --class-ii-fill:   rgba(251,146,60,0.08);
             --class-ii-border: rgba(251,146,60,0.22);
@@ -2131,6 +2146,7 @@
         .ribbon-dot { width:4px;height:4px;border-radius:50%;flex-shrink:0; }
         .ribbon-dot.hit{background:#34d399;} .ribbon-dot.miss{background:#f87171;}
         .ribbon-miss-count { color:#f87171; margin-left:auto; white-space:nowrap; flex-shrink:0; }
+        @keyframes ribbonPulse { 0%,100%{opacity:1} 50%{opacity:.55} }
 
         /* ---- Import preview table ---- */
         .import-preview { max-height:200px; overflow-y:auto; margin-top:10px; }
@@ -2412,7 +2428,7 @@
            ============================================================ */
 
         .detail-header {
-            background: var(--white);
+            background: var(--bg-card, var(--white));
             border: 1px solid var(--border);
             border-radius: 12px;
             padding: 20px 24px;
@@ -3669,6 +3685,17 @@
                 flex-wrap: wrap;
                 gap: 6px !important;
             }
+
+            /* Breadcrumb strip: truncate name more aggressively on phone */
+            #canvasBreadcrumb { padding: 0 12px; }
+            #canvasBreadcrumb .cb-name { max-width: 160px; font-size: 11px; }
+            #canvasBreadcrumb .cb-eti  { display: none; } /* ETI hidden on very narrow */
+
+            /* main-inner: tighter padding on phone */
+            .main-inner { padding: 12px; }
+
+            /* Close modal touch target */
+            #canvasBreadcrumb .cb-dismiss { min-height: 36px; padding: 0 12px; }
         }
 
     
@@ -4589,6 +4616,31 @@
                     <button class="class-dot cv"   id="cdot-V"   onclick="setClassFilter('V')" style="color:var(--class-v);">V</button>
                     <button class="class-dot cvi"  id="cdot-VI"  onclick="setClassFilter('VI')" style="color:var(--class-vi);">VI</button>
                 </div>
+                <!-- Search tips — collapsible, reveals full structured syntax -->
+                <div style="padding:3px 10px 5px;">
+                    <button onclick="const t=this.nextElementSibling;const open=t.style.display!=='block';t.style.display=open?'block':'none';this.querySelector('.tips-chevron').style.transform=open?'rotate(90deg)':'rotate(0)'"
+                        style="background:none;border:none;cursor:pointer;font-size:9.5px;
+                               color:var(--text-tertiary);display:flex;align-items:center;gap:4px;
+                               padding:2px 0;font-family:var(--font-body);"
+                        title="Show search syntax tips">
+                        <i class="fas fa-chevron-right tips-chevron" style="font-size:7px;transition:transform .15s;opacity:.6;"></i>
+                        Search tips
+                    </button>
+                    <div style="display:none;margin-top:5px;font-size:10px;color:var(--text-tertiary);
+                                line-height:1.85;font-family:var(--font-mono);">
+                        <div><span style="color:var(--text-secondary);font-weight:600;">class:II</span> &nbsp;filter by class</div>
+                        <div><span style="color:var(--text-secondary);font-weight:600;">eti:responsive</span> &nbsp;ETI status</div>
+                        <div><span style="color:var(--text-secondary);font-weight:600;">missing:class</span> &nbsp;unclassified</div>
+                        <div><span style="color:var(--text-secondary);font-weight:600;">searched:>10</span> &nbsp;high demand</div>
+                        <div><span style="color:var(--text-secondary);font-weight:600;">gap:CRITICAL</span> &nbsp;gap level</div>
+                        <div><span style="color:var(--text-secondary);font-weight:600;">validated:0</span> &nbsp;unvalidated</div>
+                        <div style="margin-top:4px;padding-top:4px;border-top:1px solid var(--border);
+                                    font-family:var(--font-body);font-size:9px;color:var(--text-tertiary);">
+                            Combine: <span style="color:var(--brand);font-family:var(--font-mono);">class:II eti:responsive</span>
+                            &nbsp;·&nbsp; <kbd style="background:rgba(255,255,255,0.06);padding:0 3px;border-radius:2px;font-family:var(--font-mono);">⌘K</kbd> commands
+                        </div>
+                    </div>
+                </div>
             </div>
             <!-- Intelligent search dropdown -->
             <div class="search-dropdown hidden" id="searchDropdown"></div>
@@ -4684,11 +4736,20 @@
 
 <!-- Activity ribbon — bottom of viewport -->
 <div class="activity-ribbon" id="activityRibbon">
-    <span class="ribbon-label">Live activity</span>
+    <span class="ribbon-label">Live</span>
     <div class="ribbon-feed" id="ribbonFeed">
-        <span class="ribbon-event" style="color:var(--text-tertiary);">Waiting for searches…</span>
+        <span class="ribbon-event" style="color:var(--text-tertiary);">Waiting for activity…</span>
     </div>
-    <span class="ribbon-miss-count" id="ribbonMissCount" style="display:none;"></span>
+    <span class="ribbon-miss-count" id="ribbonMissCount" style="display:none;cursor:pointer;"
+          onclick="showMissQueuePanel()" title="Click to review miss queue"></span>
+    <!-- Helios urgent alert slot — shown when URGENT items exist in pending queue -->
+    <span id="ribbonHeliosAlert" style="display:none;margin-left:8px;font-size:10px;
+          font-weight:700;color:#fbbf24;cursor:pointer;white-space:nowrap;
+          font-family:var(--font-mono);animation:ribbonPulse 2s ease-in-out infinite;"
+          onclick="openHelios()" title="Open Helios — urgent review needed">
+        <i class="fas fa-sun" style="margin-right:3px;font-size:9px;"></i>
+        <span id="ribbonHeliosCount"></span> urgent
+    </span>
 </div>
 
 <!-- ================================================================
@@ -5544,6 +5605,19 @@
    ================================================================ */
 
 // ========== CONFIGURATION ==========
+// ── NeumuacFQ global namespace ───────────────────────────────────────────────
+// All major state objects and public functions are registered here.
+// Existing code continues to use bare names (STATE, CONFIG, etc.) — this
+// namespace is the single discoverable entry point for external scripts,
+// DevTools inspection, and future module migration.
+// Usage: window.NeumuacFQ.state.variants  |  NeumuacFQ.fn.selectVariant(name)
+window.NeumuacFQ = window.NeumuacFQ || {
+    /** @type {typeof CONFIG} */  config: null,
+    /** @type {typeof STATE}  */  state:  null,
+    /** Public function registry — populated at DOMContentLoaded */
+    fn: {}
+};
+
 const CONFIG = {
     SUPABASE: {
         URL: 'https://oxlkisjwfarseyqgeyuw.supabase.co',
@@ -5565,6 +5639,21 @@ const CONFIG = {
     WRITE_CODE: 'helix2024', // ⚠ Change before deployment — move to server-side auth in production
     WRITE_DURATION: 30 * 60 * 1000
 };
+
+// ========== UUID POLYFILL ==========
+// uuid() is unavailable in some older mobile WebViews and
+// non-HTTPS contexts. Replace all direct calls with uuid() which degrades
+// gracefully to a Math.random-based fallback that produces valid UUID v4 format.
+function uuid() {
+    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+        try { return uuid(); } catch(e) { /* fall through */ }
+    }
+    // RFC 4122 v4 UUID fallback — sufficient for client-side ID generation
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+        const r = Math.random() * 16 | 0;
+        return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+    });
+}
 
 // ========== FETCH SIGNAL INTERCEPTOR ==========
 // Root cause: in environments where Chrome's network/service-worker process
@@ -5811,7 +5900,7 @@ async function triggerRoboticSearchOnMiss(query, missId) {
             body: JSON.stringify({ status: 'in_review' })
         });
 
-        const runId = crypto.randomUUID();
+        const runId = uuid();
         const results = await Promise.allSettled([
             roboticPubMedSearch(query),
             roboticClinVarSearch(query),
@@ -6341,6 +6430,41 @@ async function writeAuditLog(entry) {
     } catch(e) { /* non-fatal — audit log failure never blocks clinical work */ }
 }
 
+/**
+ * @typedef {Object} CFTRVariant
+ * Core variant record as returned by Supabase and stored in STATE.variants.
+ * All fields mirror the public.variants table schema exactly.
+ *
+ * @property {number}       id                   - Bigint PK from DB
+ * @property {string}       legacy_name          - Primary identifier (e.g. "F508del")
+ * @property {string|null}  protein_name         - HGVS protein notation (e.g. "p.Phe508del")
+ * @property {string|null}  cdna_name            - HGVS cDNA notation (e.g. "c.1521_1523del")
+ * @property {string|null}  alt_names            - Space/comma separated alternate names
+ * @property {string|null}  final_determination  - "CF-causing" | "VUS" | "Non CF-causing"
+ * @property {'I'|'II'|'III'|'IV'|'V'|'VI'|'II/III'|null} cftr_class
+ * @property {'true'|'presumed'|'exceptional'|'atypical'|'standard'|null} class_subtype
+ * @property {string|null}  class_confidence
+ * @property {'responsive'|'non_responsive'|'unknown'|null} eti_prediction
+ * @property {string|null}  eti_evidence_level
+ * @property {string}       source_summary       - e.g. "CFTR2_2026" | "Manual_Form" | "Manual_Import"
+ * @property {string|null}  last_evidence_update - ISO date string
+ * @property {string}       created_at           - ISO timestamp
+ * @property {string}       updated_at           - ISO timestamp — used as gap cache key
+ * @property {string|null}  clinical_alert       - Computed DB column
+ * @property {boolean}      therapy_responsive
+ * @property {string|null}  eti_recommendation
+ * @property {string|null}  data_status          - "complete_clinical" | "minimal" | null
+ * @property {number}       validation_count     - Number of peer validations recorded
+ * @property {string|null}  last_validated_at    - ISO timestamp of most recent validation
+ * @property {string|null}  last_validator_name
+ * @property {string|null}  last_validator_role
+ * @property {number}       search_hit_count     - Cumulative search hits from search_logs
+ * @property {string|null}  last_searched_at     - ISO timestamp of most recent search hit
+ * @property {Object[]}     evidence_links       - Joined from evidence_links table
+ * @property {number|null}  population_frequency - gnomAD allele frequency (fetched on demand)
+ * @property {Object|null}  _gap                 - Cached gap score result (not in DB)
+ */
+
 const STATE = {
     variants: [],
     variantsById: new Map(),
@@ -6654,6 +6778,21 @@ async function loadVariants() {
 
         STATE.system.initialized = true;
         STATE.system.initEndTime = new Date();
+
+        // Wire NeumuacFQ namespace — makes state inspectable from DevTools
+        // and provides a stable API surface for future external scripts.
+        if (window.NeumuacFQ) {
+            window.NeumuacFQ.config = CONFIG;
+            window.NeumuacFQ.state  = STATE;
+            window.NeumuacFQ.fn     = {
+                selectVariant, clearSearch, quickSearch,
+                showDashboard, showAuditTrail, dismissCanvas,
+                undoLastEdit, redoLastEdit,
+                setClassFilter, setDataView, filterVariants,
+                applyFilterChain, renderVariantList, renderVariantDetail,
+                buildSearchIndex, calculateGapScore,
+            };
+        }
         
         const initTime = (performance.now() - startTime).toFixed(0);
 
@@ -9113,10 +9252,12 @@ Object.assign(window, { dismissCanvas });
 
 function quickSearch(name) {
     const input = document.getElementById('searchInput');
-    if (input) { input.value = name; }
+    if (input) input.value = name;
     STATE.view.searchQuery = name;
     applyFilterChain();
-    setTimeout(() => selectVariant(name), 200);
+    // Select immediately — applyFilterChain is synchronous, variant is in the
+    // filtered list by the time we call selectVariant. No timeout needed.
+    selectVariant(name);
 }
 
 // ========== SIDEBAR TOGGLE ==========
@@ -9964,6 +10105,12 @@ function renderVariantDetail(variant, fromSearch) {
                     <button onclick="helixPinVariant(STATE.variantsById.get(${variant.id}))" class="btn btn-ghost btn-sm" title="Pin for side-by-side compare" style="border-color:rgba(41,121,255,0.3);color:var(--brand);">
                         <i class="fas fa-columns"></i>
                     </button>
+                    <button onclick="exportClinicalReport('single')" class="btn btn-ghost btn-sm"
+                        title="Print / Export clinical PDF for this variant"
+                        style="border-color:rgba(52,211,153,0.25);color:#34d399;">
+                        <i class="fas fa-file-medical" style="font-size:10px;"></i>
+                        <span style="font-size:11px;">PDF</span>
+                    </button>
                 </div>
                 ${variant.date_updated ? `<span style="font-size: 11px;color:var(--text-tertiary)">Updated ${formatDate(variant.date_updated)}</span>` : ''}
             </div>
@@ -10431,6 +10578,20 @@ async function submitValidation() {
 
         msgDiv.innerHTML = '<span style="color:var(--success)">✓ Saved</span>';
         showNotification(`${name} validated ${variantName}`, 'success');
+
+        // Peer review nudge — if this is the FIRST validation, prompt the clinician
+        // to flag that a second reviewer is needed. Non-blocking, purely informational.
+        const newCount = (variant?.validation_count || 0);
+        if (newCount === 1) {
+            setTimeout(() => {
+                showNotification(
+                    `First validation recorded. For classification-critical variants, a second clinician review is recommended — use the Validate button again with a different clinician name.`,
+                    'info', 7000
+                );
+                // Update ribbon Helios alert in case a review item was created
+                if (typeof _updateRibbonHeliosAlert === 'function') _updateRibbonHeliosAlert();
+            }, 1400);
+        }
         calculateMasterStats();
         updateHeaderStats();
         updateFilterChips();
@@ -12635,10 +12796,22 @@ function helixShowDetailMissState(query) {
 }
 
 // Reset detail empty panel to default state (call on clearSearch)
+let _homeDashboardDirty = false;
+let _homeDashboardTimer = null;
 function helixResetDetailEmpty() {
     const panel = document.getElementById('detailEmptyMissPanel');
     if (panel) { panel.style.display = 'none'; panel.innerHTML = ''; }
-    if (STATE.system.initialized) setTimeout(() => renderHomeDashboard(), 60);
+    if (!STATE.system.initialized) return;
+    // Debounce: multiple rapid calls (from filter chain, clear, dismiss) collapse
+    // into a single render 80ms after the last one — prevents flicker cascade.
+    _homeDashboardDirty = true;
+    clearTimeout(_homeDashboardTimer);
+    _homeDashboardTimer = setTimeout(() => {
+        if (_homeDashboardDirty) {
+            _homeDashboardDirty = false;
+            renderHomeDashboard();
+        }
+    }, 80);
 }
 
 // ========== RESEARCH GAP ENGINE ==========
@@ -13119,6 +13292,16 @@ const GAP_WEIGHTS = {
 };
 
 function calculateGapScore(variant) {
+    // Check registry cache first — avoids recalculating on every render.
+    // Cache key: variant.updated_at (set by DB on every PATCH).
+    // analyseAndRegisterGap() is the write path; this is the read path.
+    if (variant && variant.id) {
+        const cached = GAP_REGISTRY.get(variant.id);
+        if (cached && cached._updatedAt === variant.updated_at) {
+            return cached;
+        }
+    }
+
     let score = 0;
     const missing = [];
     const recs = [];
@@ -13214,7 +13397,19 @@ function calculateGapScore(variant) {
                    : score >= 15 ? 'MINOR'
                    : 'ADEQUATE';
 
-    return { score, gapLevel, missing, recommendations: recs };
+    const result = { score, gapLevel, missing, recommendations: recs };
+    // Write-through to registry
+    if (variant && variant.id) {
+        GAP_REGISTRY.set(variant.id, { ...result, _updatedAt: variant.updated_at });
+    }
+    return result;
+}
+
+// Store in registry so the next call is cached
+function _cacheGapResult(variant, result) {
+    if (!variant || !variant.id) return result;
+    GAP_REGISTRY.set(variant.id, { ...result, _updatedAt: variant.updated_at });
+    return result;
 }
 
 function gapLevelColor(level) {
@@ -13792,18 +13987,33 @@ function pushRibbonEvent(query, isHit) {
     const el = document.createElement('span');
     el.className = `ribbon-event ${isHit?'hit':'miss'}`;
     el.innerHTML = `<span class="ribbon-dot ${isHit?'hit':'miss'}"></span>${escapeHTML(query)}`;
-    // Keep only 5 most recent
     const existing = feed.querySelectorAll('.ribbon-event');
     if (existing.length >= 5) existing[0].remove();
     feed.appendChild(el);
-    // Update miss count
+    // Miss count
     const missCount = STATE.searchIntelligence.globalMisses.size;
     const missEl = document.getElementById('ribbonMissCount');
     if (missEl) {
         if (missCount > 0) {
-            missEl.textContent = `${missCount} miss${missCount!==1?'es':''} → miss queue`;
+            missEl.textContent = `${missCount} miss${missCount!==1?'es':''}`;
             missEl.style.display = '';
         } else missEl.style.display = 'none';
+    }
+    // Helios urgent alert — shown when any URGENT items are pending review
+    _updateRibbonHeliosAlert();
+}
+
+function _updateRibbonHeliosAlert() {
+    const alertEl = document.getElementById('ribbonHeliosAlert');
+    const countEl = document.getElementById('ribbonHeliosCount');
+    if (!alertEl || !countEl) return;
+    const urgentCount = (HELIOS.pendingItems || [])
+        .filter(i => i.status === 'pending' && i.priority === 'URGENT').length;
+    if (urgentCount > 0) {
+        countEl.textContent = urgentCount;
+        alertEl.style.display = '';
+    } else {
+        alertEl.style.display = 'none';
     }
 }
 
@@ -13860,6 +14070,7 @@ function initSearch() {
         'Try: 508 or G551D',
         'Try: missing:class',
         'Try: class:II eti:responsive',
+        'Tip: press ⌘K for command palette',
     ];
     let hintIdx = 0;
     const rotatePlaceholder = () => {
@@ -17374,7 +17585,7 @@ async function heliosCheckEvidenceContradictions() {
             byVariant[l.variant_id].push(l);
         });
 
-        const runId = crypto.randomUUID();
+        const runId = uuid();
         let contradictions = 0;
         let confirmations  = 0;
 
@@ -17497,7 +17708,7 @@ async function heliosCheckDrift() {
         );
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         const approved = await r.json();
-        const runId = crypto.randomUUID();
+        const runId = uuid();
         let drifts = 0;
 
         for (const entry of approved) {
@@ -17780,7 +17991,7 @@ async function heliosScanInternal() {
     const variants = STATE.variants;
     let findings = 0;
     let errors = 0;
-    const runId = crypto.randomUUID();
+    const runId = uuid();
     const startedAt = new Date().toISOString();
 
     // Open bot run record
@@ -17981,7 +18192,7 @@ async function heliosScanExternal() {
     heliosSetBotStatus('running');
     const enabled = STATE.variants.filter(v => !v.cftr_class || !v.eti_prediction).slice(0, 10);
     let findings = 0;
-    const runId = crypto.randomUUID();
+    const runId = uuid();
 
     for (let i = 0; i < enabled.length; i++) {
         const v = enabled[i];
@@ -18128,7 +18339,7 @@ async function heliosMissQueueIntelligence() {
 
         let escalated = 0;
         let signals   = 0;
-        const runId   = crypto.randomUUID();
+        const runId   = uuid();
 
         for (const m of misses) {
             // Cross-institutional threshold: 3+ unique sessions
@@ -19088,7 +19299,7 @@ async function heliosScheduledScan() {
     heliosAmbientStart('scheduled overnight scan');
     heliosSetBotStatus('running');
 
-    const runId = crypto.randomUUID();
+    const runId = uuid();
     const startedAt = new Date().toISOString();
     let findings = 0;
 
@@ -22645,7 +22856,7 @@ function lookupSaveToDatabase() {
     }
 
     const newVariant = {
-        id:                  crypto.randomUUID(),
+        id:                  uuid(),
         legacy_name:         F.legacy_name  || result.query,
         protein_name:        F.protein_name || null,
         cdna_name:           F.cdna_name    || null,
@@ -22721,22 +22932,76 @@ function lookupOpenManualEdit() {
 
 // ── Retry with alternate name ────────────────────────────────────
 function lookupRetryAlternate(query) {
-    // Prompt user for alternate nomenclature
-    const alt = window.prompt(`Enter alternate name to search (e.g. protein name, legacy name):`, query);
-    if (alt && alt.trim()) {
+    // Replace window.prompt with an inline modal input — consistent with the
+    // rest of the UI and never blocked by browser popup policies.
+    const overlay = document.createElement('div');
+    overlay.id = 'retryAltOverlay';
+    Object.assign(overlay.style, {
+        position:'fixed', inset:'0', zIndex:'99999',
+        background:'rgba(4,8,15,0.7)', backdropFilter:'blur(6px)',
+        display:'flex', alignItems:'center', justifyContent:'center'
+    });
+    overlay.innerHTML = `
+        <div style="width:min(420px,90vw);background:#0a1220;border:1px solid rgba(99,140,210,0.25);
+                    border-radius:12px;padding:22px 24px;box-shadow:0 24px 64px rgba(0,5,20,0.8);">
+            <div style="font-size:13px;font-weight:700;color:var(--text-primary);margin-bottom:6px;">
+                <i class="fas fa-search" style="color:var(--brand);margin-right:6px;font-size:11px;"></i>
+                Try alternate name
+            </div>
+            <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:14px;">
+                Enter a different nomenclature — protein name, legacy name, cDNA notation, or gene alias.
+            </div>
+            <input id="retryAltInput" value="${escapeAttr(query)}"
+                style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid rgba(99,140,210,0.3);
+                       background:rgba(255,255,255,0.04);color:var(--text-primary);font-size:13px;
+                       font-family:var(--font-mono);outline:none;box-sizing:border-box;"
+                placeholder="e.g. p.Phe508del or c.1521_1523del or F508del"
+                autocomplete="off">
+            <div style="display:flex;gap:8px;margin-top:12px;justify-content:flex-end;">
+                <button onclick="document.getElementById('retryAltOverlay').remove()"
+                    style="padding:7px 16px;border-radius:6px;border:1px solid rgba(99,140,210,0.2);
+                           background:transparent;color:var(--text-secondary);cursor:pointer;
+                           font-size:12px;font-family:var(--font-body);">Cancel</button>
+                <button id="retryAltConfirm"
+                    style="padding:7px 18px;border-radius:6px;border:none;
+                           background:var(--brand);color:#fff;cursor:pointer;
+                           font-size:12px;font-weight:600;font-family:var(--font-body);">
+                    Search ↺
+                </button>
+            </div>
+        </div>`;
+
+    document.body.appendChild(overlay);
+
+    const inp = document.getElementById('retryAltInput');
+    const confirm = document.getElementById('retryAltConfirm');
+
+    // Select all text so the clinician can type immediately
+    requestAnimationFrame(() => { inp.focus(); inp.select(); });
+
+    const doRetry = () => {
+        const alt = inp.value.trim();
+        if (!alt) return;
+        overlay.remove();
         lookupCloseModal();
-        LOOKUP_JOB_STATE.activeQuery  = alt.trim();
+        LOOKUP_JOB_STATE.activeQuery  = alt;
         LOOKUP_JOB_STATE.status       = 'running';
         LOOKUP_JOB_STATE.result       = null;
-        lookupShowTray(alt.trim(), 'running');  
-        _lookupExecute(alt.trim()).then(result => {
+        lookupShowTray(alt, 'running');
+        _lookupExecute(alt).then(result => {
             LOOKUP_JOB_STATE.status = result.found ? 'done' : 'notfound';
             LOOKUP_JOB_STATE.result = result;
-            lookupOnComplete(alt.trim(), result);
-        }).catch(err => lookupOnError(alt.trim(), err));
-        // Open the searching modal immediately
+            lookupOnComplete(alt, result);
+        }).catch(err => lookupOnError(alt, err));
         setTimeout(lookupOpenModal, 100);
-    }
+    };
+
+    confirm.addEventListener('click', doRetry);
+    inp.addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); doRetry(); }
+        if (e.key === 'Escape') overlay.remove();
+    });
+    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
 }
 </script>
 </body>
