@@ -9578,17 +9578,12 @@ function renderVariantList() {
     // 1. Single result → always auto-select
     // 2. Multiple results but tier-0 exact match at results[0] → auto-select + scroll to it
     //    (G542X returns 31 results but G542X itself is tier 0 — clinician typed the exact name)
-    const tier = STATE.searchIntelligence._lastSearchTier ?? -1;
+    // Note: `tier` and `hasExact` already computed above in the result bar section
     const topResult = STATE.view.filteredVariants[0];
 
-    // Auto-select when:
-    // 1. Exactly one result — unambiguous
-    // 2. Tier-0 exact match — clinician typed the precise name in any nomenclature
-    //    (protein, cDNA, legacy, alt). Check the searchIndex directly rather than
-    //    comparing legacy_name strings, which fails for protein/cDNA searches.
     const norm = normaliseQuery(q);
-    const indexHitIds = STATE.searchIndex.lookup.get(norm) || STATE.searchIndex.lookup.get(q.toLowerCase().trim());
-    const isTier0Hit  = tier === 0 && indexHitIds && indexHitIds.has(topResult.id);
+    const indexHitIds = STATE.searchIndex.lookup.get(norm) || STATE.searchIndex.lookup.get(q?.toLowerCase().trim());
+    const isTier0Hit  = hasExact && indexHitIds && topResult && indexHitIds.has(topResult.id);
 
     const shouldAutoSelect = isSearching && topResult && (
         total === 1 || isTier0Hit
@@ -19134,8 +19129,9 @@ Object.assign(window, {
     // Compound genotype calculator + MDT
     openCompoundGenotypeCalculator, runCompoundGenotypeCalculation, generateMDTReport,
     cgcSaveCase, cgcDeleteCase, cgcLoadCase, cgcRenderSavedCases,
-    // ACMG
-    computeACMGScore, renderACMGPanel,
+    // ACMG — wrapped to avoid ReferenceError if Object.assign runs before function is hoisted
+    computeACMGScore: (...a) => computeACMGScore(...a),
+    renderACMGPanel:  (...a) => renderACMGPanel(...a),
     // Clinical reference
     renderClinicalReferencePanel, renderClinicalAlertBanner,
     // Areas 2-5 search additions
