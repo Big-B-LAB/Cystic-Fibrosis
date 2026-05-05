@@ -1669,7 +1669,168 @@
         .si-gap-badge { font-size: 11px; font-weight:600; padding:1px 6px; border-radius:4px; background:rgba(248,113,113,0.08); color:#f87171; border:1px solid rgba(248,113,113,0.18); }
 
 
-        /* ---- Leaflet geo tooltip ---- */
+        /* ================================================================
+           GEOGRAPHY — UNIFIED DESIGN SYSTEM v6
+           One token family. Three visual states. Zero competing classes.
+           ================================================================ */
+
+        /* ── Geo surface tokens ── */
+        :root {
+            --geo-bg:        #060b14;
+            --geo-surface:   #07090f;
+            --geo-surface2:  rgba(255,255,255,0.025);
+            --geo-border:    rgba(255,255,255,0.055);
+            --geo-border2:   rgba(255,255,255,0.04);
+            --geo-text:      rgba(255,255,255,0.78);
+            --geo-text2:     rgba(255,255,255,0.38);
+            --geo-text3:     rgba(255,255,255,0.2);
+            --geo-hit:       #34d399;
+            --geo-miss:      #f87171;
+            --geo-warn:      #fbbf24;
+            --geo-brand:     #60a5fa;
+        }
+
+        /* ── Single control button ── */
+        .geo-btn {
+            font-family: var(--font-mono);
+            font-size: 10.5px;
+            font-weight: 600;
+            letter-spacing: .05em;
+            padding: 4px 11px;
+            border-radius: 6px;
+            border: 1px solid var(--geo-border);
+            background: transparent;
+            color: var(--geo-text2);
+            cursor: pointer;
+            transition: all .14s;
+            white-space: nowrap;
+            line-height: 1.4;
+        }
+        .geo-btn:hover {
+            border-color: rgba(255,255,255,0.18);
+            color: var(--geo-text);
+            background: rgba(255,255,255,0.04);
+        }
+        /* Active states — semantic colour per context */
+        .geo-btn.active-period { border-color:rgba(96,165,250,0.55); background:rgba(96,165,250,0.1); color:var(--geo-brand); }
+        .geo-btn.active-class  { border-color:rgba(52,211,153,0.55); background:rgba(52,211,153,0.08); color:var(--geo-hit); }
+        .geo-btn.active-miss   { border-color:rgba(248,113,113,0.55); background:rgba(248,113,113,0.08); color:var(--geo-miss); }
+        .geo-btn.active-view   { border-color:rgba(96,165,250,0.55); background:rgba(96,165,250,0.1); color:var(--geo-brand); }
+        .geo-btn.active-density{ border-color:rgba(251,191,36,0.55); background:rgba(251,191,36,0.08); color:var(--geo-warn); }
+
+        /* ── Insight cards ── */
+        .geo-insight {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 14px;
+            border-radius: 8px;
+            border: 1px solid;
+            cursor: default;
+            flex-shrink: 0;
+            animation: geoInsightIn 300ms cubic-bezier(.16,1,.3,1) both;
+            font-size: 11px;
+            font-family: var(--font-mono);
+        }
+        .geo-insight.hit    { border-color:rgba(52,211,153,0.25); background:rgba(52,211,153,0.06); color:var(--geo-hit); }
+        .geo-insight.miss   { border-color:rgba(248,113,113,0.25); background:rgba(248,113,113,0.06); color:var(--geo-miss); }
+        .geo-insight.warn   { border-color:rgba(251,191,36,0.25); background:rgba(251,191,36,0.06); color:var(--geo-warn); }
+        .geo-insight.info   { border-color:rgba(96,165,250,0.25); background:rgba(96,165,250,0.06); color:var(--geo-brand); }
+        .geo-insight .geo-insight-val { font-size:16px; font-weight:800; line-height:1; }
+        .geo-insight .geo-insight-lbl { font-size:9px; letter-spacing:.1em; text-transform:uppercase; opacity:.6; margin-top:1px; }
+        @keyframes geoInsightIn { from{opacity:0;transform:translateY(-4px)} to{opacity:1;transform:none} }
+
+        /* ── Flag to Helios button ── */
+        .geo-flag-btn {
+            font-size: 10.5px;
+            font-family: var(--font-mono);
+            font-weight: 700;
+            letter-spacing: .04em;
+            color: var(--geo-brand);
+            border: 1px solid rgba(96,165,250,0.3);
+            background: rgba(96,165,250,0.06);
+            border-radius: 5px;
+            padding: 4px 10px;
+            cursor: pointer;
+            transition: all .14s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .geo-flag-btn:hover {
+            background: rgba(96,165,250,0.16);
+            border-color: rgba(96,165,250,0.6);
+        }
+        .geo-flag-btn.urgent {
+            color: var(--geo-miss);
+            border-color: rgba(248,113,113,0.4);
+            background: rgba(248,113,113,0.06);
+            animation: geoFlagPulse 2.5s ease-in-out infinite;
+        }
+        @keyframes geoFlagPulse { 0%,100%{opacity:1} 50%{opacity:.65} }
+
+        /* ── Query rows ── */
+        .geo-qrow {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 7px 18px;
+            border-bottom: 1px solid var(--geo-border2);
+            transition: background .12s;
+        }
+        .geo-qrow:hover { background: rgba(255,255,255,0.02); }
+        .geo-qrow:last-child { border-bottom: none; }
+
+        /* ── Sticky section heads ── */
+        .geo-section-head {
+            position: sticky;
+            top: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 18px 5px;
+            background: var(--geo-surface);
+            border-bottom: 1px solid var(--geo-border2);
+            z-index: 2;
+            font-size: 9px;
+            font-family: var(--font-mono);
+            text-transform: uppercase;
+            letter-spacing: .14em;
+            color: var(--geo-text3);
+        }
+
+        /* ── Miss list rows ── */
+        .geo-miss-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 18px;
+            border-bottom: 1px solid var(--geo-border2);
+            cursor: pointer;
+            transition: background .12s;
+        }
+        .geo-miss-row:hover { background: rgba(255,255,255,0.03); }
+
+        /* ── Compare header ── */
+        .geo-compare-head {
+            padding: 12px 16px 10px;
+            border-bottom: 1px solid var(--geo-border2);
+            background: var(--geo-surface2);
+            flex-shrink: 0;
+        }
+
+        /* Preserve existing animations */
+        @keyframes geoPulseDot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.65)}}
+        @keyframes geoFadeUp{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes geoSelPing{0%{transform-box:fill-box;transform-origin:center;transform:scale(1);opacity:.6}100%{transform:scale(2.2);opacity:0}}
+        @keyframes geoMissPulse{0%{opacity:.55}100%{opacity:0}}
+        @keyframes geoSlideIn{from{opacity:0;transform:translateX(8px)}to{opacity:1;transform:translateX(0)}}
+        .geo-v5-slide{animation:geoSlideIn .25s cubic-bezier(.16,1,.3,1) both;}
+        .geo-v4-region-card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:8px;padding:8px 10px;cursor:pointer;transition:border-color .15s,background .15s;position:relative;overflow:hidden;animation:geoFadeUp .3s cubic-bezier(.16,1,.3,1) both;}
+        .geo-v4-region-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--grc,#60a5fa);transform:scaleX(var(--grr,0));transform-origin:left;}
+        .geo-v4-region-card:hover{border-color:rgba(255,255,255,0.16);background:rgba(255,255,255,0.05);}
+
+        /* Leaflet geo tooltip */
         .geo-tooltip {
             background: #0a1220 !important;
             border: 1px solid rgba(99,140,210,0.3) !important;
@@ -1681,96 +1842,9 @@
             box-shadow: 0 4px 12px rgba(0,5,20,0.6) !important;
         }
         .geo-tooltip::before { display:none !important; }
-
-        /* Map control buttons — proper contrast on dark background */
-        .geo-ctrl-btn {
-            font-family: var(--font-mono);
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: .06em;
-            padding: 4px 12px;
-            border-radius: 5px;
-            border: 1px solid rgba(255,255,255,0.12);
-            background: rgba(255,255,255,0.06);
-            color: rgba(255,255,255,0.45);
-            cursor: pointer;
-            transition: background .15s, color .15s, border-color .15s;
-            white-space: nowrap;
-        }
-        .geo-ctrl-btn:hover {
-            background: rgba(255,255,255,0.1);
-            color: rgba(255,255,255,0.75);
-            border-color: rgba(255,255,255,0.2);
-        }
-        .geo-ctrl-btn.active {
-            background: rgba(255,255,255,0.14);
-            color: #ffffff;
-            border-color: rgba(255,255,255,0.35);
-        }
-        .geo-ctrl-btn.active.period { color: #60a5fa; border-color: rgba(96,165,250,0.5); background: rgba(96,165,250,0.1); }
-        .geo-ctrl-btn.active.layer-class { color: #34d399; border-color: rgba(74,222,128,0.5); background: rgba(74,222,128,0.08); }
-        .geo-ctrl-btn.active.layer-miss  { color: #fbbf24; border-color: rgba(251,191,36,0.5); background: rgba(251,191,36,0.08); }
-        .geo-controls-bar {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 8px 12px;
-            background: rgba(4,8,20,0.7);
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            flex-shrink: 0;
-        }
-        .geo-controls-sep { width:1px; height:16px; background:rgba(255,255,255,0.08); flex-shrink:0; margin:0 2px; }
-        .geo-region-table {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px,1fr));
-            gap: 8px;
-            padding: 10px 0 4px;
-        }
-        .geo-region-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 8px 12px;
-            cursor: pointer;
-            transition: border-color .15s;
-        }
-        .geo-region-card:hover { border-color: rgba(41,121,255,0.4); }
-        .geo-region-name { font-size: 11px; font-weight: 600; color: var(--text-primary); margin-bottom: 3px; }
-        .geo-region-variant { font-family: var(--font-mono); font-size: 11px; color: #60a5fa; margin-bottom: 2px; }
-        .geo-region-meta { font-size: 11px; color: var(--text-tertiary); }
-        /* ── GEO V4+V5 ── */
-        @keyframes geoPulseDot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.65)}}
-        @keyframes geoFadeUp{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
-        @keyframes geoSelPing{0%{transform-box:fill-box;transform-origin:center;transform:scale(1);opacity:.6}100%{transform:scale(2.2);opacity:0}}
-        @keyframes geoMissPulse{0%{opacity:.55}100%{opacity:0}}
-        @keyframes geoSlideIn{from{opacity:0;transform:translateX(8px)}to{opacity:1;transform:translateX(0)}}
-        .geo-v4-pill{font-family:var(--font-mono);font-size: 11px;font-weight:600;letter-spacing:.04em;padding:3px 10px;border-radius:100px;border:1px solid rgba(255,255,255,0.12);background:transparent;color:rgba(255,255,255,0.45);cursor:pointer;transition:all .15s;white-space:nowrap;}
-        .geo-v4-pill:hover{border-color:rgba(255,255,255,0.22);color:rgba(255,255,255,0.75);}
-        .geo-v4-pill.on-period{border-color:rgba(96,165,250,0.5);background:rgba(96,165,250,0.1);color:#60a5fa;}
-        .geo-v4-pill.on-class{border-color:rgba(52,211,153,0.5);background:rgba(52,211,153,0.08);color:#34d399;}
-        .geo-v4-pill.on-miss{border-color:rgba(251,113,133,0.5);background:rgba(251,113,133,0.08);color:#fb7185;}
-        .geo-v4-region-card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:8px;padding:8px 10px;cursor:pointer;transition:border-color .15s,background .15s;position:relative;overflow:hidden;animation:geoFadeUp .3s cubic-bezier(.16,1,.3,1) both;}
-        .geo-v4-region-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--grc,#60a5fa);transform:scaleX(var(--grr,0));transform-origin:left;}
-        .geo-v4-region-card:hover{border-color:rgba(255,255,255,0.16);background:rgba(255,255,255,0.05);}
-        .geo-v4-query-row{display:flex;align-items:center;gap:10px;padding:7px 18px;border-bottom:1px solid rgba(255,255,255,0.04);transition:background .12s;}
-        .geo-v4-query-row:hover{background:rgba(255,255,255,0.02);}
-        .geo-v4-query-row:last-child{border-bottom:none;}
-        .geo-v4-sticky-head{position:sticky;top:0;display:flex;align-items:center;justify-content:space-between;padding:7px 18px 6px;background:var(--surface);border-bottom:1px solid rgba(255,255,255,0.06);z-index:2;}
-        .geo-v5-view-btn{font-family:var(--font-mono);font-size: 11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:3px 10px;border-radius:100px;border:1px solid rgba(255,255,255,0.1);background:transparent;color:rgba(255,255,255,0.38);cursor:pointer;transition:all .15s;}
-        .geo-v5-view-btn:hover{border-color:rgba(255,255,255,0.22);color:rgba(255,255,255,0.7);}
-        .geo-v5-view-btn.active{border-color:rgba(96,165,250,0.5);background:rgba(96,165,250,0.1);color:#60a5fa;}
-        .geo-v5-miss-row{display:flex;align-items:center;gap:10px;padding:8px 18px;border-bottom:1px solid rgba(255,255,255,0.04);transition:background .12s;cursor:pointer;}
-        .geo-v5-miss-row:hover{background:rgba(255,255,255,0.03);}
-        .geo-v5-compare-head{padding:10px 14px 8px;border-bottom:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.02);flex-shrink:0;}
+        @keyframes missPulse { 0%,100%{stroke-opacity:.7} 50%{stroke-opacity:1} }
         .geo-v5-scrubber{-webkit-appearance:none;appearance:none;width:100%;height:3px;background:rgba(255,255,255,0.08);border-radius:100px;outline:none;cursor:pointer;}
         .geo-v5-scrubber::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:#60a5fa;border:2px solid rgba(11,15,26,0.9);cursor:pointer;}
-        .geo-v5-flag-btn{font-size: 11px;font-family:var(--font-mono);color:#60a5fa;border:1px solid rgba(96,165,250,0.25);background:rgba(96,165,250,0.06);border-radius:4px;padding:2px 8px;cursor:pointer;transition:all .15s;white-space:nowrap;}
-        .geo-v5-flag-btn:hover{background:rgba(96,165,250,0.14);border-color:rgba(96,165,250,0.5);}
-        .geo-v5-slide{animation:geoSlideIn .25s cubic-bezier(.16,1,.3,1) both;}
-        @keyframes missPulse {
-            0%, 100% { stroke-opacity: 0.7; r: var(--base-r, 8); }
-            50% { stroke-opacity: 1; }
-        }
 
         /* Geography panel: map left, detail right */
         .geo-split {
@@ -5282,135 +5356,140 @@
             </div>
 
             <div id="siPanelGeo" class="si-panel" style="display:none;">
-                <div style="display:flex;flex-direction:column;height:100%;min-height:0;overflow:hidden;">
-                    <!-- GEO HEADER BAR -->
-                    <div style="display:flex;align-items:center;gap:0;height:46px;border-bottom:1px solid rgba(255,255,255,0.05);flex-shrink:0;background:#07090f;padding:0;">
-                        <div style="display:flex;align-items:center;gap:8px;padding:0 18px;border-right:1px solid rgba(255,255,255,0.05);">
-                            <span style="width:6px;height:6px;border-radius:50%;background:#34d399;display:inline-block;animation:geoPulseDot 2.5s ease-in-out infinite;flex-shrink:0;"></span>
-                            <span style="font-family:var(--font-mono);font-size: 11px;letter-spacing:.16em;color:rgba(255,255,255,0.3);text-transform:uppercase;" id="geoNoteV4">Geographic intelligence</span>
-                            <span id="geoHealthBadge" style="display:none;margin-left:6px;font-family:var(--font-mono);font-size: 11px;padding:2px 8px;border-radius:100px;border:1px solid rgba(255,255,255,0.08);color:rgba(255,255,255,0.28);" title="Geo coverage"></span>
+                <div style="display:flex;flex-direction:column;height:100%;min-height:0;overflow:hidden;background:var(--geo-bg);">
+
+                    <!-- ══ ROW 1: IDENTITY + LIVE STATS ══ -->
+                    <div style="display:flex;align-items:center;height:44px;border-bottom:1px solid var(--geo-border);flex-shrink:0;background:var(--geo-surface);">
+                        <div style="display:flex;align-items:center;gap:9px;padding:0 18px;border-right:1px solid var(--geo-border);flex-shrink:0;">
+                            <span style="width:7px;height:7px;border-radius:50%;background:var(--geo-hit);display:inline-block;animation:geoPulseDot 2.5s ease-in-out infinite;flex-shrink:0;"></span>
+                            <span style="font-family:var(--font-mono);font-size:10px;letter-spacing:.2em;color:var(--geo-text2);text-transform:uppercase;" id="geoNoteV4">Geographic Intelligence</span>
+                            <span id="geoHealthBadge" style="display:none;font-family:var(--font-mono);font-size:10px;padding:1px 7px;border-radius:100px;border:1px solid var(--geo-border);color:var(--geo-text3);" title="Geo coverage"></span>
                         </div>
-                        <!-- Period pills -->
-                        <div style="display:flex;align-items:center;gap:4px;padding:0 14px;border-right:1px solid rgba(255,255,255,0.05);">
-                            <button class="geo-v4-pill on-period" id="geoV4p7"   onclick="geoV4SetPeriod(7,this)">7d</button>
-                            <button class="geo-v4-pill"           id="geoV4p30"  onclick="geoV4SetPeriod(30,this)">30d</button>
-                            <button class="geo-v4-pill"           id="geoV4pAll" onclick="geoV4SetPeriod(0,this)">All</button>
-                        </div>
-                        <!-- Layer toggles -->
-                        <div style="display:flex;align-items:center;gap:4px;padding:0 14px;border-right:1px solid rgba(255,255,255,0.05);">
-                            <button class="geo-v4-pill on-class" id="geoV4lClass"  onclick="geoV4ToggleLayer('class',this)">Class</button>
-                            <button class="geo-v4-pill"          id="geoV4lMiss"   onclick="geoV4ToggleLayer('miss',this)">Miss signal</button>
-                            <button class="geo-v4-pill"          id="geoV4lChoro"  onclick="geoV4ToggleLayer('choropleth',this)" title="Country-level search density choropleth">Density</button>
-                        </div>
-                        <!-- Timeline scrubber -->
-                        <div style="display:flex;align-items:center;gap:8px;padding:0 14px;border-right:1px solid rgba(255,255,255,0.05);">
-                            <span style="font-size: 11px;font-family:var(--font-mono);color:rgba(255,255,255,0.22);letter-spacing:.08em;">Timeline</span>
-                            <input type="range" class="geo-v5-scrubber" id="geoTimeline" min="0" max="100" value="100" style="width:90px;" oninput="geoV5TimelineScrub(this.value)">
-                            <span style="font-family:var(--font-mono);font-size: 11px;color:rgba(255,255,255,0.35);min-width:30px;" id="geoTimelineLabel">Live</span>
-                        </div>
-                        <!-- View switcher -->
-                        <div style="display:flex;align-items:center;gap:4px;padding:0 14px;border-right:1px solid rgba(255,255,255,0.05);">
-                            <button class="geo-v5-view-btn active" id="geoViewMap"     onclick="geoV5SetView('map',this)">Map</button>
-                            <button class="geo-v5-view-btn"        id="geoViewMiss"    onclick="geoV5SetView('miss',this)">Miss intel</button>
-                            <button class="geo-v5-view-btn"        id="geoViewCompare" onclick="geoV5SetView('compare',this)">Compare</button>
-                            <button class="geo-v5-view-btn"        id="geoViewExport"  onclick="geoV5Export()">Export ↓</button>
-                        </div>
-                        <!-- Stats strip -->
-                        <div style="display:flex;align-items:stretch;margin-left:auto;">
-                            <div style="display:flex;flex-direction:column;align-items:flex-end;justify-content:center;padding:0 14px;border-left:1px solid rgba(255,255,255,0.05);">
-                                <span style="font-family:var(--font-mono);font-size:14px;font-weight:500;color:#e2e8f0;line-height:1;" id="geoStripSearches">—</span>
-                                <span style="font-size: 11px;color:rgba(255,255,255,0.22);text-transform:uppercase;letter-spacing:.1em;margin-top:2px;">searches</span>
+                        <div style="display:flex;align-items:stretch;flex:1;">
+                            <div style="display:flex;flex-direction:column;justify-content:center;padding:0 16px;border-right:1px solid var(--geo-border);">
+                                <span style="font-family:var(--font-mono);font-size:15px;font-weight:700;color:var(--geo-text);line-height:1;" id="geoStripSearches">—</span>
+                                <span style="font-size:9px;color:var(--geo-text3);text-transform:uppercase;letter-spacing:.1em;margin-top:1px;">searches</span>
                             </div>
-                            <div style="display:flex;flex-direction:column;align-items:flex-end;justify-content:center;padding:0 14px;border-left:1px solid rgba(255,255,255,0.05);">
-                                <span style="font-family:var(--font-mono);font-size:14px;font-weight:500;color:#e2e8f0;line-height:1;" id="geoStripLocs">—</span>
-                                <span style="font-size: 11px;color:rgba(255,255,255,0.22);text-transform:uppercase;letter-spacing:.1em;margin-top:2px;">locations</span>
+                            <div style="display:flex;flex-direction:column;justify-content:center;padding:0 16px;border-right:1px solid var(--geo-border);">
+                                <span style="font-family:var(--font-mono);font-size:15px;font-weight:700;color:var(--geo-text);line-height:1;" id="geoStripLocs">—</span>
+                                <span style="font-size:9px;color:var(--geo-text3);text-transform:uppercase;letter-spacing:.1em;margin-top:1px;">locations</span>
                             </div>
-                            <div style="display:flex;flex-direction:column;align-items:flex-end;justify-content:center;padding:0 14px;border-left:1px solid rgba(255,255,255,0.05);">
-                                <span style="font-family:var(--font-mono);font-size:14px;font-weight:500;color:#34d399;line-height:1;" id="geoStripRate">—</span>
-                                <span style="font-size: 11px;color:rgba(255,255,255,0.22);text-transform:uppercase;letter-spacing:.1em;margin-top:2px;">hit rate</span>
+                            <div style="display:flex;flex-direction:column;justify-content:center;padding:0 16px;border-right:1px solid var(--geo-border);">
+                                <span style="font-family:var(--font-mono);font-size:15px;font-weight:700;color:var(--geo-hit);line-height:1;" id="geoStripRate">—</span>
+                                <span style="font-size:9px;color:var(--geo-text3);text-transform:uppercase;letter-spacing:.1em;margin-top:1px;">hit rate</span>
                             </div>
-                            <div style="display:flex;flex-direction:column;align-items:flex-end;justify-content:center;padding:0 16px;border-left:1px solid rgba(255,255,255,0.05);">
-                                <span style="font-family:var(--font-mono);font-size:11px;font-weight:500;color:#e2e8f0;line-height:1;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" id="geoStripHosp">—</span>
-                                <span style="font-size: 11px;color:rgba(255,255,255,0.22);text-transform:uppercase;letter-spacing:.1em;margin-top:2px;">institution</span>
+                            <div style="display:flex;flex-direction:column;justify-content:center;padding:0 16px;">
+                                <span style="font-family:var(--font-mono);font-size:11px;font-weight:600;color:var(--geo-text);line-height:1;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" id="geoStripHosp">—</span>
+                                <span style="font-size:9px;color:var(--geo-text3);text-transform:uppercase;letter-spacing:.1em;margin-top:1px;">institution</span>
                             </div>
+                        </div>
+                        <div style="padding:0 14px;border-left:1px solid var(--geo-border);flex-shrink:0;">
+                            <button class="geo-btn" onclick="geoV5Export()" title="Export geographic intelligence report as CSV" style="display:flex;align-items:center;gap:5px;">
+                                <i class="fas fa-download" style="font-size:9px;"></i> Export
+                            </button>
                         </div>
                     </div>
-                    <!-- CLASS LEGEND BAR -->
-                    <div style="display:flex;align-items:center;gap:12px;height:28px;padding:0 18px;background:rgba(0,0,0,0.25);border-bottom:1px solid rgba(255,255,255,0.04);flex-shrink:0;" id="geoV4Legend">
-                        <span style="font-family:var(--font-mono);font-size: 11px;color:rgba(255,255,255,0.18);text-transform:uppercase;letter-spacing:.14em;margin-right:4px;">CFTR class</span>
-                        <div style="display:flex;align-items:center;gap:5px;font-family:var(--font-mono);font-size: 11px;color:rgba(255,255,255,0.3);"><span style="width:6px;height:6px;border-radius:50%;background:#ef4444;display:inline-block;"></span>I</div>
-                        <div style="display:flex;align-items:center;gap:5px;font-family:var(--font-mono);font-size: 11px;color:rgba(255,255,255,0.3);"><span style="width:6px;height:6px;border-radius:50%;background:#f97316;display:inline-block;"></span>II</div>
-                        <div style="display:flex;align-items:center;gap:5px;font-family:var(--font-mono);font-size: 11px;color:rgba(255,255,255,0.3);"><span style="width:6px;height:6px;border-radius:50%;background:#34d399;display:inline-block;"></span>III</div>
-                        <div style="display:flex;align-items:center;gap:5px;font-family:var(--font-mono);font-size: 11px;color:rgba(255,255,255,0.3);"><span style="width:6px;height:6px;border-radius:50%;background:#a78bfa;display:inline-block;"></span>IV</div>
-                        <div style="display:flex;align-items:center;gap:5px;font-family:var(--font-mono);font-size: 11px;color:rgba(255,255,255,0.3);"><span style="width:6px;height:6px;border-radius:50%;background:#ec4899;display:inline-block;"></span>V</div>
-                        <div style="display:flex;align-items:center;gap:5px;font-family:var(--font-mono);font-size: 11px;color:rgba(255,255,255,0.3);"><span style="width:6px;height:6px;border-radius:50%;background:#4b5563;display:inline-block;"></span>—</div>
-                        <div style="margin-left:auto;display:flex;align-items:center;gap:14px;">
-                            <div style="display:flex;align-items:center;gap:5px;font-family:var(--font-mono);font-size: 11px;color:rgba(255,255,255,0.22);"><span style="width:6px;height:6px;border-radius:50%;background:#34d399;display:inline-block;opacity:0.7;"></span>High hit rate</div>
-                            <div style="display:flex;align-items:center;gap:5px;font-family:var(--font-mono);font-size: 11px;color:rgba(255,255,255,0.22);"><span style="width:6px;height:6px;border-radius:50%;background:#fbbf24;display:inline-block;opacity:0.7;"></span>Mixed</div>
-                            <div style="display:flex;align-items:center;gap:5px;font-family:var(--font-mono);font-size: 11px;color:rgba(255,255,255,0.22);"><span style="width:6px;height:6px;border-radius:50%;background:#f87171;display:inline-block;opacity:0.7;"></span>High miss rate</div>
+
+                    <!-- ══ ROW 2: CONTROLS ══ -->
+                    <div style="display:flex;align-items:center;gap:6px;height:38px;padding:0 14px;border-bottom:1px solid var(--geo-border);flex-shrink:0;background:rgba(0,0,0,0.2);">
+                        <div style="display:flex;align-items:center;gap:3px;">
+                            <button class="geo-btn active-period" id="geoV4p7"   onclick="geoV4SetPeriod(7,this)">7d</button>
+                            <button class="geo-btn"               id="geoV4p30"  onclick="geoV4SetPeriod(30,this)">30d</button>
+                            <button class="geo-btn"               id="geoV4pAll" onclick="geoV4SetPeriod(0,this)">All</button>
+                        </div>
+                        <div style="width:1px;height:18px;background:var(--geo-border);flex-shrink:0;margin:0 3px;"></div>
+                        <div style="display:flex;align-items:center;gap:3px;">
+                            <button class="geo-btn active-class" id="geoV4lClass" onclick="geoV4ToggleLayer('class',this)"><i class="fas fa-circle" style="font-size:7px;margin-right:3px;"></i>Class</button>
+                            <button class="geo-btn"              id="geoV4lMiss"  onclick="geoV4ToggleLayer('miss',this)"><i class="fas fa-exclamation" style="font-size:8px;margin-right:3px;"></i>Miss signal</button>
+                            <button class="geo-btn"              id="geoV4lChoro" onclick="geoV4ToggleLayer('choropleth',this)" title="Country-level search density choropleth"><i class="fas fa-layer-group" style="font-size:8px;margin-right:3px;"></i>Density</button>
+                        </div>
+                        <div style="width:1px;height:18px;background:var(--geo-border);flex-shrink:0;margin:0 3px;"></div>
+                        <div style="display:flex;align-items:center;gap:7px;">
+                            <span style="font-size:9.5px;font-family:var(--font-mono);color:var(--geo-text3);letter-spacing:.08em;flex-shrink:0;">Timeline</span>
+                            <input type="range" class="geo-v5-scrubber" id="geoTimeline" min="0" max="100" value="100" style="width:80px;" oninput="geoV5TimelineScrub(this.value)">
+                            <span style="font-family:var(--font-mono);font-size:10px;color:var(--geo-brand);min-width:28px;" id="geoTimelineLabel">Live</span>
+                        </div>
+                        <div style="width:1px;height:18px;background:var(--geo-border);flex-shrink:0;margin:0 3px;"></div>
+                        <div style="display:flex;align-items:center;gap:3px;">
+                            <button class="geo-btn active-view" id="geoViewMap"     onclick="geoV5SetView('map',this)">Map</button>
+                            <button class="geo-btn"             id="geoViewMiss"    onclick="geoV5SetView('miss',this)">Miss intel</button>
+                            <button class="geo-btn"             id="geoViewCompare" onclick="geoV5SetView('compare',this)">Compare</button>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:9px;margin-left:auto;font-family:var(--font-mono);font-size:10px;color:var(--geo-text3);" id="geoV4Legend">
+                            <span style="opacity:.5;font-size:9px;letter-spacing:.1em;text-transform:uppercase;">CFTR</span>
+                            <span style="display:flex;align-items:center;gap:3px;"><span style="width:5px;height:5px;border-radius:50%;background:#ef4444;display:inline-block;"></span>I</span>
+                            <span style="display:flex;align-items:center;gap:3px;"><span style="width:5px;height:5px;border-radius:50%;background:#f97316;display:inline-block;"></span>II</span>
+                            <span style="display:flex;align-items:center;gap:3px;"><span style="width:5px;height:5px;border-radius:50%;background:#34d399;display:inline-block;"></span>III</span>
+                            <span style="display:flex;align-items:center;gap:3px;"><span style="width:5px;height:5px;border-radius:50%;background:#a78bfa;display:inline-block;"></span>IV</span>
+                            <span style="display:flex;align-items:center;gap:3px;"><span style="width:5px;height:5px;border-radius:50%;background:#ec4899;display:inline-block;"></span>V</span>
+                            <span style="opacity:.4;margin-left:6px;font-size:9px;">● Hit rate &nbsp; ● Miss pulse</span>
                         </div>
                     </div>
+
+                    <!-- ══ ROW 3: LIVE INSIGHT STRIP ══ -->
+                    <div id="geoInsightStrip" style="display:none;align-items:center;gap:8px;padding:7px 14px;border-bottom:1px solid var(--geo-border);flex-shrink:0;background:rgba(0,0,0,0.15);overflow-x:auto;"></div>
+
                     <!-- VIEW: MAP -->
                     <div id="geoViewMapPane" style="display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden;">
                         <div style="display:grid;grid-template-columns:1fr 320px;flex:1;min-height:0;overflow:hidden;">
-                            <!-- MAP -->
                             <div style="display:flex;flex-direction:column;overflow:hidden;position:relative;">
-                                <div id="siGeoMap" style="flex:1;min-height:300px;background:#060b14;"></div>
-                                <!-- region cards below map -->
-                                <div style="flex-shrink:0;border-top:1px solid rgba(255,255,255,0.05);background:rgba(4,6,14,0.95);padding:8px 14px 10px;">
+                                <div id="siGeoMap" style="flex:1;min-height:300px;background:var(--geo-bg);"></div>
+                                <div style="flex-shrink:0;border-top:1px solid var(--geo-border);background:rgba(4,6,14,0.95);padding:8px 14px 10px;">
                                     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-                                        <span style="font-size: 11px;font-family:var(--font-mono);color:rgba(255,255,255,0.22);text-transform:uppercase;letter-spacing:.12em;">Top variant by region</span>
-                                        <span style="font-size: 11px;font-family:var(--font-mono);color:rgba(255,255,255,0.18);" id="geoRegionCount">—</span>
+                                        <span style="font-size:9px;font-family:var(--font-mono);color:var(--geo-text3);text-transform:uppercase;letter-spacing:.12em;">Top variant by region</span>
+                                        <span style="font-size:10px;font-family:var(--font-mono);color:var(--geo-text3);" id="geoRegionCount">—</span>
                                     </div>
                                     <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:5px;" id="geoRegionCards"></div>
                                 </div>
                             </div>
-                            <!-- RIGHT DETAIL PANEL -->
-                            <div style="border-left:1px solid rgba(255,255,255,0.05);display:flex;flex-direction:column;overflow:hidden;background:#07090f;">
-                                <!-- empty state -->
-                                <div id="geoDetailEmpty" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:40px;text-align:center;">
-                                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" style="opacity:0.15;"><circle cx="16" cy="16" r="14" stroke="white" stroke-width="1.5"/><circle cx="16" cy="12" r="4" stroke="white" stroke-width="1.5"/><path d="M8 26c0-4.4 3.6-8 8-8s8 3.6 8 8" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
-                                    <div style="font-size:12px;font-weight:500;color:rgba(255,255,255,0.3);">Select a location</div>
-                                    <div style="font-size: 11px;color:rgba(255,255,255,0.16);line-height:1.8;font-family:var(--font-mono);">Click any marker on the map<br>to explore its search activity</div>
+                            <div style="border-left:1px solid var(--geo-border);display:flex;flex-direction:column;overflow:hidden;background:var(--geo-surface);">
+                                <div id="geoDetailEmpty" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:40px;text-align:center;">
+                                    <svg width="36" height="36" viewBox="0 0 36 36" fill="none" style="opacity:0.12;"><circle cx="18" cy="18" r="16" stroke="white" stroke-width="1.5"/><circle cx="18" cy="13" r="5" stroke="white" stroke-width="1.5"/><path d="M8 32c0-5.5 4.5-10 10-10s10 4.5 10 10" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
+                                    <div style="font-size:12px;font-weight:600;color:var(--geo-text2);">Select a location</div>
+                                    <div style="font-size:10.5px;color:var(--geo-text3);line-height:1.9;font-family:var(--font-mono);">Click any marker on the map<br>to explore its search activity</div>
                                 </div>
                                 <div id="geoDetailContent" style="display:none;flex-direction:column;flex:1;overflow-y:auto;overflow-x:hidden;min-height:0;"></div>
                             </div>
                         </div>
                     </div>
+
                     <!-- VIEW: MISS INTELLIGENCE -->
                     <div id="geoViewMissPane" style="display:none;flex-direction:column;flex:1;min-height:0;overflow:hidden;" class="geo-v5-slide">
                         <div style="display:grid;grid-template-columns:1fr 300px;flex:1;min-height:0;overflow:hidden;">
-                            <div style="display:flex;flex-direction:column;overflow:hidden;border-right:1px solid rgba(255,255,255,0.06);">
-                                <div style="padding:10px 18px 8px;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:rgba(255,255,255,0.02);">
-                                    <span style="font-size:11px;font-weight:500;color:rgba(255,255,255,0.65);">Unresolved queries — ranked by institutional reach</span>
-                                    <span style="font-family:var(--font-mono);font-size: 11px;color:rgba(255,255,255,0.28);" id="geoMissTotal">—</span>
+                            <div style="display:flex;flex-direction:column;overflow:hidden;border-right:1px solid var(--geo-border);">
+                                <div style="padding:10px 18px 8px;border-bottom:1px solid var(--geo-border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:var(--geo-surface2);">
+                                    <span style="font-size:11px;font-weight:600;color:var(--geo-text2);">Unresolved queries — ranked by institutional reach</span>
+                                    <span style="font-family:var(--font-mono);font-size:10px;color:var(--geo-text3);" id="geoMissTotal">—</span>
                                 </div>
                                 <div style="flex:1;overflow-y:auto;min-height:0;" id="geoMissList"></div>
                             </div>
-                            <div style="display:flex;flex-direction:column;overflow:hidden;background:var(--surface);" id="geoMissDetail">
-                                <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:30px;text-align:center;color:rgba(255,255,255,0.22);">
-                                    <i class="fas fa-search" style="font-size:20px;opacity:.3;"></i>
-                                    <div style="font-size:12px;">Select a miss query<br>to see its geographic spread</div>
+                            <div style="display:flex;flex-direction:column;overflow:hidden;background:var(--geo-surface);" id="geoMissDetail">
+                                <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:30px;text-align:center;">
+                                    <i class="fas fa-search" style="font-size:22px;color:var(--geo-text3);opacity:.4;"></i>
+                                    <div style="font-size:11px;color:var(--geo-text2);">Select a miss query<br>to see its geographic spread</div>
                                 </div>
                             </div>
                         </div>
                     </div>
+
                     <!-- VIEW: COMPARE -->
                     <div id="geoViewComparePane" style="display:none;flex-direction:column;flex:1;min-height:0;overflow:hidden;" class="geo-v5-slide">
-                        <div style="padding:10px 18px 8px;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;gap:12px;flex-shrink:0;background:rgba(255,255,255,0.02);">
-                            <span style="font-size:11px;color:rgba(255,255,255,0.45);">Compare two locations:</span>
-                            <select id="geoCompareA" onchange="geoV5RenderCompare()" style="font-family:var(--font-mono);font-size:11px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.8);padding:4px 10px;border-radius:6px;cursor:pointer;"><option value="">Location A…</option></select>
-                            <span style="font-size:11px;color:rgba(255,255,255,0.2);">vs</span>
-                            <select id="geoCompareB" onchange="geoV5RenderCompare()" style="font-family:var(--font-mono);font-size:11px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.8);padding:4px 10px;border-radius:6px;cursor:pointer;"><option value="">Location B…</option></select>
+                        <div style="padding:10px 18px;border-bottom:1px solid var(--geo-border);display:flex;align-items:center;gap:10px;flex-shrink:0;background:var(--geo-surface2);">
+                            <i class="fas fa-code-branch" style="font-size:11px;color:var(--geo-text3);"></i>
+                            <span style="font-size:11px;color:var(--geo-text2);">Institution comparison</span>
+                            <select id="geoCompareA" onchange="geoV5RenderCompare()" style="font-family:var(--font-mono);font-size:11px;background:rgba(255,255,255,0.05);border:1px solid var(--geo-border);color:var(--geo-text);padding:4px 10px;border-radius:6px;cursor:pointer;outline:none;"><option value="">Location A…</option></select>
+                            <span style="font-size:10px;color:var(--geo-text3);">vs</span>
+                            <select id="geoCompareB" onchange="geoV5RenderCompare()" style="font-family:var(--font-mono);font-size:11px;background:rgba(255,255,255,0.05);border:1px solid var(--geo-border);color:var(--geo-text);padding:4px 10px;border-radius:6px;cursor:pointer;outline:none;"><option value="">Location B…</option></select>
+                            <span style="font-size:10px;color:var(--geo-text3);margin-left:auto;font-family:var(--font-mono);">Comparing CFTR class distribution · hit rate · top queries</span>
                         </div>
                         <div style="display:grid;grid-template-columns:1fr 1fr;flex:1;min-height:0;overflow:hidden;" id="geoCompareGrid">
-                            <div style="display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.2);font-size:12px;border-right:1px solid rgba(255,255,255,0.06);">Select location A</div>
-                            <div style="display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.2);font-size:12px;">Select location B</div>
+                            <div style="display:flex;align-items:center;justify-content:center;color:var(--geo-text3);font-size:12px;border-right:1px solid var(--geo-border);">Select location A</div>
+                            <div style="display:flex;align-items:center;justify-content:center;color:var(--geo-text3);font-size:12px;">Select location B</div>
                         </div>
                     </div>
+
                 </div>
             </div>
-
             <div id="siPanelGaps" class="si-panel" style="display:none;">
                 <div class="si-body">
                     <div class="si-card">
@@ -7481,8 +7560,11 @@ function renderGeoMarkers()        { geoV4RenderMarkers(); }
 
 function geoV4SetPeriod(days,btn) {
     window._geoState.period = days;
-    ['geoV4p7','geoV4p30','geoV4pAll'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('on-period'); });
-    if(btn) btn.classList.add('on-period');
+    ['geoV4p7','geoV4p30','geoV4pAll'].forEach(id=>{
+        const el=document.getElementById(id);
+        if(el) el.classList.remove('active-period');
+    });
+    if(btn) btn.classList.add('active-period');
     geoV4RenderMarkers();
 }
 
@@ -7490,19 +7572,22 @@ function geoV4ToggleLayer(layer,btn) {
     const st=window._geoState;
     if(layer==='class'){
         st.layerClass=!st.layerClass;
-        const el=document.getElementById('geoV4lClass'); if(el) el.classList.toggle('on-class',st.layerClass);
-        const leg=document.getElementById('geoV4Legend'); if(leg) leg.style.opacity=st.layerClass?'1':'0.3';
+        const el=document.getElementById('geoV4lClass');
+        if(el) el.classList.toggle('active-class', st.layerClass);
+        const leg=document.getElementById('geoV4Legend');
+        if(leg) leg.style.opacity=st.layerClass?'1':'0.4';
     }
     if(layer==='miss'){
         st.layerMiss=!st.layerMiss;
-        const el=document.getElementById('geoV4lMiss'); if(el) el.classList.toggle('on-miss',st.layerMiss);
+        const el=document.getElementById('geoV4lMiss');
+        if(el) el.classList.toggle('active-miss', st.layerMiss);
     }
     if(layer==='choropleth'){
         st.layerChoropleth=!st.layerChoropleth;
         const el=document.getElementById('geoV4lChoro');
-        if(el) { el.classList.toggle('on-class', st.layerChoropleth); }
+        if(el) el.classList.toggle('active-density', st.layerChoropleth);
         geoV4RenderChoropleth();
-        return; // choropleth is additive — don't re-render markers
+        return;
     }
     geoV4RenderMarkers();
 }
@@ -7531,10 +7616,14 @@ function geoV5TimelineScrub(pct) {
 /* #5 VIEW SWITCHER */
 function geoV5SetView(view,btn) {
     window._geoState.view=view;
-    document.querySelectorAll('.geo-v5-view-btn').forEach(b=>b.classList.remove('active'));
-    if(btn) btn.classList.add('active');
-    ['geoViewMapPane','geoViewMissPane','geoViewComparePane'].forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display='none'; });
-    if(view==='map')    { const el=document.getElementById('geoViewMapPane');     if(el){ el.style.display='flex'; } }
+    document.querySelectorAll('#geoViewMap,#geoViewMiss,#geoViewCompare').forEach(b=>{
+        b.classList.remove('active-view');
+    });
+    if(btn) btn.classList.add('active-view');
+    ['geoViewMapPane','geoViewMissPane','geoViewComparePane'].forEach(id=>{
+        const el=document.getElementById(id); if(el) el.style.display='none';
+    });
+    if(view==='map')    { const el=document.getElementById('geoViewMapPane');     if(el){ el.style.display='flex'; requestAnimationFrame(()=>{ if(window._helixMap) window._helixMap.invalidateSize(); }); } }
     if(view==='miss')   { const el=document.getElementById('geoViewMissPane');    if(el){ el.style.display='flex'; geoV5RenderMissView(); } }
     if(view==='compare'){ const el=document.getElementById('geoViewComparePane'); if(el){ el.style.display='flex'; geoV5PopulateCompareSelects(); } }
 }
