@@ -7098,9 +7098,11 @@ const STATE = {
         timeline: [],
         sessionId: 'sess_' + Math.random().toString(36).slice(2,10),
         siCharts: {},
-        locationCache: null,  // { country, region, city, latitude, longitude } — fetched once per session
+        locationCache: null,  // { country, region, city, latitude, longitude, accuracy, ip } — fetched once per session
         _lastResult: null,    // last search result metadata — used by log debounce
-        hospital: null        // set from localStorage by initHospital()
+        hospital: null,       // set from localStorage by initHospital()
+        hospitalId: null,     // institutions.id — resolved once from DB, stored in STATE
+        clinicianName: null   // individual name if entered, distinct from institution
     },
 
     // ---- Undo / Redo — variant field edits ----
@@ -7659,13 +7661,20 @@ async function fetchLocationOnce() {
 
             si.locationCache = {
                 country, region, city,
-                latitude:  Math.round(latitude  * 10000) / 10000,
-                longitude: Math.round(longitude * 10000) / 10000,
-                ip_source: 'browser_gps',
-                accuracy:  Math.round(pos.coords.accuracy)
+                latitude:        Math.round(latitude  * 10000) / 10000,
+                longitude:       Math.round(longitude * 10000) / 10000,
+                ip_source:       'browser_gps',
+                accuracy_metres: Math.round(pos.coords.accuracy),
+                ip_address:      null  // GPS path — no IP needed
             };
             console.log('[NeumuacFQ Geo] GPS location:', si.locationCache.city, si.locationCache.country,
-                        '(±' + si.locationCache.accuracy + 'm)');
+                        '(±' + si.locationCache.accuracy_metres + 'm)');
+            // Back-fill verified coordinates into the institution record if we have one
+            const instId = STATE.searchIntelligence?.hospitalId;
+            if (instId) {
+                const { latitude: lat, longitude: lon } = si.locationCache;
+                updateInstitutionCoords(instId, lat, lon).catch(() => {});
+            }
             return si.locationCache;
         } catch(geoErr) {
             // User denied or API unavailable — fall through to IP fallback
@@ -7681,12 +7690,14 @@ async function fetchLocationOnce() {
         const d = await res.json();
         if (d && d.city) {
             si.locationCache = {
-                country:   d.country_name || null,
-                region:    d.region       || null,
-                city:      d.city         || null,
-                latitude:  d.latitude     || null,
-                longitude: d.longitude    || null,
-                ip_source: 'ipapi.co'
+                country:         d.country_name || null,
+                region:          d.region       || null,
+                city:            d.city         || null,
+                latitude:        d.latitude     || null,
+                longitude:       d.longitude    || null,
+                ip_source:       'ipapi.co',
+                accuracy_metres: null,             // IP-based — no accuracy
+                ip_address:      d.ip            || null   // store for re-geocoding
             };
             console.log('[NeumuacFQ Geo] IP location:', si.locationCache.city, si.locationCache.country);
         } else {
@@ -7837,14 +7848,17 @@ async function persistSearchEvent(query, isHit, matchedField, matchedVariantId) 
                 matched_variant_id:matchedVariantId || null,
                 session_id:        STATE.searchIntelligence.sessionId,
                 searched_at:       new Date().toISOString(),
-                country:           loc.country   || null,
-                region:            loc.region    || null,
-                city:              loc.city      || null,
-                latitude:          loc.latitude  || null,
-                longitude:         loc.longitude || null,
-                ip_source:         loc.ip_source || null,
-                hospital_name:     hospital
-                // institution_id removed — column not in search_logs schema
+                country:           loc.country        || null,
+                region:            loc.region         || null,
+                city:              loc.city           || null,
+                latitude:          loc.latitude       || null,
+                longitude:         loc.longitude      || null,
+                ip_source:         loc.ip_source      || null,
+                accuracy_metres:   loc.accuracy_metres || null,
+                ip_address:        loc.ip_address     || null,
+                hospital_name:     hospital,
+                institution_id:    STATE.searchIntelligence.hospitalId || null,
+                clinician_name:    STATE.searchIntelligence.clinicianName || null
             })
         });
 
@@ -7874,8 +7888,10 @@ async function persistSearchEvent(query, isHit, matchedField, matchedVariantId) 
                         body: JSON.stringify({
                             query:          normQuery,
                             last_seen_at:   new Date().toISOString(),
-                            top_hospital:   hospital || null
-                            // institution_id removed — not in search_miss_queue schema
+                            top_hospital:   hospital || null,
+                            // unique_sessions and miss_count are auto-incremented by DB trigger
+                            // Pass first_seen_at only on insert (merge-duplicates will ignore it on update)
+                            first_seen_at:  new Date().toISOString()
                         })
                     }
                 );
@@ -8099,13 +8115,13 @@ async function renderGeoTab() {
             // Try with latitude filter first; fall back gracefully if that column
             // doesn't exist yet (Supabase returns 400 for unknown column names)
             let res = await fetch(
-                `${CONFIG.SUPABASE.URL}/rest/v1/search_logs?select=query,is_hit,city,country,region,latitude,longitude,hospital_name,searched_at&latitude=not.is.null&order=searched_at.desc&limit=2000`,
+                `${CONFIG.SUPABASE.URL}/rest/v1/geo_search_enriched?select=query,is_hit,city,country,region,resolved_latitude,resolved_longitude,hospital_name,institution_name,location_tier,ip_source,accuracy_metres,searched_at&resolved_latitude=not.is.null&order=searched_at.desc&limit=5000`,
                 {headers:{'apikey':CONFIG.SUPABASE.KEY,'Authorization':`Bearer ${CONFIG.SUPABASE.KEY}`}}
             );
             if (res.status === 400 || res.status === 404) {
                 // latitude/longitude columns don't exist yet — fetch without geo filter
                 res = await fetch(
-                    `${CONFIG.SUPABASE.URL}/rest/v1/search_logs?select=query,is_hit,city,country,hospital_name,searched_at&order=searched_at.desc&limit=2000`,
+                    `${CONFIG.SUPABASE.URL}/rest/v1/geo_search_enriched?select=query,is_hit,city,country,institution_name,location_tier,ip_source,searched_at&order=searched_at.desc&limit=2000`,
                     {headers:{'apikey':CONFIG.SUPABASE.KEY,'Authorization':`Bearer ${CONFIG.SUPABASE.KEY}`}}
                 );
             }
@@ -8210,6 +8226,17 @@ function geoV5FilteredRows(){
 }
 
 function geoV4BuildPoints(rows){
+    // Normalise rows from geo_search_enriched view (resolved_latitude/longitude)
+    // or legacy search_logs (latitude/longitude). Makes the function robust to both.
+    rows = rows.map(r => ({
+        ...r,
+        latitude:     r.resolved_latitude  ?? r.latitude,
+        longitude:    r.resolved_longitude ?? r.longitude,
+        hospital_name: r.institution_name  || r.hospital_name || null,
+        // location_tier: 1=GPS 2=institution-verified 3=IP-guess
+        location_tier: r.location_tier ?? (r.ip_source === 'browser_gps' ? 1 : 3)
+    }));
+
     const pts=new Map();
     // Raw accumulator for coordinate averaging per city group
     const coordAccum=new Map();
@@ -8336,10 +8363,15 @@ function geoV4RenderMarkers(){
         const displayName = p.hospital || p.city || p.country || 'Unknown';
         const subLabel    = p.hospital && p.city ? p.city + (p.country ? ', ' + p.country : '')
                           : p.country || '';
+        // Location confidence badge (tier 1=GPS, 2=institution-verified, 3=IP-guess)
+        const tier = p.location_tier || 3;
+        const tierLabel = tier === 1 ? '📍 GPS' : tier === 2 ? '✓ Verified' : '~ IP estimate';
+        const tierColor = tier === 1 ? 'rgba(74,222,128,0.9)' : tier === 2 ? 'rgba(96,165,250,0.9)' : 'rgba(251,191,36,0.7)';
         marker.bindTooltip(
             `<strong style="font-size:13px;">${escapeHTML(displayName)}</strong>` +
             (subLabel ? `<br><span style="font-family:var(--font-mono);font-size: 11px;color:rgba(255,255,255,0.5);">${escapeHTML(subLabel)}</span>` : '') +
-            `<br><span style="font-family:var(--font-mono);font-size: 11px;">${p.hits} hits · ${p.misses} misses · ${Math.round(hitRate*100)}%</span>`,
+            `<br><span style="font-family:var(--font-mono);font-size: 11px;">${p.hits} hits · ${p.misses} misses · ${Math.round(hitRate*100)}%</span>` +
+            `<br><span style="font-family:var(--font-mono);font-size: 10px;color:${tierColor};">${tierLabel}${p.accuracy_metres ? ' ±' + p.accuracy_metres + 'm' : ''}</span>`,
             {className:'geo-tooltip',sticky:true}
         );
         marker.on('click',()=>{ st.selectedKey=p.key; geoV4RenderMarkers(); geoV4RenderDetail(p); });
@@ -9280,7 +9312,7 @@ async function exportSearchPDF() {
 
     try {
         const res = await fetch(
-            `${CONFIG.SUPABASE.URL}/rest/v1/search_logs?select=query,is_hit,matched_field,city,hospital_name,searched_at&order=searched_at.desc&limit=300`,
+            `${CONFIG.SUPABASE.URL}/rest/v1/search_logs?select=query,is_hit,matched_field,city,hospital_name,searched_at&order=searched_at.desc&limit=1000`,
             { headers: {'apikey': CONFIG.SUPABASE.KEY, 'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`} }
         );
         const allHistory = res.ok ? await res.json() : [];
@@ -14278,21 +14310,99 @@ async function saveNewInstitution() {
 }
 
 // ---- Update usage count when institution is confirmed ----
-async function updateInstitutionUsage(institutionId) {
+async function updateInstitutionUsage(institutionId, obj) {
     if (!institutionId) return;
     try {
-        // Use RPC-style upsert — increment usage_count and update last_used_at
+        // PATCH last_used_at and latitude/longitude if now available from GPS
+        const patch = { last_used_at: new Date().toISOString() };
+        if (obj?.latitude  && obj.latitude  !== null) patch.latitude  = obj.latitude;
+        if (obj?.longitude && obj.longitude !== null) patch.longitude = obj.longitude;
         await fetch(
             `${CONFIG.SUPABASE.URL}/rest/v1/institutions?id=eq.${institutionId}`,
             {
                 method: 'PATCH',
                 headers: {
-                    'apikey': CONFIG.SUPABASE.KEY,
+                    'apikey':        CONFIG.SUPABASE.KEY,
                     'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`,
-                    'Content-Type': 'application/json',
-                    'Prefer': 'return=minimal'
+                    'Content-Type':  'application/json',
+                    'Prefer':        'return=minimal'
                 },
-                body: JSON.stringify({ last_used_at: new Date().toISOString() })
+                body: JSON.stringify(patch)
+            }
+        );
+        // Increment usage_count in a separate call (Supabase REST doesn't support += natively)
+        await fetch(
+            `${CONFIG.SUPABASE.URL}/rest/v1/rpc/increment_institution_usage`,
+            {
+                method: 'POST',
+                headers: {
+                    'apikey':        CONFIG.SUPABASE.KEY,
+                    'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`,
+                    'Content-Type':  'application/json'
+                },
+                body: JSON.stringify({ p_id: institutionId })
+            }
+        ).catch(() => {}); // non-fatal if RPC not yet deployed
+    } catch(e) { /* non-fatal */ }
+}
+
+// ---- Resolve institution_id via Supabase RPC (fuzzy name match + auto-create) ----
+async function resolveInstitutionId(name, obj) {
+    if (!name || name === 'Anonymous') return null;
+
+    // If we already have an id from the dropdown selection — use it directly
+    if (obj && obj.id) {
+        await updateInstitutionUsage(obj.id, obj);
+        return obj.id;
+    }
+
+    try {
+        // Call the resolve_institution() DB function we created in migration 001
+        // It handles fuzzy matching + auto-create + usage bump atomically
+        const res = await fetch(
+            `${CONFIG.SUPABASE.URL}/rest/v1/rpc/resolve_institution`,
+            {
+                method: 'POST',
+                headers: {
+                    'apikey':        CONFIG.SUPABASE.KEY,
+                    'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`,
+                    'Content-Type':  'application/json'
+                },
+                body: JSON.stringify({
+                    p_name:      name,
+                    p_city:      obj?.city      || null,
+                    p_country:   obj?.country   || null,
+                    p_latitude:  obj?.latitude  || null,
+                    p_longitude: obj?.longitude || null
+                })
+            }
+        );
+        if (!res.ok) throw new Error(`resolve_institution HTTP ${res.status}`);
+        const id = await res.json();   // function returns bigint
+        return id || null;
+    } catch(e) {
+        console.warn('[NeumuacFQ] Institution resolve failed (non-fatal):', e.message);
+        return null;
+    }
+}
+
+// ---- Update institution coordinates after GPS acquisition ----
+// Called when browser GPS fires and we now have accurate coords
+// to back-fill into institutions for future renders.
+async function updateInstitutionCoords(institutionId, latitude, longitude) {
+    if (!institutionId || !latitude || !longitude) return;
+    try {
+        await fetch(
+            `${CONFIG.SUPABASE.URL}/rest/v1/institutions?id=eq.${institutionId}&latitude=is.null`,
+            {
+                method: 'PATCH',
+                headers: {
+                    'apikey':        CONFIG.SUPABASE.KEY,
+                    'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`,
+                    'Content-Type':  'application/json',
+                    'Prefer':        'return=minimal'
+                },
+                body: JSON.stringify({ latitude, longitude })
             }
         );
     } catch(e) { /* non-fatal */ }
@@ -14315,6 +14425,14 @@ function initHospital() {
     if (stored) {
         updateHospitalBadge(stored);
         STATE.searchIntelligence.hospital = stored;
+        // Restore cached institution_id (avoids a DB round-trip on every page load)
+        try {
+            const cachedId = localStorage.getItem('helix_hospital_id_v1');
+            if (cachedId) STATE.searchIntelligence.hospitalId = parseInt(cachedId, 10);
+            // Also restore hospitalObj for coordinate seeding
+            const obj = getStoredHospitalObj();
+            if (obj) STATE.searchIntelligence.hospitalObj = obj;
+        } catch(e) {}
     } else {
         setTimeout(showHospitalModal, 800);
     }
@@ -14334,8 +14452,13 @@ async function confirmHospital() {
     STATE.searchIntelligence.hospitalObj = obj;
     updateHospitalBadge(name);
 
-    // Update usage count in DB
-    if (obj.id) await updateInstitutionUsage(obj.id);
+    // Resolve institution_id via DB fuzzy-match function (non-blocking)
+    resolveInstitutionId(name, obj).then(id => {
+        if (id) {
+            STATE.searchIntelligence.hospitalId = id;
+            try { localStorage.setItem('helix_hospital_id_v1', String(id)); } catch(e) {}
+        }
+    });
 
     const modal = document.getElementById('hospitalModal');
     if (modal) modal.style.display = 'none';
@@ -18538,12 +18661,72 @@ function heliosToggleItem(id) {
 // ================================================================
 
 async function heliosGetClinicianIdentity() {
-    const name = STATE.searchIntelligence?.hospital || null;
-    const stored = localStorage.getItem('helix_hospital_v1') || null;
+    // clinicianName: explicit personal name if set (future: separate input)
+    // Falls back to hospital name → 'Clinician' for backward compat
+    const clinician = STATE.searchIntelligence?.clinicianName || null;
+    const hospital  = STATE.searchIntelligence?.hospital      || null;
+    const stored    = localStorage.getItem('helix_hospital_v1') || null;
+
+    const name = clinician
+        || (stored && stored !== 'Anonymous' ? stored : null)
+        || hospital
+        || 'Clinician';
+
+    // Role: in future pull from a separate role localStorage key
+    const storedRole = (() => { try { return localStorage.getItem('helix_clinician_role_v1') || null; } catch { return null; } })();
+
     return {
-        name: stored && stored !== 'Anonymous' ? stored : (name || 'Clinician'),
-        role: 'Clinician'
+        name,
+        role:       storedRole || 'Clinician',
+        hospital:   stored && stored !== 'Anonymous' ? stored : null,
+        hospitalId: STATE.searchIntelligence?.hospitalId || null
     };
+}
+
+// ================================================================
+// HELIOS OPTIMISTIC LOCKING
+// Uses the helios_claim / helios_release DB functions from migration_001.
+// A 5-minute TTL means stale locks are auto-released even if the tab crashes.
+// ================================================================
+
+async function heliosClaimItem(itemId, clinicianName) {
+    try {
+        const res = await fetch(
+            `${CONFIG.SUPABASE.URL}/rest/v1/rpc/helios_claim`,
+            {
+                method: 'POST',
+                headers: {
+                    'apikey':        CONFIG.SUPABASE.KEY,
+                    'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`,
+                    'Content-Type':  'application/json'
+                },
+                body: JSON.stringify({ p_item_id: itemId, p_clinician: clinicianName })
+            }
+        );
+        if (!res.ok) return false;
+        const row = await res.json();
+        return row !== null;  // null = someone else holds the lock
+    } catch(e) {
+        console.warn('[Helios] Claim failed (non-fatal):', e.message);
+        return true;  // fail open — don't block curator if DB call fails
+    }
+}
+
+async function heliosReleaseItem(itemId, clinicianName) {
+    try {
+        await fetch(
+            `${CONFIG.SUPABASE.URL}/rest/v1/rpc/helios_release`,
+            {
+                method: 'POST',
+                headers: {
+                    'apikey':        CONFIG.SUPABASE.KEY,
+                    'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`,
+                    'Content-Type':  'application/json'
+                },
+                body: JSON.stringify({ p_item_id: itemId, p_clinician: clinicianName })
+            }
+        );
+    } catch(e) { /* non-fatal */ }
 }
 
 // ================================================================
@@ -18666,10 +18849,17 @@ async function heliosApprove(itemId) {
     const item = HELIOS.pendingItems.find(i => i.id === itemId);
     if (!item) return;
 
+    // ── Optimistic lock: claim the item before processing ──
+    const clinician = await heliosGetClinicianIdentity();
+    const claimed = await heliosClaimItem(itemId, clinician.name);
+    if (!claimed) {
+        showNotification('This item is currently being reviewed by another clinician — please try again in a moment.', 'warning', 5000);
+        return;
+    }
+
     // ── Feedback loop ──
     heliosFeedbackRecord(item, 'approved');
 
-    const clinician = await heliosGetClinicianIdentity();
     const note = document.getElementById(`hnote-${itemId}`)?.value?.trim() || '';
 
     await heliosSetItemStatus(itemId, 'approved', clinician.name, clinician.role, note);
