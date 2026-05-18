@@ -2204,7 +2204,7 @@
         .gap-rec { font-size: 11px; color:var(--text-secondary); display:flex; align-items:center; gap:5px; }
         .gap-rec::before { content:''; width:4px; height:4px; border-radius:50%; background:var(--text-tertiary); flex-shrink:0; }
 
-        /* ---- Hospital onboarding modal ---- */
+        /* ---- Hospital onboarding modal — redesigned ---- */
         .hospital-modal-overlay {
             position: fixed; inset: 0; z-index: 99995;
             background: rgba(4,8,15,0.92);
@@ -2212,29 +2212,135 @@
             backdrop-filter: blur(8px);
         }
         .hospital-modal {
-            background: #0a1220; border: 1px solid rgba(99,140,210,0.25);
-            border-radius: 16px; padding: 32px 36px; width: 440px;
-            box-shadow: 0 24px 64px rgba(0,5,20,0.8);
+            background: #0a1220; border: 1px solid rgba(99,140,210,0.22);
+            border-radius: 18px; padding: 32px 32px 28px; width: 460px; max-width: 95vw;
+            box-shadow: 0 32px 72px rgba(0,5,20,0.85), 0 0 0 1px rgba(41,121,255,0.06);
         }
         .hospital-modal-logo-img { text-align:center; padding: 12px 0 4px; }
-
         .hospital-modal-sub {
             font-size: 11px; color: #5a7aaa; letter-spacing: .12em;
             text-transform: uppercase; margin-bottom: 24px;
         }
         .hospital-modal h3 {
-            font-size: 15px; font-weight: 600; color: #f0f6ff; margin-bottom: 6px;
+            font-size: 17px; font-weight: 700; color: #f0f6ff; margin-bottom: 6px;
         }
         .hospital-modal p {
             font-size: 12px; color: #9ab8e0; line-height: 1.6; margin-bottom: 20px;
         }
+
+        /* ── New dropdown-based selector ── */
+        .inst-selector-wrap {
+            position: relative;
+            margin-bottom: 14px;
+        }
+        .inst-selector-trigger {
+            display: flex; align-items: center; gap: 10px;
+            width: 100%; height: 46px; padding: 0 14px;
+            background: rgba(4,8,15,0.7);
+            border: 1.5px solid rgba(99,140,210,0.25);
+            border-radius: 10px; color: #f0f6ff; font-size: 13px;
+            font-family: var(--font-body); cursor: pointer;
+            transition: border-color .2s, box-shadow .2s;
+            box-sizing: border-box;
+        }
+        .inst-selector-trigger:hover { border-color: rgba(41,121,255,0.45); }
+        .inst-selector-trigger.open {
+            border-color: rgba(41,121,255,0.6);
+            border-bottom-left-radius: 0; border-bottom-right-radius: 0;
+            box-shadow: 0 0 0 3px rgba(41,121,255,0.08);
+        }
+        .inst-selector-trigger .inst-trigger-icon {
+            color: #4a6a99; font-size: 13px; flex-shrink: 0;
+        }
+        .inst-selector-trigger .inst-trigger-label {
+            flex: 1; text-align: left; overflow: hidden;
+            text-overflow: ellipsis; white-space: nowrap;
+        }
+        .inst-selector-trigger .inst-trigger-label.placeholder { color: #5a7aaa; }
+        .inst-selector-trigger .inst-trigger-arrow {
+            color: #4a6a99; font-size: 11px; flex-shrink: 0;
+            transition: transform .2s;
+        }
+        .inst-selector-trigger.open .inst-trigger-arrow { transform: rotate(180deg); }
+
+        /* Dropdown panel */
+        .inst-dropdown {
+            display: none; position: absolute; left: 0; right: 0; z-index: 20;
+            background: #0b1628;
+            border: 1.5px solid rgba(41,121,255,0.3);
+            border-top: none;
+            border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;
+            box-shadow: 0 16px 40px rgba(0,5,20,0.7);
+            overflow: hidden;
+        }
+        .inst-dropdown.open { display: block; }
+
+        /* Search bar inside dropdown */
+        .inst-search-bar {
+            display: flex; align-items: center; gap: 8px;
+            padding: 10px 14px; border-bottom: 1px solid rgba(99,140,210,0.12);
+            background: rgba(0,0,0,0.25);
+        }
+        .inst-search-bar i { color: #4a6a99; font-size: 12px; flex-shrink: 0; }
+        .inst-search-input {
+            flex: 1; background: transparent; border: none; outline: none;
+            color: #f0f6ff; font-size: 13px; font-family: var(--font-body);
+        }
+        .inst-search-input::placeholder { color: #4a6a99; }
+        .inst-search-clear {
+            background: none; border: none; color: #4a6a99; cursor: pointer;
+            font-size: 12px; padding: 2px 4px; display: none;
+            transition: color .15s;
+        }
+        .inst-search-clear.visible { display: block; }
+        .inst-search-clear:hover { color: #9ab8e0; }
+
+        /* Results list */
+        .inst-list {
+            max-height: 240px; overflow-y: auto;
+        }
+        .inst-list::-webkit-scrollbar { width: 4px; }
+        .inst-list::-webkit-scrollbar-track { background: transparent; }
+        .inst-list::-webkit-scrollbar-thumb { background: rgba(99,140,210,0.2); border-radius: 2px; }
+
+        /* Country header */
+        .inst-country-header {
+            padding: 5px 14px 3px;
+            font-size: 10px; font-weight: 700; letter-spacing: .1em;
+            text-transform: uppercase; color: #3a4a6a;
+            background: rgba(0,0,0,0.3);
+            position: sticky; top: 0; z-index: 1;
+        }
+        /* Institution row */
+        .inst-row {
+            display: flex; align-items: center; gap: 9px;
+            padding: 9px 14px; cursor: pointer;
+            border-bottom: 1px solid rgba(99,140,210,0.06);
+            transition: background .12s;
+        }
+        .inst-row:last-child { border-bottom: none; }
+        .inst-row:hover, .inst-row.highlighted { background: rgba(41,121,255,0.1); }
+        .inst-row.selected { background: rgba(41,121,255,0.15); }
+        .inst-row-icon { color: #4a6a99; font-size: 11px; width: 13px; flex-shrink: 0; }
+        .inst-row-body { flex: 1; min-width: 0; }
+        .inst-row-name { font-size: 12.5px; color: #e8f2ff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .inst-row-name em { color: #60a5fa; font-style: normal; }
+        .inst-row-city { font-size: 11px; color: #5a7aaa; margin-top: 1px; }
+        .inst-row-verified { color: #34d399; font-size: 11px; flex-shrink: 0; }
+        .inst-row-count { font-size: 10px; color: #2a3a5a; font-family: var(--font-mono); flex-shrink: 0; }
+        .inst-empty {
+            padding: 20px 14px; text-align: center; font-size: 12px; color: #5a7aaa;
+        }
+        .inst-empty a { color: #60a5fa; cursor: pointer; }
+
+        /* Legacy aliases kept for backward compat */
         .hospital-input-wrap { position: relative; margin-bottom: 10px; }
         .hospital-input {
             width: 100%; height: 42px; padding: 0 12px;
             background: rgba(4,8,15,0.8); border: 1.5px solid rgba(99,140,210,0.25);
             border-radius: 8px; color: #f0f6ff; font-size: 13px;
             font-family: var(--font-body); outline: none;
-            transition: border-color .2s;
+            transition: border-color .2s; box-sizing: border-box;
         }
         .hospital-input:focus { border-color: rgba(41,121,255,0.6); }
         .hospital-input::placeholder { color: #5a7aaa; }
@@ -2250,18 +2356,20 @@
         }
         .hospital-suggestion:last-child { border-bottom: none; }
         .hospital-suggestion:hover { background: rgba(41,121,255,0.1); color: #f0f6ff; }
+
         .hospital-confirm-btn {
-            width: 100%; height: 42px; background: #2979ff;
-            border: none; border-radius: 8px; color: white;
+            width: 100%; height: 44px; background: #2979ff;
+            border: none; border-radius: 10px; color: white;
             font-size: 13px; font-weight: 600; cursor: pointer;
-            font-family: var(--font-body); margin-top: 14px;
-            transition: background .15s;
+            font-family: var(--font-body); margin-top: 6px;
+            transition: background .15s, opacity .15s;
+            display: flex; align-items: center; justify-content: center; gap: 7px;
         }
         .hospital-confirm-btn:hover { background: #1a5fd9; }
-        .hospital-confirm-btn:disabled { background: rgba(41,121,255,0.3); cursor: default; }
+        .hospital-confirm-btn:disabled { background: rgba(41,121,255,0.25); cursor: default; opacity: .7; }
         .hospital-skip {
-            text-align: center; margin-top: 12px; font-size: 11px;
-            color: #5a7aaa; cursor: pointer; text-decoration: underline;
+            text-align: center; margin-top: 14px; font-size: 11px;
+            color: #4a5a7a; cursor: pointer;
         }
         .hospital-skip:hover { color: #9ab8e0; }
         .hospital-badge {
@@ -5128,27 +5236,34 @@
             </div>
         </div>
 
-        <!-- Search input -->
-        <div class="hospital-input-wrap">
-            <input
-                type="text"
-                id="hospitalInput"
-                class="hospital-input"
-                placeholder="Search by hospital name or city…"
-                aria-label="Search institutions"
-                autocomplete="off"
-                oninput="filterHospitalSuggestions(this.value)"
-                style="font-size:14px;padding:10px 14px 10px 38px;"
-            >
-            <div class="hospital-suggestions hidden" id="hospitalSuggestions"></div>
-        </div>
-
-        <!-- Country-grouped institution list -->
-        <div id="hospitalGroupedList" style="max-height:260px;overflow-y:auto;margin-bottom:12px;border:1px solid rgba(99,140,210,0.15);border-radius:8px;background:rgba(4,8,15,0.5);">
-            <div style="padding:20px;text-align:center;font-size:12px;color:#5a7aaa;">
-                <i class="fas fa-spinner fa-spin" style="margin-right:6px;"></i>Loading institutions…
+        <!-- Dropdown selector (redesigned) -->
+        <div class="inst-selector-wrap" id="instSelectorWrap">
+            <div class="inst-selector-trigger" id="instTrigger" onclick="instToggleDropdown()" tabindex="0">
+                <i class="fas fa-hospital-alt inst-trigger-icon"></i>
+                <span class="inst-trigger-label placeholder" id="instTriggerLabel">Select your CF centre…</span>
+                <i class="fas fa-chevron-down inst-trigger-arrow" id="instArrow"></i>
+            </div>
+            <div class="inst-dropdown" id="instDropdown">
+                <div class="inst-search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="instSearchInput" class="inst-search-input"
+                        placeholder="Search by name or city…" autocomplete="off"
+                        oninput="instOnSearch(this.value)">
+                    <button class="inst-search-clear" id="instSearchClear" onclick="instClearSearch()" title="Clear">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="inst-list" id="instList">
+                    <div class="inst-empty">
+                        <i class="fas fa-spinner fa-spin" style="margin-right:5px;"></i>Loading institutions…
+                    </div>
+                </div>
             </div>
         </div>
+        <!-- Legacy compat stubs -->
+        <input type="hidden" id="hospitalInput">
+        <div class="hospital-suggestions hidden" id="hospitalSuggestions"></div>
+        <div id="hospitalGroupedList" style="display:none;"></div>
 
         <!-- "Not in list?" — new institution form (hidden by default) -->
         <div id="hospitalNewForm" style="display:none;background:rgba(41,121,255,0.05);border:1px solid rgba(41,121,255,0.18);border-radius:10px;padding:14px;margin-bottom:12px;">
@@ -15177,6 +15292,153 @@ function filterHospitalSuggestions(val) {
     renderHospitalSuggestions(filtered);
 }
 
+
+// ══════════════════════════════════════════════════════════════
+//  NEW DROPDOWN INSTITUTION SELECTOR — instXxx namespace
+// ══════════════════════════════════════════════════════════════
+
+const TYPE_ICON_MAP = { hospital: 'fa-hospital', research: 'fa-flask', university: 'fa-graduation-cap', lab: 'fa-microscope', other: 'fa-building' };
+
+let _instDropdownOpen = false;
+let _instSelectedInst = null;
+
+function instToggleDropdown() {
+    _instDropdownOpen ? instCloseDropdown() : instOpenDropdown();
+}
+
+function instOpenDropdown() {
+    _instDropdownOpen = true;
+    document.getElementById('instTrigger')?.classList.add('open');
+    document.getElementById('instDropdown')?.classList.add('open');
+    setTimeout(() => document.getElementById('instSearchInput')?.focus(), 60);
+    // Close on outside click
+    setTimeout(() => document.addEventListener('click', instOutsideClick), 10);
+}
+
+function instCloseDropdown() {
+    _instDropdownOpen = false;
+    document.getElementById('instTrigger')?.classList.remove('open');
+    document.getElementById('instDropdown')?.classList.remove('open');
+    document.removeEventListener('click', instOutsideClick);
+}
+
+function instOutsideClick(e) {
+    const wrap = document.getElementById('instSelectorWrap');
+    if (wrap && !wrap.contains(e.target)) instCloseDropdown();
+}
+
+function instOnSearch(val) {
+    const clearBtn = document.getElementById('instSearchClear');
+    if (clearBtn) clearBtn.classList.toggle('visible', val.length > 0);
+    instRenderList(_institutionsCache || [], val.trim());
+}
+
+function instClearSearch() {
+    const input = document.getElementById('instSearchInput');
+    if (input) { input.value = ''; input.focus(); }
+    const clearBtn = document.getElementById('instSearchClear');
+    if (clearBtn) clearBtn.classList.remove('visible');
+    instRenderList(_institutionsCache || [], '');
+}
+
+function highlight(text, query) {
+    if (!query) return escapeHTML(text);
+    const idx = text.toLowerCase().indexOf(query.toLowerCase());
+    if (idx === -1) return escapeHTML(text);
+    return escapeHTML(text.slice(0, idx)) +
+        '<em>' + escapeHTML(text.slice(idx, idx + query.length)) + '</em>' +
+        escapeHTML(text.slice(idx + query.length));
+}
+
+function instRenderList(institutions, filter) {
+    const el = document.getElementById('instList');
+    if (!el) return;
+
+    const list = filter
+        ? institutions.filter(i =>
+            i.name.toLowerCase().includes(filter.toLowerCase()) ||
+            (i.city||'').toLowerCase().includes(filter.toLowerCase()) ||
+            (i.country||'').toLowerCase().includes(filter.toLowerCase()))
+        : institutions;
+
+    if (!list.length) {
+        el.innerHTML = `<div class="inst-empty">No results — <a onclick="showNewInstitutionForm();instCloseDropdown()">register yours</a></div>`;
+        return;
+    }
+
+    // Group by country
+    const byCountry = new Map();
+    list.forEach(i => {
+        const c = i.country || 'Other';
+        if (!byCountry.has(c)) byCountry.set(c, []);
+        byCountry.get(c).push(i);
+    });
+    const countries = [...byCountry.keys()].sort((a, b) => {
+        if (a === 'Spain') return -1; if (b === 'Spain') return 1;
+        return a.localeCompare(b);
+    });
+
+    if (!window._instLookup) window._instLookup = {};
+
+    el.innerHTML = countries.map(country => {
+        const insts = byCountry.get(country);
+        const rows = insts.map(i => {
+            const key = 'inst_dd_' + (i.id || i.name.replace(/\W/g,'_'));
+            window._instLookup[key] = i;
+            const icon = TYPE_ICON_MAP[i.institution_type] || 'fa-building';
+            const isSelected = _instSelectedInst && (_instSelectedInst.id === i.id && i.id) || (_instSelectedInst && _instSelectedInst.name === i.name);
+            return `<div class="inst-row${isSelected ? ' selected' : ''}" onclick="instSelect('${key}')">
+                <i class="fas ${icon} inst-row-icon"></i>
+                <div class="inst-row-body">
+                    <div class="inst-row-name">${highlight(i.name, filter)}</div>
+                    ${i.city ? `<div class="inst-row-city">${escapeHTML(i.city)}</div>` : ''}
+                </div>
+                ${i.is_verified ? '<i class="fas fa-check-circle inst-row-verified" title="Verified"></i>' : ''}
+                <span class="inst-row-count">${i.usage_count||1}×</span>
+            </div>`;
+        }).join('');
+        return `<div class="inst-country-header">${escapeHTML(country)} <span style="opacity:.5;font-weight:400;">(${insts.length})</span></div>${rows}`;
+    }).join('');
+}
+
+function instSelect(key) {
+    const inst = window._instLookup && window._instLookup[key];
+    if (!inst) return;
+    _instSelectedInst = inst;
+    // Update trigger label
+    const label = document.getElementById('instTriggerLabel');
+    if (label) {
+        label.textContent = inst.name;
+        label.classList.remove('placeholder');
+    }
+    // Update icon in trigger
+    const icon = document.getElementById('instTrigger')?.querySelector('.inst-trigger-icon');
+    if (icon) {
+        const t = TYPE_ICON_MAP[inst.institution_type] || 'fa-building';
+        icon.className = `fas ${t} inst-trigger-icon`;
+    }
+    // Close dropdown
+    instCloseDropdown();
+    // Re-render to show selected state
+    const searchVal = document.getElementById('instSearchInput')?.value || '';
+    instRenderList(_institutionsCache || [], searchVal);
+    // Delegate to existing selection logic
+    selectInstitutionFromList(JSON.stringify(inst));
+    // Enable confirm button
+    const btn = document.getElementById('hospitalConfirmBtn');
+    if (btn) btn.disabled = false;
+}
+
+// Hook renderInstitutionGroupedList to also refresh new UI
+const _origRenderGrouped = typeof renderInstitutionGroupedList === 'function' ? renderInstitutionGroupedList : null;
+function renderInstitutionGroupedListPatched(institutions, filter) {
+    // still call old renderer so legacy code stays happy
+    if (_origRenderGrouped) _origRenderGrouped(institutions, filter);
+    // also refresh new dropdown list
+    instRenderList(institutions, filter || '');
+}
+
+
 function renderHospitalSuggestions(list) {
     const el = document.getElementById('hospitalSuggestions');
     if (!el) return;
@@ -15382,8 +15644,8 @@ async function showHospitalModal() {
     // Load from DB
     const institutions = await loadInstitutionsFromDB();
     renderInstitutionGroupedList(institutions, null);
-    const input = document.getElementById('hospitalInput');
-    if (input) setTimeout(() => input.focus(), 100);
+    instRenderList(institutions, '');
+    setTimeout(() => document.getElementById('instSearchInput')?.focus(), 100);
 }
 
 function initHospital() {
