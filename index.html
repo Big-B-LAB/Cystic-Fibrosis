@@ -2894,29 +2894,27 @@
         .app-main::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 6px; }
 
         .main-inner {
-            max-width: 1200px;
-            margin: 0 auto;
+            max-width: 100%;
+            margin: 0;
             padding: 24px;
         }
 
-        /* ── Wide-screen layout — hospital monitors (1440p / 4K) ── */
+        /* ── Wide-screen layout — hospital monitors ── */
+        @media (min-width: 1280px) {
+            :root { --sidebar-width: 340px; }
+            .main-inner { padding: 24px 28px; }
+        }
+
         @media (min-width: 1440px) {
-            :root {
-                --sidebar-width: 360px;
-            }
-            .main-inner {
-                max-width: 1400px;
-                padding: 28px 32px;
-            }
-            .detail-grid {
-                grid-template-columns: 1fr 1fr 1fr !important;
-            }
-            .nomenclature-row {
-                grid-template-columns: 1fr 1fr 1fr 1fr !important;
-            }
-            #heliosPanel {
-                width: 700px !important;
-            }
+            :root { --sidebar-width: 360px; }
+            .main-inner { padding: 26px 32px; }
+            .detail-grid { grid-template-columns: 1fr 1fr 1fr !important; }
+            .nomenclature-row { grid-template-columns: 1fr 1fr 1fr 1fr !important; }
+        }
+
+        @media (min-width: 1600px) {
+            :root { --sidebar-width: 380px; }
+            .main-inner { padding: 28px 36px; }
         }
 
         @media (min-width: 1920px) {
