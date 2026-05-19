@@ -240,7 +240,7 @@
             --info-bg: rgba(96,165,250,0.08);
 
             /* Layout */
-            --sidebar-width: 320px;
+            --sidebar-width: 320px; /* scales up at 1440p+ via media queries */
             --sidebar-collapsed: 56px;
             --header-height: 56px;
             --transition: 220ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -2894,9 +2894,74 @@
         .app-main::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 6px; }
 
         .main-inner {
-            max-width: 1100px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 24px;
+        }
+
+        /* ── Wide-screen layout — hospital monitors (1440p / 4K) ── */
+        @media (min-width: 1440px) {
+            :root {
+                --sidebar-width: 360px;
+            }
+            .main-inner {
+                max-width: 1400px;
+                padding: 28px 32px;
+            }
+            .detail-grid {
+                grid-template-columns: 1fr 1fr 1fr !important;
+            }
+            .nomenclature-row {
+                grid-template-columns: 1fr 1fr 1fr 1fr !important;
+            }
+            #heliosPanel {
+                width: 700px !important;
+            }
+        }
+
+        @media (min-width: 1920px) {
+            :root {
+                --sidebar-width: 400px;
+            }
+            .main-inner {
+                max-width: 1680px;
+                padding: 32px 40px;
+            }
+            .detail-grid {
+                grid-template-columns: 1fr 1fr 1fr !important;
+            }
+            .report-grid-2,
+            .rpt-grid-2 {
+                grid-template-columns: 1fr 1fr 1fr !important;
+            }
+            /* Helios inbox — 2 column layout on large screens */
+            #heliosInboxList {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                gap: 10px !important;
+                align-items: start !important;
+            }
+            /* Keep greeting + filters full width above the grid */
+            .helios-greeting,
+            .helios-filter-row {
+                grid-column: 1 / -1 !important;
+            }
+        }
+
+        @media (min-width: 2560px) {
+            :root {
+                --sidebar-width: 440px;
+            }
+            .main-inner {
+                max-width: 2000px;
+                padding: 36px 48px;
+            }
+            .field-grid {
+                grid-template-columns: 1fr 1fr 1fr !important;
+            }
+            .helios-card-body {
+                max-height: 700px !important;
+            }
         }
 
         /* ============================================================
