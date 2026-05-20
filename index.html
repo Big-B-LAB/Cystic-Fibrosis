@@ -166,6 +166,11 @@
 .pop-acmg.ba1 { background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#ef4444; }
 .pop-acmg.pm2 { background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);color:#22c55e; }
 .pop-freq-empty { padding:16px 0; }
+/* Variant name validator hints */
+.field-hint-error,.field-hint-warning{font-size:11px;line-height:1.5;margin-top:4px;padding:5px 8px;border-radius:0 4px 4px 0;}
+.field-hint-error{background:rgba(248,113,113,.08);border-left:2px solid #f87171;color:#f87171;}
+.field-hint-warning{background:rgba(251,191,36,.07);border-left:2px solid #fbbf24;color:#fbbf24;}
+
 
 /* Item 10 — Skip link */
 .skip-link { position:absolute;top:-40px;left:0;background:var(--brand);color:#fff;padding:8px 16px;font-size:13px;font-weight:600;z-index:100000;border-radius:0 0 8px 0;transition:top .2s ease;text-decoration:none; }
@@ -9737,11 +9742,11 @@ async function confirmWriteMode() {
         } else {
             // 404 = migration_002 not yet deployed; fail open with local fallback
             console.warn('[NeumuacFQ] check_write_pin RPC not deployed — run migration_002.sql. Using local fallback.');
-            pinVerified = (entered === CONFIG.WRITE_CODE);
+            pinVerified = await verifyPin(entered) // ITEM 8: hash-based, no plaintext;
         }
     } catch(e) {
         console.warn('[NeumuacFQ] PIN RPC error:', e.message);
-        pinVerified = (entered === CONFIG.WRITE_CODE);
+        pinVerified = await verifyPin(entered) // ITEM 8: hash-based, no plaintext;
     }
 
     if (btn) btn.disabled = false;
@@ -9921,6 +9926,7 @@ async function loadVariants() {
         if (window.NeumuacFQ) {
             window.NeumuacFQ.config = CONFIG;
             window.NeumuacFQ.state  = STATE;
+    window.NeumuacFQ.fn.validateVariantName = VariantNameValidator; // Nomenclature validator
     window.NeumuacFQ.fn.hashPin       = hashPin;       // ITEM 8
     window.NeumuacFQ.fn.auditContrast = auditContrast; // ITEM 10
     window.NeumuacFQ.fn.contrastRatio = contrastRatio; // ITEM 10
@@ -10023,9 +10029,17 @@ function buildSearchIndex() {
         const positions = nameStr.match(/\d{3,}/g) || [];
         positions.forEach(pos => addKey(pos, v.id));
         // Index nucleotide changes — c.1521_1523del, c.1652G>A etc
+        // FIX 2: also index the del-only form stripping nucleotide suffix (delCTT→del)
+        // so c.1521_1523delCTT and c.1521_1523del both resolve to the same variant.
         if (v.cdna_name) {
             const cdnaStripped = v.cdna_name.replace(/^c\./, '').toLowerCase();
             addKey(cdnaStripped, v.id);
+            // Strip nucleotide suffix after del/ins/dup: delCTT→del, insAGT→ins
+            const cdnaDelOnly = cdnaStripped.replace(/(del|ins|dup)[acgt]+$/i, '$1');
+            if (cdnaDelOnly !== cdnaStripped) addKey(cdnaDelOnly, v.id);
+            // Also index without underscore range: 1521_1523del → 1521del (shorthand)
+            const cdnaShorthand = cdnaStripped.replace(/_(\d+)(del|ins|dup)/, '$2');
+            if (cdnaShorthand !== cdnaStripped) addKey(cdnaShorthand, v.id);
         }
         // FIX #4 — Index clinical classification terms clinicians type naturally:
         //   "CF-causing", "VUS", "Non CF-causing", "exceptional", "atypical"
@@ -10054,7 +10068,731 @@ function buildSearchIndex() {
 // ════════════════════════════════════════════════════════════════════════
 // ITEM 2 — NOMENCLATURE NORMALIZATION
 // WHERE TO INSERT: After the search index builder (~line 8327).
-//   Search for: "// ========== SEARCH v2 — SCORED, FUZZY + PHONETIC MATCH =========="
+//   Search for: "
+
+// ════ NeumuacFQ VARIANT NAME VALIDATOR ════
+// ════════════════════════════════════════════════════════════════════════
+// NeumuacFQ — VARIANT NAME VALIDATOR
+// WHERE TO INSERT: After buildSearchIndex() and before SEARCH v2.
+//   Search for: "// ========== SEARCH v2 — SCORED, FUZZY"
+//   Insert this entire block immediately BEFORE that line.
+//
+// WHAT IT DOES:
+//   Catches typos, copy-paste artifacts, and HGVS rule violations
+//   at the moment of entry — before bad data reaches the database.
+//   Covers: subscript/superscript chars, footnote markers, Unicode
+//   arrows, Greek letters, case violations, range delimiter errors,
+//   missing prefixes, trailing artifacts like the "b" in 1078delTb.
+//
+// THREE INTEGRATION POINTS (wiring instructions at bottom of file):
+//   1. Manual entry form — inline hints on each name field
+//   2. previewImportBatch — adds nomenclature column to import preview
+//   3. Annotation modal — validates when editing legacy/protein/cDNA fields
+// ════════════════════════════════════════════════════════════════════════
+
+// ── All valid 3-letter amino acid codes (HGVS CamelCase) ────────────
+const HGVS_AA3 = new Set([
+    'Ala','Arg','Asn','Asp','Cys','Gln','Glu','Gly',
+    'His','Ile','Leu','Lys','Met','Phe','Pro','Ser',
+    'Thr','Trp','Tyr','Val','Ter',
+]);
+
+// ── All valid DNA/RNA nucleotide characters ──────────────────────────
+const DNA_BASES = /^[ACGTU]+$/;
+
+const VariantNameValidator = Object.freeze({
+
+    // ════════════════════════════════════════════════════════════════
+    // ARTIFACT DETECTION
+    // Catches characters that should never appear in a variant name —
+    // typically introduced by copy-pasting from PDFs, Word, or papers.
+    // ════════════════════════════════════════════════════════════════
+
+    ARTIFACT_PATTERNS: [
+        // ── Subscript / superscript Unicode ──────────────────────────
+        {
+            id:      'subscript_digit',
+            pattern: /[\u2080-\u2089]/,
+            label:   'Subscript digit (₀–₉)',
+            detail:  'Likely copy-pasted from a PDF. Strip the subscript characters.',
+            fix:     raw => raw.replace(/[\u2080-\u2089]/g, c =>
+                String.fromCharCode(c.charCodeAt(0) - 0x2080 + 48)),
+        },
+        {
+            id:      'superscript_digit',
+            pattern: /[\u2070-\u2079\u00B9\u00B2\u00B3]/,
+            label:   'Superscript digit (⁰–⁹)',
+            detail:  'Footnote number from a paper. Should be stripped.',
+            fix:     raw => raw.replace(/[\u2070-\u2079\u00B9\u00B2\u00B3]/g, c => ({
+                '\u00B9':'1','\u00B2':'2','\u00B3':'3',
+                '\u2074':'4','\u2075':'5','\u2076':'6',
+                '\u2077':'7','\u2078':'8','\u2079':'9','\u2070':'0',
+            }[c] || '')),
+        },
+        {
+            id:      'superscript_letter',
+            pattern: /[\u1D43-\u1D46\u1D48-\u1D49\u1D4B-\u1D4D\u1D4F-\u1D51\u1D53-\u1D5C\u02AA-\u02B8\u00AA\u00BA]/,
+            label:   'Superscript letter',
+            detail:  'Likely a superscript footnote label (ᵃ, ᵇ, ᶜ...) from a paper.',
+            fix:     raw => raw.replace(/[\u1D43-\u1D5C\u02AA-\u02B8\u00AA\u00BA]/g, ''),
+        },
+        {
+            id:      'subscript_letter',
+            pattern: /[\u2090-\u2094]/,
+            label:   'Subscript letter (ₐ, ₑ, ₒ...)',
+            detail:  'Subscript letter from copy-paste. Should be stripped.',
+            fix:     raw => raw.replace(/[\u2090-\u2094]/g, ''),
+        },
+
+        // ── Arrows — should be '>' in substitution notation ──────────
+        {
+            id:      'unicode_arrow',
+            pattern: /[\u2190-\u21FF]/,
+            label:   'Unicode arrow (→, ←, ↑)',
+            detail:  'Use ">" for nucleotide substitutions, not arrow characters.',
+            fix:     raw => raw.replace(/[\u2192\u21D2\u2794\u27A1]/g, '>') // → ⇒ ➔ ➡
+                               .replace(/[\u2190-\u21FF]/g, '>'),
+        },
+
+        // ── Greek letters ─────────────────────────────────────────────
+        {
+            id:      'greek_delta',
+            pattern: /[δΔ]/,
+            label:   'Greek delta (δ/Δ)',
+            detail:  'Use "del" not δ/Δ — e.g. F508del, not ΔF508.',
+            fix:     raw => raw.replace(/[δΔ]/g, 'del')
+                               .replace(/^del([A-Z])(\d+)$/, '$1$2del'), // ΔF508 → F508del
+        },
+        {
+            id:      'greek_other',
+            pattern: /[\u03B1-\u03C9\u0391-\u03A9]/.source.replace('δΔ',''),
+            label:   'Greek letter',
+            detail:  'Greek characters should be written as Latin equivalents in HGVS.',
+            fix:     raw => raw.replace(/[\u03B1-\u03C9\u0391-\u03A9]/g, ''),
+        },
+
+        // ── Footnote and typographic symbols ─────────────────────────
+        {
+            id:      'footnote_symbol',
+            pattern: /[†‡§¶*°]/,
+            label:   'Footnote/typographic symbol (†, ‡, §, °, *)',
+            detail:  'Footnote marker copy-pasted from a table or paper. Strip it.',
+            fix:     raw => raw.replace(/[†‡§¶°]/g, '').replace(/\*$/, ''),
+        },
+
+        // ── Smart/curly quotes ────────────────────────────────────────
+        {
+            id:      'curly_quotes',
+            pattern: /[''""]/,
+            label:   'Smart quote (\u2018\u2019\u201C\u201D)',
+            detail:  'Smart quotes from Word/Pages. Replace with standard ASCII quotes or strip.',
+            fix:     raw => raw.replace(/[''""]/g, ''),
+        },
+
+        // ── Non-breaking and zero-width spaces ────────────────────────
+        {
+            id:      'invisible_chars',
+            pattern: /[\u00A0\u200B\u200C\u200D\uFEFF]/,
+            label:   'Invisible character (non-breaking or zero-width space)',
+            detail:  'Invisible spacing character from copy-paste. Strip it.',
+            fix:     raw => raw.replace(/[\u00A0\u200B\u200C\u200D\uFEFF]/g, ''),
+        },
+
+        // ── En/em dash used instead of underscore in ranges ──────────
+        {
+            id:      'dash_range',
+            pattern: /\d[\u2013\u2014]\d/,
+            label:   'En/em dash in range (–, —)',
+            detail:  'Use underscore _ for position ranges: c.1521_1523del not c.1521–1523del.',
+            fix:     raw => raw.replace(/[\u2013\u2014]/g, '_'),
+        },
+
+        // ── CRITICAL: Trailing ASCII artifact after DNA bases ─────────
+        // This catches "1078delTb" — lowercase non-DNA letter after del[ACGT]+
+        // The lowercase letter is a subscript footnote that pasted as ASCII.
+        {
+            id:      'del_trailing_artifact',
+            // Case-sensitive [A-Z] for DNA bases so delCTT doesn't false-fire.
+            // The [a-z]+ (lowercase-only, no /i) catches the artifact 'b' in 1078delTb.
+            pattern: /(del|ins|dup)[A-Z]+[a-z]+$/,
+            label:   'Trailing artifact after deletion/insertion',
+            detail:  'Looks like a subscript footnote (e.g. "b" in "1078delTb") that was pasted as regular text. Strip the trailing lowercase letter(s).',
+            fix:     raw => raw.replace(/(del|ins|dup)([A-Z]+)([a-z]+)$/g,
+                (_, op, bases, artifact) => op + bases),
+                // Strips the trailing lowercase artifact (the 'b' in 1078delTb)
+        },
+
+        // ── Trailing digits that look like footnote numbers ───────────
+        // G551D2 — the '2' is footnote, not part of the variant
+        // BUT: only flag when digits follow a letter at the very end
+        // (not for things like c.1652G>A2 which is invalid anyway)
+        {
+            id:      'trailing_footnote_digit',
+            pattern: /[A-Za-z]\d+$/,
+            label:   'Trailing digit (possible footnote number)',
+            detail:  'Digit at the end of a name ending in a letter — could be a footnote number from a paper.',
+            // Don't auto-fix this one — could be part of the name (e.g. "G551D1" is unusual but possible)
+            fix:     null,
+        },
+    ],
+
+    /**
+     * Detects copy-paste artifacts in a raw variant name string.
+     * Returns array of detected issues.
+     *
+     * @param {string} raw - Raw input string
+     * @returns {{ id, label, detail, fix, canFix }[]}
+     */
+    detectArtifacts(raw) {
+        if (!raw) return [];
+        const found = [];
+        for (const p of this.ARTIFACT_PATTERNS) {
+            const regex = typeof p.pattern === 'string'
+                ? new RegExp(p.pattern)
+                : p.pattern;
+            if (regex.test(raw)) {
+                found.push({
+                    id:     p.id,
+                    label:  p.label,
+                    detail: p.detail,
+                    canFix: !!p.fix,
+                    fix:    p.fix ? () => p.fix(raw) : null,
+                });
+            }
+        }
+        return found;
+    },
+
+    /**
+     * Applies all auto-fixable artifacts in sequence.
+     * Returns the cleaned string.
+     *
+     * @param {string} raw
+     * @returns {string}
+     */
+    applyAllFixes(raw) {
+        let s = raw;
+        for (const p of this.ARTIFACT_PATTERNS) {
+            if (!p.fix) continue;
+            const regex = typeof p.pattern === 'string'
+                ? new RegExp(p.pattern)
+                : p.pattern;
+            if (regex.test(s)) s = p.fix(s);
+        }
+        return s.trim();
+    },
+
+    // ════════════════════════════════════════════════════════════════
+    // LEGACY NAME VALIDATION
+    // Covers: G551D, F508del, W1282X, R117H, 1078delT, 3849+10kbC→T
+    // ════════════════════════════════════════════════════════════════
+
+    validateLegacyName(name) {
+        if (!name) return { valid: false, errors: ['Name is required'], warnings: [], suggestion: null };
+        const raw = name.trim();
+        const errors = [], warnings = [];
+
+        // Run artifact detection first
+        const artifacts = this.detectArtifacts(raw);
+        artifacts.forEach(a => {
+            if (a.canFix) warnings.push({ code: a.id, msg: a.label + ' — ' + a.detail, autofix: a.fix });
+            else errors.push({ code: a.id, msg: a.label + ' — ' + a.detail });
+        });
+
+        // If artifacts are blocking, suggest the clean form
+        const cleaned = this.applyAllFixes(raw);
+
+        // ── Structural checks (on cleaned form) ──────────────────────
+
+        // Should NOT start with 'p.' or 'c.' (those are different fields)
+        if (/^[cp]\./i.test(cleaned)) {
+            errors.push({ code: 'wrong_field', msg: `Starts with "${cleaned.slice(0,2)}" — this looks like a ${cleaned[0] === 'p' ? 'protein' : 'cDNA'} name, not a legacy name` });
+        }
+
+        // Amino acid substitution: [Letter][Number][Letter] e.g. G551D, R117H
+        const isAASubst = /^[A-Z]\d+[A-Z*X]$/i.test(cleaned);
+        if (isAASubst) {
+            const [first, last] = [cleaned[0], cleaned[cleaned.length - 1]];
+            if (first !== first.toUpperCase()) {
+                warnings.push({ code: 'case_first', msg: `First amino acid should be uppercase: "${first.toUpperCase() + cleaned.slice(1)}"`,
+                    autofix: () => cleaned[0].toUpperCase() + cleaned.slice(1) });
+            }
+            if (last !== last.toUpperCase() && last !== '*') {
+                warnings.push({ code: 'case_last', msg: `Terminal residue should be uppercase: "${cleaned.slice(0,-1) + last.toUpperCase()}"`,
+                    autofix: () => cleaned.slice(0,-1) + last.toUpperCase() });
+            }
+        }
+
+        // Deletion: [Letter][Number]del OR [Number]del[ACGT]* e.g. F508del, 1078delT
+        const isDeletion = /^[A-Z]?\d+del[ACGT]*$/i.test(cleaned);
+
+        // Splice: e.g. 3849+10kbC→T, 621+1G→T (complex — just warn if → is present)
+        const isSplice = /\d+[+-]\d/.test(cleaned);
+
+        // Neither a known pattern — might be novel/complex, just warn
+        if (!isAASubst && !isDeletion && !isSplice && cleaned.length > 2) {
+            // Check for common error: lowercase entire name
+            if (cleaned === cleaned.toLowerCase() && /[a-z]/.test(cleaned)) {
+                const suggested = cleaned[0].toUpperCase() +
+                    cleaned.slice(1).replace(/([a-z])(\d)/g, (_, l, d) => l.toUpperCase() + d);
+                warnings.push({ code: 'all_lowercase', msg: `Name appears to be all lowercase — did you mean "${suggested}"?`,
+                    autofix: () => suggested });
+            }
+        }
+
+        const suggestion = (errors.length || warnings.length) && cleaned !== raw ? cleaned : null;
+        return { valid: errors.length === 0, errors, warnings, suggestion, cleaned };
+    },
+
+    // ════════════════════════════════════════════════════════════════
+    // PROTEIN NAME VALIDATION
+    // Covers: p.Phe508del, p.Gly551Asp, p.Trp1282Ter, p.Arg117His
+    // HGVS rules: p.[AA3][Pos][AA3orChange]
+    // ════════════════════════════════════════════════════════════════
+
+    validateProteinName(name) {
+        if (!name) return { valid: true, errors: [], warnings: [], suggestion: null }; // optional field
+
+        const raw = name.trim();
+        const errors = [], warnings = [];
+
+        const artifacts = this.detectArtifacts(raw);
+        artifacts.forEach(a => {
+            if (a.canFix) warnings.push({ code: a.id, msg: a.label, autofix: a.fix });
+            else errors.push({ code: a.id, msg: a.label });
+        });
+        const cleaned = this.applyAllFixes(raw);
+
+        // Must start with 'p.'
+        if (!cleaned.startsWith('p.') && !cleaned.startsWith('P.')) {
+            if (/^[A-Z][a-z]{2}\d/.test(cleaned)) {
+                // Looks like protein notation without the prefix
+                warnings.push({ code: 'missing_prefix', msg: 'Missing p. prefix — HGVS protein notation requires "p."',
+                    autofix: () => 'p.' + cleaned });
+            } else if (/^[cp]\./i.test(cleaned)) {
+                errors.push({ code: 'wrong_prefix', msg: `Starts with "${cleaned.slice(0,2)}" — use p. for protein notation` });
+            }
+        } else {
+            // Has p. prefix — check the rest
+            const body = cleaned.replace(/^[pP]\./, '');
+
+            // Prefix must be lowercase 'p'
+            if (cleaned.startsWith('P.')) {
+                warnings.push({ code: 'uppercase_p', msg: 'Protein prefix should be lowercase: "p." not "P."',
+                    autofix: () => 'p.' + body });
+            }
+
+            // First AA must be 3-letter CamelCase
+            const aa3match = body.match(/^([A-Za-z]{3})(\d+)(.*)$/);
+            if (aa3match) {
+                const [, aa3, pos, change] = aa3match;
+                const aa3Canon = aa3[0].toUpperCase() + aa3.slice(1).toLowerCase();
+
+                if (!HGVS_AA3.has(aa3Canon)) {
+                    // Might be single-letter notation: p.F508del
+                    if (/^[A-Z]/.test(body) && /^[A-Z]\d/.test(body)) {
+                        warnings.push({ code: 'single_letter_aa', msg: 'HGVS protein notation uses 3-letter amino acid codes — e.g. p.Phe508del not p.F508del' });
+                    } else {
+                        errors.push({ code: 'invalid_aa3', msg: `"${aa3}" is not a valid 3-letter amino acid code` });
+                    }
+                } else if (aa3 !== aa3Canon) {
+                    warnings.push({ code: 'aa3_case', msg: `Amino acid code should be CamelCase: "${aa3Canon}" not "${aa3}"`,
+                        autofix: () => `p.${aa3Canon}${pos}${change}` });
+                }
+
+                // Validate the change part
+                if (change) {
+                    const changeUpper = change.toUpperCase();
+                    if (changeUpper === 'DEL') {
+                        if (change !== 'del') warnings.push({ code: 'del_case', msg: '"del" should be lowercase',
+                            autofix: () => `p.${aa3Canon}${pos}del` });
+                    } else if (changeUpper === 'TER') {
+                        if (change !== 'Ter') warnings.push({ code: 'ter_case', msg: '"Ter" should be title-case',
+                            autofix: () => `p.${aa3Canon}${pos}Ter` });
+                    } else {
+                        // Should be another 3-letter AA
+                        const changeAA3 = change[0]?.toUpperCase() + change.slice(1)?.toLowerCase();
+                        if (!HGVS_AA3.has(changeAA3) && change !== '=' && change !== '?') {
+                            warnings.push({ code: 'invalid_change', msg: `Change "${change}" — expected 3-letter AA, "del", "Ter", or "="` });
+                        }
+                    }
+                }
+            }
+        }
+
+        const suggestion = warnings.some(w => w.autofix) && cleaned !== raw ? cleaned : null;
+        return { valid: errors.length === 0, errors, warnings, suggestion, cleaned };
+    },
+
+    // ════════════════════════════════════════════════════════════════
+    // cDNA NAME VALIDATION
+    // Covers: c.1652G>A, c.1521_1523del, c.489+1G>T, c.-40G>A
+    // HGVS rules: c.[position][change]
+    // ════════════════════════════════════════════════════════════════
+
+    validateCDNAName(name) {
+        if (!name) return { valid: true, errors: [], warnings: [], suggestion: null }; // optional
+
+        const raw = name.trim();
+        const errors = [], warnings = [];
+
+        const artifacts = this.detectArtifacts(raw);
+        artifacts.forEach(a => {
+            if (a.canFix) warnings.push({ code: a.id, msg: a.label, autofix: a.fix });
+            else errors.push({ code: a.id, msg: a.label });
+        });
+        let cleaned = this.applyAllFixes(raw);
+
+        // Must start with 'c.'
+        if (!cleaned.startsWith('c.') && !cleaned.startsWith('C.')) {
+            // Check if it looks like a cDNA name missing the prefix
+            if (/^\d+[_+\-]/.test(cleaned) || /^\d+(del|ins|dup|>)/i.test(cleaned)) {
+                warnings.push({ code: 'missing_c_prefix', msg: 'Missing "c." prefix — cDNA notation should start with c.',
+                    autofix: () => 'c.' + cleaned });
+                cleaned = 'c.' + cleaned;
+            } else if (/^[pr]\./i.test(cleaned)) {
+                errors.push({ code: 'wrong_prefix', msg: `Starts with "${cleaned.slice(0,2)}" — use c. for cDNA notation` });
+            }
+        } else {
+            if (cleaned.startsWith('C.')) {
+                warnings.push({ code: 'uppercase_c', msg: 'cDNA prefix should be lowercase: "c." not "C."',
+                    autofix: () => 'c.' + cleaned.slice(2) });
+                cleaned = 'c.' + cleaned.slice(2);
+            }
+        }
+
+        const body = cleaned.replace(/^c\./, '');
+
+        // Range delimiter: must be _ not - (hyphen means intron offset with +/-)
+        // c.1521-1523del is WRONG (hyphen in range), c.1521_1523del is CORRECT
+        // BUT c.489-1G>T is CORRECT (intronic variant — hyphen means upstream of exon)
+        if (/\d-\d/.test(body) && !/\d[+-]\d/.test(body)) {
+            // Plain hyphen between two positions with no +/- context = range error
+            const fixed = cleaned.replace(/(\d)-(\d)/g, '$1_$2');
+            warnings.push({ code: 'hyphen_range', msg: 'Use underscore _ for position ranges, not hyphen — e.g. c.1521_1523del',
+                autofix: () => fixed });
+        }
+
+        // Substitution notation: uppercase nucleotide > uppercase nucleotide
+        const substMatch = body.match(/([acgtu])>([acgtu])/i);
+        if (substMatch) {
+            const [full, from, to] = substMatch;
+            if (from !== from.toUpperCase() || to !== to.toUpperCase()) {
+                const fixedCleaned = cleaned.replace(/([acgtu])>([acgtu])/gi,
+                    (_, f, t) => f.toUpperCase() + '>' + t.toUpperCase());
+                warnings.push({ code: 'nucleotide_case', msg: 'Nucleotides in substitution should be uppercase — e.g. G>A not g>a',
+                    autofix: () => fixedCleaned });
+            }
+        }
+
+        // Colon used instead of > for substitution (c.1652G:A)
+        if (/[ACGTU]:[ACGTU]/i.test(body)) {
+            const fixedCleaned = cleaned.replace(/([ACGTU]):([ACGTU])/gi, '$1>$2');
+            warnings.push({ code: 'colon_subst', msg: 'Use ">" not ":" for nucleotide substitution — e.g. G>A',
+                autofix: () => fixedCleaned });
+        }
+
+        // DEL/INS/DUP should be lowercase
+        if (/\b(DEL|INS|DUP)\b/.test(body)) {
+            const fixedCleaned = cleaned.replace(/\b(DEL|INS|DUP)\b/g, s => s.toLowerCase());
+            warnings.push({ code: 'keyword_case', msg: '"del", "ins", "dup" should be lowercase in HGVS notation',
+                autofix: () => fixedCleaned });
+        }
+
+        // Spaces inside cDNA name
+        if (/\s/.test(body)) {
+            const fixedCleaned = cleaned.replace(/\s+/g, '');
+            warnings.push({ code: 'spaces', msg: 'Remove spaces from cDNA name — HGVS notation has no spaces',
+                autofix: () => fixedCleaned });
+        }
+
+        const suggestion = (warnings.some(w => w.autofix)) && cleaned !== raw ? cleaned : null;
+        return { valid: errors.length === 0, errors, warnings, suggestion, cleaned };
+    },
+
+    // ════════════════════════════════════════════════════════════════
+    // FULL VARIANT VALIDATION
+    // Validates all three name fields together.
+    // Returns a structured result for UI rendering.
+    // ════════════════════════════════════════════════════════════════
+
+    /**
+     * @param {{ legacy_name, protein_name, cdna_name }} fields
+     * @returns {{ isClean, fields: { legacy, protein, cdna }, hasErrors, hasWarnings }}
+     */
+    validateVariantEntry(fields) {
+        const legacy  = this.validateLegacyName(fields.legacy_name  || '');
+        const protein = this.validateProteinName(fields.protein_name || '');
+        const cdna    = this.validateCDNAName(fields.cdna_name       || '');
+
+        const hasErrors   = !legacy.valid || !protein.valid || !cdna.valid;
+        const hasWarnings = legacy.warnings.length  > 0
+                         || protein.warnings.length > 0
+                         || cdna.warnings.length    > 0;
+
+        return {
+            isClean:     !hasErrors && !hasWarnings,
+            hasErrors,
+            hasWarnings,
+            fields: { legacy, protein, cdna },
+        };
+    },
+});
+
+
+// ════════════════════════════════════════════════════════════════════════
+// UI — INLINE VALIDATION HINTS
+// Attaches real-time validation hints to name input fields.
+// Each hint appears below the field with color coding and a Fix button.
+// ════════════════════════════════════════════════════════════════════════
+
+/**
+ * Renders a validation hint element below an input field.
+ * Returns the hint div (appended to parent of inputEl).
+ */
+function createFieldHintEl(inputEl) {
+    const existing = document.getElementById(inputEl.id + '_hint');
+    if (existing) return existing;
+    const hint = document.createElement('div');
+    hint.id = inputEl.id + '_hint';
+    hint.style.cssText = `
+        font-size: 11px;
+        line-height: 1.5;
+        margin-top: 4px;
+        padding: 0;
+        min-height: 0;
+        transition: all 0.15s ease;
+        display: none;
+    `;
+    inputEl.parentNode.appendChild(hint);
+    return hint;
+}
+
+/**
+ * Updates the hint div for a field with validation results.
+ * @param {HTMLElement} inputEl
+ * @param {{ errors, warnings, suggestion, cleaned }} result
+ * @param {Function} onFix - callback(cleanedValue) when Fix is clicked
+ */
+function updateFieldHint(inputEl, result, onFix) {
+    const hint = createFieldHintEl(inputEl);
+    const { errors, warnings } = result;
+
+    if (!errors.length && !warnings.length) {
+        hint.style.display = 'none';
+        inputEl.style.borderColor = '';
+        return;
+    }
+
+    // Pick the most severe issue to show (errors before warnings)
+    const issues = [...errors.map(e => ({ ...e, level: 'error' })),
+                    ...warnings.map(w => ({ ...w, level: 'warning' }))];
+    const primary = issues[0];
+
+    const colors = {
+        error:   { border: 'rgba(248,113,113,0.6)', bg: 'rgba(248,113,113,0.08)', text: '#f87171', icon: '✗' },
+        warning: { border: 'rgba(251,191,36,0.5)',  bg: 'rgba(251,191,36,0.07)',  text: '#fbbf24', icon: '⚠' },
+    };
+    const c = colors[primary.level];
+
+    inputEl.style.borderColor = c.border;
+    hint.style.display = 'block';
+
+    // Build fix button HTML if applicable
+    const canFix = result.suggestion || (primary.autofix);
+    const fixTarget = result.suggestion || (primary.autofix ? primary.autofix() : null);
+
+    const fixBtnHtml = canFix && fixTarget
+        ? `<button type="button"
+               data-fix="${fixTarget.replace(/"/g, '&quot;')}"
+               data-input-id="${inputEl.id}"
+               style="margin-left:6px;font-size:10px;padding:1px 7px;border-radius:4px;
+                      border:1px solid ${c.border};background:${c.bg};color:${c.text};
+                      cursor:pointer;font-family:var(--font-body);white-space:nowrap;
+                      vertical-align:middle;"
+               onclick="document.getElementById(this.dataset.inputId).value=this.dataset.fix;
+                        document.getElementById(this.dataset.inputId).dispatchEvent(new Event('input'));
+                        this.parentNode.parentNode.style.display='none';">
+               Fix → <code style="font-family:var(--font-mono);font-size:9px;">${fixTarget}</code>
+           </button>`
+        : '';
+
+    hint.style.cssText += `
+        padding: 5px 8px;
+        background: ${c.bg};
+        border-left: 2px solid ${c.text};
+        border-radius: 0 4px 4px 0;
+    `;
+    hint.innerHTML =
+        `<span style="color:${c.text};font-weight:600;">${c.icon} ${primary.msg}</span>` +
+        fixBtnHtml +
+        (issues.length > 1
+            ? `<span style="color:var(--text-tertiary);margin-left:6px;">+${issues.length-1} more issue${issues.length>2?'s':''}</span>`
+            : '');
+}
+
+/**
+ * Attaches live nomenclature validation to the three manual entry form fields.
+ * Call once at DOMContentLoaded.
+ */
+function attachVariantNameValidation() {
+    const fields = [
+        { id: 'formLegacyName',  validate: n => VariantNameValidator.validateLegacyName(n),  label: 'legacy' },
+        { id: 'formProteinName', validate: n => VariantNameValidator.validateProteinName(n), label: 'protein' },
+        { id: 'formCdnaName',    validate: n => VariantNameValidator.validateCDNAName(n),    label: 'cdna' },
+    ];
+
+    fields.forEach(({ id, validate }) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+
+        let debounce = null;
+        el.addEventListener('input', () => {
+            clearTimeout(debounce);
+            debounce = setTimeout(() => {
+                const result = validate(el.value);
+                updateFieldHint(el, result);
+            }, 400);
+        });
+
+        el.addEventListener('blur', () => {
+            clearTimeout(debounce);
+            const result = validate(el.value);
+            updateFieldHint(el, result);
+        });
+
+        el.addEventListener('focus', () => {
+            // Clear green border on focus so it doesn't distract
+            if (!el.value) {
+                const hint = document.getElementById(id + '_hint');
+                if (hint) hint.style.display = 'none';
+            }
+        });
+    });
+
+    console.log('[NeumuacFQ] Variant name validation attached to entry form');
+}
+
+/**
+ * Validates name fields in the annotation modal when editing inline.
+ * @param {string} fieldName - e.g. 'legacy_name', 'protein_name', 'cdna_name'
+ * @param {HTMLInputElement} inputEl
+ */
+function attachAnnotationFieldValidation(fieldName, inputEl) {
+    if (!inputEl) return;
+    const validatorMap = {
+        legacy_name:  n => VariantNameValidator.validateLegacyName(n),
+        protein_name: n => VariantNameValidator.validateProteinName(n),
+        cdna_name:    n => VariantNameValidator.validateCDNAName(n),
+    };
+    const validate = validatorMap[fieldName];
+    if (!validate) return;
+
+    let debounce = null;
+    inputEl.addEventListener('input', () => {
+        clearTimeout(debounce);
+        debounce = setTimeout(() => updateFieldHint(inputEl, validate(inputEl.value)), 400);
+    });
+    inputEl.addEventListener('blur', () => {
+        clearTimeout(debounce);
+        updateFieldHint(inputEl, validate(inputEl.value));
+    });
+}
+
+/**
+ * Adds nomenclature validation to each row in previewImportBatch.
+ * Call inside previewImportBatch to enrich the rowErrors array.
+ *
+ * @param {Object} item - Import row object
+ * @param {string[]} rowErrors - Existing errors array (mutated in place)
+ * @returns {string[]} nomenclature warnings (yellow, non-blocking)
+ */
+function validateImportRowNomenclature(item, rowErrors) {
+    const nomWarnings = [];
+
+    const legacyRaw  = item.variant_legacy_name  || item.legacy_name  || '';
+    const proteinRaw = item.variant_protein_name || item.protein_name || '';
+    const cdnaRaw    = item.variant_cDNA_name    || item.cdna_name    || '';
+
+    if (legacyRaw) {
+        const r = VariantNameValidator.validateLegacyName(legacyRaw);
+        if (!r.valid) {
+            r.errors.forEach(e => rowErrors.push(`legacy_name: ${e.msg}`));
+        }
+        r.warnings.forEach(w => {
+            const fix = w.autofix ? ` → suggest: "${w.autofix()}"` : '';
+            nomWarnings.push(`legacy: ${w.msg}${fix}`);
+        });
+    }
+    if (proteinRaw) {
+        const r = VariantNameValidator.validateProteinName(proteinRaw);
+        if (!r.valid) r.errors.forEach(e => rowErrors.push(`protein_name: ${e.msg}`));
+        r.warnings.forEach(w => nomWarnings.push(`protein: ${w.msg}`));
+    }
+    if (cdnaRaw) {
+        const r = VariantNameValidator.validateCDNAName(cdnaRaw);
+        if (!r.valid) r.errors.forEach(e => rowErrors.push(`cdna_name: ${e.msg}`));
+        r.warnings.forEach(w => nomWarnings.push(`cDNA: ${w.msg}`));
+    }
+
+    return nomWarnings;
+}
+
+
+// ════════════════════════════════════════════════════════════════════════
+// CSS — add to the main design-system <style> block
+/*
+.field-hint-error {
+    font-size: 11px;
+    line-height: 1.5;
+    margin-top: 4px;
+    padding: 5px 8px;
+    background: rgba(248,113,113,0.08);
+    border-left: 2px solid #f87171;
+    border-radius: 0 4px 4px 0;
+    color: #f87171;
+}
+.field-hint-warning {
+    font-size: 11px;
+    line-height: 1.5;
+    margin-top: 4px;
+    padding: 5px 8px;
+    background: rgba(251,191,36,0.07);
+    border-left: 2px solid #fbbf24;
+    border-radius: 0 4px 4px 0;
+    color: #fbbf24;
+}
+*/
+// ════════════════════════════════════════════════════════════════════════
+
+
+// ════════════════════════════════════════════════════════════════════════
+// WIRING INSTRUCTIONS
+// ════════════════════════════════════════════════════════════════════════
+//
+// 1) ENTRY FORM — call once at DOMContentLoaded init block:
+//    attachVariantNameValidation();
+//
+// 2) IMPORT BATCH — inside previewImportBatch(), in the rows.map() callback,
+//    add after the existing rowErrors checks:
+//
+//    const nomWarnings = validateImportRowNomenclature(item, rowErrors);
+//    // nomWarnings is an array of yellow advisory strings — show in the
+//    // import preview table as a 'Nomenclature' column or tooltip.
+//
+// 3) ANNOTATION MODAL — in showAnnotationModal() or wherever an annotation
+//    field is rendered as an <input>, after creating the input element:
+//
+//    attachAnnotationFieldValidation(fieldName, inputElement);
+//    (fieldName = 'legacy_name' | 'protein_name' | 'cdna_name')
+//
+// 4) Expose on NeumuacFQ.fn for testing from DevTools:
+//    NeumuacFQ.fn.validateVariantName = VariantNameValidator;
+//    Example: NeumuacFQ.fn.validateVariantName.validateLegacyName('1078delTb')
+
+// ════ END VALIDATOR ════
+
+// ========== SEARCH v2 — SCORED, FUZZY + PHONETIC MATCH =========="
 //   Insert this block immediately BEFORE that section.
 // WHY: Right now two clinicians can import F508del and p.Phe508del as
 //   separate entries. The database has no way to know they're the same
@@ -10254,10 +10992,12 @@ const NomenclatureResolver = Object.freeze({
 // HGVS prefixes (p. c. r.), Greek delta, positional numbers all normalised.
 
 function _phoneticKey(s) {
+    // FIX 5: was .replace(/(.)\u0001+/g, '$1') — \u0001 is ASCII SOH, not a backreference.
+    // Correct form is /(.)\1+/ to collapse repeated characters (ggg→g, 555→5).
     return s.toLowerCase()
         .replace(/[aeiou]+(?=.)/g, '')    // remove vowels (keep trailing)
-        .replace(/(.)+/g, '$1')          // collapse repeated consonants
-        .replace(/[^a-z0-9]/g, '')         // strip non-alphanumeric
+        .replace(/(.)\1+/g, '$1')          // FIX 5: backreference — collapses repeated chars
+        .replace(/[^a-z0-9]/g, '')        // strip non-alphanumeric
         .slice(0, 12);
 }
 
@@ -10279,17 +11019,25 @@ function searchVariants(query) {
     const isNumericSearch = /^\d+$/.test(stripped);
 
     STATE.searchIndex.lookup.forEach((ids, key) => {
-        const kPhon = _phoneticKey(key);
+        // FIX 9: kPhon deferred — only computed if we reach the phonetic branch
+        // (was computed for every key on every search, ~3000 wasted calls per query)
         if (key === norm || key === stripped || key === raw) {
             ids.forEach(id => record(id, 0));                         // Tier 0: exact
-        } else if (key.startsWith(norm) || key.startsWith(stripped) || norm.startsWith(key)) {
+        } else if (key.startsWith(norm) || key.startsWith(stripped)) {
             ids.forEach(id => record(id, 1));                         // Tier 1: prefix
+        // FIX 3: removed `norm.startsWith(key)` from Tier 1 — it caused short index keys
+        // like 'g','r','cf','non' to rank ALL matching variants at Tier 1, flooding
+        // results. Demoted to Tier 2 with a 3-char key length guard below.
         } else if (isNumericSearch && key.includes(stripped)) {
             ids.forEach(id => record(id, 1));                         // Tier 1: number-in-name
-        } else if (key.includes(norm) || key.includes(stripped) || norm.includes(key)) {
+        } else if (key.includes(norm) || key.includes(stripped)
+                    // FIX 3+4: norm.includes(key) demoted here from Tier 1, with 3-char guard.
+                    // Prevents short index keys ('cf','non','of','del') from polluting results.
+                    || (key.length >= 3 && norm.includes(key))
+                    || (key.length >= 3 && norm.startsWith(key))) {
             ids.forEach(id => record(id, 2));                         // Tier 2: substring
-        } else if (stripped.length >= 4 && kPhon === phonetic && kPhon.length >= 2) {
-            ids.forEach(id => record(id, 4));                         // Tier 4: phonetic
+        } else if (stripped.length >= 4 && _phoneticKey(key) === phonetic && _phoneticKey(key).length >= 2) {
+            ids.forEach(id => record(id, 4));                         // Tier 4: phonetic (FIX 9)
         }
     });
 
@@ -10537,6 +11285,12 @@ function normaliseQueryWithSteps(q) {
     s = s.replace(/[-\s]+/g, '').replace(/>\s*/g, '>').replace(/\s*>/g, '>');
     if (s !== before6) steps.push('spacing normalised');
 
+    // 6b. FIX 2: Strip nucleotide suffix after del/ins/dup (delCTT → del)
+    // Clinicians often paste the full HGVS form; we store the short form.
+    const before6b = s;
+    s = s.replace(/(del|ins|dup)[acgt]{1,6}$/i, '$1');
+    if (s !== before6b) steps.push('del nucleotide suffix stripped');
+
     // 7. Canonical aliases — common clinical typing patterns
     const aliases = {
         'deltaf508':'f508del', 'deltaf508del':'f508del', 'delta-f508':'f508del',
@@ -10589,16 +11343,23 @@ function levenshtein(a, b) {
 
 // ---- Fuzzy match: returns closest variant name within edit distance 2 ----
 function fuzzyMatchVariant(query) {
+    // FIX 10: precompute normalised candidate norms for all variants once.
+    // Original ran normaliseQuery() inside the inner loop — ~3000+ calls per miss.
     const norm = normaliseQuery(query);
     if (norm.length < 3) return null;
     let best = null, bestDist = 3; // threshold = 2, reject if >= 3
-    for (const v of STATE.variants) {
-        const candidates = [v.legacy_name, v.protein_name, v.cdna_name].filter(Boolean).map(normaliseQuery);
-        for (const c of candidates) {
-            if (Math.abs(c.length - norm.length) > 2) continue; // quick length filter
-            const d = levenshtein(norm, c);
-            if (d < bestDist) { bestDist = d; best = v.legacy_name; }
-        }
+
+    // Build candidate list once (lazy — only called on misses via persistSearchEvent)
+    const allCandidates = STATE.variants.flatMap(v =>
+        [v.legacy_name, v.protein_name, v.cdna_name]
+            .filter(Boolean)
+            .map(n => ({ norm: normaliseQuery(n), original: v.legacy_name }))
+    );
+
+    for (const { norm: c, original } of allCandidates) {
+        if (Math.abs(c.length - norm.length) > 2) continue; // quick length filter
+        const d = levenshtein(norm, c);
+        if (d < bestDist) { bestDist = d; best = original; }
     }
     return best; // null if no close match
 }
@@ -12535,7 +13296,8 @@ function updateFilterChips() {
 function parseStructuredQuery(raw) {
     if (!raw || !raw.trim()) return { nameQuery: '', filters: {} };
 
-    const TOKEN = /\b(class|eti|missing|searched|validated|unvalidated|recent|complete|gap):([\w><!=]+)/gi;
+    // FIX 6: added [/] to token value charset so class:II/III parses correctly
+    const TOKEN = /\b(class|eti|missing|searched|validated|unvalidated|recent|complete|gap):([\w><!=\/]+)/gi;
     const filters  = {};
     const nameQuery = raw.replace(TOKEN, (_, key, val) => {
         filters[key.toLowerCase()] = val.toLowerCase();
@@ -12543,9 +13305,11 @@ function parseStructuredQuery(raw) {
     }).replace(/\s+/g, ' ').trim();
 
     // Boolean shorthand tokens (no colon)
-    if (/\bunvalidated\b/i.test(raw)) { filters.validated = '0'; }
-    if (/\brecent\b/i.test(raw))      { filters.recent    = 'true'; }
-    if (/\bcomplete\b/i.test(raw))    { filters.complete  = 'true'; }
+    // FIX 7: only set shorthand if not already set by explicit filter:value syntax
+    // Prevents 'validated:2 unvalidated' from being silently overwritten to '0'
+    if (/\bunvalidated\b/i.test(raw) && !filters.validated) { filters.validated = '0'; }
+    if (/\brecent\b/i.test(raw)      && !filters.recent)    { filters.recent    = 'true'; }
+    if (/\bcomplete\b/i.test(raw)    && !filters.complete)  { filters.complete  = 'true'; }
 
     return { nameQuery, filters };
 }
@@ -12554,7 +13318,8 @@ function applyStructuredFilters(variants, filters) {
     let result = variants;
 
     if (filters.class) {
-        const cls = filters.class.toUpperCase();
+        // FIX 6: normalise 'ii/iii' → 'II/III' preserving slash for compound classes
+        const cls = filters.class.toUpperCase().replace(/\s/g, '');
         result = result.filter(v => v.cftr_class === cls);
     }
 
@@ -12581,10 +13346,13 @@ function applyStructuredFilters(variants, filters) {
         const val = filters.searched;
         const n   = parseInt(val.replace(/[><!=]/g,''));
         if (!isNaN(n)) {
-            if (val.startsWith('>'))      result = result.filter(v => (v.search_hit_count||0) > n);
-            else if (val.startsWith('>='))result = result.filter(v => (v.search_hit_count||0) >= n);
-            else if (val.startsWith('<')) result = result.filter(v => (v.search_hit_count||0) < n);
-            else                          result = result.filter(v => (v.search_hit_count||0) >= n);
+            // FIX 1: check >= before > so '>=' is never short-circuited by '>' check
+            if      (val.startsWith('>=')) result = result.filter(v => (v.search_hit_count||0) >= n);
+            else if (val.startsWith('<=')) result = result.filter(v => (v.search_hit_count||0) <= n);
+            else if (val.startsWith('!=')) result = result.filter(v => (v.search_hit_count||0) !== n);
+            else if (val.startsWith('>'))  result = result.filter(v => (v.search_hit_count||0) > n);
+            else if (val.startsWith('<'))  result = result.filter(v => (v.search_hit_count||0) < n);
+            else                           result = result.filter(v => (v.search_hit_count||0) >= n);
         }
     }
 
@@ -12684,7 +13452,11 @@ function applyFilterChain() {
     // Clinically: "G551D" (searched 500×) should beat an obscure prefix match.
     if (shouldSearch && filtered.length > 1) {
         const tierMap = STATE.searchIntelligence._lastScores;
-        if (tierMap && tierMap.size) {
+        // FIX 8: only apply demand boost if _lastScores is for the current query
+        // (not stale from a previous search when user just toggled a filter)
+        const scoresAreStale = STATE.searchIntelligence._lastResult?.query?.toLowerCase()
+            !== q.toLowerCase().trim();
+        if (tierMap && tierMap.size && !scoresAreStale) {
             filtered.sort((a, b) => {
                 const ta = tierMap.get(a.id) ?? 9;
                 const tb = tierMap.get(b.id) ?? 9;
@@ -13730,7 +14502,7 @@ function renderVariantList() {
             <div class="row-content">
                 <div class="row-top">
                     <span class="row-name">${hl(v.legacy_name)}${isExceptional ? ' <span style="color:var(--class-ii);font-size: 11px;font-family:var(--font-body)">⚡</span>' : ''}${isNovel ? ' <span title="Unvalidated — entered via import or external lookup" style="font-size:9px;padding:1px 5px;border-radius:3px;background:rgba(96,165,250,0.12);color:#60a5fa;border:1px solid rgba(96,165,250,0.25);font-family:var(--font-mono);font-weight:700;vertical-align:middle;letter-spacing:.03em;">NEW</span>' : ''}</span>
-                    ${v.cftr_class ? `<span class="row-class-badge ${cls}">${v.cftr_class}</span>` : ''}
+                    ${v.cftr_class ? `<span class="row-class-badge ${cls}" onclick="event.stopPropagation();showCFTRClassDiagram('${escapeAttr(v.cftr_class)}')" title="Class ${v.cftr_class} — click for mechanism diagram" style="cursor:pointer;">${v.cftr_class}</span>` : ''}
                 </div>
                 ${v.protein_name ? `<div class="row-protein">${hl(v.protein_name)}</div>` : '<div class="row-protein" style="opacity:0.4">—</div>'}
                 <div class="row-indicators">
@@ -14336,9 +15108,13 @@ function renderVariantDetail(variant, fromSearch) {
     container.innerHTML = `
         <!-- DETAIL HEADER -->
         <div class="detail-header">
-            <div class="detail-class-block ${cls}">
+            <div class="detail-class-block ${cls}"
+                     onclick="${variant.cftr_class ? `showCFTRClassDiagram('${escapeAttr(variant.cftr_class)}')` : ''}"
+                     title="${variant.cftr_class ? 'Click to see Class ' + variant.cftr_class + ' mechanism diagram' : 'No class assigned'}"
+                     style="${variant.cftr_class ? 'cursor:pointer;' : ''}">
                 <span class="class-roman">${variant.cftr_class || '?'}</span>
                 <span class="class-label">CLASS</span>
+                ${variant.cftr_class ? '<span style="font-size:8px;opacity:0.6;display:block;letter-spacing:.06em;margin-top:1px;">VIEW ↗</span>' : ''}
             </div>
 
             <div class="detail-names">
@@ -14487,6 +15263,32 @@ function renderVariantDetail(variant, fromSearch) {
                         ${dataField('Recommendation', variant.eti_recommendation, 'eti_recommendation', variant)}
                     </div>
                     ${renderETITimeline(variant)}
+                </div>
+            </div>
+
+            <!-- Population Prevalence — gnomAD v4 (ITEM 9) -->
+            <div class="detail-section">
+                <div class="section-header">
+                    <div class="section-header-icon" style="background:rgba(52,211,153,0.08);color:#34d399;">
+                        <i class="fas fa-globe-europe"></i>
+                    </div>
+                    <span class="section-title">Population Prevalence</span>
+                    <button class="section-action"
+                            onclick="loadAndRenderPopulationFrequencies(STATE.variantsById.get(${variant.id}), 'popFreqContainer-${variant.id}')"
+                            title="Load gnomAD v4 population frequencies">
+                        Load gnomAD ↓
+                    </button>
+                </div>
+                <div class="section-body">
+                    <div id="popFreqContainer-${variant.id}">
+                        <div style="font-size:11px;color:var(--text-tertiary);padding:8px 0;display:flex;align-items:center;gap:8px;">
+                            <span>Population frequency data from gnomAD v4.</span>
+                            <button onclick="loadAndRenderPopulationFrequencies(STATE.variantsById.get(${variant.id}), 'popFreqContainer-${variant.id}')"
+                                    style="font-size:10px;color:var(--brand);background:none;border:none;cursor:pointer;padding:0;text-decoration:underline;font-family:var(--font-body);">
+                                Load now →
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -15520,6 +16322,8 @@ function previewImportBatch(arr, resultsEl, btn) {
             rowErrors.push(`cftr_class '${item.cftr_class}' invalid — must be: ${VALID_CLASS.join('/')}`);
         if (item.class_subtype && !VALID_SUBTYPE.includes(item.class_subtype))
             rowErrors.push(`class_subtype '${item.class_subtype}' invalid`);
+        // Nomenclature validation
+        const nomWarnings = validateImportRowNomenclature(item, rowErrors);
         // Normalise name for duplicate check
         const normName = normalizeImportName(item.variant_legacy_name);
         // Case-insensitive duplicate check across all three nomenclature fields
@@ -21265,6 +22069,7 @@ async function init() {
     // Phase 1: load DB-driven configs in parallel — non-blocking
     Promise.all([loadClassRules(), loadJournalImpacts(), loadCftrClassRules()]).catch(() => {});
     IdleGuard.start(); // ITEM 8: idle timeout guard
+    attachVariantNameValidation(); // Nomenclature validation on entry form
     await loadVariants();
     initHospital();
     initAppMode();
