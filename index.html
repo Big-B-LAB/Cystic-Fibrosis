@@ -5720,11 +5720,11 @@
                         </div>
                         <div class="hdr-menu-item" onclick="showDashboard('geo');hdrCloseMenu()">
                             <div class="hdr-menu-icon" style="background:rgba(96,165,250,.1);color:#60a5fa">
-                                <i class="fas fa-globe" aria-hidden="true"></i>
+                                <i class="fas fa-map" aria-hidden="true"></i>
                             </div>
                             <div class="hdr-menu-label">
-                                <div class="hdr-menu-title">Geography map</div>
-                                <div class="hdr-menu-sub">Search origin &amp; CF centres</div>
+                                <div class="hdr-menu-title">Variant Reach Atlas</div>
+                                <div class="hdr-menu-sub">Arc map: variant origins to clinical centres</div>
                             </div>
                         </div>
                         <div class="hdr-menu-item" onclick="helixHistoryBack();hdrCloseMenu()">
@@ -5750,7 +5750,7 @@
                         </div>
                         <div class="hdr-menu-item" onclick="showAuditTrail();hdrCloseMenu()">
                             <div class="hdr-menu-icon" style="background:rgba(148,163,184,.07);color:#64748b">
-                                <i class="fas fa-shield-alt" aria-hidden="true"></i>
+                                <i class="fas fa-clipboard-list" aria-hidden="true"></i>
                             </div>
                             <div class="hdr-menu-label">
                                 <div class="hdr-menu-title">Audit trail</div>
@@ -6100,7 +6100,7 @@
                     <i class="fas fa-layer-group"></i> Bulk CSV
                 </button>
                 <button class="tab" id="tabWizard" onclick="openClassificationWizard();" style="border-color:rgba(41,121,255,0.3);color:var(--brand);" title="Step-by-step CFTR classification guide">
-                    <i class="fas fa-magic"></i> Wizard
+                    <i class="fas fa-wand-magic-sparkles"></i> Wizard
                 </button>
             </div>
 
@@ -6563,7 +6563,7 @@
                     <div class="cc-card-body" id="ccMissQueue"></div>
                 </div>
                 <div class="cc-card cc-card-full">
-                    <div class="cc-card-head"><span class="cc-card-title">Platform health snapshot</span></div>
+                    <div class="cc-card-head"><span class="cc-card-title">System status</span></div>
                     <div class="cc-card-body" id="ccHealthPanel"></div>
                 </div>
             </div>
@@ -6573,13 +6573,13 @@
         <div id="siPanel" class="dash-tab-panel" style="display:none; flex-direction:column;">
             <div class="si-tabs">
                 <button class="si-tab active" id="siTab-overview" onclick="setSITab('overview',this)">Overview</button>
-                <button class="si-tab" id="siTab-misses" onclick="setSITab('misses',this)">Miss queue</button>
-                <button class="si-tab" id="siTab-recent" onclick="setSITab('recent',this)">Session</button>
-                <button class="si-tab" id="siTab-geo" onclick="setSITab('geo',this)"><i class="fas fa-map-marker-alt" style="font-size: 11px;margin-right:4px;"></i>Geography</button>
-                <button class="si-tab" id="siTab-gaps" onclick="setSITab('gaps',this)"><i class="fas fa-exclamation-triangle" style="font-size: 11px;margin-right:4px;color:#fbbf24;"></i>Gap queue</button>
-                <button class="si-tab" id="siTab-heatmap" onclick="setSITab('heatmap',this)"><i class="fas fa-th" style="font-size:11px;margin-right:4px;"></i>Velocity</button>
-                <button class="si-tab" id="siTab-cosearch" onclick="setSITab('cosearch',this)"><i class="fas fa-project-diagram" style="font-size:11px;margin-right:4px;"></i>Co-search</button>
-                <button class="si-tab" id="siTab-priority" onclick="setSITab('priority',this)" style="border-color:rgba(251,191,36,0.3);color:#fbbf24;"><i class="fas fa-star" style="font-size:11px;margin-right:4px;color:#fbbf24;"></i>Priority</button>
+                <button class="si-tab" id="siTab-misses" onclick="setSITab('misses',this)">Research gaps</button>
+                <button class="si-tab" id="siTab-recent" onclick="setSITab('recent',this)">This session</button>
+                <button class="si-tab" id="siTab-geo" onclick="setSITab('geo',this)"><i class="fas fa-earth-europe" style="font-size: 11px;margin-right:4px;"></i>Geography</button>
+                <button class="si-tab" id="siTab-gaps" onclick="setSITab('gaps',this)"><i class="fas fa-exclamation-triangle" style="font-size: 11px;margin-right:4px;color:#fbbf24;"></i>Curation gaps</button>
+                <button class="si-tab" id="siTab-heatmap" onclick="setSITab('heatmap',this)"><i class="fas fa-th" style="font-size:11px;margin-right:4px;"></i>Activity patterns</button>
+                <button class="si-tab" id="siTab-cosearch" onclick="setSITab('cosearch',this)"><i class="fas fa-link" style="font-size:11px;margin-right:4px;"></i>Related searches</button>
+                <button class="si-tab" id="siTab-priority" onclick="setSITab('priority',this)" style="border-color:rgba(251,191,36,0.3);color:#fbbf24;"><i class="fas fa-star" style="font-size:11px;margin-right:4px;color:#fbbf24;"></i>Urgent items</button>
             </div>
 
             <div id="siPanelOverview" class="si-panel active">
@@ -6711,8 +6711,8 @@
                 <div class="si-body">
                     <div class="si-card">
                         <div class="si-card-head">
-                            <div class="si-card-title"><span style="width:6px;height:6px;border-radius:50%;background:#f87171;display:inline-block;"></span>Miss queue — research gap work items</div>
-                            <div class="si-card-note">Sorted by unique users · not raw count</div>
+                            <div class="si-card-title"><span style="width:6px;height:6px;border-radius:50%;background:#f87171;display:inline-block;"></span>Research gaps — unresolved searches</div>
+                            <div class="si-card-note">Sorted by number of affected users</div>
                         </div>
                         <div class="si-card-body">
                             <div style="display:grid;grid-template-columns:1fr auto auto;gap:8px;padding-bottom:8px;border-bottom:1px solid var(--border);font-size: 11px;font-weight:600;letter-spacing:.08em;color:var(--text-tertiary);text-transform:uppercase;">
@@ -6874,7 +6874,7 @@
             </div>
             <div id="siPanelCosearch" class="si-panel" style="display:none;">
                 <div style="padding:16px 20px 8px;">
-                    <div style="font-size:12px;font-weight:600;color:var(--text-primary);margin-bottom:4px;">Co-search clusters</div>
+                    <div style="font-size:12px;font-weight:600;color:var(--text-primary);margin-bottom:4px;">Related search clusters</div>
                     <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:12px;">Variants searched together in the same session — potential compound het pairs</div>
                     <div id="coSearchContainer"></div>
                 </div>
@@ -14303,7 +14303,7 @@ function _restoreFilterState() {
             { mode: 'alpha',     asc: true,  icon: 'fas fa-sort-alpha-down', label: 'A–Z'             },
             { mode: 'alpha',     asc: false, icon: 'fas fa-sort-alpha-up',   label: 'Z–A'             },
             { mode: 'demand',    asc: false, icon: 'fas fa-fire',            label: 'Most searched'   },
-            { mode: 'gap',       asc: false, icon: 'fas fa-exclamation-circle', label: 'Gap score'    },
+            { mode: 'gap',       asc: false, icon: 'fas fa-exclamation-circle', label: 'Curation priority'    },
             { mode: 'validated', asc: true,  icon: 'fas fa-shield-alt',      label: 'Least validated' },
         ];
         const cur = SORT_CYCLE.find(s => s.mode === STATE.view.sortMode && s.asc === STATE.view.sortAsc) || SORT_CYCLE[0];
@@ -14367,7 +14367,7 @@ function toggleSort() {
         { mode: 'alpha',     asc: true,  icon: 'fas fa-sort-alpha-down', label: 'A–Z'         },
         { mode: 'alpha',     asc: false, icon: 'fas fa-sort-alpha-up',   label: 'Z–A'         },
         { mode: 'demand',    asc: false, icon: 'fas fa-fire',            label: 'Most searched' },
-        { mode: 'gap',       asc: false, icon: 'fas fa-exclamation-circle', label: 'Gap score' },
+        { mode: 'gap',       asc: false, icon: 'fas fa-exclamation-circle', label: 'Curation priority' },
         { mode: 'validated', asc: true,  icon: 'fas fa-shield-alt',      label: 'Least validated' },
     ];
     const current = SORT_CYCLE.findIndex(s => s.mode === (STATE.view.sortMode || 'alpha') && s.asc === STATE.view.sortAsc);
@@ -15823,7 +15823,7 @@ function renderVariantDetail(variant, fromSearch) {
                         <i class="fas fa-trash-alt" style="color:var(--error)"></i>
                     </button>
                     <button onclick="helixPinVariant(STATE.variantsById.get(${variant.id}))" class="btn btn-ghost btn-sm" title="Pin for side-by-side compare" style="border-color:rgba(41,121,255,0.3);color:var(--brand);">
-                        <i class="fas fa-columns"></i>
+                        <i class="fas fa-table-columns"></i>
                     </button>
                     <!-- Clinical / Curator view toggle -->
                     <button id="detailViewToggle" onclick="toggleDetailViewMode()"
@@ -15946,7 +15946,7 @@ function renderVariantDetail(variant, fromSearch) {
             <div class="detail-section">
                 <div class="section-header">
                     <div class="section-header-icon" style="background:rgba(52,211,153,0.08);color:#34d399;">
-                        <i class="fas fa-globe-europe"></i>
+                        <i class="fas fa-earth-europe"></i>
                     </div>
                     <span class="section-title">Population Prevalence</span>
                     <button class="section-action"
@@ -17536,7 +17536,7 @@ function getEvidenceIcon(type) {
     const icons = {
         'pubmed': 'fa-book-open',
         'cftr2': 'fa-dna',
-        'clinvar': 'fa-hospital',
+        'clinvar': 'fa-database',
         'article': 'fa-file-alt',
         'study': 'fa-flask',
         'default': 'fa-link'
@@ -22679,14 +22679,14 @@ function kbOpenCommandPalette() {
           action: () => { overlay.remove(); const v = STATE.view.selectedVariant; if(v) showAnnotationModal(v); else showNotification('Select a variant first','warning'); } },
         { label: 'Export clinical PDF',       icon: 'fa-file-medical', group: 'Variant',
           action: () => { overlay.remove(); exportClinicalReport('single'); } },
-        { label: 'Pin for comparison',        icon: 'fa-columns', group: 'Variant',
+        { label: 'Pin for comparison',        icon: 'fa-table-columns', group: 'Variant',
           action: () => { overlay.remove(); const v = STATE.view.selectedVariant; if(v) helixPinVariant(v); } },
         // ── Navigation ────────────────────────────────────────────────────────
         { label: 'Open Helios AI inbox',      icon: 'fa-sun',             group: 'Navigation', action: () => { overlay.remove(); openHelios(); } },
         { label: 'Analytics dashboard',       icon: 'fa-chart-bar',       group: 'Navigation', action: () => { overlay.remove(); showDashboard(); } },
-        { label: 'Geography intelligence',    icon: 'fa-globe',           group: 'Navigation', action: () => { overlay.remove(); document.getElementById('siTabGeo')?.click(); } },
+        { label: 'Variant Reach Atlas',    icon: 'fa-globe',           group: 'Navigation', action: () => { overlay.remove(); document.getElementById('siTabGeo')?.click(); } },
         { label: 'Search intelligence',       icon: 'fa-brain',           group: 'Navigation', action: () => { overlay.remove(); document.getElementById('siTabSearch')?.click(); } },
-        { label: 'Audit trail',               icon: 'fa-history',         group: 'Navigation', action: () => { overlay.remove(); showAuditTrail(); } },
+        { label: 'Audit trail',               icon: 'fa-clipboard-list',         group: 'Navigation', action: () => { overlay.remove(); showAuditTrail(); } },
         // ── Filters & sort ────────────────────────────────────────────────────
         { label: 'Clear all filters',         icon: 'fa-filter-circle-xmark', group: 'Filters',
           action: () => { overlay.remove(); _clearAllFilters(); } },
@@ -22696,7 +22696,7 @@ function kbOpenCommandPalette() {
           action: () => { overlay.remove(); STATE.view.sortMode='gap'; applyFilterChain(); } },
         { label: 'Sort A–Z',                  icon: 'fa-sort-alpha-down',  group: 'Filters',
           action: () => { overlay.remove(); STATE.view.sortMode='alpha'; STATE.view.sortAsc=true; applyFilterChain(); } },
-        { label: 'Show missing data only',    icon: 'fa-exclamation',     group: 'Filters',
+        { label: 'Show variants with gaps',    icon: 'fa-filter',     group: 'Filters',
           action: () => { overlay.remove(); filterVariants('missing'); } },
         // ── Actions ───────────────────────────────────────────────────────────
         { label: 'Add variant',               icon: 'fa-plus',            group: 'Actions', action: () => { overlay.remove(); showImportModal(); } },
@@ -22720,7 +22720,7 @@ function kbOpenCommandPalette() {
         { label: 'ETI-responsive variants',   icon: 'fa-pills', group: 'Class filters', action: () => { overlay.remove(); filterVariants('eti'); } },
         { label: 'Exceptional variants',      icon: 'fa-bolt',  group: 'Class filters', action: () => { overlay.remove(); filterVariants('exceptional'); } },
         // ── Curation sprint ────────────────────────────────────────────────────
-        { label: 'Start curation sprint',     icon: 'fa-running', group: 'Actions', action: () => { overlay.remove(); startCurationSprint(); } },
+        { label: 'Start curation session',     icon: 'fa-circle-play', group: 'Actions', action: () => { overlay.remove(); startCurationSprint(); } },
         { label: 'Genotype calculator',       icon: 'fa-calculator', group: 'Actions', action: () => { overlay.remove(); openCompoundGenotypeCalculator(); } },
     ];
 
@@ -25485,7 +25485,7 @@ Object.assign(window, { showAuditTrail });
                             <i class="fas fa-history"></i> Check Value Drift
                         </button>
                         <button class="helios-btn helios-btn-ghost" onclick="heliosMissQueueIntelligence()" id="hbtnMissIntel" style="border-color:rgba(96,165,250,0.2);color:var(--helios-blue);">
-                            <i class="fas fa-project-diagram"></i> Miss Queue Intelligence
+                            <i class="fas fa-magnifying-glass-chart"></i> Research Gap Intelligence
                         </button>
                         <button class="helios-btn helios-btn-ghost" onclick="heliosCheckEvidenceContradictions()" id="hbtnEvidence" style="grid-column:1/-1;border-color:rgba(248,113,113,0.2);color:var(--helios-red);">
                             <i class="fas fa-flask"></i> Scan Evidence Contradictions
@@ -25859,7 +25859,7 @@ const HELIOS_TYPES = {
     CONTRADICTION:      { icon:'fa-exclamation-triangle', label:'Contradiction',  cls:'htype-contradiction'   },
     DRIFT_ALERT:        { icon:'fa-clock',             label:'Drift Alert',       cls:'htype-drift_alert'     },
     MISS_RESOLVED:      { icon:'fa-check-circle',      label:'Miss Resolved',     cls:'htype-miss_resolved'   },
-    PATTERN_SIGNAL:     { icon:'fa-project-diagram',   label:'Pattern Signal',    cls:'htype-pattern_signal'  },
+    PATTERN_SIGNAL:     { icon:'fa-chart-network',      label:'Pattern signal',    cls:'htype-pattern_signal'  },
     REGIONAL_SIGNAL:    { icon:'fa-map-marker-alt',    label:'Regional Signal',   cls:'htype-regional_signal' },
     INTERNAL_LOGIC:     { icon:'fa-ban',               label:'Logic Error',       cls:'htype-internal_logic'  },
     INTERNAL_NAMING:    { icon:'fa-spell-check',       label:'Naming Issue',      cls:'htype-internal_naming' },
