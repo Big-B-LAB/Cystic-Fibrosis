@@ -4568,12 +4568,61 @@
         }
 
         /* ── Print: ensure class colours survive ── */
+        /* ════════════════════════════════════════
+           PRINT STYLESHEET — Item 5
+           Prints the selected variant detail panel
+           as clean white A4, suitable for case conferences
+           ════════════════════════════════════════ */
         @media print {
-            .cftr-class-badge,
-            [class*="class-badge"] {
+            /* Reset dark theme to white */
+            html, body { background: #fff !important; color: #111 !important; }
+
+            /* Hide everything except the detail panel */
+            .app-sidebar,
+            .app-header,
+            .detail-actions,
+            .detail-tab-bar,
+            .helios-panel,
+            .cfsm-panel,
+            [class*="modal"],
+            [class*="overlay"],
+            [class*="notification"],
+            [class*="toast"],
+            .no-print,
+            #gapWorklistOverlay,
+            #nomAuditOverlay,
+            #kbShortcutsOverlay,
+            button:not(.print-keep) { display: none !important; }
+
+            /* Main panel takes full width */
+            .app-main, .main-content, .detail-panel, .variant-detail {
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 16px 20px !important;
+                background: #fff !important;
+                border: none !important;
+                box-shadow: none !important;
+                border-radius: 0 !important;
+            }
+
+            /* Typography — legible on paper */
+            .detail-variant-name,
+            .row-name { color: #111 !important; font-size: 16pt !important; }
+            .detail-section { border: 1px solid #ddd !important; border-radius: 4px !important; margin-bottom: 8px !important; background: #fff !important; }
+            .section-title { color: #333 !important; font-size: 10pt !important; }
+            .section-body { color: #222 !important; font-size: 10pt !important; }
+            .row-class-badge, [class*="class-badge"], .cftr-class-badge {
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
+                border: 1px solid #999 !important;
             }
+            /* Evidence links — show URLs */
+            a[href]:after { content: " (" attr(href) ")"; font-size: 8pt; color: #666; }
+
+            /* Page settings */
+            @page { margin: 14mm 16mm; size: A4 portrait; }
+            .detail-panel { page-break-inside: avoid; }
         }
 
         /* ── Focus indicators for keyboard nav ── */
@@ -5757,6 +5806,15 @@
                                 <div class="hdr-menu-sub">All clinical edits</div>
                             </div>
                         </div>
+                        <div class="hdr-menu-item" onclick="openAPIKeyPanel();hdrCloseMenu()">
+                            <div class="hdr-menu-icon" style="background:rgba(251,191,36,.08);color:#fbbf24">
+                                <i class="fas fa-key" aria-hidden="true"></i>
+                            </div>
+                            <div class="hdr-menu-label">
+                                <div class="hdr-menu-title">API keys</div>
+                                <div class="hdr-menu-sub">Manage integration access keys</div>
+                            </div>
+                        </div>
                         <div class="hdr-menu-item" onclick="openNomenclatureAudit();hdrCloseMenu()">
                             <div class="hdr-menu-icon" style="background:rgba(251,191,36,.08);color:#fbbf24">
                                 <i class="fas fa-spell-check" aria-hidden="true"></i>
@@ -5927,6 +5985,7 @@
         <!-- List meta -->
         <div class="list-meta">
             <span class="list-meta-count"><span id="listCount">—</span> variants</span>
+            <span id="compoundChip" style="display:none;"></span>
             <button id="helixBatchToggle" onclick="helixToggleBatchMode()" title="Select multiple variants for batch validation"
                 style="font-size: 11px;padding:2px 8px;border-radius:5px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:var(--text-tertiary);cursor:pointer;font-family:var(--font-body);transition:all .15s;margin-left:4px;">
                 <i class="fas fa-check-square" style="font-size: 11px;margin-right:3px;"></i>Select
@@ -8450,6 +8509,19 @@ async function roboticPubMedSearch(variantName) {
 
 // Score evidence quality using journal_impacts table cache
 const JOURNAL_IMPACT_CACHE = {};
+
+// Item 19: load evidence_sources reliability scores
+const EVIDENCE_SOURCE_RELIABILITY = {};
+async function loadEvidenceSources() {
+    try {
+        const r = await hFetch('evidence_sources?select=source_key,display_name,reliability_score,is_active&is_active=eq.true');
+        if (!r.ok) return;
+        const rows = await r.json();
+        rows.forEach(s => { EVIDENCE_SOURCE_RELIABILITY[s.source_key] = s; });
+        console.log(`[NeumuacFQ] ${rows.length} evidence sources loaded`);
+    } catch(e) {}
+}
+
 async function loadJournalImpacts() {
     try {
         const res = await fetch(`${CONFIG.SUPABASE.URL}/rest/v1/journal_impacts?select=journal_name,impact_factor,quartile&limit=500`, {
@@ -11952,14 +12024,18 @@ function getTopMisses(n = 10) {
             if (!looksLikeCFTR(query)) return false;
             return true;
         })
-        .sort((a,b) => b[1].sessions.size - a[1].sessions.size)
+        .sort((a,b) => {
+            const aSize = a[1].sessions instanceof Set ? a[1].sessions.size : (a[1].sessions || 1);
+            const bSize = b[1].sessions instanceof Set ? b[1].sessions.size : (b[1].sessions || 1);
+            return bSize - aSize;
+        })
         .slice(0, n)
         .map(([query, data]) => ({
             query,
-            count:    data.count,
-            sessions: data.sessions.size,
-            status:   data.status || 'pending',
-            // Check if it's a known misspelling with a suggestion
+            count:      data.count,
+            sessions:   data.sessions instanceof Set ? data.sessions.size : (data.sessions || 1),
+            status:     data.status || 'pending',
+            id:         data.id    || null,  // Supabase row ID (enriched from DB fetch)
             suggestion: NomenclatureResolver?.resolve?.(query)?.legacy || null,
         }));
 }
@@ -15243,6 +15319,22 @@ function renderVariantList() {
     if (shell) shell.classList.toggle('search-active', isSearching);
 
     setText('listCount', total.toLocaleString());
+    // Item 4: compound chip
+    const _cpEl = document.getElementById('compoundChip');
+    if (_cpEl) {
+        const _cpd = STATE.searchIntelligence._lastCompound;
+        if (_cpd && _cpd.parts && STATE.view.searchQuery) {
+            const chips = [
+                ..._cpd.hits.map(p => `<span style="font-size:9px;padding:1px 6px;border-radius:3px;font-family:var(--font-mono);background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.25);color:#34d399;margin-right:3px;">${escapeHTML(p)} ✓</span>`),
+                ...(_cpd.misses||[]).map(p => `<span style="font-size:9px;padding:1px 6px;border-radius:3px;font-family:var(--font-mono);background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.2);color:#f87171;margin-right:3px;">${escapeHTML(p)} ✗</span>`),
+            ].join('');
+            _cpEl.innerHTML = `<span style="font-size:9px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.06em;margin-right:4px;">Compound</span>${chips}`;
+            _cpEl.style.display = 'inline-flex';
+            _cpEl.style.alignItems = 'center';
+        } else {
+            _cpEl.style.display = 'none';
+        }
+    }
 
     // ── Search result bar — three distinct states ─────────────────────────────
     //
@@ -15377,6 +15469,35 @@ function renderVariantList() {
 
         // FIX #1 — Did you mean: inline clickable card, replaces the disappearing notification
         const dym = STATE.view._didYouMean;
+        // Item 3: smart hints for common query mistakes
+        const _q3 = (STATE.view.searchQuery || '').trim();
+        const _smartHint = (() => {
+            if (/^rs\d+$/i.test(_q3))
+                return `<div style="margin-top:12px;padding:10px 14px;background:rgba(251,191,36,0.07);
+                    border:1px solid rgba(251,191,36,0.22);border-radius:8px;text-align:left;">
+                    <div style="font-size:10px;color:#fbbf24;margin-bottom:4px;letter-spacing:.05em;text-transform:uppercase;">
+                        <i class="fas fa-info-circle" style="margin-right:4px;"></i>rsID not supported
+                    </div>
+                    <div style="font-size:11px;color:var(--text-secondary);line-height:1.6;">
+                        CFTR databases use legacy variant names, not dbSNP rsIDs.<br>
+                        Try: <span style="font-family:var(--font-mono);color:var(--brand);">F508del</span>,
+                        <span style="font-family:var(--font-mono);color:var(--brand);">G551D</span>,
+                        <span style="font-family:var(--font-mono);color:var(--brand);">W1282X</span>
+                    </div>
+                </div>`;
+            if (_q3.includes('->'))
+                return `<div style="margin-top:12px;padding:8px 12px;background:rgba(251,191,36,0.06);
+                    border:1px solid rgba(251,191,36,0.2);border-radius:8px;text-align:left;cursor:pointer;"
+                    onclick="document.getElementById('searchInput').value='${escapeAttr(_q3.replace(/->/g,'>'))
+                    }';STATE.view.searchQuery='${escapeAttr(_q3.replace(/->/g,'>'))}';applyFilterChain();">
+                    <span style="font-size:11px;color:#fbbf24;">
+                        Arrow notation: try 
+                        <strong style="font-family:var(--font-mono);">${escapeHTML(_q3.replace(/->/g,'>'))}</strong>
+                        — click to search
+                    </span>
+                </div>`;
+            return '';
+        })();
         const didYouMeanHTML = (dym && dym.suggestion && !crossCount) ? `
             <div style="margin-top:12px;padding:10px 14px;
                         background:rgba(41,121,255,0.06);border:1px solid rgba(41,121,255,0.22);
@@ -15423,6 +15544,7 @@ function renderVariantList() {
                 <p style="font-family:var(--font-mono);font-size:13px;color:var(--text-secondary);">"${escapedQ}"</p>
                 <p style="margin-top:4px;font-size:11px;color:var(--text-tertiary);">not in local database${STATE.view.classFilter !== 'all' && !crossCount ? ` (Class ${escapeHTML(STATE.view.classFilter)} filter active)` : ''}</p>
                 ${didYouMeanHTML}
+                ${_smartHint}
                 ${crossHatch}
                 ${!crossCount ? (isRunning ? `
                 <div class="neu-lookup-running" style="margin-top:16px;">
@@ -15497,6 +15619,14 @@ function renderVariantList() {
                 <div class="row-top">
                     <span class="row-name">${hl(v.legacy_name)}${isExceptional ? ' <span style="color:var(--class-ii);font-size: 11px;font-family:var(--font-body)">⚡</span>' : ''}${isNovel ? ' <span title="Unvalidated — entered via import or external lookup" style="font-size:9px;padding:1px 5px;border-radius:3px;background:rgba(96,165,250,0.12);color:#60a5fa;border:1px solid rgba(96,165,250,0.25);font-family:var(--font-mono);font-weight:700;vertical-align:middle;letter-spacing:.03em;">NEW</span>' : ''}</span>
                     ${v.cftr_class ? `<span class="row-class-badge ${cls}" onclick="event.stopPropagation();showCFTRClassDiagram('${escapeAttr(v.cftr_class)}')" title="Class ${v.cftr_class} — click for mechanism diagram" style="cursor:pointer;">${v.cftr_class}</span>` : ''}
+                    ${(() => {
+                        if (!v.last_evidence_update) return '';
+                        const ageDays = (Date.now() - new Date(v.last_evidence_update).getTime()) / 86400000;
+                        if (ageDays < 365) return '';
+                        const col = ageDays > 730 ? '#f87171' : '#fbbf24';
+                        const label = ageDays > 730 ? `Evidence ${Math.round(ageDays/365)}y old` : `Evidence ${Math.round(ageDays/30)}mo old`;
+                        return `<span title="${label}" style="width:6px;height:6px;border-radius:50%;background:${col};display:inline-block;flex-shrink:0;opacity:0.7;"></span>`;
+                    })()}
                 </div>
                 ${v.protein_name ? `<div class="row-protein">${hl(v.protein_name)}</div>` : '<div class="row-protein" style="opacity:0.4">—</div>'}
                 <div class="row-indicators">
@@ -15652,6 +15782,7 @@ async function acmgToggleCriterion(variantName, variantId, criterionKey, current
         STATE.variantsById.set(variantId, v);
         if (STATE.view.selectedVariant?.id === variantId) {
             STATE.view.selectedVariant = v;
+    helixPresenceInit(v?.id); // Item 20: track presence
             renderVariantDetail(v);
         }
         showNotification(`ACMG ${criterionKey} ${overrides[criterionKey] ? 'overridden to ' + overrides[criterionKey] : 'reverted to auto'}`, 'success');
@@ -16344,6 +16475,7 @@ function renderVariantDetail(variant, fromSearch) {
                         <div class="val-stat"><div class="val-stat-num" id="valUnique-${variant.id}">—</div><div class="val-stat-lbl">Unique</div></div>
                         <div class="val-stat"><div class="val-stat-num" id="valRoles-${variant.id}">—</div><div class="val-stat-lbl">Roles</div></div>
                     </div>
+                    <div id="valRoleBreakdown-${variant.id}" style="padding:6px 0 2px;"></div>
                     <div class="divider"></div>
                     <div class="val-history" id="valHistory-${variant.id}">
                         <div style="text-align:center;padding:8px;font-size:11px;color:var(--text-tertiary)">
@@ -16509,6 +16641,46 @@ function dataField(label, value, field, variant) {
             <i class="fas fa-pencil-alt"></i>
         </button>
     </div>`;
+}
+
+
+// ── Item 2 helper: field-level diff between snapshot and current values ──
+function renderValidationSnapshotDiff(v, cur) {
+    const parts = [];
+    if (v.snapshot_cftr_class) {
+        const changed = cur && cur.cftr_class !== v.snapshot_cftr_class;
+        const col   = changed ? '#fbbf24' : 'var(--text-primary)';
+        const arrow = (changed && cur)
+            ? ' <span style="color:#fbbf24;font-size:9px;">→ now ' + escapeHTML(cur.cftr_class || '—') + '</span>'
+            : '';
+        parts.push('<span title="' + (changed ? 'Changed since validation' : 'Unchanged') + '">Class <strong style="color:' + col + ';">' + escapeHTML(v.snapshot_cftr_class) + '</strong>' + arrow + '</span>');
+    }
+    if (v.snapshot_eti) {
+        const changed = cur && cur.eti_prediction !== v.snapshot_eti;
+        const col   = changed ? '#fbbf24' : 'var(--text-primary)';
+        const arrow = (changed && cur)
+            ? ' <span style="color:#fbbf24;font-size:9px;">→ now ' + escapeHTML(cur.eti_prediction || '—') + '</span>'
+            : '';
+        parts.push('<span title="' + (changed ? 'ETI changed' : 'ETI unchanged') + '">ETI <strong style="color:' + col + ';">' + escapeHTML(v.snapshot_eti) + '</strong>' + arrow + '</span>');
+    }
+    if (v.snapshot_determination) {
+        const changed = cur && cur.final_determination !== v.snapshot_determination;
+        const col = changed ? '#f87171' : 'var(--text-primary)';
+        parts.push('<span>Det. <strong style="color:' + col + ';">' + escapeHTML(v.snapshot_determination) + '</strong></span>');
+    }
+    return parts.length ? parts.join(' &middot; ') : '';
+}
+
+// ── Item 8 helper: reads data-attrs from Helios confidence span ──
+function heliosConfClick(evt, el) {
+    evt.stopPropagation();
+    heliosShowConfidenceDetail(evt, {
+        score:           parseInt(el.dataset.score)    || 0,
+        source:          el.dataset.source             || '',
+        itemType:        el.dataset.itype              || '',
+        evidenceTier:    el.dataset.tier               || '',
+        authoritySource: el.dataset.authority          || '',
+    });
 }
 
 function renderEvidenceLink(link) {
@@ -16756,6 +16928,7 @@ async function submitValidation() {
         }
         calculateMasterStats();
         updateHeaderStats();
+    setTimeout(checkFirstRun, 500); // Item 11: first-run onboarding
         updateFilterChips();
         renderVariantList();
         if (STATE.view.selectedVariant?.id === variantId) {
@@ -16786,6 +16959,22 @@ async function loadValidationHistory(variantId) {
         const uniqueRoles = new Set(validations.map(v => v.clinician_role)).size;
         setText(`valUnique-${variantId}`, uniqueNames);
         setText(`valRoles-${variantId}`, uniqueRoles);
+        // Item 16: role distribution bars
+        const roleEl = document.getElementById(`valRoleBreakdown-${variantId}`);
+        if (roleEl && validations.length > 0) {
+            const roleCounts = {};
+            validations.forEach(v => { roleCounts[v.clinician_role||'Unknown'] = (roleCounts[v.clinician_role||'Unknown']||0)+1; });
+            const maxR = Math.max(...Object.values(roleCounts));
+            roleEl.innerHTML = Object.entries(roleCounts).sort((a,b)=>b[1]-a[1]).slice(0,4).map(([role, count]) =>
+                `<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
+                    <div style="font-size:10px;color:var(--text-secondary);width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHTML(role)}</div>
+                    <div style="flex:1;height:4px;background:rgba(99,140,210,0.1);border-radius:2px;overflow:hidden;">
+                        <div style="height:100%;width:${Math.round(count/maxR*100)}%;background:var(--brand);border-radius:2px;opacity:.7;"></div>
+                    </div>
+                    <div style="font-size:10px;color:var(--text-tertiary);font-family:var(--font-mono);width:16px;text-align:right;">${count}</div>
+                </div>`
+            ).join('');
+        }
 
         if (validations.length === 0) {
             container.innerHTML = '<div style="text-align:center;font-size:11px;color:var(--text-tertiary);padding:8px;">No validations yet</div>';
@@ -16815,9 +17004,10 @@ async function loadValidationHistory(variantId) {
                         ${v.institution_name ? `<span style="font-size:10px;color:var(--text-tertiary);"><i class="fas fa-hospital-alt" style="font-size:9px;margin-right:3px;"></i>${escapeHTML(v.institution_name)}</span>` : ''}
                     </div>
                     ${hasSnapshot ? `
-                    <div style="margin-top:4px;padding:4px 8px;border-radius:5px;background:rgba(99,140,210,0.06);border:1px solid rgba(99,140,210,0.12);font-size:10px;color:var(--text-tertiary);display:flex;gap:8px;flex-wrap:wrap;">
-                        <span style="color:var(--text-secondary);font-weight:600;font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;">Snapshot at validation:</span>
-                        ${v.snapshot_cftr_class ? `<span>Class <strong style="color:var(--text-primary);">${escapeHTML(v.snapshot_cftr_class)}</strong></span>` : ''}
+                    <div style="margin-top:4px;padding:6px 9px;border-radius:5px;background:rgba(99,140,210,0.06);border:1px solid rgba(99,140,210,0.12);font-size:10px;color:var(--text-tertiary);display:flex;gap:8px;flex-wrap:wrap;">
+                        <span style="color:var(--text-secondary);font-weight:600;font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;">At validation:</span>
+                        ${renderValidationSnapshotDiff(v, variant || STATE.variants.find(x => x.id === variantId))}
+                        ${v.snapshot_cftr_class ? '' : ''}
                         ${v.snapshot_eti ? `<span>ETI: <strong style="color:${v.snapshot_eti==='responsive'?'#34d399':v.snapshot_eti==='non_responsive'?'#f87171':'#fbbf24'};">${escapeHTML(v.snapshot_eti.replace('_',' '))}</strong></span>` : ''}
                         ${v.snapshot_determination ? `<span style="color:var(--text-tertiary);">${escapeHTML(v.snapshot_determination)}</span>` : ''}
                     </div>` : ''}
@@ -17996,6 +18186,25 @@ function setSITab(name, btn) {
     if (btn) btn.classList.add('active');
     if (name === 'geo')          renderGeoTab();
     else if (name === 'gaps')    renderGapQueue();
+    if (name === 'misses') {
+        // Enrich in-memory misses with Supabase IDs so Add-variant works
+        hFetch('search_miss_queue?select=id,query,miss_count,unique_sessions,status&order=unique_sessions.desc&limit=50')
+            .then(r => r.ok ? r.json() : [])
+            .then(rows => {
+                rows.forEach(row => {
+                    const mem = STATE.searchIntelligence.globalMisses.get(row.query);
+                    if (mem) mem.id = row.id;  // attach Supabase ID to in-memory entry
+                    // Also surface Supabase-only misses not in current session
+                    if (!mem && row.unique_sessions >= 2) {
+                        STATE.searchIntelligence.globalMisses.set(row.query, {
+                            count: row.miss_count, sessions: new Set([row.query]),
+                            status: row.status, id: row.id,
+                        });
+                    }
+                });
+                populateSITab('misses');  // re-render with enriched data
+            }).catch(() => {});
+    }
     else if (name === 'heatmap') renderVelocityHeatmap();
     else if (name === 'cosearch')renderCoSearchClusters();
     else if (name === 'priority')renderPriorityQueue();
@@ -18108,7 +18317,7 @@ function populateSITab(name) {
     const mqEl = document.getElementById('siMissQueue');
     if (misses.length) {
         mqEl.innerHTML = misses.map(m => `
-            <div class="si-miss-row">
+            <div class="si-miss-row" style="cursor:default;">
                 <div class="si-miss-q">
                     ${escapeHTML(m.query)}
                     ${m.suggestion ? `<span style="display:block;font-size:9px;color:#fbbf24;margin-top:1px;">→ ${escapeHTML(m.suggestion)}</span>` : ''}
@@ -18116,6 +18325,14 @@ function populateSITab(name) {
                 <div class="si-miss-u">${m.sessions} user${m.sessions!==1?'s':''}</div>
                 <div class="si-miss-n">${m.count}×</div>
                 <div class="si-miss-s ${m.status === 'in_review' ? 'review' : m.status}">${m.status === 'in_review' ? 'in review' : m.status}</div>
+                ${m.status === 'pending' ? `
+                <button onclick="event.stopPropagation();siCreateVariantFromMiss('${escapeAttr(m.query)}',${m.id||'null'})"
+                    title="Create a new variant entry for this query"
+                    style="font-size:9px;padding:2px 7px;border-radius:4px;border:1px solid rgba(41,121,255,0.25);
+                    background:rgba(41,121,255,0.07);color:var(--brand);cursor:pointer;
+                    font-family:var(--font-body);white-space:nowrap;flex-shrink:0;">
+                    + Add variant
+                </button>` : ''}
             </div>`).join('');
     } else { mqEl.innerHTML = '<div style="font-size:11px;color:var(--text-tertiary);padding:12px 0;">No misses recorded yet.</div>'; }
 
@@ -18530,6 +18747,70 @@ function runNomenclatureAudit() {
  * Opens the nomenclature audit modal.
  * Runs the audit and presents results with per-variant fix buttons.
  */
+// Item 14: API key management panel (partial)
+async function openAPIKeyPanel() {
+    const existing = document.getElementById('apiKeyPanel');
+    if (existing) { existing.remove(); return; }
+    const ol = document.createElement('div');
+    ol.id = 'apiKeyPanel';
+    Object.assign(ol.style, {
+        position:'fixed', inset:'0', zIndex:'99990',
+        background:'rgba(5,9,26,0.8)', backdropFilter:'blur(6px)',
+        display:'flex', alignItems:'center', justifyContent:'center',
+    });
+    const card = document.createElement('div');
+    Object.assign(card.style, {
+        width:'min(560px,94vw)', maxHeight:'80vh',
+        background:'#0c1422', border:'1px solid rgba(99,140,210,0.22)',
+        borderRadius:'14px', overflow:'hidden', display:'flex', flexDirection:'column',
+        fontFamily:'var(--font-body)', boxShadow:'0 32px 80px rgba(0,0,0,0.8)',
+    });
+    card.innerHTML = `<div style="padding:16px 20px;border-bottom:1px solid rgba(99,140,210,0.12);
+        display:flex;align-items:center;justify-content:space-between;">
+        <div style="display:flex;align-items:center;gap:8px;">
+            <i class="fas fa-key" style="color:var(--brand);"></i>
+            <span style="font-size:13px;font-weight:700;color:var(--text-primary);">API keys</span>
+        </div>
+        <button id="apiKeyClose" style="background:none;border:none;color:var(--text-tertiary);font-size:18px;cursor:pointer;">×</button>
+    </div>
+    <div id="apiKeyBody" style="overflow-y:auto;flex:1;padding:16px 20px;">
+        <div style="font-size:11px;color:var(--text-tertiary);">Loading…</div>
+    </div>`;
+    ol.appendChild(card);
+    document.body.appendChild(ol);
+    FocusTrap.trap(card);
+    const close = () => { FocusTrap.release(); ol.remove(); };
+    document.getElementById('apiKeyClose').addEventListener('click', close);
+    ol.addEventListener('click', e => { if (e.target === ol) close(); });
+
+    try {
+        const r = await hFetch('api_keys?select=id,name,email,organization,requests_today,rate_limit,is_active,expires_at,created_at&order=created_at.desc&limit=20');
+        const keys = r.ok ? await r.json() : [];
+        const body = document.getElementById('apiKeyBody');
+        if (!keys.length) {
+            body.innerHTML = '<div style="text-align:center;padding:24px;font-size:12px;color:var(--text-tertiary);">No API keys configured</div>';
+        } else {
+            body.innerHTML = keys.map(k => `
+                <div style="padding:10px 12px;border:1px solid rgba(99,140,210,0.1);border-radius:8px;margin-bottom:8px;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+                        <span style="font-size:12px;font-weight:700;color:var(--text-primary);">${escapeHTML(k.name)}</span>
+                        <span style="font-size:10px;padding:2px 7px;border-radius:4px;
+                            background:${k.is_active ? 'rgba(52,211,153,0.1)' : 'rgba(248,113,113,0.1)'};
+                            border:1px solid ${k.is_active ? 'rgba(52,211,153,0.3)' : 'rgba(248,113,113,0.3)'};
+                            color:${k.is_active ? '#34d399' : '#f87171'};">${k.is_active ? 'Active' : 'Inactive'}</span>
+                    </div>
+                    <div style="font-size:10px;color:var(--text-tertiary);display:flex;gap:12px;flex-wrap:wrap;">
+                        ${k.organization ? `<span>${escapeHTML(k.organization)}</span>` : ''}
+                        <span>${k.requests_today||0} / ${k.rate_limit||100} req today</span>
+                        ${k.expires_at ? `<span>Expires ${new Date(k.expires_at).toLocaleDateString()}</span>` : ''}
+                    </div>
+                </div>`).join('');
+        }
+    } catch(e) {
+        document.getElementById('apiKeyBody').innerHTML = `<div style="font-size:11px;color:var(--text-tertiary);">API keys unavailable</div>`;
+    }
+}
+
 async function openNomenclatureAudit() {
     const existing = document.getElementById('nomAuditOverlay');
     if (existing) { existing.remove(); return; }
@@ -18770,9 +19051,94 @@ async function nomAuditApplyAll() {
     }, 'Applying batch nomenclature fixes requires write mode');
 }
 
+
+
+// Item 7: Create variant from miss queue — opens annotation modal pre-filled
+function siCreateVariantFromMiss(query, missId) {
+    if (!isWriteMode()) {
+        requireWriteMode(() => siCreateVariantFromMiss(query, missId),
+            `Creating a variant from "${query}" requires write mode`);
+        return;
+    }
+    // Open the new variant form pre-filled with the query as legacy_name
+    const modal = document.getElementById('addVariantModal') || document.getElementById('importModal');
+    if (typeof openAddVariantModal === 'function') {
+        openAddVariantModal({ legacy_name: query, _fromMiss: missId });
+    } else {
+        // Fallback: open lookup with the query, which will offer to save
+        lookupCloseModal();
+        LOOKUP_JOB_STATE.activeQuery = query;
+        LOOKUP_JOB_STATE.status = 'idle';
+        lookupOpenModal();
+        showNotification(`Initiated lookup for "${query}" — save result to create variant`, 'info', 5000);
+        // Mark miss as in_review in Supabase
+        if (missId) {
+            hFetch(`search_miss_queue?id=eq.${missId}`, {
+                method: 'PATCH',
+                body: JSON.stringify({ status: 'in_review' })
+            }).catch(() => {});
+        }
+    }
+}
+
 function renderSICharts() {
     populateSITab('overview');
     renderSIBadges();
+}
+
+
+
+// Item 11: First-run onboarding modal
+function checkFirstRun() {
+    if (STATE.variants.length > 0) return;
+    if (localStorage.getItem('_onboardingDone')) return;
+    const ol = document.createElement('div');
+    ol.id = 'onboardingOverlay';
+    Object.assign(ol.style, {
+        position:'fixed', inset:'0', zIndex:'99999',
+        background:'rgba(5,9,26,0.92)', backdropFilter:'blur(12px)',
+        display:'flex', alignItems:'center', justifyContent:'center',
+    });
+    ol.innerHTML = `<div style="width:min(520px,94vw);background:#0c1422;border:1px solid rgba(41,121,255,0.25);
+        border-radius:16px;padding:32px;font-family:var(--font-body);box-shadow:0 40px 80px rgba(0,0,0,0.8);">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+            <i class="fas fa-dna" style="color:var(--brand);font-size:18px;"></i>
+            <span style="font-size:18px;font-weight:800;color:var(--text-primary);font-family:var(--font-display);">Welcome to NeumuacFQ</span>
+        </div>
+        <p style="font-size:13px;color:var(--text-secondary);margin-bottom:24px;line-height:1.6;">
+            Your CFTR variant intelligence platform. Let's get you set up in three steps.
+        </p>
+        <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px;">
+            ${[
+                {n:1, icon:'fa-upload',       col:'#60a5fa', title:'Import variants',      desc:'Load your CFTR variant database via CSV, JSON, or manual entry. Start with even a handful.'},
+                {n:2, icon:'fa-building',      col:'#34d399', title:'Set your institution', desc:'Your institution name appears on reports and analytics. Set it in Settings → Institution.'},
+                {n:3, icon:'fa-robot',         col:'#c084fc', title:'Run Helios scan',      desc:'After import, run the AI scan to flag data quality issues and enrich evidence links.'},
+            ].map(s => `<div style="display:flex;gap:12px;padding:12px;border-radius:8px;background:rgba(41,121,255,0.04);border:1px solid rgba(41,121,255,0.1);">
+                <div style="width:32px;height:32px;border-radius:8px;background:${s.col}18;border:1px solid ${s.col}33;
+                    display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <i class="fas ${s.icon}" style="color:${s.col};font-size:13px;"></i>
+                </div>
+                <div>
+                    <div style="font-size:12px;font-weight:700;color:var(--text-primary);margin-bottom:2px;">
+                        <span style="font-size:10px;color:${s.col};margin-right:6px;font-weight:700;">${s.n}</span>${s.title}
+                    </div>
+                    <div style="font-size:11px;color:var(--text-tertiary);line-height:1.5;">${s.desc}</div>
+                </div>
+            </div>`).join('')}
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;">
+            <button onclick="document.getElementById('onboardingOverlay').remove();localStorage.setItem('_onboardingDone','1');"
+                style="padding:8px 16px;border-radius:7px;border:1px solid rgba(99,140,210,0.2);background:none;color:var(--text-tertiary);font-size:12px;cursor:pointer;font-family:var(--font-body);">
+                Skip for now
+            </button>
+            <button onclick="document.getElementById('onboardingOverlay').remove();localStorage.setItem('_onboardingDone','1');document.getElementById('hdrMenu')?.querySelector('[onclick*=import]')?.click();"
+                style="padding:8px 20px;border-radius:7px;background:var(--brand);border:none;color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-body);">
+                <i class="fas fa-upload" style="margin-right:6px;font-size:11px;"></i>Import variants →
+            </button>
+        </div>
+    </div>`;
+    document.body.appendChild(ol);
+    FocusTrap.trap(ol.querySelector('div'));
 }
 
 function renderSIBadges() {
@@ -24365,9 +24731,30 @@ async function init() {
     initializeBulkImport();
     initDevNotice();
     // Phase 1: load DB-driven configs in parallel — non-blocking
-    Promise.all([loadClassRules(), loadJournalImpacts(), loadCftrClassRules()]).catch(() => {});
+    Promise.all([loadClassRules(), loadJournalImpacts(), loadCftrClassRules(), loadEvidenceSources()]).catch(() => {});
     IdleGuard.start(); // ITEM 8: idle timeout guard
+    // Item 9: refresh platform snapshot once per day
+    (() => {
+        const today = new Date().toISOString().split('T')[0];
+        const lastSnap = localStorage.getItem('_lastSnapshot');
+        if (lastSnap !== today) {
+            hFetch('rpc/fn_refresh_platform_snapshot', { method: 'POST', body: '{}' })
+                .then(r => {
+                    if (r.ok) {
+                        localStorage.setItem('_lastSnapshot', today);
+                        console.log('[NeumuacFQ] Platform snapshot refreshed');
+                    } else {
+                        // 404 = function not exposed via PostgREST. Fix with:
+                        // GRANT EXECUTE ON FUNCTION public.fn_refresh_platform_snapshot() TO anon;
+                        // ALTER FUNCTION public.fn_refresh_platform_snapshot() SECURITY DEFINER;
+                        console.debug('[NeumuacFQ] Snapshot RPC not accessible — run SQL grant');
+                    }
+                })
+                .catch(() => {}); // non-fatal — snapshot will be stale
+        }
+    })();
     heliosFeedbackLoad(); // Load Helios feedback from Supabase
+    loadAppConfig(); // Item 17: load configurable settings
     attachVariantNameValidation(); // Nomenclature validation on entry form
     await loadVariants();
     initHospital();
@@ -26081,6 +26468,9 @@ Object.assign(window, { showAuditTrail });
             <button class="helios-tab" id="htab-audit" onclick="heliosTab('audit')">
                 <i class="fas fa-scroll"></i> Audit Trail
             </button>
+            <button class="helios-tab" id="htab-monitor" onclick="heliosTab('monitor')">
+                <i class="fas fa-bell"></i> Watchlist
+            </button>
             <button class="helios-tab" id="htab-validate" onclick="heliosTab('validate')">
                 <i class="fas fa-shield-alt"></i> Validate
                 <span class="helios-tab-badge" id="htabBadgeValidate" style="display:none;background:var(--helios-blue);"></span>
@@ -26649,14 +27039,15 @@ function closeHelios() {
 // ---- Tab switching ----
 function heliosTab(tab) {
     HELIOS.currentTab = tab;
-    ['inbox','scanner','health','audit','validate','calibration'].forEach(t => {
+    ['inbox','scanner','health','audit','validate','calibration','monitor'].forEach(t => {
         document.getElementById(`hpanel-${t}`)?.classList.toggle('active', t === tab);
         document.getElementById(`htab-${t}`)?.classList.toggle('active', t === tab);
     });
-    if (tab === 'audit')    heliosLoadAudit();
-    if (tab === 'scanner')  heliosUpdateScannerStats();
-    if (tab === 'validate') heliosLoadValidationQueue();
+    if (tab === 'audit')       heliosLoadAudit();
+    if (tab === 'scanner')     heliosUpdateScannerStats();
+    if (tab === 'validate')    heliosLoadValidationQueue();
     if (tab === 'calibration') heliosFeedbackRefreshPanel();
+    if (tab === 'monitor')     heliosLoadMonitor();
     // health check only on explicit Run Check click
 }
 
@@ -27277,6 +27668,48 @@ async function heliosReleaseItem(itemId, clinicianName) {
 // ================================================================
 const HELIOS_FEEDBACK = {};  // in-memory cache; populated by heliosFeedbackLoad()
 
+
+
+// Item 17: Load app_config from Supabase and override CONFIG values
+async function loadAppConfig() {
+    try {
+        const r = await hFetch('app_config?select=key,value');
+        if (!r.ok) return;
+        const rows = await r.json();
+        rows.forEach(({ key, value }) => {
+            switch(key) {
+                case 'idle_timeout_minutes':
+                    if (SESSION_SECURITY && parseInt(value)) {
+                        // Note: SESSION_SECURITY is frozen — log the value for reference
+                        console.log(`[NeumuacFQ Config] idle_timeout: ${value}min (restart to apply)`);
+                    }
+                    break;
+                case 'institution_name':
+                    if (STATE.searchIntelligence && value) {
+                        STATE.searchIntelligence.hospitalName = STATE.searchIntelligence.hospitalName || value;
+                    }
+                    break;
+                case 'min_validation_for_complete':
+                    if (parseInt(value) > 0) CONFIG.MIN_VALIDATIONS_COMPLETE = parseInt(value);
+                    break;
+                case 'helios_confidence_threshold':
+                    if (parseInt(value) > 0) CONFIG.HELIOS_MIN_CONFIDENCE = parseInt(value);
+                    break;
+                case 'platform_name':
+                    if (value) {
+                        document.title = value;
+                        const brandEl = document.querySelector('.app-brand-name, [class*="brand"]');
+                        if (brandEl) brandEl.textContent = value;
+                    }
+                    break;
+            }
+        });
+        console.log(`[NeumuacFQ Config] ${rows.length} config values loaded from Supabase`);
+    } catch(e) {
+        console.debug('[NeumuacFQ Config] app_config unavailable:', e.message);
+    }
+}
+
 async function heliosFeedbackLoad() {
     try {
         const r = await hFetch('helios_feedback?select=scan_source,item_type,approved,rejected,deferred,total');
@@ -27400,7 +27833,13 @@ function renderHeliosConfidence(item) {
     const confLabel = calibrated >= 80 ? 'High — likely approvable' : calibrated >= 50 ? 'Moderate — review carefully' : 'Low — verify before approving';
     return `<div class="helios-confidence-bar">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
-            <span style="font-size:10px;font-weight:700;font-family:var(--helios-mono);color:var(--helios-text3);text-transform:uppercase;letter-spacing:.08em;">
+            <span onclick="heliosConfClick(event,this)" 
+                  data-score="${calibrated}"
+                  data-source="${escapeHTML(item.scan_source||'')}"
+                  data-itype="${escapeHTML(item.item_type||'')}"
+                  data-tier="${escapeHTML(item.eti_evidence_tier||'')}"
+                  data-authority="${escapeHTML(item.eti_authority_source||'')}"
+                  title="Click for confidence breakdown" style="cursor:pointer;font-size:10px;font-weight:700;font-family:var(--helios-mono);color:var(--helios-text3);text-transform:uppercase;letter-spacing:.08em;">
                 ${suppressed ? '⚠ LOW SIGNAL SOURCE' : 'AI Confidence'}
             </span>
             <span style="font-size:10px;color:${color};font-family:var(--helios-mono);">${confLabel}</span>
@@ -28376,6 +28815,25 @@ function heliosCheckVariantConsistency(v) {
         }
     }
 
+    // Check 17: Duplicate candidate detection
+    if (v.legacy_name) {
+        const _thisNorm = normaliseQuery(v.legacy_name);
+        const _dupe = STATE.variants.find(other =>
+            other.id !== v.id && other.legacy_name &&
+            normaliseQuery(other.legacy_name) === _thisNorm
+        );
+        if (_dupe) {
+            issues.push({
+                item_type: 'INTERNAL_DUPLICATE',
+                bot_summary: `"${v.legacy_name}" and "${_dupe.legacy_name}" are likely the same variant`,
+                bot_reasoning: `Both normalise to "${_thisNorm}". Review both records — one may be a copy or alternate notation that should be archived.`,
+                bot_confidence: 82,
+                proposed_field: 'legacy_name', current_value: v.legacy_name,
+                proposed_value: _dupe.legacy_name, _priority: 'ROUTINE',
+            });
+        }
+    }
+
     return issues;
 }
 
@@ -28836,6 +29294,62 @@ async function heliosRemoveMonitor(targetId) {
 // ================================================================
 // AUDIT TRAIL
 // ================================================================
+// Item 8: Helios confidence explanation popover
+function heliosShowConfidenceDetail(evt, data) {
+    evt.stopPropagation();
+    const existing = document.getElementById('heliosConfPopover');
+    if (existing) { existing.remove(); return; }
+    const parsed = typeof data === 'string' ? JSON.parse(data) : data;
+    const { score, source, itemType, evidenceTier, authoritySource } = parsed;
+
+    // Approval rate from feedback cache
+    const rate    = heliosFeedbackApprovalRate(source, itemType);
+    const rateStr = rate !== null ? `${Math.round(rate*100)}% approval rate (${Math.round(rate*100 >= 70 ? 1 : 0) + ' of similar items approved'})` : 'Not enough feedback yet (< 3 decisions)';
+
+    // Tier explanation
+    const TIER_EXPLAIN = {
+        fda_approved:       '✅ FDA Trikafta prescribing label — highest authority',
+        fda_non_responsive: '✅ CFTR2 / FDA confirmed non-responsive',
+        class_rule:         '⚡ CFTR class general rule — no variant-specific data',
+        literature:         '📄 Literature-derived signal — manual review recommended',
+        insufficient:       '❓ Insufficient evidence — low confidence by design',
+    };
+    const tierNote = TIER_EXPLAIN[evidenceTier] || '';
+
+    const pop = document.createElement('div');
+    pop.id = 'heliosConfPopover';
+    Object.assign(pop.style, {
+        position: 'fixed',
+        top:  (evt.clientY + 12) + 'px',
+        left: Math.min(evt.clientX, window.innerWidth - 240) + 'px',
+        zIndex: '999999',
+        background: '#0f1d30',
+        border: '1px solid rgba(99,140,210,0.3)',
+        borderRadius: '8px',
+        padding: '12px 14px',
+        width: '220px',
+        boxShadow: '0 12px 40px rgba(0,0,0,0.7)',
+        fontFamily: 'var(--font-body)',
+    });
+    pop.innerHTML = `
+        <div style="font-size:10px;font-weight:700;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;">
+            Confidence breakdown
+        </div>
+        <div style="font-size:22px;font-weight:700;font-family:var(--font-mono);color:${score>=80?'#34d399':score>=60?'#fbbf24':'#f87171'};margin-bottom:8px;">
+            ${score}%
+        </div>
+        ${tierNote ? `<div style="font-size:11px;color:var(--text-secondary);margin-bottom:6px;line-height:1.5;">${tierNote}</div>` : ''}
+        ${authoritySource ? `<div style="font-size:10px;color:var(--text-tertiary);margin-bottom:6px;">Source: ${escapeHTML(authoritySource)}</div>` : ''}
+        <div style="font-size:10px;color:var(--text-tertiary);border-top:1px solid rgba(99,140,210,0.1);padding-top:6px;margin-top:2px;">
+            Feedback: ${rateStr}
+        </div>`;
+
+    document.body.appendChild(pop);
+    setTimeout(() => {
+        document.addEventListener('click', () => pop.remove(), { once: true });
+    }, 10);
+}
+
 async function heliosLoadAudit() {
     const list = document.getElementById('heliosAuditList');
     list.innerHTML = `<div class="helios-empty"><div class="helios-spinner" style="margin:0 auto 12px;"></div><p>Loading…</p></div>`;
@@ -31989,6 +32503,59 @@ Object.assign(window, { saveEvidenceLink });
 STATE.batchMode  = false;
 STATE.batchSelected = new Set();
 
+
+
+// Item 1: Batch apply field edits (class, ETI, determination)
+async function helixBatchApplyFields() {
+    const cls  = document.getElementById('batchClassSel')?.value;
+    const eti  = document.getElementById('batchEtiSel')?.value;
+    const det  = document.getElementById('batchDetSel')?.value;
+    if (!cls && !eti && !det) {
+        showNotification('Select at least one field to apply', 'warning', 3000);
+        return;
+    }
+    if (!isWriteMode()) {
+        requireWriteMode(() => helixBatchApplyFields(),
+            `Batch editing ${STATE.batchSelected.size} variants requires write mode`);
+        return;
+    }
+    const patch = {};
+    if (cls) { patch.cftr_class = cls; }
+    if (eti) { patch.eti_prediction = eti; }
+    if (det) { patch.final_determination = det; }
+    patch.updated_at = new Date().toISOString();
+
+    const ids = [...STATE.batchSelected];
+    if (!confirm(`Apply ${Object.keys(patch).filter(k=>k!=='updated_at').join(', ')} to ${ids.length} variant${ids.length!==1?'s':''}?
+
+This will be logged to the audit trail.`)) return;
+
+    let done = 0, failed = 0;
+    for (const id of ids) {
+        try {
+            const r = await hFetch(`variants?id=eq.${id}`, { method: 'PATCH', body: JSON.stringify(patch) });
+            if (!r.ok) throw new Error(`HTTP ${r.status}`);
+            const v = STATE.variants.find(x => x.id === id);
+            if (v) Object.assign(v, patch);
+            await writeAuditLog({
+                action: 'batch_field_edit', variant_id: id,
+                variant_name: STATE.variants.find(x=>x.id===id)?.legacy_name || String(id),
+                clinician_name: STATE.searchIntelligence?.clinicianName || 'Curator',
+                clinician_role: STATE.searchIntelligence?.clinicianRole  || 'Write mode user',
+                note: `Batch edit: ${JSON.stringify(patch).replace('{"','').replace('"updated_at":"'+patch.updated_at+'",','').replace('}','')}`,
+            });
+            done++;
+        } catch(e) { failed++; }
+    }
+    showNotification(`${done} variant${done!==1?'s':''} updated${failed?`, ${failed} failed`:''}`, done > 0 ? 'success' : 'error');
+    calculateMasterStats(); updateHeaderStats(); renderVariantList();
+    // Reset selects
+    ['batchClassSel','batchEtiSel','batchDetSel'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+}
+
 function helixToggleBatchMode() {
     STATE.batchMode = !STATE.batchMode;
     STATE.batchSelected.clear();
@@ -32033,12 +32600,33 @@ function helixUpdateBatchBar() {
         requestAnimationFrame(() => { bar.style.transform = 'translateY(0)'; });
     }
     const n = STATE.batchSelected.size;
+    const selStyle = 'padding:4px 8px;border-radius:5px;border:1px solid rgba(99,140,210,0.25);background:rgba(99,140,210,0.08);color:var(--text-primary);font-size:11px;font-family:var(--font-body);cursor:pointer;';
     bar.innerHTML = `
-        <span style="font-size:11.5px;color:var(--text-secondary);flex:1;">${n} variant${n!==1?'s':''} selected</span>
-        <button onclick="helixBatchValidate()" style="padding:6px 12px;border-radius:6px;background:var(--brand);border:none;color:#fff;font-size:11.5px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .15s;" onmouseover="this.style.background='var(--brand-dark)'" onmouseout="this.style.background='var(--brand)'">
-            <i class="fas fa-check-circle" style="margin-right:4px;font-size: 11px;"></i>Validate ${n}
+        <span style="font-size:11px;color:var(--text-secondary);flex-shrink:0;">${n} selected</span>
+        <span style="font-size:9px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.07em;flex-shrink:0;">Set:</span>
+        <select id="batchClassSel" title="Set CFTR class for all selected" style="${selStyle}">
+            <option value="">Class…</option>
+            ${['I','II','III','IV','V','VI','II/III'].map(c => `<option value="${c}">${c}</option>`).join('')}
+        </select>
+        <select id="batchEtiSel" title="Set ETI prediction for all selected" style="${selStyle}">
+            <option value="">ETI…</option>
+            <option value="responsive">Responsive</option>
+            <option value="non_responsive">Non-responsive</option>
+            <option value="unknown">Unknown</option>
+        </select>
+        <select id="batchDetSel" title="Set determination for all selected" style="${selStyle}">
+            <option value="">Determination…</option>
+            <option value="CF-causing">CF-causing</option>
+            <option value="Variant of Uncertain Significance">VUS</option>
+            <option value="Non-CF-causing">Non-CF-causing</option>
+        </select>
+        <button onclick="helixBatchApplyFields()" style="padding:5px 11px;border-radius:5px;background:rgba(251,191,36,0.12);border:1px solid rgba(251,191,36,0.3);color:#fbbf24;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--font-body);flex-shrink:0;">
+            Apply
         </button>
-        <button onclick="STATE.batchSelected.clear();helixUpdateBatchBar();renderVariantList();" style="padding:6px 10px;border-radius:6px;border:1px solid rgba(99,140,210,0.2);background:none;color:var(--text-tertiary);font-size:11px;cursor:pointer;">Clear</button>`;
+        <button onclick="helixBatchValidate()" style="padding:5px 11px;border-radius:5px;background:var(--brand);border:none;color:#fff;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--font-body);flex-shrink:0;">
+            <i class="fas fa-check-circle" style="margin-right:3px;font-size:10px;"></i>Validate
+        </button>
+        <button onclick="STATE.batchSelected.clear();helixUpdateBatchBar();renderVariantList();" style="padding:5px 8px;border-radius:5px;border:1px solid rgba(99,140,210,0.2);background:none;color:var(--text-tertiary);font-size:11px;cursor:pointer;flex-shrink:0;">✕</button>`;
 }
 
 async function helixBatchValidate() {
