@@ -1969,7 +1969,7 @@
         .si-rq { font-size:11px; font-family:var(--font-mono); color:var(--text-primary); flex:1; }
         .si-rf { font-size: 11px; color:var(--text-secondary); background:var(--white); border-radius:3px; padding:1px 5px; border:1px solid var(--border); }
         .si-rt { font-size: 11px; color:var(--text-tertiary); font-family:var(--font-mono); }
-        .si-coverage-track { height:8px; background:rgba(255,255,255,0.04); border-radius:4px; overflow:hidden; margin-bottom:5px; }
+        .si-coverage-track { position:relative; height:8px; background:rgba(255,255,255,0.04); border-radius:4px; overflow:hidden; margin-bottom:5px; }
         .si-coverage-fill { height:100%; border-radius:4px; background:#34d399; transition:width 1s cubic-bezier(.4,0,.2,1); }
         .si-field-bar { display:flex; height:24px; border-radius:4px; overflow:hidden; gap:1px; margin-bottom:7px; }
         .si-fb-seg { display:flex; align-items:center; justify-content:center; font-size: 11px; font-weight:600; letter-spacing:.04em; }
@@ -6576,8 +6576,15 @@
                             <div class="si-card-head"><div class="si-card-title"><span style="width:6px;height:6px;border-radius:50%;background:#34d399;display:inline-block;"></span>DB coverage</div></div>
                             <div class="si-card-body">
                                 <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:9px;">
-                                    <span style="font-size:24px;font-weight:700;font-family:var(--font-mono);color:#34d399;" id="siCoveragePct">—</span>
-                                    <span style="font-size: 11px;color:var(--text-tertiary);">clinical coverage</span>
+                                <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:4px;">
+                                    <span style="font-size:26px;font-weight:700;font-family:var(--font-mono);color:#34d399;" id="siCoveragePct">—</span>
+                                    <span style="font-size:11px;color:var(--text-tertiary);">search hit rate</span>
+                                </div>
+                                <div style="display:flex;gap:12px;margin-bottom:8px;margin-top:8px;">
+                                    <div style="text-align:center;"><div style="font-size:14px;font-weight:700;font-family:var(--font-mono);color:#34d399;" id="siCovHits">—</div><div style="font-size:9px;color:var(--text-tertiary);margin-top:1px;">hits</div></div>
+                                    <div style="text-align:center;"><div style="font-size:14px;font-weight:700;font-family:var(--font-mono);color:#f87171;" id="siCovMisses">—</div><div style="font-size:9px;color:var(--text-tertiary);margin-top:1px;">misses</div></div>
+                                    <div style="text-align:center;"><div style="font-size:14px;font-weight:700;font-family:var(--font-mono);color:#60a5fa;" id="siCovUniq">—</div><div style="font-size:9px;color:var(--text-tertiary);margin-top:1px;">unique</div></div>
+                                </div>
                                 </div>
                                 <div class="si-coverage-track"><div class="si-coverage-fill" id="siCoverageBar" style="width:0%"></div></div>
                                 <div style="display:flex;justify-content:space-between;font-size: 11px;color:var(--text-tertiary);font-family:var(--font-mono);margin-top:4px;"><span>0%</span><span>50%</span><span>100%</span></div>
@@ -6587,11 +6594,14 @@
                         <div class="si-card">
                             <div class="si-card-head"><div class="si-card-title"><span style="width:6px;height:6px;border-radius:50%;background:#fbbf24;display:inline-block;"></span>Nomenclature used by clinicians</div></div>
                             <div class="si-card-body">
-                                <div class="si-field-bar" id="siFieldBar">
-                                    <div class="si-fb-seg" style="flex:1;background:var(--surface-alt);color:var(--text-tertiary);">No data</div>
+                                <!-- Horizontal field breakdown bar (kept for field note) -->
+                                <div class="si-field-bar" id="siFieldBar" style="display:none;"></div>
+                                <div id="siFieldLegend" style="display:none;"></div>
+                                <div style="margin-top:0;font-size:11px;color:var(--text-tertiary);line-height:1.5;display:none;" id="siFieldNote"></div>
+                                <!-- Nomenclature bars — populated by populateSITab() -->
+                                <div id="siNomBars">
+                                    <div style="font-size:11px;color:var(--text-tertiary);padding:8px 0;">Breakdown appears after searches.</div>
                                 </div>
-                                <div style="display:flex;gap:10px;font-size: 11px;font-family:var(--font-mono);" id="siFieldLegend"></div>
-                                <div style="margin-top:8px;font-size:11px;color:var(--text-tertiary);line-height:1.5;" id="siFieldNote">Breakdown appears after searches.</div>
                             </div>
                         </div>
                     </div>
@@ -11497,13 +11507,39 @@ function getTopSearchHits(n = 10) {
         .slice(0, n);
 }
 function getTopMisses(n = 10) {
+    // Noise filter: exclude queries that are not plausible CFTR variant searches
+    // Keeps: anything with digits, HGVS-like notation, known gene symbols
+    // Removes: pure text words (gating, braf, test), single chars, whitespace-only
+    const NOISE_PATTERNS = [
+        /^(gating|trafficking|test|sample|hello|search|query|unknown|example|dummy|null|undefined)$/i,
+        /^[a-z]{1,3}$/i,       // 1-3 letter words with no digits = likely noise
+        /^\d{1,2}$/,            // 1-2 digit numbers = too vague
+        /^(braf|kras|egfr|tp53|brca|apc|pten|mtor)$/i, // non-CFTR genes
+    ];
+    const looksLikeCFTR = q => {
+        // Must have at least one digit OR be known CFTR notation
+        if (/\d/.test(q)) return true;                         // has position number
+        if (/^[A-Z][a-z]{2}\d/.test(q)) return true;          // protein notation
+        if (/^(p\.|c\.|r\.|IVS)/i.test(q)) return true;       // HGVS prefix
+        if (/del|ins|dup|splice|class|exon/i.test(q)) return true;
+        return false;
+    };
     return Array.from(STATE.searchIntelligence.globalMisses.entries())
-        .sort((a,b) => b[1].sessions.size - a[1].sessions.size).slice(0, n)
+        .filter(([query]) => {
+            if (!query || query.trim().length < 2) return false;
+            if (NOISE_PATTERNS.some(p => p.test(query.trim()))) return false;
+            if (!looksLikeCFTR(query)) return false;
+            return true;
+        })
+        .sort((a,b) => b[1].sessions.size - a[1].sessions.size)
+        .slice(0, n)
         .map(([query, data]) => ({
             query,
             count:    data.count,
             sessions: data.sessions.size,
-            status:   data.status || 'pending'
+            status:   data.status || 'pending',
+            // Check if it's a known misspelling with a suggestion
+            suggestion: NomenclatureResolver?.resolve?.(query)?.legacy || null,
         }));
 }
 function getSearchHitRate() {
@@ -17562,15 +17598,46 @@ function populateSITab(name) {
     const pct = rate.total > 0 ? rate.hitRate : 0;
     document.getElementById('siCoveragePct').textContent = rate.total > 0 ? pct + '%' : '—';
     document.getElementById('siCoverageBar').style.width = pct + '%';
+    const missBar = document.getElementById('siCoverageMissBar');
+    if (missBar) missBar.style.width = (rate.total > 0 ? (100-pct) : 0) + '%';
+    const hitEl = document.getElementById('siCovHits');
+    const misEl = document.getElementById('siCovMisses');
+    const unqEl = document.getElementById('siCovUniq');
+    if (hitEl) hitEl.textContent = rate.hits.toLocaleString();
+    if (misEl) misEl.textContent = rate.misses.toLocaleString();
+    if (unqEl) unqEl.textContent = uniq.toLocaleString(); // uniq already declared above
     document.getElementById('siCoverageNote').textContent = rate.misses > 0
-        ? rate.misses + ' searches returned no result — potential DB gaps.'
-        : 'All searches resolved. Excellent coverage.';
+        ? rate.misses.toLocaleString() + ' searches returned no result — potential DB gaps.'
+        : rate.total > 0 ? 'All searches resolved. Excellent database coverage.' : 'Search more variants to build coverage data.';
 
-    // Field breakdown
+    // Field breakdown + wire to nomenclature section
     const fb = getFieldBreakdown();
     const fbTotal = Object.values(fb).reduce((a,b) => a+b, 0);
     const fbEl = document.getElementById('siFieldBar');
     const lgEl = document.getElementById('siFieldLegend');
+    
+    // Wire nomenclature card with actual data
+    const nomEl = document.getElementById('siNomBars');
+    if (nomEl && fbTotal > 0) {
+        const fieldCfgNom = [
+            { key:'legacy_name',  label:'Legacy name',  pct: Math.round((fb.legacy_name||0)/fbTotal*100),  color:'#93c5fd', note:'e.g. F508del, G551D' },
+            { key:'protein_name', label:'Protein (HGVS)',pct: Math.round((fb.protein_name||0)/fbTotal*100), color:'#c4b5fd', note:'e.g. p.Phe508del' },
+            { key:'cdna_name',    label:'cDNA (HGVS)',   pct: Math.round((fb.cdna_name||0)/fbTotal*100),   color:'#6ee7b7', note:'e.g. c.1521_1523del' },
+        ];
+        nomEl.innerHTML = fieldCfgNom.map(f => `
+            <div style="margin-bottom:10px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                    <span style="font-size:11px;color:${f.color};font-weight:600;">${f.label}</span>
+                    <span style="font-size:11px;font-family:var(--font-mono);color:${f.color};">${f.pct}%</span>
+                </div>
+                <div style="height:4px;background:rgba(255,255,255,.05);border-radius:2px;overflow:hidden;">
+                    <div style="height:100%;width:${f.pct}%;background:${f.color};border-radius:2px;opacity:.7;transition:width .7s ease;"></div>
+                </div>
+                <div style="font-size:10px;color:var(--text-tertiary);margin-top:2px;">${f.note}</div>
+            </div>`).join('');
+    } else if (nomEl) {
+        nomEl.innerHTML = '<div style="font-size:11px;color:var(--text-tertiary);padding:8px 0;">No data yet — search some variants to populate.</div>';
+    }
     const fieldCfg = [
         { key:'legacy_name',  label:'Legacy',  bg:'#1e3a5f', color:'#93c5fd' },
         { key:'protein_name', label:'Protein', bg:'#2d1f5e', color:'#c4b5fd' },
@@ -17607,9 +17674,12 @@ function populateSITab(name) {
         const maxS = misses[0].sessions;
         mEl.innerHTML = misses.slice(0,5).map(m => `
             <div class="si-bar-row">
-                <div class="si-bl" title="${escapeHTML(m.query)}">${escapeHTML(m.query)}</div>
+                <div class="si-bl" title="${escapeHTML(m.query)}" style="display:flex;flex-direction:column;gap:1px;">
+                    <span>${escapeHTML(m.query)}</span>
+                    ${m.suggestion ? `<span style="font-size:9px;color:#fbbf24;font-family:var(--font-mono);">→ did you mean ${escapeHTML(m.suggestion)}?</span>` : ''}
+                </div>
                 <div class="si-bt"><div class="si-bf r" style="width:${Math.round(m.sessions/maxS*100)}%"></div></div>
-                <div class="si-bn">${m.sessions}<span style="font-size: 11px;color:var(--text-tertiary);">u</span></div>
+                <div class="si-bn">${m.sessions}<span style="font-size:9px;color:var(--text-tertiary);">u</span></div>
             </div>`).join('');
     } else { mEl.innerHTML = '<div style="font-size:11px;color:var(--text-tertiary);padding:8px 0;">No misses yet</div>'; }
 
@@ -17618,7 +17688,10 @@ function populateSITab(name) {
     if (misses.length) {
         mqEl.innerHTML = misses.map(m => `
             <div class="si-miss-row">
-                <div class="si-miss-q">${escapeHTML(m.query)}</div>
+                <div class="si-miss-q">
+                    ${escapeHTML(m.query)}
+                    ${m.suggestion ? `<span style="display:block;font-size:9px;color:#fbbf24;margin-top:1px;">→ ${escapeHTML(m.suggestion)}</span>` : ''}
+                </div>
                 <div class="si-miss-u">${m.sessions} user${m.sessions!==1?'s':''}</div>
                 <div class="si-miss-n">${m.count}×</div>
                 <div class="si-miss-s ${m.status === 'in_review' ? 'review' : m.status}">${m.status === 'in_review' ? 'in review' : m.status}</div>
@@ -17911,22 +17984,22 @@ function renderSICharts() {
         data: {
             labels: tl.labels,
             datasets: [
-                { type:'bar', label:'Hits',    data:tl.hits,   backgroundColor:'rgba(74,222,128,0.45)', borderColor:'rgba(74,222,128,0.7)', borderWidth:1, borderRadius:3, yAxisID:'y' },
-                { type:'bar', label:'Misses',  data:tl.misses, backgroundColor:'rgba(248,113,113,0.35)', borderColor:'rgba(248,113,113,0.6)', borderWidth:1, borderRadius:3, yAxisID:'y' },
-                { type:'line',label:'Hit rate %', data:tl.rates, borderColor:'#fbbf24', borderWidth:2, pointBackgroundColor:'#fbbf24', pointRadius:3, tension:.4, yAxisID:'y2', fill:false }
+                { type:'bar', label:'Hits',    data:tl.hits,   backgroundColor:'rgba(52,211,153,0.55)', borderColor:'#34d399', borderWidth:1.5, borderRadius:4, yAxisID:'y', barPercentage:0.75 },
+                { type:'bar', label:'Misses',  data:tl.misses, backgroundColor:'rgba(248,113,113,0.45)', borderColor:'#f87171', borderWidth:1.5, borderRadius:4, yAxisID:'y', barPercentage:0.75 },
+                { type:'line',label:'Hit rate %', data:tl.rates, borderColor:'#fbbf24', borderWidth:2.5, pointBackgroundColor:'#fbbf24', pointBorderColor:'#0a1220', pointBorderWidth:1.5, pointRadius:4, tension:.35, yAxisID:'y2', fill:false }
             ]
         },
         options: {
             responsive:true, maintainAspectRatio:false,
             plugins:{
                 legend:{ labels:{ color:'rgba(255,255,255,0.8)', font:{size:10}, boxWidth:10, padding:14, usePointStyle:true, pointStyleWidth:8 } },
-                tooltip:{ backgroundColor:'var(--surface)', borderColor:'var(--border)', borderWidth:1, titleColor:'var(--text-primary)', bodyColor:'var(--text-secondary)',
+                tooltip:{ backgroundColor:'#0a1220', borderColor:'rgba(99,140,210,0.3)', borderWidth:1, titleColor:'#f0f6ff', bodyColor:'#9ab8e0',
                     callbacks:{ label: ctx => ctx.dataset.label === 'Hit rate %' ? ` Hit rate: ${ctx.parsed.y}%` : ` ${ctx.dataset.label}: ${ctx.parsed.y}` }
                 }
             },
             scales:{
-                x:{ ticks:{color:'var(--text-tertiary)',font:{size:10}}, grid:{color:'var(--border)'} },
-                y:{ beginAtZero:true, stacked:false, ticks:{color:'var(--text-tertiary)',font:{size:10}}, grid:{color:'var(--border)'}, title:{display:true,text:'Count',color:'var(--text-tertiary)',font:{size:9}} },
+                x:{ ticks:{color:'rgba(240,246,255,0.4)',font:{size:10}}, grid:{color:'rgba(99,140,210,0.12)'} },
+                y:{ beginAtZero:true, stacked:false, ticks:{color:'rgba(240,246,255,0.4)',font:{size:10}}, grid:{color:'rgba(99,140,210,0.12)'}, title:{display:true,text:'Count',color:'rgba(240,246,255,0.35)',font:{size:9}} },
                 y2:{ beginAtZero:false, min:0, max:100, position:'right', ticks:{color:'#fbbf24',font:{size:10}, callback:v=>v+'%'}, grid:{display:false}, title:{display:true,text:'Hit rate',color:'#fbbf24',font:{size:9}} }
             }
         }
@@ -28017,7 +28090,8 @@ Object.assign(window, {
     // computeACMGScore and renderACMGPanel are function declarations in script block 0
     // — already on window. DO NOT re-assign here (causes infinite recursion).
     // Clinical reference
-    renderClinicalReferencePanel, renderClinicalAlertBanner,
+    renderClinicalReferencePanel: function(v){ return renderClinicalReferencePanel(v); },
+    renderClinicalAlertBanner:    function(v){ return renderClinicalAlertBanner(v); },
     // Areas 2-5 search additions
     saveMissNote, highlightMatch,
     renderVelocityHeatmap, renderCoSearchClusters,
