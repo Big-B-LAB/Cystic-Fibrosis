@@ -11645,6 +11645,20 @@ function searchVariants(query) {
         return STATE.variants;
     }
 
+    // ── Pre-gate: Eponymic + positional resolution ───────────────
+    // Run BEFORE the structural gate so informal names like "the gating",
+    // "la variante gallega", or "508" resolve to canonical before being
+    // misidentified as prose or sentences.
+    const _preNorm = normaliseQueryWithSteps(query);
+    if (_preNorm.norm !== query.toLowerCase().trim() && _preNorm.norm.length > 0) {
+        const _preResolved = _preNorm.norm;
+        // If eponymic/positional resolution changed the query, use the resolved form
+        const _preGate = SEARCH_GATE.structuralCheck(_preResolved);
+        if (!_preGate.blocked) {
+            return searchVariants(_preResolved);
+        }
+    }
+
     // ── Layer 1: Structural gate — block non-variant input ────────
     // Search still shows "no results" for soft-blocked queries,
     // but they are flagged so Layer 2 can skip logging.
