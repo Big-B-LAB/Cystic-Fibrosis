@@ -5676,7 +5676,7 @@
         <!-- "Not in list?" — new institution form (hidden by default) -->
         <div id="hospitalNewForm" style="display:none;background:rgba(41,121,255,0.05);border:1px solid rgba(41,121,255,0.18);border-radius:10px;padding:14px;margin-bottom:12px;">
             <div style="font-size:12px;font-weight:600;color:#60a5fa;margin-bottom:10px;">
-                <i class="fas fa-plus-circle" style="margin-right:5px;"></i>Register new institution
+                <i class="fas fa-circle-plus" style="margin-right:5px;"></i>Register new institution
             </div>
             <input type="text" id="newInstitutionName" class="hospital-input" placeholder="Full institution name *" aria-label="Full institution name *" style="margin-bottom:6px;" oninput="validateNewInstitution()">
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;">
@@ -5807,7 +5807,7 @@
                         Clinical
                     </button>
                     <button class="app-mode-btn" data-mode="curator" onclick="setAppMode('curator')">
-                        <i class="fas fa-flask" style="font-size:9px;"></i>
+                        <i class="fas fa-vial-circle-check" style="font-size:9px;"></i>
                         Curator
                     </button>
                 </div>
@@ -5925,7 +5925,7 @@
                         </div>
                         <div class="hdr-menu-item" onclick="openNomenclatureAudit();hdrCloseMenu()">
                             <div class="hdr-menu-icon" style="background:rgba(251,191,36,.08);color:#fbbf24">
-                                <i class="fas fa-spell-check" aria-hidden="true"></i>
+                                <i class="fas fa-list-check" aria-hidden="true"></i>
                             </div>
                             <div class="hdr-menu-label">
                                 <div class="hdr-menu-title">Nomenclature audit</div>
@@ -6471,7 +6471,7 @@
         <div class="modal-header" style="background:rgba(52,211,153,0.05);border-bottom-color:rgba(52,211,153,0.15);">
             <div style="display:flex;align-items:center;gap:10px;">
                 <div style="width:32px;height:32px;border-radius:8px;background:rgba(52,211,153,0.12);border:1px solid rgba(52,211,153,0.25);display:flex;align-items:center;justify-content:center;">
-                    <i class="fas fa-check-circle" style="color:#34d399;font-size:14px;"></i>
+                    <i class="fas fa-circle-check" style="color:#34d399;font-size:14px;"></i>
                 </div>
                 <div>
                     <div class="modal-title" style="font-size:13px;">Clinician Validation</div>
@@ -6559,7 +6559,7 @@
             <button onclick="closeValidationModal()" class="btn btn-secondary">Cancel</button>
             <button onclick="submitValidation()" class="btn btn-primary" id="submitValidationBtn"
                 style="background:#059669;border-color:#059669;gap:6px;">
-                <i class="fas fa-check-circle" style="font-size:11px;"></i>
+                <i class="fas fa-circle-check" style="font-size:11px;"></i>
                 Confirm validation
             </button>
         </div>
@@ -6930,7 +6930,7 @@
         <div id="cfsmBar" style="display:flex;align-items:center;gap:0;border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0;background:#0c1422;">
             <!-- Mode tabs -->
             <button class="cfsm-tab" id="cfsmTabAtlas" onclick="cfsmSetMode('atlas')" title="Variant Reach Atlas — arc flows from gnomAD origin populations to clinical institutions" style="color:#34d399;border-bottom-color:#34d399;">
-                <i class="fas fa-globe-europe" style="font-size:9px;margin-right:4px;" aria-hidden="true"></i>Reach Atlas
+                <i class="fas fa-earth-europe-europe" style="font-size:9px;margin-right:4px;" aria-hidden="true"></i>Reach Atlas
             </button>
             <button class="cfsm-tab active" id="cfsmTabNetwork" onclick="cfsmSetMode('network')" title="Institution network — nodes sized by volume, arcs show shared variant interest">Network</button>
             <button class="cfsm-tab" id="cfsmTabVariant" onclick="cfsmSetMode('variant')" title="Variant geography — shows where a selected variant is being searched">Variant focus</button>
@@ -7267,7 +7267,7 @@
             </button>
         </div>
         <div id="writeModeError" style="display:none;font-size:12px;color:#f87171;margin-bottom:12px;padding:8px 12px;background:rgba(248,113,113,0.08);border-radius:6px;border:1px solid rgba(248,113,113,0.2);">
-            <i class="fas fa-times-circle" style="margin-right:6px;"></i>Incorrect PIN — try again
+            <i class="fas fa-circle-xmark" style="margin-right:6px;"></i>Incorrect PIN — try again
         </div>
         <div style="display:flex;gap:8px;">
             <button onclick="closeWriteModeModal()" style="flex:1;height:40px;background:transparent;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#9ab8e0;font-size:13px;cursor:pointer;transition:border-color .15s;" onmouseover="this.style.borderColor='rgba(255,255,255,0.25)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'">Cancel</button>
@@ -12814,7 +12814,7 @@ function _renderFederationPanel(variant) {
 
     if (conflicts.length === 0 && !variant.clinvar_id && !variant.cftr2_eti_response) {
         container.innerHTML = `<div style="font-size:11px;color:var(--text-tertiary);padding:8px 0;display:flex;align-items:center;gap:6px;">
-            <i class="fas fa-check-circle" style="color:#34d399;font-size:12px;" aria-hidden="true"></i>
+            <i class="fas fa-circle-check" style="color:#34d399;font-size:12px;" aria-hidden="true"></i>
             No source conflicts — all external databases agree${enrichedAt ? ' · checked ' + enrichedAt : ''}
         </div>`;
         return;
@@ -15770,7 +15770,7 @@ function _restoreFilterState() {
             { mode: 'alpha',     asc: true,  icon: 'fas fa-sort-alpha-down', label: 'A–Z'             },
             { mode: 'alpha',     asc: false, icon: 'fas fa-sort-alpha-up',   label: 'Z–A'             },
             { mode: 'demand',    asc: false, icon: 'fas fa-fire',            label: 'Most searched'   },
-            { mode: 'gap',       asc: false, icon: 'fas fa-exclamation-circle', label: 'Curation priority'    },
+            { mode: 'gap',       asc: false, icon: 'fas fa-circle-exclamation', label: 'Curation priority'    },
             { mode: 'validated', asc: true,  icon: 'fas fa-shield-halved',      label: 'Least validated' },
         ];
         const cur = SORT_CYCLE.find(s => s.mode === STATE.view.sortMode && s.asc === STATE.view.sortAsc) || SORT_CYCLE[0];
@@ -15834,7 +15834,7 @@ function toggleSort() {
         { mode: 'alpha',     asc: true,  icon: 'fas fa-sort-alpha-down', label: 'A–Z'         },
         { mode: 'alpha',     asc: false, icon: 'fas fa-sort-alpha-up',   label: 'Z–A'         },
         { mode: 'demand',    asc: false, icon: 'fas fa-fire',            label: 'Most searched' },
-        { mode: 'gap',       asc: false, icon: 'fas fa-exclamation-circle', label: 'Curation priority' },
+        { mode: 'gap',       asc: false, icon: 'fas fa-circle-exclamation', label: 'Curation priority' },
         { mode: 'validated', asc: true,  icon: 'fas fa-shield-halved',      label: 'Least validated' },
     ];
     const current = SORT_CYCLE.findIndex(s => s.mode === (STATE.view.sortMode || 'alpha') && s.asc === STATE.view.sortAsc);
@@ -15968,7 +15968,7 @@ function _updateCanvasBreadcrumb(variant) {
         <span class="cb-eti" style="color:${etiColor};">${etiLabel}</span>
         ${variant.validation_count > 0
             ? `<span style="font-size:9px;color:var(--text-tertiary);flex-shrink:0;">
-                   <i class="fas fa-check-circle" style="color:#34d399;margin-right:2px;font-size:8px;"></i>
+                   <i class="fas fa-circle-check" style="color:#34d399;margin-right:2px;font-size:8px;"></i>
                    ${variant.validation_count} validation${variant.validation_count > 1 ? 's' : ''}
                </span>`
             : ''}
@@ -16143,7 +16143,7 @@ function renderHomeDashboard() {
             actionBtn.style.background = 'rgba(248,113,113,0.1)';
             actionBtn.style.borderColor = 'rgba(248,113,113,0.25)';
             actionBtn.style.color = '#f87171';
-            actionBtn.innerHTML = '<i class="fas fa-exclamation-circle" style="font-size:9px;margin-right:4px;"></i>'
+            actionBtn.innerHTML = '<i class="fas fa-circle-exclamation" style="font-size:9px;margin-right:4px;"></i>'
                 + critCount2 + ' critical — resolve now';
         }
     })();
@@ -16300,7 +16300,7 @@ function renderHomeDashboard() {
 
         if (!scored.length) {
             pqEl.innerHTML = '<div style="padding:16px 14px;font-size:12px;color:var(--text-tertiary);text-align:center;">'
-                           + '<i class="fas fa-check-circle" style="color:var(--class-iii);margin-right:6px;"></i>All variants in good shape</div>';
+                           + '<i class="fas fa-circle-check" style="color:var(--class-iii);margin-right:6px;"></i>All variants in good shape</div>';
         } else {
             pqEl.innerHTML = scored.map(function(x) {
                 var score = x.composite;
@@ -16510,7 +16510,7 @@ function renderVariantList() {
             const escapedQ = escapeHTML(q);
             const escapedQAttr = escapeAttr(q);
             partialEl.innerHTML = `
-                <i class="fas fa-exclamation-circle" style="font-size:9px;opacity:.7;flex-shrink:0;"></i>
+                <i class="fas fa-circle-exclamation" style="font-size:9px;opacity:.7;flex-shrink:0;"></i>
                 <span style="color:var(--text-tertiary);">No exact match for</span>
                 <span class="pml-query">${escapedQ}</span>
                 <span style="color:var(--text-tertiary);">— showing related</span>
@@ -16618,7 +16618,7 @@ function renderVariantList() {
                  onmouseover="this.style.background='rgba(41,121,255,0.11)'"
                  onmouseout="this.style.background='rgba(41,121,255,0.06)'">
                 <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:4px;letter-spacing:.05em;text-transform:uppercase;">
-                    <i class="fas fa-spell-check" style="margin-right:4px;"></i>Did you mean?
+                    <i class="fas fa-list-check" style="margin-right:4px;"></i>Did you mean?
                 </div>
                 <div style="display:flex;align-items:center;gap:8px;">
                     <span style="font-size:14px;font-weight:700;color:var(--brand);font-family:var(--font-mono);">
@@ -16746,7 +16746,7 @@ function renderVariantList() {
                         <span class="eti-dot"></span>
                         ${etiLabel}
                     </span>
-                    ${valCount > 0 ? `<span class="val-badge"><i class="fas fa-check-circle" style="font-size: 11px"></i>${valCount}</span>` : ''}
+                    ${valCount > 0 ? `<span class="val-badge"><i class="fas fa-circle-check" style="font-size: 11px"></i>${valCount}</span>` : ''}
                     ${(STATE.appMode === 'curator' && hasMissing) ? `<span class="missing-pip" title="Missing clinical data"></span>` : ''}
                     ${(STATE.appMode === 'curator' && (v.search_hit_count||0) >= 5 && valCount === 0) ? `<span class="gap-alert" title="Searched ${v.search_hit_count} times — needs validation"></span>` : ''}
                 </div>
@@ -17182,7 +17182,7 @@ function renderClinicalAlertBanner(variant) {
     const isExceptional = alert.includes('EXCEPTIONAL');
     const color  = isUnknown ? '#fbbf24' : isExceptional ? '#60a5fa' : '#f87171';
     const bg     = isUnknown ? 'rgba(251,191,36,0.08)' : isExceptional ? 'rgba(96,165,250,0.08)' : 'rgba(248,113,113,0.08)';
-    const icon   = isUnknown ? 'fa-question-circle' : isExceptional ? 'fa-bolt' : 'fa-exclamation-circle';
+    const icon   = isUnknown ? 'fa-question-circle' : isExceptional ? 'fa-bolt' : 'fa-circle-exclamation';
     // Strip emoji prefix from DB-computed alert text for clean display
     const text   = alert.replace(/^[⚠️🚫❓✅⚡]+\s*/u, '').trim();
     return `<div style="display:flex;align-items:center;gap:10px;padding:10px 16px;
@@ -17309,7 +17309,7 @@ function renderVariantDetail(variant, fromSearch) {
     const valCount = variant.validation_count || 0;
 
     const etiCardClass = isResponsive ? 'yes' : isNonResponsive ? 'no' : 'unk';
-    const etiIcon = isResponsive ? 'fa-check-circle' : isNonResponsive ? 'fa-times-circle' : 'fa-question-circle';
+    const etiIcon = isResponsive ? 'fa-circle-check' : isNonResponsive ? 'fa-circle-xmark' : 'fa-question-circle';
     const etiLabel = isResponsive ? 'ETI Responsive' : isNonResponsive ? 'Non-responsive' : 'Unknown';
     const etiSub = isResponsive ? 'Predicted to respond to elexacaftor/tezacaftor/ivacaftor' :
                    isNonResponsive ? 'Not predicted to respond to current modulators' :
@@ -17386,14 +17386,14 @@ function renderVariantDetail(variant, fromSearch) {
                     ${isNonResponsive ? `<span class="detail-tag tag-eti-no"><i class="fas fa-xmark" style="font-size: 11px"></i> Non-responsive</span>` : ''}
                     ${isExceptional ? `<span class="detail-tag tag-exceptional">⚡ Exceptional</span>` : ''}
                     ${variant.final_determination === 'CF-causing' ? `<span class="detail-tag tag-cf"><i class="fas fa-exclamation-triangle" style="font-size: 11px"></i> CF-causing</span>` : ''}
-                    ${valCount > 0 ? `<span class="detail-tag tag-validated"><i class="fas fa-check-circle" style="font-size: 11px"></i> ${valCount} validation${valCount > 1 ? 's' : ''}</span>` : ''}
+                    ${valCount > 0 ? `<span class="detail-tag tag-validated"><i class="fas fa-circle-check" style="font-size: 11px"></i> ${valCount} validation${valCount > 1 ? 's' : ''}</span>` : ''}
                 </div>
             </div>
 
             <div class="detail-meta">
                 <div class="detail-actions">
                     <button onclick="showValidationModal('${escapeAttr(variant.legacy_name)}', ${variant.id})" class="btn btn-secondary btn-sm">
-                        <i class="fas fa-check-circle"></i> Validate
+                        <i class="fas fa-circle-check"></i> Validate
                     </button>
                     <button onclick="showAnnotationModal('${escapeAttr(variant.legacy_name)}', 'legacy_name', '${escapeAttr(variant.legacy_name || '')}')" class="btn btn-secondary btn-sm">
                         <i class="fas fa-pencil-alt"></i> Edit
@@ -17558,7 +17558,7 @@ function renderVariantDetail(variant, fromSearch) {
             <!-- Evidence Chain -->
             <div class="detail-section">
                 <div class="section-header">
-                    <div class="section-header-icon" style="background:rgba(251,191,36,0.1);color:#fbbf24"><i class="fas fa-flask"></i></div>
+                    <div class="section-header-icon" style="background:rgba(251,191,36,0.1);color:#fbbf24"><i class="fas fa-vial-circle-check"></i></div>
                     <span class="section-title">Evidence Chain</span>
                     <span style="font-size:11px;color:var(--text-tertiary);margin-right:4px;" id="evidenceCount-${variant.id}">${evidenceLinks.length} source${evidenceLinks.length !== 1 ? 's' : ''}</span>
                     <button class="section-action" onclick="showAllEvidence(${variant.id})">View All</button>
@@ -17587,7 +17587,7 @@ function renderVariantDetail(variant, fromSearch) {
                 <div class="section-body">
                     ${valCount > 0 ? `
                     <div class="validation-summary">
-                        <div class="val-icon"><i class="fas fa-check-circle"></i></div>
+                        <div class="val-icon"><i class="fas fa-circle-check"></i></div>
                         <div class="val-info">
                             <div class="val-count">${valCount}</div>
                             <div class="val-sub">
@@ -17601,7 +17601,7 @@ function renderVariantDetail(variant, fromSearch) {
                         <i class="fas fa-shield-halved" style="font-size:24px;opacity:0.2;margin-bottom:8px;display:block"></i>
                         <p style="font-size:12px">Not yet validated by clinical staff</p>
                         <button onclick="showValidationModal('${escapeAttr(variant.legacy_name)}', ${variant.id})" class="btn btn-primary btn-sm" style="margin-top:10px">
-                            <i class="fas fa-check-circle"></i> Be the first to validate
+                            <i class="fas fa-circle-check"></i> Be the first to validate
                         </button>
                     </div>
                     `}
@@ -17625,7 +17625,7 @@ function renderVariantDetail(variant, fromSearch) {
         <div class="detail-section" style="margin-top:0">
             <div class="section-header">
                 <div class="section-header-icon" style="background:var(--surface-alt);color:var(--text-secondary)">
-                    <i class="fas fa-globe"></i>
+                    <i class="fas fa-earth-europe"></i>
                 </div>
                 <span class="section-title">Population &amp; Literature</span>
                 ${!variant.population_frequency ? `
@@ -17637,7 +17637,7 @@ function renderVariantDetail(variant, fromSearch) {
                     Fetch gnomAD AF
                 </button>` : `
                 <span style="margin-left:auto;font-size:10px;color:var(--text-tertiary);">
-                    <i class="fas fa-check-circle" style="color:#34d399;margin-right:3px;"></i>gnomAD enriched
+                    <i class="fas fa-circle-check" style="color:#34d399;margin-right:3px;"></i>gnomAD enriched
                 </span>`}
             </div>
             <div class="section-body">
@@ -17865,7 +17865,7 @@ function renderEvidenceLink(link) {
                     ${link.citation_count > 0 ? `<span style="color:var(--text-tertiary);">${link.citation_count} citations</span>` : ''}
                 </div>
             </div>
-            <i class="fas fa-external-link-alt evidence-arrow"></i>
+            <i class="fas fa-arrow-up-right-from-square evidence-arrow"></i>
         </div>
         ${(qs > 0 || studyLabel || classClaim || etiClaim) ? `
         <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding-top:4px;border-top:1px solid var(--border);">
@@ -17882,7 +17882,7 @@ function renderEvidenceLink(link) {
                 const vs = link.func_result_value != null
                     ? ' '+link.func_result_value+(link.func_result_unit==='pct_wt'?'% WT':link.func_result_unit==='uA_cm2'?'\u03bcA/cm\u00b2':link.func_result_unit||'') : '';
                 const il = link.func_interpretation ? ' \u00b7 '+link.func_interpretation.replace(/_/g,' ') : '';
-                return '<span style="font-size:10px;padding:1px 7px;border-radius:3px;background:'+col+'18;color:'+col+';border:1px solid '+col+'40;font-family:var(--font-mono);display:inline-flex;align-items:center;gap:3px;"><i class=\\"fas fa-flask\\" style=\\"font-size:8px;\\"></i>'+escapeHTML(al+vs+il)+'</span>';
+                return '<span style="font-size:10px;padding:1px 7px;border-radius:3px;background:'+col+'18;color:'+col+';border:1px solid '+col+'40;font-family:var(--font-mono);display:inline-flex;align-items:center;gap:3px;"><i class=\\"fas fa-vial-circle-check\\" style=\\"font-size:8px;\\"></i>'+escapeHTML(al+vs+il)+'</span>';
             })() : ''}
         </div>` : ''}
     </a>`;
@@ -19168,7 +19168,7 @@ async function showAllEvidence(variantId) {
                             </div>
                             <div class="flex items-center gap-2">
                                 <a href="${escapeHTML(link.url)}" target="_blank" style="width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--text-tertiary);background:none;border:none;cursor:pointer;transition:background 0.15s,color 0.15s;" onmouseover="this.style.background='var(--brand-faint)';this.style.color='var(--brand)'" onmouseout="this.style.background='';this.style.color='var(--text-tertiary)'">
-                                    <i class="fas fa-external-link-alt"></i>
+                                    <i class="fas fa-arrow-up-right-from-square"></i>
                                 </a>
                                 <button onclick="copyToClipboard('${escapeHTML(link.url)}')" style="width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--text-tertiary);background:none;border:none;cursor:pointer;transition:background 0.15s,color 0.15s;" onmouseover="this.style.background='var(--brand-faint)';this.style.color='var(--brand)'" onmouseout="this.style.background='';this.style.color='var(--text-tertiary)'">
                                     <i class="fas fa-copy"></i>
@@ -19197,7 +19197,7 @@ function getEvidenceIcon(type) {
         'cftr2': 'fa-dna',
         'clinvar': 'fa-database',
         'article': 'fa-file-alt',
-        'study': 'fa-flask',
+        'study': 'fa-vial-circle-check',
         'default': 'fa-link'
     };
     return icons[type?.toLowerCase()] || icons.default;
@@ -20096,7 +20096,7 @@ async function openNomenclatureAudit() {
         fontFamily: 'var(--font-body)',
     });
     card.innerHTML = `<div style="padding:20px 22px;border-bottom:1px solid rgba(99,140,210,0.12);display:flex;align-items:center;gap:10px;">
-        <i class="fas fa-spell-check" style="color:var(--brand);font-size:14px;"></i>
+        <i class="fas fa-list-check" style="color:var(--brand);font-size:14px;"></i>
         <span style="font-size:14px;font-weight:700;color:var(--text-primary);">Database nomenclature audit</span>
         <div style="flex:1;"></div>
         <div style="font-size:11px;color:var(--text-tertiary);" id="nomAuditStatus">Scanning ${STATE.variants.length.toLocaleString()} variants…</div>
@@ -20135,7 +20135,7 @@ async function openNomenclatureAudit() {
 
     if (report.affected.length === 0 && report.duplicateCandidates.length === 0) {
         body.innerHTML = `<div style="text-align:center;padding:40px 0;">
-            <i class="fas fa-check-circle" style="font-size:28px;color:#34d399;display:block;margin-bottom:10px;"></i>
+            <i class="fas fa-circle-check" style="font-size:28px;color:#34d399;display:block;margin-bottom:10px;"></i>
             <div style="font-size:14px;font-weight:700;color:#34d399;">All ${report.total.toLocaleString()} variants pass nomenclature checks</div>
             <div style="font-size:12px;color:var(--text-tertiary);margin-top:6px;">No artifacts, HGVS violations, or naming issues detected.</div>
         </div>`;
@@ -21366,222 +21366,366 @@ function generateElitePDF(variants, reporter) {
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet">
 <style>
+    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@700;800&display=swap');
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    :root {
+        --ink:       #0A1628;
+        --ink-mid:   #1e3a5f;
+        --ink-soft:  #334155;
+        --muted:     #64748b;
+        --subtle:    #94a3b8;
+        --rule:      #e2e8f0;
+        --surface:   #f8fafc;
+        --white:     #ffffff;
+        --teal:      #0891b2;
+        --teal-light:#e0f7fa;
+        --amber:     #d97706;
+        --amber-light:#fef3c7;
+        --red:       #dc2626;
+        --red-light: #fef2f2;
+        --green:     #059669;
+        --green-light:#f0fdf4;
+        --brand:     #0A1628;
+    }
+
     body {
-        font-family: 'IBM Plex Sans', -apple-system, sans-serif;
-        background: #f1f5f9;
-        color: #162540;
+        font-family: 'IBM Plex Sans', system-ui, sans-serif;
+        background: #eef1f6;
+        color: var(--ink);
         -webkit-font-smoothing: antialiased;
-        font-size: 13px;
-        line-height: 1.5;
+        font-size: 12.5px;
+        line-height: 1.55;
     }
 
-    /* ── Page shell ── */
+    /* ── Page shell ────────────────────────────────────── */
     .report-page {
-        max-width: 880px; margin: 32px auto; background: #fff;
-        border: 1px solid #e2e8f0; border-radius: 2px;
-        box-shadow: 0 4px 24px rgba(15,23,42,0.08);
+        max-width: 860px;
+        margin: 32px auto;
+        background: var(--white);
+        border-radius: 4px;
         overflow: hidden;
+        box-shadow: 0 1px 3px rgba(10,22,40,.06), 0 8px 32px rgba(10,22,40,.08);
+        border: 1px solid #dde3ec;
     }
-    .report-page:last-child { margin-bottom: 32px; }
+    .report-page + .report-page { margin-top: 20px; }
 
-    /* ── Header — print-safe letterhead style ── */
+    /* ── Letterhead ────────────────────────────────────── */
     .rpt-header {
-        display: flex; align-items: center; justify-content: space-between;
-        padding: 18px 28px 16px;
-        border-bottom: 2.5px solid #162540;
-        background: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 28px;
+        background: var(--ink);
+        gap: 16px;
     }
+    .rpt-header-left { display: flex; align-items: center; gap: 14px; }
     .rpt-logo-text {
-        font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800;
-        color: #162540; letter-spacing: -.02em;
+        font-family: 'Syne', sans-serif;
+        font-size: 18px; font-weight: 800;
+        color: #ffffff;
+        letter-spacing: -.02em;
     }
-    .rpt-header-div { width: 1px; height: 28px; background: #e2e8f0; margin: 0 12px; }
-    .rpt-header-type { font-size: 11px; font-weight: 700; letter-spacing: .1em;
-        text-transform: uppercase; color: #334155; }
-    .rpt-header-sub { font-size: 10px; color: #94a3b8; margin-top: 2px; }
-    .rpt-header-inst { font-size: 12px; font-weight: 700; color: #111827; }
-    .rpt-header-date { font-size: 10px; color: #94a3b8; margin-top: 1px; }
+    .rpt-header-div {
+        width: 1px; height: 26px;
+        background: rgba(255,255,255,.2);
+    }
+    .rpt-header-type {
+        font-size: 10px; font-weight: 600;
+        letter-spacing: .12em; text-transform: uppercase;
+        color: rgba(255,255,255,.65);
+    }
+    .rpt-header-sub {
+        font-size: 10px;
+        color: rgba(255,255,255,.4);
+        margin-top: 1px;
+    }
+    .rpt-header-right { text-align: right; }
+    .rpt-header-inst {
+        font-size: 11px; font-weight: 600;
+        color: rgba(255,255,255,.9);
+    }
+    .rpt-header-date {
+        font-size: 10px;
+        color: rgba(255,255,255,.45);
+        margin-top: 2px;
+        font-family: 'IBM Plex Mono', monospace;
+    }
 
-    /* ── Hero band ── */
+    /* ── Thin accent rule under header ────────────────── */
+    .rpt-accent-rule {
+        height: 3px;
+        background: linear-gradient(90deg, var(--teal) 0%, #0e7490 40%, var(--ink) 100%);
+    }
+
+    /* ── Hero band ─────────────────────────────────────── */
     .rpt-hero {
-        display: flex; align-items: stretch; gap: 0;
-        border-bottom: 1px solid #f1f5f9;
+        display: flex;
+        align-items: stretch;
+        border-bottom: 1px solid var(--rule);
     }
     .hero-left {
-        width: 140px; flex-shrink: 0;
+        width: 130px; flex-shrink: 0;
         display: flex; align-items: center; justify-content: center;
-        padding: 24px 16px; background: #162540; border-right: 1px solid #1e293b;
+        padding: 24px 16px;
+        background: var(--surface);
+        border-right: 1px solid var(--rule);
     }
     .class-block {
-        width: 100px; border-radius: 12px; border: 2px solid;
-        padding: 10px 8px; text-align: center;
-        display: flex; flex-direction: column; align-items: center; gap: 3px;
+        width: 92px;
+        border-radius: 10px;
+        border: 1.5px solid currentColor;
+        padding: 12px 8px;
+        text-align: center;
+        display: flex; flex-direction: column; align-items: center; gap: 4px;
+    }
+    .class-numeral {
+        font-family: 'Syne', sans-serif;
+        font-size: 28px; font-weight: 800;
+        line-height: 1;
+    }
+    .class-label {
+        font-size: 8.5px; font-weight: 700;
+        letter-spacing: .1em; text-transform: uppercase;
+        opacity: .7;
     }
     .hero-right {
-        flex: 1; padding: 22px 24px; min-width: 0;
+        flex: 1; padding: 22px 28px; min-width: 0;
     }
     .hero-variant-name {
         font-family: 'IBM Plex Mono', monospace;
-        font-size: 36px; font-weight: 700; color: #162540;
-        letter-spacing: -.02em; line-height: 1;
+        font-size: 34px; font-weight: 700;
+        color: var(--ink); letter-spacing: -.02em;
+        line-height: 1; margin-bottom: 5px;
+    }
+    .hero-protein {
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 12px; color: var(--muted);
+        margin-bottom: 1px;
+    }
+    .hero-cdna {
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 11px; color: var(--subtle);
+    }
+    .hero-badges {
+        display: flex; gap: 6px; flex-wrap: wrap;
+        margin-top: 14px;
+    }
+    .eti-badge {
+        display: inline-flex; align-items: center; gap: 5px;
+        padding: 5px 12px; border-radius: 5px;
+        font-size: 11px; font-weight: 700;
+        letter-spacing: .06em; border: 1.5px solid;
+    }
+    .det-badge {
+        display: inline-flex; align-items: center; gap: 5px;
+        padding: 5px 10px; border-radius: 5px;
+        font-size: 11px; font-weight: 700;
+        letter-spacing: .05em; border: 1.5px solid;
+    }
+    .confidence-strip {
+        height: 2px; background: var(--rule);
+        margin-top: 16px; border-radius: 1px;
+        overflow: hidden;
+    }
+    .confidence-fill { height: 100%; border-radius: 1px; transition: width .3s; }
+
+    /* ── Section heading ────────────────────────────────── */
+    .rpt-section {
+        padding: 14px 28px 0;
+    }
+    .rpt-section-title {
+        font-size: 9.5px; font-weight: 700;
+        letter-spacing: .12em; text-transform: uppercase;
+        color: var(--subtle);
+        display: flex; align-items: center; gap: 8px;
+        margin-bottom: 12px;
+    }
+    .rpt-section-title::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: var(--rule);
+    }
+
+    /* ── Classification card ────────────────────────────── */
+    .rpt-class-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin-bottom: 14px;
+    }
+    .rpt-field {
+        background: var(--surface);
+        border: 1px solid var(--rule);
+        border-radius: 6px;
+        padding: 10px 12px;
+    }
+    .rpt-field-label {
+        font-size: 9px; font-weight: 700;
+        letter-spacing: .1em; text-transform: uppercase;
+        color: var(--subtle); margin-bottom: 4px;
+    }
+    .rpt-field-value {
+        font-size: 12.5px; font-weight: 600;
+        color: var(--ink);
+    }
+    .rpt-field-value.mono {
+        font-family: 'IBM Plex Mono', monospace;
+        font-weight: 500; font-size: 12px;
+    }
+
+    /* ── Evidence chain ─────────────────────────────────── */
+    .evidence-item {
+        display: flex; align-items: flex-start; gap: 12px;
+        padding: 12px 0;
+        border-bottom: 1px solid var(--rule);
+    }
+    .evidence-item:last-child { border-bottom: none; }
+    .evidence-num {
+        width: 22px; height: 22px; border-radius: 50%;
+        background: var(--ink); color: #fff;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 10px; font-weight: 700;
+        flex-shrink: 0; margin-top: 1px;
+    }
+    .evidence-body { flex: 1; min-width: 0; }
+    .evidence-title {
+        font-size: 12.5px; font-weight: 600;
+        color: var(--ink); line-height: 1.4;
+        margin-bottom: 3px;
+    }
+    .evidence-meta {
+        font-size: 10.5px; color: var(--muted);
+        display: flex; gap: 10px; flex-wrap: wrap;
+    }
+    .evidence-doi {
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 10px; color: var(--teal);
+    }
+    .evidence-tag {
+        display: inline-block; padding: 1px 6px;
+        border-radius: 3px; font-size: 9.5px; font-weight: 600;
+        background: var(--ink); color: #fff;
+        letter-spacing: .04em;
+    }
+
+    /* ── Recommendation card ────────────────────────────── */
+    .rpt-recommendation {
+        margin: 0 28px 16px;
+        padding: 16px 18px;
+        border-radius: 8px;
+        border-left: 4px solid;
+        background: var(--surface);
+    }
+    .rpt-rec-title {
+        font-size: 10px; font-weight: 700;
+        letter-spacing: .1em; text-transform: uppercase;
         margin-bottom: 6px;
     }
-    .hero-protein { font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #475569; margin-bottom: 2px; }
-    .hero-cdna    { font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: #94a3b8; }
-    .hero-badges  { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px; }
-    .eti-badge    { display: inline-flex; align-items: center; gap: 5px; padding: 4px 12px;
-                    border-radius: 5px; font-size: 11px; font-weight: 700; letter-spacing: .08em; border: 1px solid; }
-    .det-badge    { display: inline-block; padding: 4px 10px; border-radius: 5px; font-size: 11px;
-                    font-weight: 700; letter-spacing: .06em; background: #f8fafc; border: 1px solid #e2e8f0; color: #475569; }
-    .exc-badge    { display: inline-block; padding: 4px 10px; border-radius: 5px; font-size: 11px;
-                    font-weight: 700; letter-spacing: .06em; background: #fdf4ff; border: 1px solid #e879f9; color: #86198f; }
-    .th-badge     { display: inline-block; padding: 4px 10px; border-radius: 5px; font-size: 11px;
-                    font-weight: 700; letter-spacing: .06em; background: #f0fdf4; border: 1px solid #86efac; color: #166534; }
-    .conf-strip   { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; margin-bottom: 4px; }
-    .conf-bar     { height: 4px; background: #f1f5f9; border-radius: 2px; overflow: hidden; }
-    .conf-fill    { height: 100%; border-radius: 2px; }
-
-    /* ── Reporter strip ── */
-    .rpt-reporter-strip {
-        display: flex; gap: 24px; flex-wrap: wrap;
-        padding: 8px 28px; background: #f8fafc;
-        border-bottom: 1px solid #e2e8f0;
-        font-size: 10.5px; color: #475569;
-    }
-    .rpt-reporter-strip strong { color: #162540; }
-
-    /* ── Disclaimer ── */
-    .rpt-disclaimer {
-        background: #fff7ed; border-left: 3px solid #f59e0b;
-        padding: 7px 14px; margin: 12px 28px 0;
-        font-size: 10px; color: #92400e; line-height: 1.5;
-        border-radius: 0 4px 4px 0;
+    .rpt-rec-text {
+        font-size: 12.5px; line-height: 1.6;
+        color: var(--ink-soft);
     }
 
-    /* ── Grid ── */
-    .rpt-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; padding: 16px 28px; }
-    .rpt-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; padding: 0 28px; }
-
-    /* ── Cards ── */
-    .rpt-card {
-        background: #ffffff;
-        border: 1px solid #e8ecf0;
-        border-radius: 6px;
-        padding: 14px 18px 16px;
-        margin-bottom: 0;
+    /* ── Validation history ─────────────────────────────── */
+    .validation-row {
+        display: flex; align-items: center; gap: 12px;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--rule);
+        font-size: 11.5px;
     }
-    .rpt-card.accent-green { border-left: 3.5px solid #16a34a; }
-    .rpt-card.accent-red   { border-left: 3.5px solid #dc2626; }
-    .rpt-card.accent-amber { border-left: 3.5px solid #d97706; }
-    .rpt-card.accent-blue  { border-left: 3.5px solid #2563eb; }
-    .rpt-card-title {
-        font-size: 9px;
-        font-weight: 700;
-        letter-spacing: .14em;
-        text-transform: uppercase;
-        color: #94a3b8;
-        margin-bottom: 10px;
-        padding-bottom: 8px;
-        border-bottom: 1px solid #f1f5f9;
-        display: flex;
-        align-items: center;
-        gap: 6px;
+    .validation-row:last-child { border-bottom: none; }
+    .val-conf {
+        padding: 3px 8px; border-radius: 4px;
+        font-size: 9.5px; font-weight: 700;
+        letter-spacing: .06em; flex-shrink: 0;
     }
+    .val-inst { flex: 1; color: var(--ink-soft); font-weight: 500; }
+    .val-date { color: var(--subtle); font-size: 10.5px;
+                font-family: 'IBM Plex Mono', monospace; }
 
-    /* ── Table — alternating rows, clear label/value hierarchy ── */
-    .rpt-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-    .rpt-table tr:nth-child(even) td { background: #f8fafc; }
-    .rpt-table td {
-        padding: 5px 8px 5px 0;
-        vertical-align: top;
-        line-height: 1.55;
-        border-bottom: 1px solid #f1f5f9;
+    /* ── Reporter line ──────────────────────────────────── */
+    .rpt-reporter {
+        display: flex; align-items: center; gap: 16px;
+        padding: 12px 28px;
+        background: var(--surface);
+        border-top: 1px solid var(--rule);
+        font-size: 10.5px; color: var(--muted);
     }
-    .rpt-table td:first-child {
-        color: #64748b;
-        width: 40%;
-        font-size: 11px;
-        font-weight: 500;
-        letter-spacing: .01em;
-        padding-right: 12px;
-        white-space: nowrap;
-    }
-    .rpt-table td:last-child { color: #111827; font-weight: 500; }
-    .rpt-table tr:last-child td { border-bottom: none; }
+    .rpt-reporter strong { color: var(--ink-soft); font-weight: 600; }
 
-    /* ── Alert bar ── */
-    .alert-bar {
-        background: #fff7ed; border-left: 2px solid #f59e0b;
-        padding: 6px 10px; border-radius: 0 4px 4px 0;
-        font-size: 10.5px; color: #92400e; margin-top: 10px; line-height: 1.5;
-    }
-
-    /* ── Subtype pill ── */
-    .subtype-pill {
-        display: inline-block; font-size: 9.5px; font-weight: 600;
-        padding: 1px 6px; border-radius: 4px; background: #f1f5f9;
-        border: 1px solid #e2e8f0; color: #64748b; margin-left: 4px;
-        vertical-align: middle;
-    }
-
-    /* ── Validation badge ── */
-    .val-badge { display: inline-flex; align-items: center; gap: 5px;
-        font-size: 10.5px; font-weight: 700; padding: 3px 10px; border-radius: 5px; }
-    .val-green { background: #f0fdf4; border: 1px solid #86efac; color: #166534; }
-    .val-amber { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
-
-    /* ── Evidence rows ── */
-    .evidence-row { display: flex; align-items: flex-start; gap: 10px;
-        padding: 7px 0; border-bottom: 1px solid #f8fafc; }
-    .evidence-row:last-child { border-bottom: none; }
-    .evidence-type-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
-    .evidence-title { font-size: 12px; font-weight: 600; color: #1e293b; line-height: 1.4; margin-bottom: 3px; }
-    .evidence-meta  { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 10px; }
-    .evidence-tag   { font-size: 9.5px; font-weight: 700; letter-spacing: .06em;
-        padding: 1px 5px; border-radius: 3px; background: #f1f5f9;
-        border: 1px solid #e2e8f0; color: #64748b; }
-
-    /* ── Footer ── */
+    /* ── Footer ─────────────────────────────────────────── */
     .rpt-footer {
-        display: flex; align-items: center; justify-content: space-between;
-        padding: 12px 28px; margin-top: 20px;
-        border-top: 1.5px solid #f1f5f9;
-        background: #f8fafc;
+        display: flex; align-items: center;
+        justify-content: space-between;
+        padding: 10px 28px;
+        background: var(--ink);
+        font-size: 9.5px;
+        color: rgba(255,255,255,.4);
+        letter-spacing: .04em;
     }
-    .rpt-footer-left  { font-size: 9.5px; color: #94a3b8; line-height: 1.6; }
-    .rpt-footer-right { font-size: 9.5px; color: #cbd5e1; font-family: 'IBM Plex Mono', monospace; }
+    .rpt-footer-brand {
+        font-family: 'Syne', sans-serif;
+        font-size: 11px; font-weight: 700;
+        color: rgba(255,255,255,.7);
+        letter-spacing: -.01em;
+    }
 
-    /* ── No-print toolbar ── */
-    .no-print {
-        position: sticky; top: 0; z-index: 99;
-        display: flex; align-items: center; gap: 12px; padding: 0 24px; height: 54px;
-        background: #162540; border-bottom: 1px solid #1e293b;
+    /* ── Spacer between sections ────────────────────────── */
+    .rpt-section-spacer { height: 16px; }
+
+    /* ── Print overrides ────────────────────────────────── */
+    @media print {
+        body { background: #fff !important; }
+        .report-page {
+            box-shadow: none !important;
+            border: none !important;
+            margin: 0 !important;
+            border-radius: 0 !important;
+        }
+        .rpt-accent-rule { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .rpt-header, .rpt-footer, .hero-left, .evidence-num, .rpt-recommendation {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+    }
+
+    /* ── Print toolbar ───────────────────────────────────── */
+    .npt-toolbar {
+        position: sticky; top: 0; z-index: 100;
+        display: flex; align-items: center;
+        padding: 0 28px; height: 54px;
+        background: var(--ink);
+        border-bottom: 1px solid rgba(255,255,255,.1);
+        gap: 10px;
+    }
+    .npt-toolbar-brand {
+        font-family: 'Syne', sans-serif;
+        font-size: 14px; font-weight: 800;
+        color: rgba(255,255,255,.9);
+        letter-spacing: -.01em;
+        flex: 1;
     }
     .npt-btn-primary {
         display: inline-flex; align-items: center; gap: 7px;
-        padding: 0 18px; height: 36px; border-radius: 8px; border: none;
-        background: #2563eb; color: #fff; font-size: 12px; font-weight: 600;
+        padding: 0 18px; height: 36px; border-radius: 7px;
+        border: none; background: var(--teal);
+        color: #fff; font-size: 12px; font-weight: 600;
         cursor: pointer; font-family: 'IBM Plex Sans', sans-serif;
-        transition: background .15s;
+        transition: background .15s; letter-spacing: .01em;
     }
-    .npt-btn-primary:hover { background: #1d4ed8; }
+    .npt-btn-primary:hover { background: #0e7490; }
     .npt-btn-secondary {
         display: inline-flex; align-items: center; gap: 6px;
-        padding: 0 14px; height: 36px; border-radius: 8px;
-        border: 1px solid #334155; background: transparent;
-        color: #94a3b8; font-size: 12px; cursor: pointer;
-        font-family: 'IBM Plex Sans', sans-serif; transition: all .15s;
+        padding: 0 14px; height: 36px; border-radius: 7px;
+        border: 1px solid rgba(255,255,255,.2);
+        background: transparent; color: rgba(255,255,255,.7);
+        font-size: 12px; font-weight: 500;
+        cursor: pointer; font-family: 'IBM Plex Sans', sans-serif;
     }
-    .npt-btn-secondary:hover { border-color: #475569; color: #cbd5e1; }
-
-    @media print {
-        body { background: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-        .no-print { display: none !important; }
-        .report-page { max-width: 100%; border: none; margin: 0; box-shadow: none; border-radius: 0; }
-        @page { margin: 14mm 16mm; size: A4 portrait; }
-    }
+    .npt-btn-secondary:hover { background: rgba(255,255,255,.06); }
+    @media print { .npt-toolbar { display: none !important; } }
 </style>
 </head>
 <body>
@@ -21607,22 +21751,6 @@ function generateElitePDF(variants, reporter) {
 </div>
 
 ${pages}
-
-function _updateSectionIndicator(section, icon, label) {
-    const pill = document.getElementById('headerSectionPill');
-    const iconEl = document.getElementById('headerSectionIcon');
-    const labelEl = document.getElementById('headerSectionLabel');
-    if (!pill) return;
-    if (section) {
-        pill.style.display = 'flex';
-        if (iconEl) iconEl.className = 'fas ' + (icon || 'fa-dna') + ' ' + iconEl.style.cssText;
-        iconEl.className = 'fas ' + (icon || 'fa-dna');
-        iconEl.style.fontSize = '10px';
-        if (labelEl) labelEl.textContent = label || section;
-    } else {
-        pill.style.display = 'none';
-    }
-}
 
 </body>
 </html>`;
@@ -22071,7 +22199,7 @@ function openExportCentre() {
                         </div>
                         ${selectedV
                             ? `<div style="font-size:11px;color:#34d399;display:flex;align-items:center;gap:5px;">
-                                <i class="fas fa-check-circle" style="font-size:10px;"></i>
+                                <i class="fas fa-circle-check" style="font-size:10px;"></i>
                                 <span class="text-mono">${escapeHTML(selectedV.legacy_name)}</span> selected
                                </div>`
                             : `<div style="font-size:11px;color:#5a4a3a;">Select a variant first to enable</div>`
@@ -22133,7 +22261,7 @@ function openExportCentre() {
 
             <!-- CURATOR / DATA EXPORTS -->
             <div>
-                <div class="xp-section-label"><i class="fas fa-flask" style="color:#60a5fa;"></i>Data & Curation Exports</div>
+                <div class="xp-section-label"><i class="fas fa-vial-circle-check" style="color:#60a5fa;"></i>Data & Curation Exports</div>
                 <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
 
                     <!-- Quick CSV -->
@@ -22629,7 +22757,7 @@ function showNotification(msg, type='info', duration=CONFIG.UI.NOTIFICATION_DURA
     if (existing.length >= 4) existing[0].remove();
 
     const colors = { success: 'var(--success)', error: 'var(--error)', warning: 'var(--warning)', info: 'var(--brand)' };
-    const icons  = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle', info: 'fa-info-circle' };
+    const icons  = { success: 'fa-circle-check', error: 'fa-circle-exclamation', warning: 'fa-exclamation-triangle', info: 'fa-info-circle' };
     const n = document.createElement('div');
     n.className = `notification ${type}`;
     n.dataset.msg = msg;
@@ -22825,7 +22953,7 @@ function helixShowDetailMissState(query) {
                             ['ClinVar', `https://www.ncbi.nlm.nih.gov/clinvar/?term=${enc}+CFTR`,                            '#34d399','fa-database'],
                             ['LOVD',    `https://databases.lovd.nl/shared/variants/CFTR?search_variant_published_as=${enc}`, '#fb923c','fa-list-alt'],
                             ['PubMed',  `https://pubmed.ncbi.nlm.nih.gov/?term=${enc}+CFTR+cystic+fibrosis`,                '#fbbf24','fa-book-medical'],
-                            ['gnomAD',  `https://gnomad.broadinstitute.org/search?dataset=gnomad_r4&query=${enc}`,           '#c084fc','fa-globe'],
+                            ['gnomAD',  `https://gnomad.broadinstitute.org/search?dataset=gnomad_r4&query=${enc}`,           '#c084fc','fa-earth-europe'],
                         ].map(([name,url,color,icon]) => `
                             <a href="${url}" target="_blank" rel="noopener noreferrer"
                                style="display:inline-flex;align-items:center;gap:5px;
@@ -22837,7 +22965,7 @@ function helixShowDetailMissState(query) {
                                onmouseover="this.style.background='rgba(255,255,255,0.08)';this.style.borderColor='${color}55'"
                                onmouseout="this.style.background='rgba(255,255,255,0.03)';this.style.borderColor='rgba(255,255,255,0.08)'">
                                 <i class="fas ${icon}" style="font-size:10px;"></i>${name}
-                                <i class="fas fa-external-link-alt" style="font-size:8px;opacity:.5;"></i>
+                                <i class="fas fa-arrow-up-right-from-square" style="font-size:8px;opacity:.5;"></i>
                             </a>`).join('')}
                     </div>
                 </div>
@@ -22854,7 +22982,7 @@ function helixShowDetailMissState(query) {
                             transition:background .15s;"
                         onmouseover="this.style.background='rgba(248,113,113,0.12)'"
                         onmouseout="this.style.background='rgba(248,113,113,0.05)'">
-                        <i class="fas fa-plus-circle" style="font-size:11px;"></i>
+                        <i class="fas fa-circle-plus" style="font-size:11px;"></i>
                         Add "${escapeHTML(query.length>22?query.slice(0,20)+'…':query)}" directly to NeumuacFQ
                     </button>
                 </div>
@@ -23008,7 +23136,7 @@ function renderInstitutionGroupedList(institutions, filter) {
         return a.localeCompare(b);
     });
 
-    const TYPE_ICON = { hospital: 'fa-hospital', research: 'fa-flask', university: 'fa-graduation-cap', lab: 'fa-microscope', other: 'fa-building' };
+    const TYPE_ICON = { hospital: 'fa-hospital', research: 'fa-vial-circle-check', university: 'fa-graduation-cap', lab: 'fa-microscope', other: 'fa-building' };
 
     // Store institutions in a lookup map so onclick can pass just an index
     window._instLookup = {};
@@ -23026,7 +23154,7 @@ function renderInstitutionGroupedList(institutions, filter) {
                     <div style="font-size:12px;color:#f0f6ff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHTML(i.name)}</div>
                     ${i.city ? `<div style="font-size: 11px;color:#5a7aaa;">${escapeHTML(i.city)}</div>` : ''}
                 </div>
-                ${i.is_verified ? `<i class="fas fa-check-circle" style="font-size: 11px;color:#34d399;flex-shrink:0;" title="Verified institution"></i>` : ''}
+                ${i.is_verified ? `<i class="fas fa-circle-check" style="font-size: 11px;color:#34d399;flex-shrink:0;" title="Verified institution"></i>` : ''}
                 <span style="font-size: 11px;color:#3a4a6a;font-family:var(--font-mono);">${i.usage_count||1}×</span>
             </div>`;
         }).join('');
@@ -23088,7 +23216,7 @@ function filterHospitalSuggestions(val) {
 //  NEW DROPDOWN INSTITUTION SELECTOR — instXxx namespace
 // ══════════════════════════════════════════════════════════════
 
-const TYPE_ICON_MAP = { hospital: 'fa-hospital', research: 'fa-flask', university: 'fa-graduation-cap', lab: 'fa-microscope', other: 'fa-building' };
+const TYPE_ICON_MAP = { hospital: 'fa-hospital', research: 'fa-vial-circle-check', university: 'fa-graduation-cap', lab: 'fa-microscope', other: 'fa-building' };
 
 let _instDropdownOpen = false;
 let _instSelectedInst = null;
@@ -23184,7 +23312,7 @@ function instRenderList(institutions, filter) {
                     <div class="inst-row-name">${highlight(i.name, filter)}</div>
                     ${i.city ? `<div class="inst-row-city">${escapeHTML(i.city)}</div>` : ''}
                 </div>
-                ${i.is_verified ? '<i class="fas fa-check-circle inst-row-verified" title="Verified"></i>' : ''}
+                ${i.is_verified ? '<i class="fas fa-circle-check inst-row-verified" title="Verified"></i>' : ''}
                 <span class="inst-row-count">${i.usage_count||1}×</span>
             </div>`;
         }).join('');
@@ -23908,7 +24036,7 @@ function renderPriorityQueue() {
 
     if (!scored.length) {
         container.innerHTML = '<div style="font-size:12px;color:var(--text-tertiary);padding:20px 0;text-align:center;">'
-            + '<i class="fas fa-check-circle" style="font-size:20px;color:#34d399;display:block;margin-bottom:8px;"></i>'
+            + '<i class="fas fa-circle-check" style="font-size:20px;color:#34d399;display:block;margin-bottom:8px;"></i>'
             + 'No urgent curation items right now. Database is in good shape.</div>';
         return;
     }
@@ -24211,7 +24339,7 @@ function updateSearchDropdown(query, results) {
                         <div style="width:8px;height:8px;border-radius:50%;background:#2979ff;animation:neuPulse 1s ease-in-out infinite;flex-shrink:0;"></div>
                         <span style="font-size:11px;color:#60a5fa;font-weight:600;">NeumuacFQ is searching PubMed · ClinVar · CFTR2 robotically…</span>
                     ` : `
-                        <i class="fas fa-check-circle" style="color:#34d399;font-size:11px;flex-shrink:0;"></i>
+                        <i class="fas fa-circle-check" style="color:#34d399;font-size:11px;flex-shrink:0;"></i>
                         <span style="font-size:11px;color:#34d399;font-weight:600;">Robotic scan queued — check Helios inbox within 24h</span>
                     `}
                 </div>
@@ -24242,7 +24370,7 @@ function updateSearchDropdown(query, results) {
                                   background:${color}12;border:1px solid ${color}30;text-decoration:none;
                                   transition:background .1s;"
                            onmouseover="this.style.background='${color}22'" onmouseout="this.style.background='${color}12'">
-                            ${name} <i class="fas fa-external-link-alt" style="font-size:8px;"></i>
+                            ${name} <i class="fas fa-arrow-up-right-from-square" style="font-size:8px;"></i>
                         </a>`).join('')}
                 </div>
             </div>
@@ -25163,10 +25291,10 @@ function kbOpenCommandPalette() {
         // ── Navigation ────────────────────────────────────────────────────────
         { label: 'Open Helios AI inbox',      icon: 'fa-sun',             group: 'Navigation', action: () => { overlay.remove(); openHelios(); } },
         { label: 'Analytics dashboard',       icon: 'fa-chart-bar',       group: 'Navigation', action: () => { overlay.remove(); showDashboard(); } },
-        { label: 'Variant Reach Atlas',    icon: 'fa-globe',           group: 'Navigation', action: () => { overlay.remove(); document.getElementById('siTabGeo')?.click(); } },
+        { label: 'Variant Reach Atlas',    icon: 'fa-earth-europe',           group: 'Navigation', action: () => { overlay.remove(); document.getElementById('siTabGeo')?.click(); } },
         { label: 'Search intelligence',       icon: 'fa-brain',           group: 'Navigation', action: () => { overlay.remove(); document.getElementById('siTabSearch')?.click(); } },
         { label: 'Audit trail',               icon: 'fa-clipboard-list',         group: 'Navigation', action: () => { overlay.remove(); showAuditTrail(); } },
-        { label: 'Nomenclature audit',          icon: 'fa-spell-check',            group: 'Navigation', action: () => { overlay.remove(); openNomenclatureAudit(); } },
+        { label: 'Nomenclature audit',          icon: 'fa-list-check',            group: 'Navigation', action: () => { overlay.remove(); openNomenclatureAudit(); } },
         // ── Filters & sort ────────────────────────────────────────────────────
         { label: 'Clear all filters',         icon: 'fa-filter-circle-xmark', group: 'Filters',
           action: () => { overlay.remove(); _clearAllFilters(); } },
@@ -25418,7 +25546,7 @@ function helixShowMissAction(query) {
         { name:'ClinVar', url:`https://www.ncbi.nlm.nih.gov/clinvar/?term=${enc}+CFTR`,                      icon:'fa-database',     color:'#34d399', desc:'NIH significance' },
         { name:'LOVD',    url:`https://databases.lovd.nl/shared/variants/CFTR?search_variant_published_as=${enc}`, icon:'fa-list-alt', color:'#fb923c', desc:'LOVD' },
         { name:'PubMed',  url:`https://pubmed.ncbi.nlm.nih.gov/?term=${enc}+CFTR+cystic+fibrosis`,           icon:'fa-book-medical', color:'#fbbf24', desc:'Literature' },
-        { name:'CFTR-FR', url:'https://www.cftr.iurc.montp.inserm.fr/cftr/',                                 icon:'fa-globe',        color:'#c084fc', desc:'French DB' },
+        { name:'CFTR-FR', url:'https://www.cftr.iurc.montp.inserm.fr/cftr/',                                 icon:'fa-earth-europe',        color:'#c084fc', desc:'French DB' },
     ];
 
     const safeQ = escapeAttr(query);
@@ -25509,7 +25637,7 @@ function helixShowMissAction(query) {
                            onmouseover="this.style.background='rgba(255,255,255,0.08)';this.style.borderColor='${db.color}55'"
                            onmouseout="this.style.background='rgba(255,255,255,0.03)';this.style.borderColor='rgba(255,255,255,0.08)'">
                             <i class="fas ${db.icon}" style="font-size:10px;"></i>${db.name}
-                            <i class="fas fa-external-link-alt" style="font-size:8px;opacity:.5;"></i>
+                            <i class="fas fa-arrow-up-right-from-square" style="font-size:8px;opacity:.5;"></i>
                         </a>`).join('')}
                 </div>
             </div>
@@ -25524,7 +25652,7 @@ function helixShowMissAction(query) {
                         justify-content:center;gap:7px;transition:background .15s;"
                     onmouseover="this.style.background='rgba(248,113,113,0.13)'"
                     onmouseout="this.style.background='rgba(248,113,113,0.06)'">
-                    <i class="fas fa-plus-circle" style="font-size:11px;"></i>
+                    <i class="fas fa-circle-plus" style="font-size:11px;"></i>
                     Add "${safeShortH}" directly to NeumuacFQ
                 </button>
             </div>
@@ -25612,7 +25740,7 @@ async function helixSubmitMissNote(query) {
         });
 
         // 3. Honest confirmation
-        status.innerHTML = '<span style="color:#34d399;"><i class="fas fa-check-circle" style="margin-right:4px;font-size:10px;"></i>Flagged \u2014 a curator will review this. You\'ll see it in the database when classified.</span>';
+        status.innerHTML = '<span style="color:#34d399;"><i class="fas fa-circle-check" style="margin-right:4px;font-size:10px;"></i>Flagged \u2014 a curator will review this. You\'ll see it in the database when classified.</span>';
         helixMissNoteCount(query, { value: '' });
 
         // Update in-memory miss state
@@ -26322,7 +26450,7 @@ async function startCurationSprint() {
                         <span style="font-size:10px;padding:2px 8px;border-radius:5px;
                             background:rgba(99,140,210,.07);border:1px solid rgba(99,140,210,.15);
                             color:var(--text-tertiary);">
-                            <i class="fas fa-check-circle" style="font-size:9px;margin-right:3px;"></i>
+                            <i class="fas fa-circle-check" style="font-size:9px;margin-right:3px;"></i>
                             ${v.validation_count||0} validations
                         </span>
                         ${v.class_confidence ? `<span style="font-size:10px;padding:2px 8px;border-radius:5px;
@@ -26338,7 +26466,7 @@ async function startCurationSprint() {
                     <div style="font-size:10px;font-weight:700;color:#fbbf24;
                         text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;
                         display:flex;align-items:center;gap:6px;">
-                        <i class="fas fa-exclamation-circle" style="font-size:10px;"></i>
+                        <i class="fas fa-circle-exclamation" style="font-size:10px;"></i>
                         Missing data — ${missingFields.length} field${missingFields.length!==1?'s':''}
                     </div>
                     <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:4px;">
@@ -26365,7 +26493,7 @@ async function startCurationSprint() {
                     <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;
                         border-radius:9px;background:rgba(52,211,153,.06);
                         border:1px solid rgba(52,211,153,.2);margin-bottom:4px;">
-                        <i class="fas fa-check-circle" style="color:#34d399;"></i>
+                        <i class="fas fa-circle-check" style="color:#34d399;"></i>
                         <span style="font-size:12px;color:#34d399;font-weight:600;">
                             This variant is complete — mark as done to continue
                         </span>
@@ -26788,7 +26916,7 @@ async function showAuditTrail() {
 
         if (!entries.length) {
             body.innerHTML = `<div style="text-align:center;padding:40px;font-size:12px;color:var(--text-tertiary);">
-                <i class="fas fa-check-circle" style="font-size:20px;color:#34d399;display:block;margin-bottom:8px;"></i>
+                <i class="fas fa-circle-check" style="font-size:20px;color:#34d399;display:block;margin-bottom:8px;"></i>
                 No audit entries recorded yet.</div>`;
             return;
         }
@@ -27907,7 +28035,7 @@ Object.assign(window, { showAuditTrail });
                         <i class="fas fa-check-double"></i> Approve all routine
                     </button>
                     <button class="helios-btn helios-btn-ghost" onclick="heliosLoadInbox()">
-                        <i class="fas fa-sync-alt"></i>
+                        <i class="fas fa-arrows-rotate"></i>
                     </button>
                 </div>
             </div>
@@ -27990,7 +28118,7 @@ Object.assign(window, { showAuditTrail });
                             <i class="fas fa-magnifying-glass-chart"></i> Research Gap Intelligence
                         </button>
                         <button class="helios-btn helios-btn-ghost" onclick="heliosCheckEvidenceContradictions()" id="hbtnEvidence" style="grid-column:1/-1;border-color:rgba(248,113,113,0.2);color:var(--helios-red);">
-                            <i class="fas fa-flask"></i> Scan Evidence Contradictions
+                            <i class="fas fa-vial-circle-check"></i> Scan Evidence Contradictions
                         </button>
                     </div>
                     <div id="heliosScanProgress" style="display:none;">
@@ -28027,7 +28155,7 @@ Object.assign(window, { showAuditTrail });
                 <div class="helios-card-head">
                     <i class="fas fa-clock-rotate-left"></i> Scan Run History
                     <button class="helios-btn helios-btn-ghost" style="margin-left:auto;padding:3px 8px;font-size: 11px;" onclick="heliosLoadScanHistory()">
-                        <i class="fas fa-sync-alt"></i>
+                        <i class="fas fa-arrows-rotate"></i>
                     </button>
                 </div>
                 <div class="helios-card-body" style="padding:0;max-height:280px;overflow-y:auto;" id="heliosScanHistory">
@@ -28096,7 +28224,7 @@ Object.assign(window, { showAuditTrail });
                     <i class="fas fa-scroll"></i> Decision Audit Trail
                     <span style="font-size: 11px;color:var(--helios-text3);margin-left:4px;">Immutable — all decisions signed</span>
                     <button class="helios-btn helios-btn-ghost" style="margin-left:auto;padding:5px 10px;font-size: 11px;" onclick="heliosLoadAudit()">
-                        <i class="fas fa-sync-alt"></i>
+                        <i class="fas fa-arrows-rotate"></i>
                     </button>
                 </div>
                 <div class="helios-card-body" id="heliosAuditList" style="max-height:60vh;overflow-y:auto;padding:0;">
@@ -28138,7 +28266,7 @@ Object.assign(window, { showAuditTrail });
                     Validation Priority Queue
                     <span style="font-size: 11px;color:var(--helios-text3);margin-left:6px;">Ordered by clinical urgency</span>
                     <button class="helios-btn helios-btn-ghost" style="margin-left:auto;padding:4px 10px;font-size:10.5px;" onclick="heliosLoadValidationQueue()">
-                        <i class="fas fa-sync-alt"></i> Refresh
+                        <i class="fas fa-arrows-rotate"></i> Refresh
                     </button>
                 </div>
                 <div id="heliosValidationQueue" style="max-height:420px;overflow-y:auto;">
@@ -28152,7 +28280,7 @@ Object.assign(window, { showAuditTrail });
             <!-- Geographic signal -->
             <div class="helios-card">
                 <div class="helios-card-head">
-                    <i class="fas fa-globe-europe" style="color:var(--helios-blue);"></i>
+                    <i class="fas fa-earth-europe-europe" style="color:var(--helios-blue);"></i>
                     Geographic Demand Signal
                     <span style="font-size: 11px;color:var(--helios-text3);margin-left:6px;">Cross-institutional variant demand</span>
                     <button class="helios-btn helios-btn-ghost" style="margin-left:auto;padding:4px 10px;font-size:10.5px;" onclick="heliosRunGeoSignal()">
@@ -28175,7 +28303,7 @@ Object.assign(window, { showAuditTrail });
                     AI Feedback Calibration
                     <span style="font-size: 11px;color:var(--helios-text3);margin-left:6px;">Approval rates by scan source · updates in real time</span>
                     <button class="helios-btn helios-btn-ghost" style="margin-left:auto;padding:4px 10px;font-size:10.5px;" onclick="heliosFeedbackRefreshPanel()">
-                        <i class="fas fa-sync-alt"></i> Refresh
+                        <i class="fas fa-arrows-rotate"></i> Refresh
                     </button>
                 </div>
                 <div style="padding:12px 18px;border-bottom:1px solid var(--helios-border);background:rgba(0,0,0,0.15);">
@@ -28364,11 +28492,11 @@ const HELIOS_TYPES = {
     NEW_EVIDENCE:       { icon:'fa-newspaper',        label:'New Evidence',      cls:'htype-new_evidence'    },
     CONTRADICTION:      { icon:'fa-exclamation-triangle', label:'Contradiction',  cls:'htype-contradiction'   },
     DRIFT_ALERT:        { icon:'fa-clock',             label:'Drift Alert',       cls:'htype-drift_alert'     },
-    MISS_RESOLVED:      { icon:'fa-check-circle',      label:'Miss Resolved',     cls:'htype-miss_resolved'   },
+    MISS_RESOLVED:      { icon:'fa-circle-check',      label:'Miss Resolved',     cls:'htype-miss_resolved'   },
     PATTERN_SIGNAL:     { icon:'fa-chart-network',      label:'Pattern signal',    cls:'htype-pattern_signal'  },
     REGIONAL_SIGNAL:    { icon:'fa-map-marker-alt',    label:'Regional Signal',   cls:'htype-regional_signal' },
     INTERNAL_LOGIC:     { icon:'fa-ban',               label:'Logic Error',       cls:'htype-internal_logic'  },
-    INTERNAL_NAMING:    { icon:'fa-spell-check',       label:'Naming Issue',      cls:'htype-internal_naming' },
+    INTERNAL_NAMING:    { icon:'fa-list-check',       label:'Naming Issue',      cls:'htype-internal_naming' },
     INTERNAL_ORPHAN:    { icon:'fa-ghost',             label:'Orphan Variant',    cls:'htype-internal_orphan' },
     INTERNAL_DUPLICATE: { icon:'fa-copy',              label:'Duplicate Risk',    cls:'htype-internal_duplicate'},
     EXTERNAL_GUIDELINE: { icon:'fa-book-medical',      label:'Guideline Update',  cls:'htype-external_guideline'},
@@ -28598,7 +28726,7 @@ function renderHeliosInbox(items) {
     if (aaBtn) aaBtn.style.display = routine.length > 1 ? '' : 'none';
 
     if (!items.length) {
-        list.innerHTML = `<div class="helios-empty"><div class="helios-empty-icon"><i class="fas fa-check-circle" style="color:var(--helios-green);opacity:0.5;"></i></div><p>Inbox clear — nothing to review</p></div>`;
+        list.innerHTML = `<div class="helios-empty"><div class="helios-empty-icon"><i class="fas fa-circle-check" style="color:var(--helios-green);opacity:0.5;"></i></div><p>Inbox clear — nothing to review</p></div>`;
         return;
     }
 
@@ -28653,7 +28781,7 @@ function renderHeliosItem(item) {
                             ${e.pmid    ? `<span style="color:var(--helios-text3);">PMID:${escapeHTML(e.pmid)}</span>` : ''}
                         </div>
                     </div>
-                    ${e.url ? `<a href="${escapeHTML(e.url)}" target="_blank" style="flex-shrink:0;color:var(--helios-sun);font-size:11px;opacity:.7;margin-top:2px;" title="Open in PubMed"><i class="fas fa-external-link-alt"></i></a>` : ''}
+                    ${e.url ? `<a href="${escapeHTML(e.url)}" target="_blank" style="flex-shrink:0;color:var(--helios-sun);font-size:11px;opacity:.7;margin-top:2px;" title="Open in PubMed"><i class="fas fa-arrow-up-right-from-square"></i></a>` : ''}
                 </div>`;
             }).join('')}
             ${evidence.length > 5 ? `<div style="font-size: 11px;color:var(--helios-text3);padding:6px 0;font-family:var(--helios-mono);">+${evidence.length-5} more sources in payload</div>` : ''}
@@ -28789,12 +28917,12 @@ function renderHeliosItem(item) {
             ${!isDone ? `
             <div class="helios-actions">
                 ${item.priority !== 'URGENT' ? `<button class="helios-btn helios-btn-approve" onclick="heliosApprove(${item.id})"><i class="fas fa-check"></i> Approve</button>` : ''}
-                ${item.priority === 'URGENT' || item.proposed_field ? `<button class="helios-btn helios-btn-approve" onclick="heliosApproveWithNote(${item.id})"><i class="fas fa-check-circle"></i> Approve & sign</button>` : ''}
+                ${item.priority === 'URGENT' || item.proposed_field ? `<button class="helios-btn helios-btn-approve" onclick="heliosApproveWithNote(${item.id})"><i class="fas fa-circle-check"></i> Approve & sign</button>` : ''}
                 ${item.item_type === 'INTERNAL_LOGIC' ? `<button class="helios-btn helios-btn-exceptional" onclick="heliosMarkExceptional(${item.id})"><i class="fas fa-bolt"></i> Mark Exceptional</button>` : ''}
-                ${item.item_type === 'MISS_RESOLVED' ? `<button class="helios-btn helios-btn-create" onclick="heliosCreateVariantFromMiss(${item.id})"><i class="fas fa-plus-circle"></i> Create Variant</button>` : ''}
+                ${item.item_type === 'MISS_RESOLVED' ? `<button class="helios-btn helios-btn-create" onclick="heliosCreateVariantFromMiss(${item.id})"><i class="fas fa-circle-plus"></i> Create Variant</button>` : ''}
                 <button class="helios-btn helios-btn-reject" onclick="heliosReject(${item.id})"><i class="fas fa-xmark"></i> Reject</button>
                 <button class="helios-btn helios-btn-defer" onclick="heliosDefer(${item.id})"><i class="fas fa-clock"></i> Defer</button>
-                ${item.variant_name ? `<button class="helios-btn helios-btn-ghost" onclick="closeHelios();quickSearch('${escapeAttr(item.variant_name)}')"><i class="fas fa-external-link-alt"></i> View Variant</button>` : ''}
+                ${item.variant_name ? `<button class="helios-btn helios-btn-ghost" onclick="closeHelios();quickSearch('${escapeAttr(item.variant_name)}')"><i class="fas fa-arrow-up-right-from-square"></i> View Variant</button>` : ''}
             </div>` : `
             <div style="padding:8px 0;font-size:11px;color:var(--helios-text3);">
                 Decision by <strong style="color:var(--helios-text2);">${escapeHTML(item.reviewed_by||'—')}</strong>
@@ -30747,9 +30875,9 @@ async function heliosRunHealthCheck() {
         const rs = STATE._reclassStats;
         rsEl.innerHTML = `
             <div style="display:flex;gap:12px;font-size:11px;margin-top:4px;">
-                <span style="color:#f87171;"><i class="fas fa-exclamation-circle" style="font-size:10px;margin-right:3px;"></i>${rs.high} urgent</span>
+                <span style="color:#f87171;"><i class="fas fa-circle-exclamation" style="font-size:10px;margin-right:3px;"></i>${rs.high} urgent</span>
                 <span style="color:#fbbf24;"><i class="fas fa-clock" style="font-size:10px;margin-right:3px;"></i>${rs.medium} review</span>
-                <span style="color:#34d399;"><i class="fas fa-check-circle" style="font-size:10px;margin-right:3px;"></i>${rs.low} current</span>
+                <span style="color:#34d399;"><i class="fas fa-circle-check" style="font-size:10px;margin-right:3px;"></i>${rs.low} current</span>
             </div>`;
     } else if (rsEl) {
         // Score not computed yet — trigger now
@@ -31033,7 +31161,7 @@ async function heliosLoadValidationQueue() {
             .slice(0, 30); // top 30
 
         if (!scored.length) {
-            container.innerHTML = `<div class="helios-empty" style="padding:32px;"><div class="helios-empty-icon"><i class="fas fa-check-circle" style="color:var(--helios-green);"></i></div><p>All variants validated</p></div>`;
+            container.innerHTML = `<div class="helios-empty" style="padding:32px;"><div class="helios-empty-icon"><i class="fas fa-circle-check" style="color:var(--helios-green);"></i></div><p>All variants validated</p></div>`;
             return;
         }
 
@@ -31059,7 +31187,7 @@ async function heliosLoadValidationQueue() {
                 <div style="flex-shrink:0;text-align:right;">
                     <div style="font-size:9.5px;font-weight:700;padding:2px 8px;border-radius:4px;background:${urgencyBg(score)};color:${urgencyColor(score)};font-family:var(--helios-mono);border:1px solid ${urgencyColor(score).replace('var(--helios-','rgba(').replace(')',',0.3)')};">${urgencyLabel(score)}</div>
                 </div>
-                <i class="fas fa-external-link-alt" style="font-size: 11px;color:var(--helios-text3);flex-shrink:0;"></i>
+                <i class="fas fa-arrow-up-right-from-square" style="font-size: 11px;color:var(--helios-text3);flex-shrink:0;"></i>
             </div>`).join('');
 
     } catch(e) {
@@ -31158,7 +31286,7 @@ async function heliosRunGeoSignal() {
                     <div style="font-size:11px;color:var(--helios-text3);font-family:var(--helios-body);">
                         <i class="fas fa-building" style="font-size: 11px;margin-right:4px;"></i>${s.hospitals} institution${s.hospitals!==1?'s':''}
                         &nbsp;·&nbsp;
-                        <i class="fas fa-globe" style="font-size: 11px;margin-right:4px;"></i>${s.countries} countr${s.countries!==1?'ies':'y'}
+                        <i class="fas fa-earth-europe" style="font-size: 11px;margin-right:4px;"></i>${s.countries} countr${s.countries!==1?'ies':'y'}
                         &nbsp;·&nbsp;${s.searches} searches
                         ${s.countryList ? `&nbsp;·&nbsp;<span style="color:var(--helios-text2);">${escapeHTML(s.countryList)}</span>` : ''}
                     </div>
@@ -32814,7 +32942,7 @@ function renderStructuredEvidencePanel(evidenceRows, variant) {
             ${classContradiction ? `
             <div style="padding:8px 12px;border-radius:6px;background:rgba(248,113,113,0.08);
                  border:1px solid rgba(248,113,113,0.25);font-size:12px;color:#f87171;margin-bottom:10px;">
-                <i class="fas fa-exclamation-circle" style="margin-right:6px;"></i>
+                <i class="fas fa-circle-exclamation" style="margin-right:6px;"></i>
                 Evidence suggests Class ${escapeHTML(topClass)} but variant is classified Class ${escapeHTML(variant.cftr_class)} —
                 contradiction detected, review required
             </div>` : ''}
@@ -33602,7 +33730,7 @@ function wizardShowResult(result) {
             <div style="font-family:var(--font-display);font-size:19px;font-weight:700;color:var(--text-primary);margin-bottom:8px;">${escapeHTML(result.title)}</div>
             <div style="font-size:12.5px;color:var(--text-secondary);line-height:1.7;margin-bottom:16px;max-width:420px;margin-left:auto;margin-right:auto;">${escapeHTML(result.desc)}</div>
             <div style="display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:8px;background:${result.eti === 'responsive' ? 'rgba(52,211,153,0.08)' : result.eti === 'non_responsive' ? 'rgba(248,113,113,0.08)' : 'rgba(251,191,36,0.08)'};border:1px solid ${result.eti === 'responsive' ? 'rgba(52,211,153,0.22)' : result.eti === 'non_responsive' ? 'rgba(248,113,113,0.22)' : 'rgba(251,191,36,0.22)'};margin-bottom:16px;">
-                <i class="fas ${result.eti === 'responsive' ? 'fa-check-circle' : result.eti === 'non_responsive' ? 'fa-times-circle' : 'fa-question-circle'}" style="color:${result.eti === 'responsive' ? '#34d399' : result.eti === 'non_responsive' ? '#f87171' : '#fbbf24'};font-size:13px;"></i>
+                <i class="fas ${result.eti === 'responsive' ? 'fa-circle-check' : result.eti === 'non_responsive' ? 'fa-circle-xmark' : 'fa-question-circle'}" style="color:${result.eti === 'responsive' ? '#34d399' : result.eti === 'non_responsive' ? '#f87171' : '#fbbf24'};font-size:13px;"></i>
                 <span style="font-size:12px;font-weight:600;color:${result.eti === 'responsive' ? '#34d399' : result.eti === 'non_responsive' ? '#f87171' : '#fbbf24'};">
                     ETI: ${result.eti === 'responsive' ? 'Responsive' : result.eti === 'non_responsive' ? 'Non-responsive' : 'Unknown'} · Confidence: ${result.confidence}</span>
             </div>
@@ -33849,7 +33977,7 @@ function injectEvidenceQualityFields() {
              background:rgba(52,211,153,0.04);border:1px solid rgba(52,211,153,0.2);border-radius:8px;">
             <div style="font-size:11px;font-weight:700;color:#34d399;text-transform:uppercase;
                  letter-spacing:.07em;margin-bottom:10px;">
-                <i class="fas fa-flask" style="margin-right:5px;"></i>
+                <i class="fas fa-vial-circle-check" style="margin-right:5px;"></i>
                 Functional assay data — supports ACMG PS3
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
@@ -34144,7 +34272,7 @@ function helixUpdateBatchBar() {
             Apply
         </button>
         <button onclick="helixBatchValidate()" style="padding:5px 11px;border-radius:5px;background:var(--brand);border:none;color:#fff;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--font-body);flex-shrink:0;">
-            <i class="fas fa-check-circle" style="margin-right:3px;font-size:10px;"></i>Validate
+            <i class="fas fa-circle-check" style="margin-right:3px;font-size:10px;"></i>Validate
         </button>
         <button onclick="STATE.batchSelected.clear();helixUpdateBatchBar();renderVariantList();" style="padding:5px 8px;border-radius:5px;border:1px solid rgba(99,140,210,0.2);background:none;color:var(--text-tertiary);font-size:11px;cursor:pointer;flex-shrink:0;">✕</button>`;
 }
@@ -35493,6 +35621,22 @@ function lookupRetryAlternate(query) {
         if (e.key === 'Escape') overlay.remove();
     });
     overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+}
+</script>
+
+<script>
+function _updateSectionIndicator(section, icon, label) {
+    const pill = document.getElementById('headerSectionPill');
+    const iconEl = document.getElementById('headerSectionIcon');
+    const labelEl = document.getElementById('headerSectionLabel');
+    if (!pill) return;
+    if (section) {
+        pill.style.display = 'flex';
+        if (iconEl) { iconEl.className = 'fas ' + (icon || 'fa-dna'); iconEl.style.fontSize = '10px'; }
+        if (labelEl) labelEl.textContent = label || section;
+    } else {
+        pill.style.display = 'none';
+    }
 }
 </script>
 </body>
