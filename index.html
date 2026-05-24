@@ -2359,11 +2359,12 @@
         .hm-logo-panel {
             width: 100%;
             background: #ffffff;
-            padding: 20px 24px 16px;
-            display: flex; flex-direction: column; align-items: center;
+            padding: 0;
             position: relative; overflow: hidden;
             border-radius: 18px 18px 0 0;
             flex-shrink: 0;
+            min-height: 200px;
+            display: flex; align-items: center; justify-content: center;
         }
         /* Molecular dot watermark */
         .hm-logo-panel::before {
@@ -2371,7 +2372,7 @@
             position: absolute; inset: 0;
             background-image: radial-gradient(circle, rgba(26,111,216,0.06) 1px, transparent 1px);
             background-size: 22px 22px;
-            pointer-events: none;
+            pointer-events: none; z-index: 1;
         }
         /* Gradient bleed from white into dark */
         .hm-logo-panel::after {
@@ -2379,13 +2380,16 @@
             position: absolute;
             bottom: 0; left: 0; right: 0; height: 40px;
             background: linear-gradient(to bottom, transparent, rgba(7,12,28,0.10));
-            pointer-events: none;
+            pointer-events: none; z-index: 2;
         }
         .hm-logo-img {
-            width: 92%; max-width: 400px;
-            position: relative; z-index: 1;
-            filter: drop-shadow(0 4px 18px rgba(26,111,216,0.10));
-            mix-blend-mode: multiply;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            display: block;
+            position: relative; z-index: 0;
+            min-height: 200px;
         }
         /* Dark interaction panel */
         .hm-body-panel {
@@ -24776,6 +24780,20 @@ async function showHospitalModal() {
     const institutions = await loadInstitutionsFromDB();
     renderInstitutionGroupedList(institutions, null);
     instRenderList(institutions, '');
+    // Pre-populate with previously saved hospital if any
+    try {
+        const saved = getStoredHospitalObj ? getStoredHospitalObj() : null;
+        if (saved && saved.name) {
+            const trigger = document.querySelector('.inst-trigger-label');
+            if (trigger) {
+                trigger.textContent = saved.name;
+                trigger.classList.remove('placeholder');
+            }
+            const confirmBtn = document.getElementById('hospitalConfirmBtn');
+            if (confirmBtn) confirmBtn.disabled = false;
+            STATE._pendingHospitalObj = saved;
+        }
+    } catch(e) {}
     setTimeout(() => document.getElementById('instSearchInput')?.focus(), 100);
 }
 
@@ -28010,10 +28028,15 @@ function drawCanvas() {
                 }, step.delay);
             });
 
-            // Hospital greeting and selection fire after loading completes
+            // Always show hospital modal on every session start —
+            // for the internal pilot, this is a deliberate confirmation step, not a one-time setup
             setTimeout(function() {
                 showHospitalGreeting();
-                if (typeof initHospital === 'function') initHospital();
+                if (typeof showHospitalModal === 'function') {
+                    showHospitalModal();
+                } else if (typeof initHospital === 'function') {
+                    initHospital();
+                }
             }, 3700);
 
             safetyTimer = setTimeout(function() {
