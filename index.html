@@ -2350,8 +2350,8 @@
 
         /* ---- Hospital onboarding modal — redesigned ---- */
         .hospital-modal-overlay {
-            position: fixed; inset: 0; z-index: 99995;
-            background: rgba(3,6,18,0.92);
+            position: fixed; inset: 0; z-index: 100001;
+            background: #03060f;
             display: flex; align-items: center; justify-content: center;
             overflow: hidden;
         }
@@ -27982,15 +27982,43 @@ function drawCanvas() {
         dismiss: dismiss,
         _clearSafety: function() { clearTimeout(safetyTimer); },
         start: function() {
-            dismissed = false;
-            screen.style.display = '';
+            // Reset state completely
+            dismissed    = false;
+            currentPct   = 0;
+            screen.style.display  = '';
+            screen.style.opacity  = '1';
             screen.classList.remove('fade-out');
-            advance('boot');
-            showHospitalGreeting();
-            if (typeof initHospital === 'function') initHospital();
+            fill.style.width      = '0%';
+            pctEl.textContent     = '0%';
+            setStatus('Iniciando NeumuacFQ\u2026');
+
+            // Replay milestones with deliberate timing — data already loaded,
+            // this is the cinematic sequence the platform deserves
+            const sequence = [
+                { key: 'boot',         delay: 0    },
+                { key: 'db_connect',   delay: 520  },
+                { key: 'fetch_page',   delay: 1080 },
+                { key: 'index',        delay: 1700 },
+                { key: 'search_intel', delay: 2200 },
+                { key: 'render',       delay: 2700 },
+                { key: 'done',         delay: 3200 },
+            ];
+
+            sequence.forEach(function(step) {
+                setTimeout(function() {
+                    if (!dismissed) advance(step.key);
+                }, step.delay);
+            });
+
+            // Hospital greeting and selection fire after loading completes
+            setTimeout(function() {
+                showHospitalGreeting();
+                if (typeof initHospital === 'function') initHospital();
+            }, 3700);
+
             safetyTimer = setTimeout(function() {
                 if (!dismissed) dismiss();
-            }, 12000);
+            }, 8000);
         }
     };
 })();
@@ -28006,6 +28034,15 @@ function drawCanvas() {
     btn.addEventListener('click', function() {
         btn.disabled    = true;
         btn.textContent = 'Cargando\u2026';
+
+        // Immediately show a solid dark screen so platform never flashes
+        var ls = document.getElementById('loadingScreen');
+        if (ls) {
+            ls.style.display  = 'flex';
+            ls.style.opacity  = '1';
+            ls.style.zIndex   = '99999';
+        }
+
         cover.classList.add('cp-fade-out');
         setTimeout(function() {
             cover.style.display = 'none';
