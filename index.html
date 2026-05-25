@@ -536,35 +536,31 @@
             transition: opacity 0.3s;
         }
 
-        #loadingScreen.load-error .load-delta-glyph {
-            color: #f87171;
-            filter: drop-shadow(0 0 12px rgba(248,113,113,0.6));
-            animation: none;
-        }
+        /* Error state — amber, not red. Red = danger in clinical context */
         #loadingScreen.load-error .load-bar-fill {
-            background: linear-gradient(90deg, #b91c1c, #f87171);
-            box-shadow: 0 0 8px rgba(248,113,113,0.6);
+            background: linear-gradient(90deg, rgba(180,120,8,0.80), rgba(218,162,42,0.90));
         }
-        #loadingScreen.load-error .ring-spin,
-        #loadingScreen.load-error .ring-spin-rev {
-            animation-play-state: paused;
-        }
+        #loadingScreen.load-error .ls-spin-slow,
+        #loadingScreen.load-error .ls-spin-rev,
+        #loadingScreen.load-error .ls-spin-mid { animation-play-state: paused; }
+        #loadingScreen.load-error #lsProgressArc { stroke: rgba(218,162,42,0.70); }
+        #loadingScreen.load-error #loadPct { color: rgba(218,162,42,0.85); }
         .load-retry-btn {
-            margin-top: 16px;
-            padding: 8px 24px;
-            background: rgba(248,113,113,0.12);
-            border: 1px solid rgba(248,113,113,0.35);
+            margin-top: 18px;
+            padding: 11px 32px;
+            background: rgba(218,162,42,0.06);
+            border: 1px solid rgba(218,162,42,0.28);
             border-radius: 6px;
-            color: #fca5a5;
+            color: rgba(218,162,42,0.82);
             font-family: 'IBM Plex Mono', monospace;
-            font-size: 11px;
-            letter-spacing: 0.08em;
+            font-size: 11px; letter-spacing: 0.10em;
+            text-transform: uppercase;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: background .2s, border-color .2s;
             display: none;
         }
         #loadingScreen.load-error .load-retry-btn { display: inline-block; }
-        .load-retry-btn:hover { background: rgba(248,113,113,0.22); border-color: rgba(248,113,113,0.6); }
+        .load-retry-btn:hover { background: rgba(218,162,42,0.12); border-color: rgba(218,162,42,0.50); }
 
         .load-hospital-greeting {
             font-family: 'IBM Plex Mono', monospace;
@@ -2364,10 +2360,10 @@
 
         /* ---- Hospital onboarding modal — redesigned ---- */
         .hospital-modal-overlay {
-            position: fixed; inset: 0; z-index: 99995;
-            background: rgba(4,8,15,0.92);
+            position: fixed; inset: 0; z-index: 100003;
+            background: rgba(3,6,18,0.96);
             display: flex; align-items: center; justify-content: center;
-            backdrop-filter: blur(8px);
+            overflow: hidden;
         }
         .hospital-modal {
             background:rgba(7,12,28,.92) !important;
@@ -2403,66 +2399,91 @@
         }
         .inst-selector-trigger {
             display:flex; align-items:center; gap:10px;
-            width:100%; height:46px; padding:0 14px;
-            background:rgba(4,8,20,.65); border:1px solid rgba(44,198,242,.15);
+            width:100%; height:48px; padding:0 14px;
+            background:rgba(4,8,20,.50);
+            border:1px solid rgba(44,198,242,.22);
             border-radius:10px; color:#d0e8f8; font-size:12.5px;
             font-family:var(--font-body); cursor:pointer;
-            transition:border-color .2s,box-shadow .2s; box-sizing:border-box;
+            transition:border-color .2s, box-shadow .2s, background .2s;
+            box-sizing:border-box;
+            user-select:none;
         }
-        .inst-selector-trigger:hover { border-color:rgba(44,198,242,.35); box-shadow:0 0 0 3px rgba(44,198,242,.05); }
-        .inst-selector-trigger.open { border-color:rgba(44,198,242,.50); border-bottom-left-radius:0; border-bottom-right-radius:0; box-shadow:0 0 0 3px rgba(44,198,242,.07); }
-        .inst-selector-trigger .inst-trigger-icon { color:rgba(44,198,242,.45); font-size:12px; flex-shrink:0; }
+        .inst-selector-trigger:hover {
+            border-color:rgba(44,198,242,.45);
+            background:rgba(4,8,20,.70);
+            box-shadow:0 0 0 3px rgba(44,198,242,.06);
+        }
+        .inst-selector-trigger.open {
+            border-color:rgba(44,198,242,.60);
+            background:rgba(4,8,20,.70);
+            border-bottom-left-radius:0; border-bottom-right-radius:0;
+            box-shadow:0 0 0 3px rgba(44,198,242,.08);
+        }
+        .inst-selector-trigger .inst-trigger-icon { color:rgba(44,198,242,.50); flex-shrink:0; }
         .inst-selector-trigger .inst-trigger-label { flex:1; text-align:left; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-        .inst-selector-trigger .inst-trigger-label.placeholder { color:rgba(90,130,175,.70); }
-        .inst-selector-trigger .inst-trigger-arrow { color:rgba(44,198,242,.40); font-size:11px; flex-shrink:0; transition:transform .2s; }
+        .inst-selector-trigger .inst-trigger-label.placeholder { color:rgba(100,140,185,.60); font-style:italic; }
+        .inst-selector-trigger .inst-trigger-arrow { color:rgba(44,198,242,.55); flex-shrink:0; transition:transform .2s; }
         .inst-selector-trigger.open .inst-trigger-arrow { transform:rotate(180deg); }
 
         /* Dropdown panel */
         .inst-dropdown {
             display: none; position: absolute; left: 0; right: 0; z-index: 20;
-            background: #0f1d30;
-            border: 1.5px solid rgba(41,121,255,0.3);
+            background: rgba(4,8,22,0.98);
+            border: 1px solid rgba(44,198,242,0.28);
             border-top: none;
             border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;
-            box-shadow: 0 16px 40px rgba(0,5,20,0.7);
+            box-shadow: 0 20px 48px rgba(0,5,20,0.85);
             overflow: hidden;
         }
         .inst-dropdown.open { display: block; }
 
         /* Search bar inside dropdown */
         .inst-search-bar {
-            display: flex; align-items: center; gap: 8px;
-            padding: 10px 14px; border-bottom: 1px solid rgba(99,140,210,0.12);
-            background: rgba(0,0,0,0.25);
+            display: flex; align-items: center; gap: 9px;
+            padding: 11px 14px;
+            border-bottom: 1px solid rgba(44,198,242,0.08);
+            background: rgba(0,0,0,0.20);
         }
-        .inst-search-bar i { color: #4a6a99; font-size: 12px; flex-shrink: 0; }
+        .inst-search-bar svg { color: rgba(44,198,242,0.40); flex-shrink: 0; }
         .inst-search-input {
-            flex: 1; background: transparent; border: none; outline: none;
-            color: #f0f6ff; font-size: 13px; font-family: var(--font-body);
+            flex: 1; background: transparent !important;
+            border: none !important; outline: none !important;
+            box-shadow: none !important;
+            -webkit-appearance: none;
+            color: #d8eeff; font-size: 12.5px; font-family: var(--font-body);
+            caret-color: rgba(44,198,242,0.80);
+            padding: 0 !important; margin: 0 !important;
+            height: 100%; cursor: pointer;
         }
-        .inst-search-input::placeholder { color: #4a6a99; }
+        .inst-selector-trigger.open .inst-search-input { cursor: text; }
+        .inst-search-input::placeholder { color: rgba(90,125,170,0.55); font-style:italic; }
+        .inst-search-input:focus { outline: none !important; box-shadow: none !important; }
         .inst-search-clear {
-            background: none; border: none; color: #4a6a99; cursor: pointer;
-            font-size: 12px; padding: 2px 4px; display: none;
+            background: none; border: none; color: rgba(90,125,170,0.45); cursor: pointer;
+            font-size: 16px; padding: 2px 4px; display: none; line-height:1;
+            transition: color .15s; flex-shrink:0;
+        }
+        .inst-search-clear.visible { display: block; }
+        .inst-search-clear:hover { color: rgba(150,190,230,0.90); }
+            background: none; border: none; color: rgba(90,125,170,0.45); cursor: pointer;
+            font-size: 14px; padding: 2px 4px; display: none; line-height:1;
             transition: color .15s;
         }
         .inst-search-clear.visible { display: block; }
-        .inst-search-clear:hover { color: #9ab8e0; }
+        .inst-search-clear:hover { color: rgba(150,190,230,0.90); }
 
         /* Results list */
-        .inst-list {
-            max-height: 240px; overflow-y: auto;
-        }
-        .inst-list::-webkit-scrollbar { width: 4px; }
+        .inst-list { max-height: 240px; overflow-y: auto; }
+        .inst-list::-webkit-scrollbar { width: 3px; }
         .inst-list::-webkit-scrollbar-track { background: transparent; }
-        .inst-list::-webkit-scrollbar-thumb { background: rgba(99,140,210,0.2); border-radius: 2px; }
+        .inst-list::-webkit-scrollbar-thumb { background: rgba(44,198,242,0.18); border-radius: 2px; }
 
         /* Country header */
         .inst-country-header {
             padding: 5px 14px 3px;
-            font-size: 10px; font-weight: 700; letter-spacing: .1em;
-            text-transform: uppercase; color: #3a4a6a;
-            background: rgba(0,0,0,0.3);
+            font-size: 9.5px; font-weight: 700; letter-spacing: .12em;
+            text-transform: uppercase; color: rgba(44,198,242,0.35);
+            background: rgba(0,0,0,0.28);
             position: sticky; top: 0; z-index: 1;
         }
         /* Institution row */
@@ -5799,13 +5820,27 @@
             </div>
         </div>
     </div>
-    <div style="position:absolute;bottom:18px;left:0;right:0;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.09em;color:rgba(60,90,130,.28);pointer-events:none;z-index:1;">v5.1 &nbsp;·&nbsp; NeumuacFQ</div>
+    <div style="position:absolute;bottom:18px;left:0;right:0;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.09em;color:rgba(60,90,130,.28);pointer-events:none;z-index:1;">Beta v1.0</div>
 </div>
 
 <!-- ================================================================
      LOADING SCREEN
      ================================================================ -->
 <div id="loadingScreen">
+    <!-- Same atmosphere as cover page — visual continuity -->
+    <svg style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs><radialGradient id="lsAtmo" cx="50%" cy="48%" r="52%"><stop offset="0%" stop-color="#1a4db8" stop-opacity="0.08"/><stop offset="100%" stop-color="#05091a" stop-opacity="0"/></radialGradient></defs>
+        <rect width="1440" height="900" fill="url(#lsAtmo)"/>
+        <g stroke="#2cc6f2" fill="none" stroke-linecap="round">
+            <ellipse cx="720" cy="490" rx="580" ry="340" stroke-opacity="0.040" stroke-width="1.2"/>
+            <ellipse cx="720" cy="490" rx="400" ry="220" stroke-opacity="0.052" stroke-width="0.9"/>
+            <ellipse cx="720" cy="490" rx="220" ry="106" stroke-opacity="0.045" stroke-width="0.7"/>
+        </g>
+        <g stroke="#1a6fd8" fill="none" stroke-linecap="round">
+            <path d="M 0 580 Q 360 530 720 560 Q 1080 590 1440 545" stroke-opacity="0.042" stroke-width="1.2"/>
+            <path d="M 0 555 Q 360 508 720 535 Q 1080 562 1440 520" stroke-opacity="0.032" stroke-width="0.9"/>
+        </g>
+    </svg>
     <canvas id="loadCanvas"></canvas>
     <div class="load-center">
         <div class="load-spinner-wrap">
@@ -5837,7 +5872,7 @@
         <div class="load-bar-wrap"><div class="load-bar-track"><div class="load-bar-fill" id="loadBarFill"></div></div></div>
         <div class="load-variant-counter" id="loadVariantCounter"></div>
         <div class="load-hospital-greeting" id="loadHospitalGreeting"></div>
-        <button class="load-retry-btn" id="loadRetryBtn" onclick="location.reload()">&#8635; Reintentar</button>
+        <button class="load-retry-btn" id="loadRetryBtn" onclick="location.reload()">&#8635; &nbsp;Reintentar conexión</button>
     </div>
 </div>
 
@@ -5870,21 +5905,17 @@
         </div>
                 <!-- Dropdown selector (redesigned) -->
         <div class="inst-selector-wrap" id="instSelectorWrap">
-            <div class="inst-selector-trigger" id="instTrigger" onclick="instToggleDropdown()" tabindex="0">
-                <i class="fas fa-building inst-trigger-icon"></i>
-                <span class="inst-trigger-label placeholder" id="instTriggerLabel">Select your CF centre…</span>
-                <i class="fas fa-chevron-down inst-trigger-arrow" id="instArrow"></i>
+            <!-- Single combobox: trigger and search are the same element -->
+            <div class="inst-selector-trigger" id="instTrigger" onclick="document.getElementById('instSearchInput').focus(); instOpenDropdown();" style="padding:0 14px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="inst-trigger-icon" aria-hidden="true" style="flex-shrink:0;"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                <input type="text" id="instSearchInput" class="inst-search-input"
+                    placeholder="Selecciona o busca tu centro CF…"
+                    autocomplete="off"
+                    oninput="instOnSearch(this.value)">
+                <button class="inst-search-clear" id="instSearchClear" onclick="event.stopPropagation();instClearSearch()" title="Limpiar" style="font-size:16px;line-height:1;">×</button>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="inst-trigger-arrow" id="instArrow" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
             <div class="inst-dropdown" id="instDropdown">
-                <div class="inst-search-bar">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="instSearchInput" class="inst-search-input"
-                        placeholder="Search by name or city…" autocomplete="off"
-                        oninput="instOnSearch(this.value)">
-                    <button class="inst-search-clear" id="instSearchClear" onclick="instClearSearch()" title="Clear">
-                        <i class="fas fa-xmark"></i>
-                    </button>
-                </div>
                 <div class="inst-list" id="instList">
                     <div class="inst-empty">
                         <i class="fas fa-spinner fa-spin" style="margin-right:5px;"></i>Loading institutions…
@@ -6196,10 +6227,10 @@
     <!-- Dev notice — spans full width, shows once -->
     <div class="dev-notice" id="devNotice" style="grid-column: 1 / -1;">
         <span class="dev-notice-dot"></span>
-        <span>v3.0-β &nbsp;·&nbsp; En desarrollo</span>
+        <span>Beta v1.0 &nbsp;·&nbsp; Fase de desarrollo</span>
         <span class="dev-notice-sep"></span>
-        <span class="dev-notice-contact">Contacto: Neumología · CHUAC</span>
-        <button class="dev-notice-close" onclick="dismissDevNotice()" title="Dismiss">×</button>
+        <span class="dev-notice-contact">devops.neumologia@gmail.com</span>
+        <button class="dev-notice-close" onclick="dismissDevNotice()" title="Cerrar">×</button>
     </div>
 
     <!-- ============================================================
@@ -24333,23 +24364,20 @@ function instSelect(key) {
     const inst = window._instLookup && window._instLookup[key];
     if (!inst) return;
     _instSelectedInst = inst;
-    // Update trigger label
-    const label = document.getElementById('instTriggerLabel');
-    if (label) {
-        label.textContent = inst.name;
-        label.classList.remove('placeholder');
+    // Update the combobox input to show selected name
+    const input = document.getElementById('instSearchInput');
+    if (input) {
+        input.value = inst.name;
+        input.style.fontStyle = 'normal';
+        input.style.color = '#d8eeff';
     }
-    // Update icon in trigger
-    const icon = document.getElementById('instTrigger')?.querySelector('.inst-trigger-icon');
-    if (icon) {
-        const t = TYPE_ICON_MAP[inst.institution_type] || 'fa-building';
-        icon.className = `fas ${t} inst-trigger-icon`;
-    }
+    // Hide clear button after selection
+    const clearBtn = document.getElementById('instSearchClear');
+    if (clearBtn) clearBtn.classList.remove('visible');
     // Close dropdown
     instCloseDropdown();
     // Re-render to show selected state
-    const searchVal = document.getElementById('instSearchInput')?.value || '';
-    instRenderList(_institutionsCache || [], searchVal);
+    instRenderList(_institutionsCache || [], '');
     // Delegate to existing selection logic
     selectInstitutionFromList(JSON.stringify(inst));
     // Enable confirm button
@@ -24575,8 +24603,8 @@ async function showHospitalModal() {
     try {
         const saved = getStoredHospitalObj ? getStoredHospitalObj() : null;
         if (saved && saved.name) {
-            const trigger = document.querySelector('.inst-trigger-label');
-            if (trigger) { trigger.textContent = saved.name; trigger.classList.remove('placeholder'); }
+            const input = document.getElementById('instSearchInput');
+            if (input) { input.value = saved.name; input.style.fontStyle='normal'; input.style.color='#d8eeff'; }
             const confirmBtn = document.getElementById('hospitalConfirmBtn');
             if (confirmBtn) confirmBtn.disabled = false;
             STATE._pendingHospitalObj = saved;
@@ -27689,8 +27717,8 @@ async function startCurationSprint() {
         if (dismissed) return;
         screen.classList.add('load-error');
         fill.style.width = '100%';
-        pctEl.textContent = 'ERR';
-        setStatus(msg || 'Error de conexion — comprueba tu red');
+        pctEl.textContent = '—';
+        setStatus(msg || 'Sin conexión con la base de datos');
     }
 
     function dismiss() {
@@ -27797,7 +27825,6 @@ function drawCanvas() {
             ];
             seq.forEach(function(s){setTimeout(function(){if(!dismissed)advance(s.key);},s.delay);});
             setTimeout(function(){
-                screen.style.zIndex='99999';
                 showHospitalGreeting();
                 if(typeof showHospitalModal==='function') showHospitalModal();
                 else if(typeof initHospital==='function') initHospital();
