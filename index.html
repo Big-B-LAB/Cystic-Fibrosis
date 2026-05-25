@@ -7578,7 +7578,7 @@ const CONFIG = {
         URL: 'https://oxlkisjwfarseyqgeyuw.supabase.co',
         // IMPORTANT: In production, this should be moved to a backend proxy
         // This is a publishable key with Row Level Security enabled
-        KEY: 'sb_publishable_vKCe5bc1Qr20_LI_awKIYw_CqSFrblh'
+        KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im94bGtpc2p3ZmFyc2V5cWdleXV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA2NjU2MzgsImV4cCI6MjA4NjI0MTYzOH0.O3RSGW2eMF_M_kywWsjXK9DM0saxvtu9aQUu8-YPkdU'
     },
     UI: {
         ITEMS_PER_PAGE: 25,
@@ -10440,6 +10440,22 @@ async function loadVariants() {
 
         STATE.system.initialized = true;
         STATE.system.initEndTime = new Date();
+
+        // Deferred gap-score persistence: runs 3s after init, batched to avoid request storm.
+        // calculateGapScore is called with persist:false during init (updateHeaderStats),
+        // so actual DB writes are queued here in small concurrent batches.
+        setTimeout(async () => {
+            const variants = STATE.variants || [];
+            const BATCH = 5; // max concurrent POSTs at once
+            for (let i = 0; i < variants.length; i += BATCH) {
+                const slice = variants.slice(i, i + BATCH);
+                await Promise.allSettled(slice.map(v => {
+                    try { calculateGapScore(v, { persist: true }); } catch(e) {}
+                }));
+                // Small delay between batches to avoid overwhelming the connection pool
+                if (i + BATCH < variants.length) await new Promise(r => setTimeout(r, 200));
+            }
+        }, 3000);
 
         // Wire NeumuacFQ namespace — makes state inspectable from DevTools
         // and provides a stable API surface for future external scripts.
@@ -16100,7 +16116,7 @@ function updateHeaderStats() {
     const total   = s.total || 0;
     const missing = STATE.variants.filter(hasMissingData).length;
     const critical = STATE.variants.filter(v => {
-        try { return calculateGapScore(v).gapLevel === 'CRITICAL'; } catch(e) { return false; }
+        try { return calculateGapScore(v, { persist: false }).gapLevel === 'CRITICAL'; } catch(e) { return false; }
     }).length;
     const done     = total - missing;
     const donePct  = total ? done    / total * 100 : 0;
@@ -24707,7 +24723,7 @@ const GAP_WEIGHTS = {
     high_search_demand:   10,   // searched 10+ times — clinicians need this
 };
 
-function calculateGapScore(variant) {
+function calculateGapScore(variant, { persist = true } = {}) {
     // Check registry cache first — avoids recalculating on every render.
     // Cache key: variant.updated_at (set by DB on every PATCH).
     // analyseAndRegisterGap() is the write path; this is the read path.
@@ -24818,7 +24834,7 @@ function calculateGapScore(variant) {
     if (variant && variant.id) {
         GAP_REGISTRY.set(variant.id, { ...result, _updatedAt: variant.updated_at });
     }
-    if (variant && variant.id && score > 0 && !_GAP_PERSISTED.has(variant.id)) {
+    if (persist && variant && variant.id && score > 0 && !_GAP_PERSISTED.has(variant.id)) {
         _GAP_PERSISTED.add(variant.id);
         hFetch('research_gaps', {
             method: 'POST',
