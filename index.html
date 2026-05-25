@@ -7616,6 +7616,31 @@ async function verifyPin(input) {
     const hash = await hashPin(input);
     return hash === SESSION_SECURITY.WRITE_CODE_HASH;
 }
+
+// ── IDLE GUARD — auto-locks write mode after inactivity ──────────────────────
+const IdleGuard = (function() {
+    let _timer = null;
+    const TIMEOUT = SESSION_SECURITY.IDLE_TIMEOUT_MS;
+    function _reset() {
+        clearTimeout(_timer);
+        _timer = setTimeout(function() {
+            if (window.STATE && STATE.writeMode) {
+                STATE.writeMode = false;
+                const lockBtn = document.getElementById('writeLockBtn');
+                if (lockBtn) lockBtn.click();
+            }
+        }, TIMEOUT);
+    }
+    return {
+        start: function() {
+            ['mousemove','keydown','click','scroll','touchstart'].forEach(function(evt) {
+                document.addEventListener(evt, _reset, { passive: true });
+            });
+            _reset();
+        },
+        stop: function() { clearTimeout(_timer); }
+    };
+})();
 // ════ END ITEM 8 ════
 
 // ========== UUID POLYFILL ==========
@@ -27135,7 +27160,7 @@ async function init() {
     initDevNotice();
     // Phase 1: load DB-driven configs in parallel — non-blocking
     Promise.all([loadClassRules(), loadJournalImpacts(), loadCftrClassRules(), loadEvidenceSources()]).catch(() => {});
-    IdleGuard.start(); // ITEM 8: idle timeout guard
+    if (typeof IdleGuard !== 'undefined') IdleGuard.start(); // auto-lock write mode on inactivity
     // Item 9: refresh platform snapshot once per day
     (() => {
         const today = new Date().toISOString().split('T')[0];
