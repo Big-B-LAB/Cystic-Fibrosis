@@ -2424,6 +2424,18 @@
         .inst-selector-trigger .inst-trigger-label.placeholder { color:rgba(100,140,185,.60); font-style:italic; }
         .inst-selector-trigger .inst-trigger-arrow { color:rgba(44,198,242,.55); flex-shrink:0; transition:transform .2s; }
         .inst-selector-trigger.open .inst-trigger-arrow { transform:rotate(180deg); }
+        /* ── Selected state — pre-filled from stored hospital ── */
+        .inst-selector-trigger.inst-trigger-selected {
+            border-color: rgba(44,198,242,.45);
+            background: rgba(44,198,242,.06);
+        }
+        .inst-trigger-selected-pill {
+            display: inline-flex; align-items: center; gap: 4px;
+            font-size: 10px; font-family: 'IBM Plex Mono', monospace;
+            color: rgba(44,198,242,.70); letter-spacing: .05em;
+            background: rgba(44,198,242,.07); border: 1px solid rgba(44,198,242,.18);
+            border-radius: 20px; padding: 2px 8px; margin-bottom: 8px;
+        }
 
         /* Dropdown panel */
         .inst-dropdown {
@@ -24487,11 +24499,35 @@ async function showHospitalModal() {
     try {
         const saved = getStoredHospitalObj ? getStoredHospitalObj() : null;
         if (saved && saved.name) {
+            // Visible combobox input
             const input = document.getElementById('instSearchInput');
             if (input) { input.value = saved.name; input.style.fontStyle='normal'; input.style.color='#d8eeff'; }
+            // ── FIX: also populate the HIDDEN input that confirmHospital() reads ──
+            const hiddenInput = document.getElementById('hospitalInput');
+            if (hiddenInput) hiddenInput.value = saved.name;
+            // ── FIX: mark as actually selected so instSelect logic is consistent ──
+            _instSelectedInst = saved;
             const confirmBtn = document.getElementById('hospitalConfirmBtn');
-            if (confirmBtn) confirmBtn.disabled = false;
+            if (confirmBtn) {
+                confirmBtn.disabled = false;
+                // Make it clear this is a real selection, not just a pre-fill
+                confirmBtn.textContent = 'Continuar con este centro';
+            }
             STATE._pendingHospitalObj = saved;
+            // Visual: add selected state to the trigger
+            const trigger = document.getElementById('instTrigger');
+            if (trigger) trigger.classList.add('inst-trigger-selected');
+            // Re-render list so the previously-used item shows as selected
+            instRenderList(_institutionsCache || [], '');
+            // Show a "previously used" indicator above the button
+            const notInList = document.getElementById('hospitalNotInList');
+            if (notInList && !document.getElementById('_prevUsedPill')) {
+                const pill = document.createElement('div');
+                pill.id = '_prevUsedPill';
+                pill.className = 'inst-trigger-selected-pill';
+                pill.innerHTML = '<i class="fas fa-check-circle"></i> Centro de tu última sesión — pulsa Continuar para confirmar';
+                notInList.parentNode.insertBefore(pill, notInList);
+            }
         }
     } catch(e) {}
     setTimeout(() => document.getElementById('instSearchInput')?.focus(), 100);
@@ -24605,6 +24641,13 @@ async function confirmHospital() {
 
     const modal = document.getElementById('hospitalModal');
     if (modal) modal.style.display = 'none';
+    // Reset button text and pill for next session
+    const btn2 = document.getElementById('hospitalConfirmBtn');
+    if (btn2) { btn2.disabled = true; btn2.textContent = 'Continuar'; }
+    const pill = document.getElementById('_prevUsedPill');
+    if (pill) pill.remove();
+    const trigger2 = document.getElementById('instTrigger');
+    if (trigger2) trigger2.classList.remove('inst-trigger-selected');
     showNotification(`Welcome from ${name}`, 'success', 3000);
 }
 
@@ -24613,6 +24656,12 @@ function skipHospital() {
     STATE.searchIntelligence.hospital = 'Anonymous';
     const modal = document.getElementById('hospitalModal');
     if (modal) modal.style.display = 'none';
+    const pill = document.getElementById('_prevUsedPill');
+    if (pill) pill.remove();
+    const trigger2 = document.getElementById('instTrigger');
+    if (trigger2) trigger2.classList.remove('inst-trigger-selected');
+    const btn2 = document.getElementById('hospitalConfirmBtn');
+    if (btn2) { btn2.disabled = true; btn2.textContent = 'Continuar'; }
 }
 
 function changeHospital() {
@@ -27537,7 +27586,7 @@ async function startCurationSprint() {
     ];
     const milestoneMap = new Map(MILESTONES.map(m => [m.key, m]));
     let currentPct = 0;
-    let dismissed  = false;
+    let dismissed  = true; // starts true — only activates after LOADER.start() (user clicks Entrar)
 
     function animatePct(target) {
         const start = currentPct;
