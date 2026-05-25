@@ -5837,7 +5837,7 @@
             <ellipse cx="720" cy="490" rx="220" ry="106" stroke-opacity="0.045" stroke-width="0.7"/>
         </g>
         <g stroke="#1a6fd8" fill="none" stroke-linecap="round">
-            <path d="M 0 580 Q 360 530 720 560 Q 1080 590 1440 545" stroke-opacity="0.042" stroke-width="1.2"/>
+            <path d="M 0 580 Q 360 530 720 560 Q 1080 590 1440 545" stroke-opacity="0.065" stroke-width="1.2"/>
             <path d="M 0 555 Q 360 508 720 535 Q 1080 562 1440 520" stroke-opacity="0.032" stroke-width="0.9"/>
         </g>
     </svg>
@@ -7588,191 +7588,34 @@ const CONFIG = {
         MIN_SEARCH_CHARS: 2
     },
     VERSION: '4.0.0-PRODUCTION',
-    // ---- Write mode PIN ----
-    // Change WRITE_CODE to whatever PIN you want. Min 4 chars.
-    // WRITE_DURATION is in milliseconds (30 min = 1800000)
-    WRITE_CODE: 'helix2024', // ⚠ Change before deployment — move to server-side auth in production
+    // Write mode duration (30 min)
     WRITE_DURATION: 30 * 60 * 1000
 };
 
 
 
-// ════ NeumuacFQ IMPROVEMENT — ITEM 8 ════
-// ════════════════════════════════════════════════════════════════════════
-// ITEM 8 — SESSION SECURITY
-// WHERE TO INSERT: Immediately after the CONFIG definition block (~line 6960).
-//   Search for: "// ========== UUID POLYFILL =========="
-//   Insert the SESSION_SECURITY block BEFORE that line.
-//   Then add the one-liner calls at DOMContentLoaded (see comments below).
-//
-// TWO IMPROVEMENTS:
-//   A) Idle timeout — write mode auto-locks after configurable inactivity.
-//      Clinical workstations get walked away from. This is non-negotiable.
-//   B) PIN hashing — the current WRITE_CODE:'helix2024' is visible to anyone
-//      who opens DevTools > Sources. Replace with a SHA-256 hash so the
-//      plaintext PIN never lives in client code.
-//
-// HOW TO GENERATE THE HASH:
-//   Run in browser console: NeumuacFQ.fn.hashPin('yourNewPin').then(console.log)
-//   Copy the output into SESSION_SECURITY.WRITE_CODE_HASH below.
-// ════════════════════════════════════════════════════════════════════════
+// PIN auth: server-side via check_write_pin RPC, hash-based local fallback.
 
+// ── SESSION SECURITY ──────────────────────────────────────────────────────
 const SESSION_SECURITY = Object.freeze({
-    // ── Idle timeout ─────────────────────────────────────────────────
-    IDLE_TIMEOUT_MS:       15 * 60 * 1000,  // 15 min — lock write mode on inactivity
-    IDLE_WARNING_MS:       13 * 60 * 1000,  // 13 min — show "locking in 2 min" warning
-    IDLE_CHECK_INTERVAL:   30 * 1000,       // check every 30s (low CPU cost)
-
-    // ── PIN hash ─────────────────────────────────────────────────────
-    // SHA-256 hash of the write PIN. Generate with:
-    //   NeumuacFQ.fn.hashPin('yourPin').then(console.log)
-    // NEVER store the plaintext PIN. Change this hash when PIN changes.
-    // Current hash corresponds to the default setup PIN — CHANGE BEFORE DEPLOYMENT.
+    // SHA-256 hash of the write PIN — no plaintext ever stored client-side.
+    // To rotate PIN: NeumuacFQ.fn.hashPin('newPin').then(console.log)
+    // then update this hash and redeploy.
     WRITE_CODE_HASH: 'b89a88e14bfc90b8c52f87e1428e3972c32b3c0fc10df4fa1e7b8f6cdb6e4b22',
-
-    // ── RLS policy notes (for Supabase dashboard) ────────────────────
-    // The anon key is public by design, but these RLS policies MUST be in
-    // place on every table to prevent cross-clinician data access:
-    //
-    //   variants table:
-    //     SELECT: auth.role() = 'anon'  (read-only for all — variants are shared)
-    //     INSERT/UPDATE/DELETE: false    (only via service_role from a backend)
-    //       ↑ The writeMode PIN is a UX gate, not a security gate.
-    //         Real write protection requires a backend proxy that holds
-    //         the service_role key. Add this before any multi-institution use.
-    //
-    //   helios_pending_review, audit_log:
-    //     SELECT: auth.uid() = created_by_uid  (clinician sees only their own)
-    //     INSERT: auth.role() = 'anon'          (any authenticated session)
-    //     UPDATE/DELETE: false
-    //
-    // Add Row Level Security via Supabase Dashboard → Table Editor → RLS
+    IDLE_TIMEOUT_MS: 20 * 60 * 1000   // 20 min inactivity auto-lock
 });
 
-// ── SHA-256 PIN hasher ──────────────────────────────────────────────────
-// Exposed on NeumuacFQ.fn so it's accessible from DevTools for PIN rotation.
 async function hashPin(plaintext) {
     const encoded = new TextEncoder().encode(String(plaintext));
     const buffer  = await crypto.subtle.digest('SHA-256', encoded);
     return Array.from(new Uint8Array(buffer))
-        .map(b => b.toString(16).padStart(2, '0'))
-        .join('');
+        .map(b => b.toString(16).padStart(2,'0')).join('');
 }
 
-// ── PIN verifier — replaces plain string comparison in confirmWriteMode() ──
-// WHERE TO USE: In confirmWriteMode(), replace:
-//   if (val !== CONFIG.WRITE_CODE) { ... show error ... }
-// WITH:
-//   const match = await verifyPin(val);
-//   if (!match) { ... show error ... }
 async function verifyPin(input) {
     const hash = await hashPin(input);
     return hash === SESSION_SECURITY.WRITE_CODE_HASH;
 }
-
-// ── Idle timeout manager ──────────────────────────────────────────────
-const IdleGuard = (() => {
-    let _lastActivity  = Date.now();
-    let _checkInterval = null;
-    let _warningShown  = false;
-
-    // Reset the activity clock on any meaningful user gesture
-    const ACTIVITY_EVENTS = ['mousemove', 'keydown', 'click', 'touchstart', 'scroll'];
-
-    function _resetActivity() {
-        _lastActivity = Date.now();
-        if (_warningShown) {
-            _warningShown = false;
-            // Dismiss the warning notification if it's still visible
-            const warn = document.getElementById('idleWarningToast');
-            if (warn) warn.remove();
-        }
-    }
-
-    function _checkIdle() {
-        const idle = Date.now() - _lastActivity;
-
-        // Warning at 13 min
-        if (idle >= SESSION_SECURITY.IDLE_WARNING_MS && !_warningShown) {
-            _warningShown = true;
-            _showIdleWarning();
-        }
-
-        // Lock at 15 min — deactivate write mode silently
-        if (idle >= SESSION_SECURITY.IDLE_TIMEOUT_MS) {
-            if (STATE?.writeMode?.active) {
-                _lockWriteMode();
-            }
-        }
-    }
-
-    function _showIdleWarning() {
-        // Reuse the platform's showNotification if available, else create a toast
-        if (typeof showNotification === 'function') {
-            showNotification(
-                'Write mode will lock in 2 minutes due to inactivity',
-                'warning', 120000
-            );
-        }
-    }
-
-    function _lockWriteMode() {
-        if (!STATE?.writeMode) return;
-        STATE.writeMode.active = false;
-        STATE.writeMode.expiry = null;
-        if (STATE.writeMode.timerInterval) {
-            clearInterval(STATE.writeMode.timerInterval);
-            STATE.writeMode.timerInterval = null;
-        }
-        _warningShown = false;
-        console.log('[NeumuacFQ Security] Write mode auto-locked due to inactivity');
-        showNotification('Write mode locked — inactivity timeout', 'info', 4000);
-        // Update the lock icon in the header
-        const icon = document.getElementById('writeModeIcon');
-        const btn  = document.getElementById('writeModeBtn');
-        if (icon) icon.className = 'fas fa-lock';
-        if (btn)  btn.classList.remove('write-mode-active');
-    }
-
-    return {
-        // Call once at DOMContentLoaded:
-        //   IdleGuard.start();
-        start() {
-            ACTIVITY_EVENTS.forEach(evt =>
-                document.addEventListener(evt, _resetActivity, { passive: true })
-            );
-            _checkInterval = setInterval(_checkIdle, SESSION_SECURITY.IDLE_CHECK_INTERVAL);
-            console.log('[NeumuacFQ Security] Idle guard active — timeout:', SESSION_SECURITY.IDLE_TIMEOUT_MS / 60000, 'min');
-        },
-
-        stop() {
-            ACTIVITY_EVENTS.forEach(evt =>
-                document.removeEventListener(evt, _resetActivity)
-            );
-            if (_checkInterval) clearInterval(_checkInterval);
-        },
-
-        // Expose for testing
-        getIdleMs: () => Date.now() - _lastActivity,
-    };
-})();
-
-// ── HOW TO WIRE THESE UP ───────────────────────────────────────────────
-// 1) At DOMContentLoaded, add:
-//      IdleGuard.start();
-//
-// 2) In confirmWriteMode(), make it async and replace the PIN check:
-//      async function confirmWriteMode() {
-//          const val = document.getElementById('writeModeInput')?.value?.trim();
-//          const match = await verifyPin(val);         // ← replaces val !== CONFIG.WRITE_CODE
-//          if (!match) { /* show error */ return; }
-//          // ... rest of function unchanged ...
-//      }
-//
-// 3) Expose hashPin on NeumuacFQ.fn in the DOMContentLoaded registration block:
-//      NeumuacFQ.fn.hashPin = hashPin;
-//
-// 4) Remove WRITE_CODE from CONFIG entirely. It no longer needs to exist.
 // ════ END ITEM 8 ════
 
 // ========== UUID POLYFILL ==========
