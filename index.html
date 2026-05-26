@@ -17880,12 +17880,12 @@ const NBS_PANELS = {
 
 // Class-specific clinical reference data
 const CLASS_CLINICAL_DATA = {
-    'I':   { sweat_cl: '≥80 mmol/L (classic CF range)', residual_fn: '<1%',  panc_suff: '<5%',  onset: 'Neonatal / early infancy', cftr_rd: 'Rare — classic CF predominant', ivacaftor: 'Not indicated', eti: 'ETI indicated if ≥1 responsive allele' },
-    'II':  { sweat_cl: '≥80 mmol/L', residual_fn: '0–3%', panc_suff: '<10%', onset: 'Neonatal / infancy', cftr_rd: 'Rare', ivacaftor: 'Not indicated (poor gating)', eti: 'ETI strongly indicated (F508del class)' },
-    'III': { sweat_cl: '60–100 mmol/L', residual_fn: '1–5%', panc_suff: '10–25%', onset: 'Infancy to childhood', cftr_rd: 'Possible with mild allele', ivacaftor: 'Ivacaftor monotherapy indicated (G551D, G1244E, G1349D, G178R, G551S, S1251N, S1255P, S549N, S549R)', eti: 'ETI indicated' },
-    'IV':  { sweat_cl: '30–60 mmol/L (variable — check specific variant)', residual_fn: '5–30%', panc_suff: '30–70%', onset: 'Childhood to adulthood', cftr_rd: 'Common — CBAVD, pancreatitis', ivacaftor: 'Ivacaftor may benefit (R117H context-dependent on poly-T)', eti: 'ETI may benefit — check specific variant' },
-    'V':   { sweat_cl: '30–70 mmol/L', residual_fn: '3–10%', panc_suff: '40–80%', onset: 'Childhood to adulthood', cftr_rd: 'Common — CBAVD, mild lung disease', ivacaftor: 'Generally not indicated', eti: 'ETI benefit uncertain — limited data' },
-    'VI':  { sweat_cl: '40–80 mmol/L', residual_fn: '5–25%', panc_suff: '25–60%', onset: 'Variable', cftr_rd: 'Possible', ivacaftor: 'Not standard', eti: 'ETI under investigation' }
+    'I':   { sweat_cl: '≥80 mmol/L (classic CF range)', residual_fn: '<1%',  panc_suff: '<5%',  onset: 'Neonatal / early infancy', cftr_rd: 'Rare — classic CF predominant', ivacaftor: 'Not indicated', eti: 'ETI indicated if ≥1 responsive allele', alyftrek: 'Ineligible if homozygous Class I · Eligible if other allele is Class II–VI (EU/AEMPS)' },
+    'II':  { sweat_cl: '≥80 mmol/L', residual_fn: '0–3%', panc_suff: '<10%', onset: 'Neonatal / infancy', cftr_rd: 'Rare', ivacaftor: 'Not indicated (poor gating)', eti: 'ETI strongly indicated (F508del class)', alyftrek: 'Eligible (EU/AEMPS label) · Once daily' },
+    'III': { sweat_cl: '60–100 mmol/L', residual_fn: '1–5%', panc_suff: '10–25%', onset: 'Infancy to childhood', cftr_rd: 'Possible with mild allele', ivacaftor: 'Ivacaftor monotherapy indicated for specific variants (G551D, G1244E, G1349D, G178R, G551S, S1251N, S1255P, S549N, S549R)', eti: 'ETI indicated', alyftrek: 'Eligible (EU/AEMPS label) · Once daily' },
+    'IV':  { sweat_cl: '30–60 mmol/L (variable — check specific variant)', residual_fn: '5–30%', panc_suff: '30–70%', onset: 'Childhood to adulthood', cftr_rd: 'Common — CBAVD, pancreatitis', ivacaftor: 'Ivacaftor may benefit (R117H context-dependent on poly-T)', eti: 'ETI may benefit — check specific variant', alyftrek: 'Eligible (EU/AEMPS label) · Once daily' },
+    'V':   { sweat_cl: '30–70 mmol/L', residual_fn: '3–10%', panc_suff: '40–80%', onset: 'Childhood to adulthood', cftr_rd: 'Common — CBAVD, mild lung disease', ivacaftor: 'Generally not indicated', eti: 'ETI benefit uncertain — limited data', alyftrek: 'Eligible (EU/AEMPS label) · Once daily' },
+    'VI':  { sweat_cl: '40–80 mmol/L', residual_fn: '5–25%', panc_suff: '25–60%', onset: 'Variable', cftr_rd: 'Possible', ivacaftor: 'Not standard', eti: 'ETI under investigation', alyftrek: 'Eligible (EU/AEMPS label) · Once daily' }
 };
 
 // Modulator eligibility lookup — distinct from binary ETI flag
@@ -18349,6 +18349,28 @@ function renderVariantDetail(variant, fromSearch) {
                             <div class="eti-sub">${etiSub}</div>
                         </div>
                     </div>
+                    ${(() => {
+                        // Alyftrek eligibility — EU/AEMPS (Spain) label: non-Class I = eligible
+                        const alyClass = variant.cftr_class;
+                        const alyEligible = alyClass && alyClass !== 'I';
+                        const alyClassI   = alyClass === 'I';
+                        const alyUnknown  = !alyClass;
+                        const alyColor    = alyEligible ? '#818cf8' : alyClassI ? '#f87171' : '#5a7aaa';
+                        const alyIcon     = alyEligible ? 'fa-circle-check' : alyClassI ? 'fa-circle-xmark' : 'fa-question-circle';
+                        const alyLabel    = alyEligible ? 'Alyftrek Eligible (EU/AEMPS)' : alyClassI ? 'Alyftrek Class I — biallelic rule applies' : 'Alyftrek status unknown';
+                        const alySub      = alyEligible
+                            ? (isNonResponsive ? 'Expansion mutation — ETI non-responsive but Alyftrek eligible (verify evidence tier)' : 'Eligible per EU/EMA/AEMPS label · Once daily')
+                            : alyClassI ? 'Eligible only if other allele is non-Class I · Ineligible if homozygous Class I'
+                            : 'Class required to determine Alyftrek eligibility';
+                        return `<div class="eti-card" style="background:${alyColor}14;border-color:${alyColor}35;margin-top:8px;">
+                            <div class="eti-icon" style="background:${alyColor}20;color:${alyColor};"><i class="fas ${alyIcon}"></i></div>
+                            <div>
+                                <div class="eti-label" style="color:${alyColor};">${alyLabel}</div>
+                                <div class="eti-sub">${alySub}</div>
+                                ${alyEligible ? `<div style="font-size:10px;color:#818cf8;margin-top:3px;font-family:var(--font-mono);">EU · FDA · UK · Canada approved (Dec 2024–Jul 2025)</div>` : ''}
+                            </div>
+                        </div>`;
+                    })()}
                     <div class="field-grid">
                         ${dataField('Evidence Level', variant.eti_evidence_level, 'eti_evidence_level', variant)}
                         ${dataField('Recommendation', variant.eti_recommendation, 'eti_recommendation', variant)}
@@ -32998,7 +33020,10 @@ function runCompoundGenotypeCalculation() {
 
     // Phenotype severity estimate
     const severityMap = { 'I':5,'II':5,'III':4,'IV':3,'V':3,'VI':3 };
-    const avgSeverity = Math.round(((severityMap[v1.cftr_class]||2) + (severityMap[v2.cftr_class]||2)) / 2);
+    // CF phenotype driven by milder allele's residual function (not average). Class II/IV patient has
+    // better pancreatic sufficiency than Class II/II because the IV allele provides residual CFTR function.
+    const s1 = severityMap[v1.cftr_class]||2, s2 = severityMap[v2.cftr_class]||2;
+    const avgSeverity = (s1 >= 5 && s2 >= 5) ? 5 : Math.min(s1, s2);
     const severityLabel = avgSeverity >= 5 ? 'Classic CF — severe phenotype expected'
         : avgSeverity >= 4 ? 'Moderate-severe CF — variable presentation'
         : 'Mild CF or CFTR-RD — atypical presentation possible';
@@ -33026,13 +33051,13 @@ function runCompoundGenotypeCalculation() {
             <div style="padding:10px 12px;border-radius:8px;background:rgba(255,255,255,0.03);border:1px solid var(--border);">
                 <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:2px;">Allele 1</div>
                 <div style="font-size:14px;font-weight:700;color:#f0f6ff;font-family:var(--font-mono);">${escapeHTML(v1.legacy_name)}</div>
-                <div style="font-size:10px;color:var(--text-tertiary);">Class ${escapeHTML(v1.cftr_class||'?')} · ${escapeHTML(v1.eti_prediction||'unknown')}</div>
+                <div style="font-size:10px;color:var(--text-tertiary);">Class ${escapeHTML(v1.cftr_class||'?')} · ETI: ${escapeHTML(v1.eti_prediction||'unknown')} · ALY: ${v1.cftr_class === 'I' ? 'Class I*' : v1.cftr_class ? 'eligible' : '?'}</div>
             </div>
             <div style="font-size:18px;color:var(--text-tertiary);">+</div>
             <div style="padding:10px 12px;border-radius:8px;background:rgba(255,255,255,0.03);border:1px solid var(--border);">
                 <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:2px;">Allele 2</div>
                 <div style="font-size:14px;font-weight:700;color:#f0f6ff;font-family:var(--font-mono);">${escapeHTML(v2.legacy_name)}</div>
-                <div style="font-size:10px;color:var(--text-tertiary);">Class ${escapeHTML(v2.cftr_class||'?')} · ${escapeHTML(v2.eti_prediction||'unknown')}</div>
+                <div style="font-size:10px;color:var(--text-tertiary);">Class ${escapeHTML(v2.cftr_class||'?')} · ETI: ${escapeHTML(v2.eti_prediction||'unknown')} · ALY: ${v2.cftr_class === 'I' ? 'Class I*' : v2.cftr_class ? 'eligible' : '?'}</div>
             </div>
         </div>
 
@@ -33129,14 +33154,22 @@ function generateMDTReport(allele1Name, allele2Name) {
             + '</div>';
     }).join('');
 
+    const alyftrekMod = Object.entries(MODULATOR_MAP).find(([n]) => n.includes('Alyftrek'))?.[1];
     const therRows = [
         ['Recommended modulator(s)',        '<strong>' + escapeHTML(modNames) + '</strong>'],
         ['ETI eligibility (Trikafta)',      '<strong style="color:' + (verdict.trikaftaEligible?'#16a34a':'#dc2626') + '">'
                                             + (verdict.trikaftaEligible ? 'Eligible' : 'Not eligible \u2014 check specific criteria') + '</strong>'],
+        ['Alyftrek eligibility (EU/AEMPS)', '<strong style="color:' + (verdict.alyftrekEligible?'#4f46e5':'#dc2626') + '">'
+                                            + (verdict.alyftrekEligible ? 'Eligible \u2014 \u22651 non-Class I mutation (once daily)' : 'Not eligible \u2014 homozygous Class I') + '</strong>'
+                                            + (verdict.alyftrekExpansionMutation ? ' <span style="color:#92400e;background:#fef3c7;padding:1px 5px;border-radius:3px;font-size:10px;">ETI-no / Alyftrek-yes mutation \u2014 verify evidence tier</span>' : '')],
         ['Dominant allele (phenotype)',     '<span style="font-family:monospace">' + escapeHTML(dom.legacy_name) + '</span> (Class ' + escapeHTML(dom.cftr_class||'?') + ')'],
     ].concat(
-        verdict.hasUnknownEti ? [['ETI uncertainty \u26a0', 'ETI status unknown for one or more alleles \u2014 eligibility may be incomplete.']] : [],
-        verdict.etiMismatch   ? [['ETI mismatch \u26a0',   'ETI predictions differ between alleles \u2014 eligibility driven by responsive allele.']] : []
+        verdict.hasUnknownEti     ? [['ETI uncertainty \u26a0', 'ETI status unknown for one or more alleles \u2014 eligibility may be incomplete.']] : [],
+        verdict.etiMismatch       ? [['ETI mismatch \u26a0',    'ETI predictions differ between alleles \u2014 eligibility driven by responsive allele.']] : [],
+        verdict.hasExceptionalClassI ? [['Exceptional Class I \u26a1', 'One allele is classified as exceptional Class I \u2014 may respond to ETI despite typical Class I exclusion. Verify with functional data before prescribing decision.']] : [],
+        verdict.alyftrekEligible && alyftrekMod?.boxedWarning ? [['Alyftrek \u26a0 BOXED WARNING', alyftrekMod.boxedWarning]] : [],
+        verdict.alyftrekEligible && alyftrekMod?.dosingNote   ? [['Alyftrek dosing (weight-based)', alyftrekMod.dosingNote]] : [],
+        verdict.alyftrekEligible && alyftrekMod?.cyp3aNote    ? [['Alyftrek CYP3A interactions', alyftrekMod.cyp3aNote]] : []
     ).map(function(row, i) {
         return '<tr style="background:' + (i%2?'#f8fafc':'#fff') + '">'
             + '<td style="padding:5px 8px;border-bottom:1px solid #f1f5f9;color:#64748b;width:45%;font-weight:500;">' + escapeHTML(row[0]) + '</td>'
@@ -33730,8 +33763,14 @@ const MODULATOR_MAP = {
     'Kalydeco (IVA)': {
         description: 'Ivacaftor monotherapy',
         eligible: (a1, a2) => {
-            const gatingClasses = ['III', 'IV'];
-            return gatingClasses.includes(a1?.cftr_class) || gatingClasses.includes(a2?.cftr_class);
+            // Must match a specific FDA/EMA-approved gating mutation — class alone is insufficient
+            const ivacSet = new Set(IVACAFTOR_VARIANTS.map(v => v.toUpperCase()));
+            const names = v => [
+                v?.legacy_name,
+                v?.protein_name,
+                ...(v?.alt_names ? v.alt_names.split(',').map(s => s.trim()) : [])
+            ].filter(Boolean).map(n => n.toUpperCase());
+            return names(a1).some(n => ivacSet.has(n)) || names(a2).some(n => ivacSet.has(n));
         },
         classes: ['III', 'IV'],
         color: '#60a5fa',
@@ -33756,6 +33795,27 @@ const MODULATOR_MAP = {
         classes: ['II'],
         color: '#fbbf24',
         label: 'Orkambi eligible'
+    },
+    'Alyftrek (VNZ/TEZ/D-IVA)': {
+        description: 'Vanzacaftor / Tezacaftor / Deutivacaftor · Once daily · EU/AEMPS approved',
+        eligible: (a1, a2) => {
+            // EU/EMA/AEMPS (Spain) label: eligible if ≥1 non-Class I mutation
+            // Ineligible ONLY when both alleles are Class I (homozygous Class I exclusion)
+            const isClassI = v => v?.cftr_class === 'I';
+            return !(isClassI(a1) && isClassI(a2));
+        },
+        requiresMDTConfirmation: (a1, a2) => {
+            // Flag when ETI non-responsive but Alyftrek eligible (the 113 expansion mutations)
+            const eti1NonResp = a1?.eti_prediction === 'non_responsive';
+            const eti2NonResp = a2?.eti_prediction === 'non_responsive';
+            return eti1NonResp || eti2NonResp;
+        },
+        classes: ['II', 'III', 'IV', 'V', 'VI'],
+        color: '#818cf8',
+        label: 'Alyftrek eligible',
+        boxedWarning: 'Hepatotoxicity — LFT monitoring: baseline, every 3 months (year 1), then annually. Once-daily formulation requires complete halt if LFT flare — no dose titration.',
+        dosingNote: '<40 kg: 3×(4mg VNZ/20mg TEZ/50mg D-IVA) · ≥40 kg: 2×(10mg VNZ/50mg TEZ/125mg D-IVA)',
+        cyp3aNote: 'Moderate CYP3A inhibitors: every-other-day · Strong CYP3A inhibitors: once-weekly · Strong inducers: not recommended'
     }
 };
 
@@ -33763,10 +33823,15 @@ function computeCompoundHetVerdict(allele1, allele2) {
     if (!allele1 || !allele2) return null;
 
     // ── ETI uncertainty flags ──────────────────────────────────────────────
-    // If either allele has unknown/null ETI we cannot give a confident verdict.
     const eti1Unknown = !allele1.eti_prediction || allele1.eti_prediction === 'unknown';
     const eti2Unknown = !allele2.eti_prediction || allele2.eti_prediction === 'unknown';
     const hasUnknownEti = eti1Unknown || eti2Unknown;
+
+    // ── Exceptional Class I detection ─────────────────────────────────────
+    // class_subtype === 'exceptional' means a Class I variant that may still respond
+    // to ETI despite typical Class I exclusion rules. Flag for clinician review.
+    const isExceptionalClassI = v => v?.cftr_class === 'I' && v?.class_subtype === 'exceptional';
+    const hasExceptionalClassI = isExceptionalClassI(allele1) || isExceptionalClassI(allele2);
 
     const eligibleModulators = [];
     const ineligibleModulators = [];
@@ -33785,26 +33850,34 @@ function computeCompoundHetVerdict(allele1, allele2) {
     const rank2 = classRank[allele2.cftr_class] || 0;
     const dominantAllele = rank1 >= rank2 ? allele1 : allele2;
 
-    // ── Treatment-relevant allele (the responsive one, for ETI messaging) ──
-    // For ETI eligibility the clinically relevant allele is the RESPONSIVE one,
-    // not the most severe. dominantAllele is kept for phenotype display only.
+    // ── Treatment-relevant allele (responsive one drives ETI messaging) ────
     const responsiveAllele =
         allele1.eti_prediction === 'responsive' ? allele1 :
         allele2.eti_prediction === 'responsive' ? allele2 : null;
 
+    // ── Alyftrek-specific flags ────────────────────────────────────────────
+    const alyftrekEligible = eligibleModulators.some(m => m.name.includes('Alyftrek'));
+    // ETI-no but Alyftrek-yes: the 113 expansion mutations — needs clear clinical flag
+    const alyftrekOnlyEligible = alyftrekEligible &&
+        !eligibleModulators.some(m => m.name.includes('Trikafta'));
+    const alyftrekExpansionMutation =
+        alyftrekEligible &&
+        (allele1.eti_prediction === 'non_responsive' || allele2.eti_prediction === 'non_responsive');
+
     // ── Overall eligibility ────────────────────────────────────────────────
     const trikaftaEligible = eligibleModulators.some(m => m.name.includes('Trikafta'));
     const anyEligible = eligibleModulators.length > 0;
-
-    // If we have unknown ETI on either allele, eligibility is uncertain
     const eligibilityUncertain = hasUnknownEti && anyEligible;
 
+    // Updated label — now accounts for Alyftrek-only cases
     const eligibility_color = trikaftaEligible
         ? (eligibilityUncertain ? '#fbbf24' : '#34d399')
+        : alyftrekEligible ? '#818cf8'
         : anyEligible ? '#60a5fa' : '#f87171';
 
     const eligibility_label = trikaftaEligible
         ? (eligibilityUncertain ? '? Trikafta — confirm ETI status' : '✓ Trikafta candidate')
+        : alyftrekOnlyEligible ? '✓ Alyftrek eligible (EU/AEMPS)'
         : anyEligible ? '◎ Alternative modulator' : '✗ No current modulator';
 
     // ── Clinical summary flags ─────────────────────────────────────────────
@@ -33816,15 +33889,19 @@ function computeCompoundHetVerdict(allele1, allele2) {
         eligibleModulators,
         ineligibleModulators,
         dominantAllele,
-        responsiveAllele,       // the allele driving ETI eligibility
+        responsiveAllele,
         eligibility_color,
         eligibility_label,
         trikaftaEligible,
+        alyftrekEligible,
+        alyftrekOnlyEligible,
+        alyftrekExpansionMutation,
         anyEligible,
-        eligibilityUncertain,   // true when ETI unknown on either allele
+        eligibilityUncertain,
         hasUnknownEti,
         eti1Unknown,
         eti2Unknown,
+        hasExceptionalClassI,
         bothSameClass,
         etiMismatch,
         allele1,
@@ -33881,6 +33958,20 @@ function renderCompHetVerdictPanel(v) {
             ${v.responsiveAllele ? `(${escapeHTML(v.responsiveAllele.legacy_name)})` : ''}
         </div>` : '';
 
+    // Alyftrek expansion mutation flag (ETI-no but Alyftrek-yes)
+    const alyftrekExpansionHTML = v.alyftrekExpansionMutation ? `
+        <div style="padding:6px 8px;border-radius:5px;background:rgba(129,140,248,0.08);
+             border:1px solid rgba(129,140,248,0.3);font-size:10.5px;color:#818cf8;margin-bottom:8px;">
+            ⚡ ETI non-responsive allele — Alyftrek eligible via EU label expansion (verify evidence tier)
+        </div>` : '';
+
+    // Exceptional Class I warning
+    const exceptionalClassIHTML = v.hasExceptionalClassI ? `
+        <div style="padding:6px 8px;border-radius:5px;background:rgba(251,191,36,0.08);
+             border:1px solid rgba(251,191,36,0.25);font-size:10.5px;color:#fbbf24;margin-bottom:8px;">
+            ⚡ Exceptional Class I allele detected — may respond to ETI. Verify functional data before clinical decision.
+        </div>` : '';
+
     return `
         <div style="width:280px;flex-shrink:0;padding:14px 16px;border-left:2px solid rgba(41,121,255,0.25);
              background:rgba(41,121,255,0.03);overflow-y:auto;">
@@ -33896,6 +33987,8 @@ function renderCompHetVerdictPanel(v) {
             ${transDisclaimerHTML}
             ${unknownEtiHTML}
             ${etiMismatchHTML}
+            ${exceptionalClassIHTML}
+            ${alyftrekExpansionHTML}
 
             <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
                  color:var(--text-tertiary);margin-bottom:6px;">Modulator eligibility</div>
