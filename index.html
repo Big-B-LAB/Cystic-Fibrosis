@@ -6056,7 +6056,12 @@
                 </button>
 
                 <!-- Analytics -->
-                <button class="hdr-analytics" onclick="showDashboard()" title="Analytics & search intelligence">
+                <button class="hdr-analytics" onclick="openCompoundGenotypeCalculator()" title="Compound genotype calculator — biallelic ETI &amp; Alyftrek prediction">
+                    <i class="fas fa-dna" style="font-size:10px" aria-hidden="true"></i>
+                    <span>CGC</span>
+                </button>
+
+                <button class="hdr-analytics" onclick="showDashboard()" title="Analytics &amp; search intelligence">
                     <i class="fas fa-chart-bar" style="font-size:10px" aria-hidden="true"></i>
                     <span>Analytics</span>
                 </button>
@@ -27859,8 +27864,8 @@ function drawCanvas() {
             seq.forEach(function(s){setTimeout(function(){if(!dismissed)advance(s.key);},s.delay);});
             setTimeout(function(){
                 showHospitalGreeting();
-                if(typeof showHospitalModal==='function') showHospitalModal();
-                else if(typeof initHospital==='function') initHospital();
+                if(typeof initHospital==='function') initHospital();
+                else if(typeof showHospitalModal==='function') showHospitalModal();
             }, 7200);
             safetyTimer = setTimeout(function(){if(!dismissed)dismiss();}, 14000);
         }
@@ -29807,6 +29812,41 @@ async function heliosLoadInbox() {
                 }
             }
         }
+
+        // ── Auto-supersede stale items ─────────────────────────────────
+        // If a pending item proposes a field change that already matches
+        // the current DB value (e.g. we fixed it directly via SQL),
+        // mark it superseded automatically — no clinician action needed.
+        const staleIds = [];
+        for (const item of items) {
+            if (item.status !== 'pending') continue;
+            if (!item.proposed_field || !item.proposed_value || !item.variant_id) continue;
+            const liveVariant = STATE.variantsById?.get(item.variant_id);
+            if (!liveVariant) continue;
+            const liveVal = String(liveVariant[item.proposed_field] ?? '').trim();
+            const proposedVal = String(item.proposed_value ?? '').trim();
+            if (liveVal === proposedVal) staleIds.push(item.id);
+        }
+        if (staleIds.length > 0) {
+            heliosLog('info', `↻ Auto-superseding ${staleIds.length} stale item${staleIds.length > 1 ? 's' : ''} — DB already matches proposal`);
+            // Batch-supersede in background — don't block render
+            (async () => {
+                for (const id of staleIds) {
+                    await hFetch(`helios_pending_review?id=eq.${id}`, {
+                        method: 'PATCH',
+                        body: JSON.stringify({
+                            status: 'superseded',
+                            reviewer_note: 'Auto-superseded — DB field already matches proposed value (direct SQL fix applied)',
+                            reviewed_at: new Date().toISOString(),
+                            updated_at: new Date().toISOString()
+                        })
+                    }).catch(() => {});
+                }
+            })();
+            // Remove from local items so they don't render
+            items = items.filter(i => !staleIds.includes(i.id));
+        }
+        // ──────────────────────────────────────────────────────────────
 
         HELIOS.pendingItems = items;
         renderHeliosInbox(items);
@@ -37237,7 +37277,7 @@ function _updateSectionIndicator(section, icon, label) {
         if (iconEl) { iconEl.className = 'fas ' + (icon || 'fa-dna'); iconEl.style.fontSize = '10px'; }
         if (labelEl) labelEl.textContent = label || section;
     } else {
-        pill.style.display = 'none';        
+        pill.style.display = 'none';
     }
 }
 </script>
