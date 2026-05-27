@@ -49,6 +49,9 @@
           integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
           crossorigin="anonymous"
           referrerpolicy="no-referrer">
+    <!-- Supabase JS client for authentication -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+
     <!-- ================================================================
          LAYER 1 — UTILITY PRIMITIVES
          Minimal hand-rolled utility classes covering every Tailwind class
@@ -6073,6 +6076,25 @@
             <!-- ⑤ Status zone -->
             <div style="display:flex;align-items:center;gap:5px;">
 
+                <!-- Auth user badge -->
+                <div id="authUserBadge" style="display:none;align-items:center;gap:4px;
+                     padding:3px 8px;border-radius:5px;background:rgba(41,121,255,0.06);
+                     border:1px solid rgba(41,121,255,0.12);margin-right:4px;"></div>
+
+                <!-- Jurisdiction selector -->
+                <div style="display:flex;align-items:center;gap:0;border:1px solid rgba(41,121,255,0.15);
+                     border-radius:6px;overflow:hidden;margin-right:6px;" title="Active prescribing jurisdiction">
+                    <button onclick="setJurisdiction('EU')" id="jurBtn-EU"
+                        style="padding:3px 8px;font-size:9px;font-weight:700;cursor:pointer;border:none;
+                        background:rgba(41,121,255,0.15);color:#60a5fa;font-family:var(--font-body);">🇪🇺 EU</button>
+                    <button onclick="setJurisdiction('US')" id="jurBtn-US"
+                        style="padding:3px 8px;font-size:9px;font-weight:700;cursor:pointer;border:none;
+                        background:transparent;color:#3a5a7a;font-family:var(--font-body);">🇺🇸 FDA</button>
+                    <button onclick="setJurisdiction('UK')" id="jurBtn-UK"
+                        style="padding:3px 8px;font-size:9px;font-weight:700;cursor:pointer;border:none;
+                        background:transparent;color:#3a5a7a;font-family:var(--font-body);">🇬🇧 MHRA</button>
+                </div>
+
                 <!-- Mode — icon only, tooltip on hover -->
                 <button class="hdr-mode" id="writeModeBtn"
                         onclick="requestWriteMode()"
@@ -7602,21 +7624,180 @@ window.NeumuacFQ = window.NeumuacFQ || {
 const CONFIG = {
     SUPABASE: {
         URL: 'https://oxlkisjwfarseyqgeyuw.supabase.co',
-        // IMPORTANT: In production, this should be moved to a backend proxy
-        // This is a publishable key with Row Level Security enabled
+        // Publishable anon key — safe for client-side with RLS enforced.
+        // Write operations use session JWT (see AUTH below) not this key.
         KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im94bGtpc2p3ZmFyc2V5cWdleXV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA2NjU2MzgsImV4cCI6MjA4NjI0MTYzOH0.O3RSGW2eMF_M_kywWsjXK9DM0saxvtu9aQUu8-YPkdU'
     },
     UI: {
         ITEMS_PER_PAGE: 25,
-        SEARCH_DELAY: 180,       // ms — UI filter debounce (fast, for responsiveness)
-        LOG_DELAY: 1200,          // ms — search log debounce (only fire when user settles)
+        SEARCH_DELAY: 180,
+        LOG_DELAY: 1200,
         NOTIFICATION_DURATION: 4000,
         MIN_SEARCH_CHARS: 2
     },
     VERSION: '4.0.0-PRODUCTION',
-    // Write mode duration (30 min)
     WRITE_DURATION: 30 * 60 * 1000
 };
+
+// ── SUPABASE AUTH ─────────────────────────────────────────────────────────────
+// Initialise Supabase client for authentication.
+// The anon key is used for the client — actual session tokens replace it for writes.
+const _supabase = (typeof supabase !== 'undefined')
+    ? supabase.createClient(CONFIG.SUPABASE.URL, CONFIG.SUPABASE.KEY)
+    : null;
+
+const AUTH = {
+    session: null,
+    user: null,
+
+    async init() {
+        if (!_supabase) return;
+        const { data } = await _supabase.auth.getSession();
+        if (data?.session) {
+            AUTH.session = data.session;
+            AUTH.user    = data.session.user;
+            AUTH._updateHeader();
+        }
+        _supabase.auth.onAuthStateChange((event, session) => {
+            AUTH.session = session;
+            AUTH.user    = session?.user || null;
+            if (event === 'SIGNED_IN')  { AUTH._updateHeader(); AUTH._hideLoginScreen(); }
+            if (event === 'SIGNED_OUT') { AUTH._showLoginScreen(); }
+        });
+    },
+
+    // Get the best auth header — session JWT if logged in, anon key as fallback
+    headers(extra) {
+        const token = AUTH.session?.access_token || CONFIG.SUPABASE.KEY;
+        return Object.assign({
+            'apikey': CONFIG.SUPABASE.KEY,
+            'Authorization': `Bearer ${token}`
+        }, extra || {});
+    },
+
+    // Who is the current clinician?
+    displayName() {
+        if (!AUTH.user) return null;
+        return AUTH.user.user_metadata?.full_name
+            || AUTH.user.user_metadata?.name
+            || AUTH.user.email?.split('@')[0]
+            || 'Clinician';
+    },
+
+    role() {
+        return AUTH.user?.user_metadata?.role || 'clinician';
+    },
+
+    isAuthenticated() { return !!AUTH.session; },
+
+    async signIn(email, password) {
+        if (!_supabase) return { error: { message: 'Auth not available' } };
+        return await _supabase.auth.signInWithPassword({ email, password });
+    },
+
+    async signOut() {
+        if (!_supabase) return;
+        await _supabase.auth.signOut();
+    },
+
+    _updateHeader() {
+        const badge = document.getElementById('authUserBadge');
+        if (!badge) return;
+        const name = AUTH.displayName();
+        if (name) {
+            badge.innerHTML = `
+                <span style="font-size:10px;color:#4a8aaa;">${escapeHTML(name)}</span>
+                <button onclick="AUTH.signOut()" title="Sign out"
+                    style="background:none;border:none;color:#3a5a6a;cursor:pointer;
+                    font-size:9px;padding:0 3px;font-family:var(--font-body);">
+                    <i class="fas fa-right-from-bracket"></i>
+                </button>`;
+            badge.style.display = 'flex';
+        }
+    },
+
+    _showLoginScreen() {
+        let ls = document.getElementById('authLoginScreen');
+        if (ls) { ls.style.display = 'flex'; return; }
+        ls = document.createElement('div');
+        ls.id = 'authLoginScreen';
+        ls.style.cssText = 'position:fixed;inset:0;z-index:200000;background:#05091a;' +
+            'display:flex;align-items:center;justify-content:center;font-family:var(--font-body);';
+        ls.innerHTML = `
+        <div style="width:360px;background:#0c1828;border:1px solid rgba(41,121,255,0.25);
+             border-radius:16px;padding:36px;box-shadow:0 32px 80px rgba(0,0,0,0.9);">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:28px;">
+                <div style="width:36px;height:36px;border-radius:9px;background:rgba(41,121,255,0.12);
+                     border:1px solid rgba(41,121,255,0.25);display:flex;align-items:center;justify-content:center;">
+                    <i class="fas fa-dna" style="color:#60a5fa;font-size:14px;"></i>
+                </div>
+                <div>
+                    <div style="font-size:15px;font-weight:700;color:#e8f0fe;">NeumuacFQ</div>
+                    <div style="font-size:10px;color:#3a5a7a;">CFTR Precision Medicine · CHUAC</div>
+                </div>
+            </div>
+            <div style="margin-bottom:14px;">
+                <label style="font-size:10px;color:#4a7aaa;display:block;margin-bottom:5px;
+                    text-transform:uppercase;letter-spacing:.08em;">Institutional email</label>
+                <input id="authEmail" type="email" placeholder="usuario@sergas.es"
+                    style="width:100%;height:38px;background:rgba(4,8,20,0.7);border:1.5px solid rgba(41,121,255,0.18);
+                    border-radius:8px;color:#e8f0fe;font-size:13px;padding:0 12px;outline:none;box-sizing:border-box;"
+                    onfocus="this.style.borderColor='rgba(41,121,255,0.6)'"
+                    onblur="this.style.borderColor='rgba(41,121,255,0.18)'"
+                    onkeydown="if(event.key==='Enter')document.getElementById('authPassword').focus()">
+            </div>
+            <div style="margin-bottom:20px;">
+                <label style="font-size:10px;color:#4a7aaa;display:block;margin-bottom:5px;
+                    text-transform:uppercase;letter-spacing:.08em;">Password</label>
+                <input id="authPassword" type="password" placeholder="••••••••"
+                    style="width:100%;height:38px;background:rgba(4,8,20,0.7);border:1.5px solid rgba(41,121,255,0.18);
+                    border-radius:8px;color:#e8f0fe;font-size:13px;padding:0 12px;outline:none;box-sizing:border-box;"
+                    onfocus="this.style.borderColor='rgba(41,121,255,0.6)'"
+                    onblur="this.style.borderColor='rgba(41,121,255,0.18)'"
+                    onkeydown="if(event.key==='Enter')AUTH._submitLogin()">
+            </div>
+            <div id="authError" style="display:none;padding:8px 12px;border-radius:7px;
+                 background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.25);
+                 font-size:11px;color:#f87171;margin-bottom:14px;"></div>
+            <button onclick="AUTH._submitLogin()" id="authLoginBtn"
+                style="width:100%;height:40px;background:#2979ff;border:none;border-radius:9px;
+                color:white;font-size:13px;font-weight:700;cursor:pointer;transition:background .15s;">
+                Sign in to NeumuacFQ
+            </button>
+            <div style="margin-top:16px;font-size:10px;color:#2a3a50;text-align:center;line-height:1.6;">
+                Access restricted to authorised CHUAC clinical staff.<br>
+                Contact <span style="color:#3a5a7a;">devops.neumologia@gmail.com</span> for access.
+            </div>
+        </div>`;
+        document.body.appendChild(ls);
+        setTimeout(() => document.getElementById('authEmail')?.focus(), 100);
+    },
+
+    async _submitLogin() {
+        const email    = document.getElementById('authEmail')?.value.trim();
+        const password = document.getElementById('authPassword')?.value;
+        const btn      = document.getElementById('authLoginBtn');
+        const errEl    = document.getElementById('authError');
+        if (!email || !password) return;
+        if (btn) { btn.disabled = true; btn.textContent = 'Signing in…'; }
+        if (errEl) errEl.style.display = 'none';
+        const { error } = await AUTH.signIn(email, password);
+        if (error) {
+            if (errEl) { errEl.textContent = error.message; errEl.style.display = ''; }
+            if (btn) { btn.disabled = false; btn.textContent = 'Sign in to NeumuacFQ'; }
+        }
+        // On success, onAuthStateChange fires and hides the screen
+    },
+
+    _hideLoginScreen() {
+        const ls = document.getElementById('authLoginScreen');
+        if (ls) { ls.style.opacity = '0'; ls.style.transition = 'opacity .4s'; setTimeout(() => ls.remove(), 400); }
+    }
+};
+
+// Initialise auth on DOM ready — before the cover page fires
+document.addEventListener('DOMContentLoaded', () => AUTH.init());
+Object.assign(window, { AUTH });
 
 
 
@@ -7801,20 +7982,34 @@ async function archiveVariantVersion(variant) {
 // Auto-triggered when a variant has no population_frequency value.
 // Enriches PM2 (rare variant) and BA1/BS1 (common = likely benign) ACMG criteria.
 // ================================================================
-async function fetchGnomADFrequency(variant) {
-    // gnomAD GraphQL API — free, no key, public endpoint
-    const cdna = variant.cdna_name || '';
-    const protein = variant.protein_name || '';
+/**
+ * Builds a gnomAD-compatible variant ID from a variant object.
+ * gnomAD v4 expects: chromosome-position-ref-alt (e.g. 7-117559590-ATCT-A)
+ * Falls back to rsID or cDNA notation for search if genomic coords absent.
+ */
+function _buildGnomADId(variant) {
+    // Prefer explicit genomic coordinates if stored
+    if (variant.chromosome && variant.position && variant.ref_allele && variant.alt_allele) {
+        const chr = String(variant.chromosome).replace(/^chr/i, '');
+        return `${chr}-${variant.position}-${variant.ref_allele}-${variant.alt_allele}`;
+    }
+    // Use rsID if available (gnomAD accepts rs numbers)
+    if (variant.rsid && /^rs\d+$/i.test(variant.rsid)) return variant.rsid;
+    // Use cDNA notation as last resort — gnomAD search may handle HGVS
+    const cdna = variant.cdna_name || variant.protein_name || variant.legacy_name || '';
+    return cdna.replace(/"/g, '') || null;
+}
 
-    // Build search term — use cDNA or protein notation
-    const searchTerm = cdna || protein || variant.legacy_name;
-    if (!searchTerm) return null;
+async function fetchGnomADFrequency(variant) {
+    // gnomAD v4 GraphQL API — requires HGVS variant_id format: chr-pos-ref-alt
+    const gnomadId = _buildGnomADId(variant);
+    if (!gnomadId) return null;
 
     try {
         const query = `{
-            variant(variant_id: "${searchTerm.replace(/"/g,'')}", dataset: gnomad_r4) {
+            variant(variant_id: "${gnomadId}", dataset: gnomad_r4) {
                 genome { af }
-                exome { af }
+                exome  { af }
             }
         }`;
 
@@ -7916,11 +8111,11 @@ const GNOMAD_POPULATIONS = Object.freeze([
  * @returns {Promise<{ overall: number|null, populations: Object[] }|null>}
  */
 async function fetchGnomADPopulationFrequencies(variant) {
-    const searchTerm = (variant.cdna_name || variant.protein_name || variant.legacy_name || '').replace(/"/g, '');
-    if (!searchTerm) return null;
+    const gnomadId = _buildGnomADId(variant);
+    if (!gnomadId) return null;
 
     const query = `{
-        variant(variant_id: "${searchTerm}", dataset: gnomad_r4) {
+        variant(variant_id: "${gnomadId}", dataset: gnomad_r4) {
             genome {
                 af
                 populations {
@@ -9869,6 +10064,7 @@ const STATE = {
     variants: [],
     variantsById: new Map(),
     variantsByLegacyName: new Map(),
+    activeJurisdiction: 'EU',  // Default to EU/AEMPS (Spain · IPT-416)
     
     searchIndex: {
         termMap: new Map(),
@@ -29686,9 +29882,11 @@ const HELIOS_TYPES = {
 
 // ---- Supabase headers (reuse main app config) ----
 function hHeaders() {
+    // Use session JWT for authenticated users — falls back to anon key
+    const token = AUTH?.session?.access_token || CONFIG.SUPABASE.KEY;
     return {
         'apikey': CONFIG.SUPABASE.KEY,
-        'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`,
+        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
         'Prefer': 'return=representation'
     };
@@ -33466,14 +33664,16 @@ function pgpUpdateCard(n) {
             + '<i class="fas fa-circle-exclamation" style="font-size:9px;"></i>Not found in database</div>';
         return;
     }
-    const cls = v.cftr_class;
-    const clsColors = { I:'#f87171', II:'#fb923c', III:'#34d399', IV:'#60a5fa', V:'#c084fc', VI:'#f472b6' };
-    const clsColor = clsColors[cls] || '#5a7aaa';
-    const etiColor = v.eti_prediction === 'responsive' ? '#34d399'
-                   : v.eti_prediction === 'non_responsive' ? '#f87171' : '#6a8aaa';
-    const etiLabel = v.eti_prediction ? v.eti_prediction.replace(/_/g,' ') : 'unknown';
-    const valCount = v.validation_count || 0;
-    const completeness = [v.cftr_class, v.protein_name, v.cdna_name, v.eti_prediction, v.final_determination].filter(Boolean).length;
+    const cls = v.cftr_class || null;
+    const clsColors = { I:'#f87171', II:'#fb923c', 'II/III':'#fb923c', III:'#34d399', IV:'#60a5fa', V:'#c084fc', VI:'#f472b6' };
+    const clsColor = (cls && clsColors[cls]) ? clsColors[cls] : '#5a7aaa';
+    const etiPred  = typeof v.eti_prediction === 'string' ? v.eti_prediction : '';
+    const etiColor = etiPred === 'responsive' ? '#34d399'
+                   : etiPred === 'non_responsive' ? '#f87171' : '#6a8aaa';
+    const etiLabel = etiPred ? etiPred.replace(/_/g,' ') : 'unknown';
+    const valCount = Number(v.validation_count) || 0;
+    const fields   = [v.cftr_class, v.protein_name, v.cdna_name, v.eti_prediction, v.final_determination];
+    const completeness = fields.filter(f => f !== null && f !== undefined && f !== '').length;
     const completeColor = completeness >= 4 ? '#34d399' : completeness >= 2 ? '#fbbf24' : '#f87171';
 
     card.innerHTML =
@@ -36647,6 +36847,32 @@ function helixChartDrillFilter(type, value, label) {
 }
 
 Object.assign(window, { renderCharts, helixChartDrillFilter });
+
+// ── JURISDICTION SELECTOR ─────────────────────────────────────────────────────
+function setJurisdiction(code) {
+    STATE.activeJurisdiction = code;
+    // Update button styles
+    ['EU','US','UK'].forEach(j => {
+        const btn = document.getElementById('jurBtn-' + j);
+        if (!btn) return;
+        if (j === code) {
+            btn.style.background = 'rgba(41,121,255,0.18)';
+            btn.style.color = '#60a5fa';
+        } else {
+            btn.style.background = 'transparent';
+            btn.style.color = '#3a5a7a';
+        }
+    });
+    // Re-run PGP if open
+    if (document.getElementById('patientGenotypePanel') &&
+        document.getElementById('pgpResult')?.innerHTML.trim() &&
+        !document.getElementById('pgpResultPlaceholder')) {
+        runPGP();
+    }
+    const labels = { EU: 'EU/AEMPS (Spain)', US: 'FDA (United States)', UK: 'MHRA (United Kingdom)' };
+    showNotification(`Jurisdiction: ${labels[code] || code}`, 'info', 2000);
+}
+Object.assign(window, { setJurisdiction });
 
 // ================================================================
 // INIT — Start realtime after app loads
