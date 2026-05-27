@@ -33439,7 +33439,7 @@ function openCompoundGenotypeCalculator(preloadAllele1) {
     panel.id = 'patientGenotypePanel';
     Object.assign(panel.style, {
         position:'fixed', bottom:'0', left:'var(--sidebar-width,0px)', right:'0',
-        zIndex:'8000', height:'340px',
+        zIndex:'8000', height:'70vh', minHeight:'420px',
         background:'#07111f',
         borderTop:'1.5px solid rgba(41,121,255,0.28)',
         boxShadow:'0 -20px 60px rgba(0,3,14,0.95), 0 -1px 0 rgba(41,121,255,0.1)',
@@ -33532,11 +33532,11 @@ function openCompoundGenotypeCalculator(preloadAllele1) {
     </div>
 
     <!-- ── BODY: TWO COLUMNS ──────────────────────────────────────────── -->
-    <div style="display:grid;grid-template-columns:340px 1fr;flex:1;min-height:0;">
+    <div style="display:grid;grid-template-columns:340px 1fr;flex:1;min-height:0;overflow:hidden;">
 
         <!-- LEFT: inputs + allele cards ─────────────────────────── -->
         <div style="display:flex;flex-direction:column;padding:12px 16px;
-             border-right:1px solid rgba(41,121,255,0.09);gap:8px;overflow:hidden;">
+             border-right:1px solid rgba(41,121,255,0.09);gap:8px;overflow-y:auto;">
 
             <!-- Allele 1 -->
             <div>
@@ -33627,7 +33627,7 @@ function openCompoundGenotypeCalculator(preloadAllele1) {
     requestAnimationFrame(() => {
         panel.style.transform = 'translateY(0)';
         const main = document.getElementById('appMain');
-        if (main) main.style.paddingBottom = '340px';
+        if (main) main.style.paddingBottom = panel.offsetHeight + 'px';
     });
 
     if (a1Default) setTimeout(() => pgpUpdateCard(1), 60);
