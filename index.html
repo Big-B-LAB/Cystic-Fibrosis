@@ -33223,166 +33223,223 @@ function cgcRenderSavedCases() {
 }
 
 
-function openCompoundGenotypeCalculator(preloadAllele1) {
-    // Toggle off if already open
-    const existing = document.getElementById('patientGenotypePanel');
-    if (existing) { existing.remove(); document.getElementById('appMain').style.paddingBottom = ''; return; }
 
-    // Pre-populate Allele 1 from current variant if not explicitly provided
+function openCompoundGenotypeCalculator(preloadAllele1) {
+    const existing = document.getElementById('patientGenotypePanel');
+    if (existing) { existing.remove(); const m = document.getElementById('appMain'); if(m) m.style.paddingBottom=''; return; }
+
     const currentVariant = STATE.view.selectedVariant;
     const a1Default = preloadAllele1
         ? (typeof preloadAllele1 === 'string' ? preloadAllele1 : preloadAllele1.legacy_name)
         : (currentVariant ? currentVariant.legacy_name : '');
 
-    // Build datalist options
-    const options = STATE.variants.slice(0, 500).map(v =>
-        `<option value="${escapeAttr(v.legacy_name)}">${escapeHTML(v.legacy_name)}${v.cftr_class ? ' (Class '+v.cftr_class+')' : ''}</option>`
+    const options = STATE.variants.slice(0,500).map(v =>
+        `<option value="${escapeAttr(v.legacy_name)}">${escapeHTML(v.legacy_name)}${v.cftr_class?' (Class '+v.cftr_class+')':''}</option>`
     ).join('');
 
     const panel = document.createElement('div');
     panel.id = 'patientGenotypePanel';
     Object.assign(panel.style, {
-        position: 'fixed', bottom: '0',
-        left: 'var(--sidebar-width, 0px)', right: '0',
-        zIndex: '8000',
-        background: 'linear-gradient(180deg,#0c1422 0%,#05091a 100%)',
-        borderTop: '2px solid rgba(41,121,255,0.35)',
-        boxShadow: '0 -16px 60px rgba(0,5,20,0.92)',
-        fontFamily: 'var(--font-body)',
-        transform: 'translateY(100%)',
-        transition: 'transform 0.3s cubic-bezier(0.16,1,0.3,1)',
-        maxHeight: '92vh',
-        display: 'flex',
-        flexDirection: 'column'
+        position:'fixed', bottom:'0', left:'var(--sidebar-width,0px)', right:'0',
+        zIndex:'8000', height:'340px',
+        background:'#07111f',
+        borderTop:'1.5px solid rgba(41,121,255,0.28)',
+        boxShadow:'0 -20px 60px rgba(0,3,14,0.95), 0 -1px 0 rgba(41,121,255,0.1)',
+        fontFamily:'var(--font-body)',
+        transform:'translateY(100%)',
+        transition:'transform 0.32s cubic-bezier(0.16,1,0.3,1)',
+        display:'flex', flexDirection:'column'
     });
 
     panel.innerHTML = `
-    <!-- ── HEADER ─────────────────────────────────────────────── -->
-    <div style="display:flex;align-items:center;gap:12px;padding:10px 20px;
-         border-bottom:1px solid rgba(41,121,255,0.15);flex-shrink:0;
-         background:linear-gradient(135deg,rgba(4,8,18,0.98),rgba(2,5,14,0.98));">
-        <div style="width:32px;height:32px;border-radius:8px;background:rgba(41,121,255,0.12);
-             border:1px solid rgba(41,121,255,0.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-            <i class="fas fa-microscope" style="font-size:13px;color:#60a5fa;"></i>
-        </div>
-        <div>
-            <div style="font-size:13px;font-weight:700;color:#f0f6ff;letter-spacing:-.01em;">Patient Genotype Assessment</div>
-            <div style="font-size:10px;color:#4a6a99;margin-top:1px;">NeumuacFQ · Biallelic modulator eligibility — Trikafta · Alyftrek · Kalydeco</div>
-        </div>
-        <div id="pgpEligibilityBadge" style="margin-left:8px;display:none;"></div>
-        <div style="margin-left:auto;display:flex;gap:7px;align-items:center;">
-            <button id="pgpSwapBtn" onclick="pgpSwapAlleles()" style="display:none;padding:5px 11px;border-radius:6px;
-                border:1px solid rgba(41,121,255,0.25);background:rgba(41,121,255,0.08);color:#7aaeff;
-                font-size:11px;cursor:pointer;font-family:var(--font-body);font-weight:600;">
-                <i class="fas fa-arrows-rotate" style="font-size:9px;margin-right:4px;"></i>Swap alleles
+    <style>
+    #patientGenotypePanel {
+        --pgp-blue: #2979ff;
+        --pgp-blue-dim: rgba(41,121,255,0.12);
+        --pgp-blue-border: rgba(41,121,255,0.22);
+        --pgp-surface: rgba(255,255,255,0.03);
+        --pgp-border: rgba(99,140,210,0.1);
+        --pgp-text: #e8f0fe;
+        --pgp-muted: #4a6a99;
+        --pgp-mono: 'IBM Plex Mono', monospace;
+    }
+    #patientGenotypePanel .pgp-input {
+        width:100%; height:34px; background:rgba(4,8,20,0.7);
+        border:1.5px solid rgba(41,121,255,0.18); border-radius:7px;
+        color:#e8f0fe; font-family:var(--pgp-mono); font-size:12px;
+        padding:0 10px; outline:none; box-sizing:border-box;
+        transition:border-color .15s, box-shadow .15s;
+    }
+    #patientGenotypePanel .pgp-input:focus {
+        border-color:rgba(41,121,255,0.6);
+        box-shadow:0 0 0 3px rgba(41,121,255,0.08);
+    }
+    #patientGenotypePanel .pgp-input::placeholder { color:#2a3a5a; }
+    #patientGenotypePanel .pgp-chip {
+        display:inline-flex; align-items:center; gap:5px;
+        padding:3px 9px; border-radius:20px; font-size:10px; font-weight:700;
+        letter-spacing:.04em; white-space:nowrap;
+    }
+    #patientGenotypePanel .pgp-allele-badge {
+        display:flex; align-items:center; gap:8px; padding:6px 0;
+        border-bottom:1px solid var(--pgp-border); margin-bottom:6px;
+    }
+    #patientGenotypePanel .pgp-cls-dot {
+        width:28px; height:28px; border-radius:7px; flex-shrink:0;
+        display:flex; flex-direction:column; align-items:center; justify-content:center;
+    }
+    #patientGenotypePanel .pgp-action-btn {
+        height:32px; padding:0 14px; border-radius:7px; font-size:11px;
+        font-weight:600; cursor:pointer; font-family:var(--font-body);
+        border:1.5px solid; transition:all .15s; white-space:nowrap;
+        display:flex; align-items:center; gap:6px;
+    }
+    #patientGenotypePanel .pgp-calc-btn {
+        height:36px; padding:0 20px; border-radius:8px; font-size:12px;
+        font-weight:700; cursor:pointer; font-family:var(--font-body);
+        background:var(--pgp-blue); border:none; color:white;
+        transition:background .15s, transform .1s; display:flex; align-items:center; gap:7px;
+        white-space:nowrap;
+    }
+    #patientGenotypePanel .pgp-calc-btn:hover { background:#1a5fd9; transform:translateY(-1px); }
+    #patientGenotypePanel .pgp-calc-btn:active { transform:translateY(0); }
+    #patientGenotypePanel .pgp-verdict-pill {
+        display:flex; align-items:center; gap:7px; padding:8px 14px;
+        border-radius:9px; margin-bottom:10px;
+    }
+    #patientGenotypePanel .pgp-section-title {
+        font-size:9px; font-weight:700; letter-spacing:.12em;
+        text-transform:uppercase; color:var(--pgp-muted); margin-bottom:7px;
+    }
+    </style>
+
+    <!-- ── HEADER ─────────────────────────────────────────────────────── -->
+    <div style="display:flex;align-items:center;gap:0;padding:0 18px;height:38px;
+         border-bottom:1px solid rgba(41,121,255,0.1);flex-shrink:0;
+         background:linear-gradient(90deg,rgba(5,10,22,0.98),rgba(8,14,26,0.98));">
+        <i class="fas fa-microscope" style="font-size:11px;color:#3a6aaa;margin-right:8px;"></i>
+        <span style="font-size:12px;font-weight:700;color:#c8d8f0;letter-spacing:-.01em;">Patient Genotype</span>
+        <span style="font-size:10px;color:#2a3a5a;margin-left:8px;">biallelic modulator eligibility</span>
+        <div id="pgpHeaderVerdict" style="margin-left:12px;"></div>
+        <div style="margin-left:auto;display:flex;gap:6px;align-items:center;">
+            <button id="pgpSwapBtn" onclick="pgpSwapAlleles()" style="display:none;" class="pgp-action-btn"
+                style="border-color:rgba(41,121,255,0.2);background:rgba(41,121,255,0.06);color:#5a8adf;">
+                <i class="fas fa-arrows-rotate" style="font-size:9px;"></i>Swap
             </button>
-            <button onclick="closePGP()" style="padding:5px 11px;border-radius:6px;
-                border:1px solid rgba(99,140,210,0.15);background:transparent;color:#5a7aaa;
-                font-size:11px;cursor:pointer;font-family:var(--font-body);font-weight:600;">
-                <i class="fas fa-xmark" style="font-size:10px;margin-right:3px;"></i>Close
+            <button onclick="closePGP()" class="pgp-action-btn"
+                style="border-color:rgba(99,140,210,0.12);background:transparent;color:#3a5a7a;">
+                <i class="fas fa-xmark" style="font-size:10px;"></i>Close
             </button>
         </div>
     </div>
 
-    <!-- ── ALLELE INPUTS + CARDS ──────────────────────────────── -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;border-bottom:1px solid rgba(41,121,255,0.12);flex-shrink:0;">
+    <!-- ── BODY: TWO COLUMNS ──────────────────────────────────────────── -->
+    <div style="display:grid;grid-template-columns:340px 1fr;flex:1;min-height:0;">
 
-        <!-- Allele 1 -->
-        <div style="padding:14px 18px;border-right:1px solid rgba(99,140,210,0.12);">
-            <div style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
-                 color:#3a5a8a;margin-bottom:8px;display:flex;align-items:center;gap:6px;">
-                <div style="width:5px;height:5px;border-radius:50%;background:rgba(41,121,255,0.5);"></div>
-                Allele 1
+        <!-- LEFT: inputs + allele cards ─────────────────────────── -->
+        <div style="display:flex;flex-direction:column;padding:12px 16px;
+             border-right:1px solid rgba(41,121,255,0.09);gap:8px;overflow:hidden;">
+
+            <!-- Allele 1 -->
+            <div>
+                <div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+                     color:var(--pgp-muted);margin-bottom:5px;display:flex;align-items:center;gap:5px;">
+                    <span style="width:4px;height:4px;border-radius:50%;background:rgba(41,121,255,0.6);display:inline-block;"></span>
+                    Allele 1
+                </div>
+                <input id="pgpAllele1" list="pgpOptions1" placeholder="Search variant name, protein or cDNA…"
+                    value="${escapeAttr(a1Default)}" class="pgp-input"
+                    oninput="pgpUpdateCard(1)"
+                    onfocus="this.style.borderColor='rgba(41,121,255,0.6)'"
+                    onblur="this.style.borderColor='rgba(41,121,255,0.18)'">
+                <datalist id="pgpOptions1">${options}</datalist>
+                <div id="pgpCard1" style="margin-top:6px;min-height:38px;"></div>
             </div>
-            <input id="pgpAllele1" list="pgpOptions1" placeholder="e.g. F508del"
-                value="${escapeAttr(a1Default)}"
-                style="width:100%;height:36px;background:rgba(4,8,15,0.8);border:1.5px solid rgba(41,121,255,0.2);
-                border-radius:8px;color:#f0f6ff;font-family:var(--font-mono);font-size:13px;padding:0 10px;
-                outline:none;box-sizing:border-box;margin-bottom:10px;"
-                oninput="pgpUpdateCard(1)"
-                onfocus="this.style.borderColor='rgba(41,121,255,0.6)'"
-                onblur="this.style.borderColor='rgba(41,121,255,0.2)'">
-            <datalist id="pgpOptions1">${options}</datalist>
-            <div id="pgpCard1" style="min-height:60px;"></div>
+
+            <!-- Divider with plus -->
+            <div style="display:flex;align-items:center;gap:8px;padding:0 4px;">
+                <div style="flex:1;height:1px;background:rgba(99,140,210,0.08);"></div>
+                <span style="font-size:11px;color:#1a2a3a;font-weight:700;">+</span>
+                <div style="flex:1;height:1px;background:rgba(99,140,210,0.08);"></div>
+            </div>
+
+            <!-- Allele 2 -->
+            <div>
+                <div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+                     color:var(--pgp-muted);margin-bottom:5px;display:flex;align-items:center;gap:5px;">
+                    <span style="width:4px;height:4px;border-radius:50%;background:rgba(41,121,255,0.35);display:inline-block;"></span>
+                    Allele 2
+                    <span style="font-size:9px;color:#1e2e42;font-weight:400;letter-spacing:0;text-transform:none;">
+                        — or browse to a variant
+                    </span>
+                </div>
+                <input id="pgpAllele2" list="pgpOptions2" placeholder="Search variant name, protein or cDNA…"
+                    class="pgp-input"
+                    oninput="pgpUpdateCard(2)"
+                    onfocus="this.style.borderColor='rgba(41,121,255,0.6)'"
+                    onblur="this.style.borderColor='rgba(41,121,255,0.18)'">
+                <datalist id="pgpOptions2">${options}</datalist>
+                <div id="pgpCard2" style="margin-top:6px;min-height:38px;"></div>
+            </div>
+
+            <!-- Calculate + utilities -->
+            <div style="margin-top:auto;display:flex;flex-direction:column;gap:6px;">
+                <button onclick="runPGP()" id="pgpCalcBtn" class="pgp-calc-btn" style="width:100%;justify-content:center;">
+                    <i class="fas fa-dna" style="font-size:11px;"></i>
+                    Assess compound genotype
+                </button>
+                <div style="display:flex;gap:5px;">
+                    <div style="flex:1;display:flex;align-items:center;gap:5px;padding:0 8px;height:28px;
+                         background:rgba(41,121,255,0.03);border:1px solid rgba(41,121,255,0.1);border-radius:6px;">
+                        <i class="fas fa-tag" style="font-size:8px;color:#2a4a7a;"></i>
+                        <input id="pgpCaseCode" placeholder="Case code (optional)"
+                            style="background:none;border:none;color:#c8d8f0;font-family:var(--pgp-mono);
+                            font-size:10px;outline:none;width:100%;" autocomplete="off">
+                    </div>
+                    <button onclick="pgpToggleSavedCases()" class="pgp-action-btn"
+                        style="border-color:rgba(41,121,255,0.12);background:rgba(41,121,255,0.04);color:#3a5a7a;height:28px;padding:0 10px;">
+                        <i class="fas fa-clock-rotate-left" style="font-size:9px;"></i>
+                    </button>
+                </div>
+            </div>
         </div>
 
-        <!-- Allele 2 -->
-        <div style="padding:14px 18px;">
-            <div style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
-                 color:#3a5a8a;margin-bottom:8px;display:flex;align-items:center;gap:6px;">
-                <div style="width:5px;height:5px;border-radius:50%;background:rgba(41,121,255,0.3);"></div>
-                Allele 2
-                <span style="font-size:9px;color:#3a4a6a;font-weight:400;letter-spacing:0;text-transform:none;">
-                    — type or browse to a variant
-                </span>
+        <!-- RIGHT: clinical result ────────────────────────────────── -->
+        <div id="pgpResult" style="overflow-y:auto;padding:12px 18px 16px;
+             background:rgba(3,7,18,0.4);">
+            <!-- Placeholder before calculation -->
+            <div id="pgpResultPlaceholder" style="height:100%;display:flex;flex-direction:column;
+                 align-items:center;justify-content:center;gap:8px;color:#1e3050;">
+                <i class="fas fa-dna" style="font-size:28px;opacity:.3;"></i>
+                <div style="font-size:11px;text-align:center;line-height:1.6;">
+                    Enter both alleles and press<br>
+                    <span style="color:#2a4a6a;font-weight:600;">Assess compound genotype</span>
+                </div>
             </div>
-            <input id="pgpAllele2" list="pgpOptions2" placeholder="e.g. G551D"
-                style="width:100%;height:36px;background:rgba(4,8,15,0.8);border:1.5px solid rgba(41,121,255,0.2);
-                border-radius:8px;color:#f0f6ff;font-family:var(--font-mono);font-size:13px;padding:0 10px;
-                outline:none;box-sizing:border-box;margin-bottom:10px;"
-                oninput="pgpUpdateCard(2)"
-                onfocus="this.style.borderColor='rgba(41,121,255,0.6)'"
-                onblur="this.style.borderColor='rgba(41,121,255,0.2)'">
-            <datalist id="pgpOptions2">${options}</datalist>
-            <div id="pgpCard2" style="min-height:60px;"></div>
         </div>
     </div>
 
-    <!-- ── CALCULATE BUTTON ───────────────────────────────────── -->
-    <div style="padding:10px 18px;border-bottom:1px solid rgba(41,121,255,0.1);flex-shrink:0;
-         display:flex;align-items:center;gap:10px;">
-        <button onclick="runPGP()" id="pgpCalcBtn"
-            style="flex:1;height:38px;background:#2979ff;border:none;border-radius:8px;
-            color:white;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font-body);"
-            onmouseover="this.style.background='#1a5fd9'" onmouseout="this.style.background='#2979ff'">
-            <i class="fas fa-calculator" style="margin-right:8px;font-size:11px;"></i>
-            Calculate compound genotype prediction
-        </button>
-        <!-- Case code -->
-        <div style="display:flex;align-items:center;gap:6px;padding:0 10px;height:38px;
-             background:rgba(41,121,255,0.04);border:1px solid rgba(41,121,255,0.15);border-radius:8px;min-width:200px;">
-            <i class="fas fa-tag" style="font-size:9px;color:#60a5fa;flex-shrink:0;"></i>
-            <input id="pgpCaseCode" placeholder="Case code (optional)"
-                style="background:none;border:none;color:#f0f6ff;font-family:var(--font-mono);
-                font-size:11px;outline:none;width:100%;" autocomplete="off">
-        </div>
-        <!-- Saved cases toggle -->
-        <button onclick="pgpToggleSavedCases()" style="height:38px;padding:0 12px;border-radius:8px;
-            border:1px solid rgba(41,121,255,0.2);background:rgba(41,121,255,0.05);color:#5a8adf;
-            font-size:11px;cursor:pointer;font-family:var(--font-body);white-space:nowrap;">
-            <i class="fas fa-clock-rotate-left" style="margin-right:5px;font-size:10px;"></i>History
-        </button>
-    </div>
-
-    <!-- ── SAVED CASES (collapsible) ─────────────────────────── -->
-    <div id="pgpSavedCasesArea" style="display:none;padding:8px 18px;
-         border-bottom:1px solid rgba(41,121,255,0.1);flex-shrink:0;max-height:120px;overflow-y:auto;"></div>
-
-    <!-- ── CLINICAL RESULT (scrollable) ──────────────────────── -->
-    <div id="pgpResult" style="flex:1;overflow-y:auto;padding:14px 18px 20px;"></div>
+    <!-- ── SAVED CASES DRAWER ─────────────────────────────────────────── -->
+    <div id="pgpSavedCasesArea" style="display:none;padding:7px 16px;
+         border-top:1px solid rgba(41,121,255,0.1);flex-shrink:0;
+         background:rgba(2,5,14,0.6);max-height:100px;overflow-y:auto;"></div>
     `;
 
     document.body.appendChild(panel);
-
-    // Animate in
     requestAnimationFrame(() => {
         panel.style.transform = 'translateY(0)';
         const main = document.getElementById('appMain');
-        if (main) main.style.paddingBottom = panel.offsetHeight + 'px';
+        if (main) main.style.paddingBottom = '340px';
     });
 
-    // Pre-populate allele 1 card if we have a default
     if (a1Default) setTimeout(() => pgpUpdateCard(1), 60);
-
-    // Render saved cases
     setTimeout(() => pgpRenderSavedCases(), 40);
-
-    // Focus allele 2 input if allele 1 is pre-filled, else focus allele 1
     setTimeout(() => {
         if (a1Default) document.getElementById('pgpAllele2')?.focus();
         else document.getElementById('pgpAllele1')?.focus();
     }, 80);
 }
+
 
 function closePGP() {
     const panel = document.getElementById('patientGenotypePanel');
@@ -33396,6 +33453,7 @@ function closePGP() {
     COMPARE_STATE.pinned = null;
 }
 
+
 function pgpUpdateCard(n) {
     const input = document.getElementById('pgpAllele' + n);
     const card  = document.getElementById('pgpCard' + n);
@@ -33404,53 +33462,46 @@ function pgpUpdateCard(n) {
     if (!name) { card.innerHTML = ''; return; }
     const v = pgpResolveAllele(name);
     if (!v) {
-        card.innerHTML = '<div style="font-size:10px;color:#f87171;padding:2px 0;">Not found in DB</div>';
+        card.innerHTML = '<div style="font-size:10px;color:#f87171;padding:3px 0;display:flex;align-items:center;gap:5px;">'
+            + '<i class="fas fa-circle-exclamation" style="font-size:9px;"></i>Not found in database</div>';
         return;
     }
     const cls = v.cftr_class;
-    const clsColors = { I:'#f87171',II:'#fb923c',III:'#34d399',IV:'#60a5fa',V:'#c084fc',VI:'#f472b6' };
+    const clsColors = { I:'#f87171', II:'#fb923c', III:'#34d399', IV:'#60a5fa', V:'#c084fc', VI:'#f472b6' };
     const clsColor = clsColors[cls] || '#5a7aaa';
     const etiColor = v.eti_prediction === 'responsive' ? '#34d399'
-                   : v.eti_prediction === 'non_responsive' ? '#f87171' : '#9ab8e0';
-    const completeness = [v.cftr_class, v.protein_name, v.cdna_name, v.eti_prediction, v.final_determination].filter(Boolean).length;
+                   : v.eti_prediction === 'non_responsive' ? '#f87171' : '#6a8aaa';
+    const etiLabel = v.eti_prediction ? v.eti_prediction.replace(/_/g,' ') : 'unknown';
     const valCount = v.validation_count || 0;
-    card.innerHTML = `
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-            <div style="width:36px;height:36px;border-radius:8px;background:${clsColor}18;border:1.5px solid ${clsColor}40;
-                 display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;">
-                <span style="font-size:14px;font-weight:800;color:${clsColor};line-height:1;">${cls || '?'}</span>
-                <span style="font-size:8px;color:${clsColor}88;letter-spacing:.06em;">CLASS</span>
-            </div>
-            <div style="min-width:0;">
-                <div style="font-size:13px;font-weight:700;color:#f0f6ff;font-family:var(--font-mono);
-                     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHTML(v.legacy_name)}</div>
-                <div style="font-size:10px;color:var(--text-tertiary);font-family:var(--font-mono);">
-                    ${escapeHTML(v.protein_name || '—')}</div>
-            </div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;">
-            <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(99,140,210,0.1);border-radius:5px;padding:6px 8px;">
-                <div style="font-size:9px;color:var(--text-tertiary);letter-spacing:.06em;margin-bottom:2px;">ETI</div>
-                <div style="font-size:11px;font-weight:700;color:${etiColor};">
-                    ${v.eti_prediction ? v.eti_prediction.replace('_',' ').toUpperCase() : '—'}</div>
-            </div>
-            <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(99,140,210,0.1);border-radius:5px;padding:6px 8px;">
-                <div style="font-size:9px;color:var(--text-tertiary);letter-spacing:.06em;margin-bottom:2px;">Validations</div>
-                <div style="font-size:11px;font-weight:700;color:${valCount > 0 ? '#34d399' : '#f87171'};">
-                    ${valCount > 0 ? valCount + ' ✓' : 'None'}</div>
-            </div>
-            <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(99,140,210,0.1);border-radius:5px;padding:6px 8px;">
-                <div style="font-size:9px;color:var(--text-tertiary);letter-spacing:.06em;margin-bottom:2px;">Evidence</div>
-                <div style="font-size:11px;font-weight:700;color:var(--text-secondary);">
-                    ${escapeHTML(v.eti_evidence_level || '—')}</div>
-            </div>
-            <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(99,140,210,0.1);border-radius:5px;padding:6px 8px;">
-                <div style="font-size:9px;color:var(--text-tertiary);letter-spacing:.06em;margin-bottom:2px;">Complete</div>
-                <div style="font-size:11px;font-weight:700;color:${completeness >= 4 ? '#34d399' : completeness >= 2 ? '#fbbf24' : '#f87171'};">
-                    ${completeness}/5 fields</div>
-            </div>
-        </div>`;
+    const completeness = [v.cftr_class, v.protein_name, v.cdna_name, v.eti_prediction, v.final_determination].filter(Boolean).length;
+    const completeColor = completeness >= 4 ? '#34d399' : completeness >= 2 ? '#fbbf24' : '#f87171';
+
+    card.innerHTML =
+        // Class badge + name row
+        '<div style="display:flex;align-items:center;gap:7px;">'
+      +   '<div style="width:26px;height:26px;border-radius:6px;flex-shrink:0;'
+      +       'background:' + clsColor + '18;border:1.5px solid ' + clsColor + '40;'
+      +       'display:flex;flex-direction:column;align-items:center;justify-content:center;">'
+      +     '<span style="font-size:11px;font-weight:800;color:' + clsColor + ';line-height:1;">' + (cls||'?') + '</span>'
+      +   '</div>'
+      +   '<div style="min-width:0;flex:1;">'
+      +     '<div style="font-size:12px;font-weight:700;color:#d8e8fc;font-family:var(--pgp-mono,var(--font-mono));'
+      +         'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHTML(v.legacy_name) + '</div>'
+      +     '<div style="font-size:9px;color:#3a5a7a;font-family:var(--pgp-mono,var(--font-mono));">'
+      +         escapeHTML(v.protein_name || '—') + '</div>'
+      +   '</div>'
+      +   // ETI chip
+      +   '<span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;flex-shrink:0;'
+      +       'background:' + etiColor + '15;color:' + etiColor + ';border:1px solid ' + etiColor + '35;">'
+      +       etiLabel + '</span>'
+      +   // Completeness dot
+      +   '<span title="Data completeness: ' + completeness + '/5 fields" style="width:6px;height:6px;border-radius:50%;'
+      +       'background:' + completeColor + ';flex-shrink:0;opacity:.8;"></span>'
+      +   // Validation count
+      +   (valCount > 0 ? '<span style="font-size:9px;color:#34d399;flex-shrink:0;">' + valCount + '✓</span>' : '')
+      + '</div>';
 }
+
 
 function pgpResolveAllele(name) {
     const direct = STATE.variantsByLegacyName?.get(name) || STATE.variantsByLegacyName?.get(name.toLowerCase());
@@ -33545,9 +33596,23 @@ function runPGP() {
     document.getElementById('cgcResult').id  = 'pgpResult';
     if (caseCode) document.getElementById('cgcCaseCode').id = 'pgpCaseCode';
 
-    // Show swap button now that both alleles are resolved
+    // Hide placeholder, show swap button
+    const placeholder = document.getElementById('pgpResultPlaceholder');
+    if (placeholder) placeholder.style.display = 'none';
     const swapBtn = document.getElementById('pgpSwapBtn');
     if (swapBtn) swapBtn.style.display = '';
+    // Show verdict in header after result renders
+    setTimeout(() => {
+        const verdictEl = document.getElementById('pgpHeaderVerdict');
+        const resultEl  = document.getElementById('pgpResult');
+        if (!verdictEl || !resultEl) return;
+        // Look for eligibility color from the rendered result
+        const pill = resultEl.querySelector('[data-pgp-verdict]');
+        if (pill) {
+            verdictEl.style.display = '';
+            verdictEl.innerHTML = pill.innerHTML;
+        }
+    }, 80);
 
     // Resize panel height now result is populated
     const panel = document.getElementById('patientGenotypePanel');
