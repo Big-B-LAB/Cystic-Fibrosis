@@ -17839,23 +17839,53 @@ function renderACMGPanel(variant) {
         </div>`;
     }).join('');
 
+    // Pathogenic / Likely pathogenic → expanded by default; everything else collapsed
+    const defaultExpanded = classification === 'Pathogenic' || classification === 'Likely pathogenic';
+    const panelId   = `acmgBody_${variant.id}`;
+    const chevronId = `acmgChevron_${variant.id}`;
+
     return `
     <div class="detail-section" style="margin-top:0;border-left:3px solid ${clsColor}60;">
-        <div class="section-header">
+        <!-- Collapsible header — full row is clickable -->
+        <div class="section-header"
+             onclick="(function(){
+                 var b=document.getElementById('${panelId}');
+                 var c=document.getElementById('${chevronId}');
+                 if(!b||!c) return;
+                 var open=b.style.display!=='none';
+                 b.style.display=open?'none':'';
+                 c.style.transform=open?'rotate(-90deg)':'rotate(0deg)';
+             })()"
+             style="cursor:pointer;user-select:none;">
             <div class="section-header-icon" style="background:${clsColor}18;color:${clsColor};">
                 <i class="fas fa-balance-scale"></i>
             </div>
-            <span class="section-title">ACMG/AMP variant classification</span>
-            <span style="margin-left:auto;font-size:11px;font-weight:700;padding:2px 10px;border-radius:10px;
-                 background:${clsColor}18;color:${clsColor};border:1px solid ${clsColor}30;">
+            <div style="flex:1;min-width:0;display:flex;align-items:center;gap:8px;">
+                <span class="section-title">ACMG/AMP classification</span>
+                <span style="font-size:10px;color:var(--text-tertiary);">
+                    ${score > 0 ? '+' : ''}${score} ·
+                    ${met.pathogenic.length > 0
+                        ? `<span style="color:#fb923c;">${met.pathogenic.length}P</span>`
+                        : '0P'}
+                    ${met.benign.length > 0
+                        ? `· <span style="color:#60a5fa;">${met.benign.length}B</span>`
+                        : ''}
+                </span>
+            </div>
+            <span style="font-size:11px;font-weight:700;padding:2px 10px;border-radius:10px;
+                 background:${clsColor}18;color:${clsColor};border:1px solid ${clsColor}30;
+                 margin-right:8px;flex-shrink:0;">
                 ${escapeHTML(classification)}
             </span>
+            <i id="${chevronId}" class="fas fa-chevron-down"
+               style="font-size:10px;color:var(--text-tertiary);flex-shrink:0;
+                      transition:transform .2s ease;
+                      transform:${defaultExpanded ? 'rotate(0deg)' : 'rotate(-90deg)'};"></i>
         </div>
-        <div class="section-body">
-            <!-- Visual classification context -->
-            <div style="display:flex;align-items:stretch;gap:12px;padding:10px 0;margin-bottom:10px;border-bottom:1px solid var(--border);">
 
-                <!-- Score dial -->
+        <!-- Collapsible body -->
+        <div id="${panelId}" class="section-body" style="display:${defaultExpanded ? '' : 'none'};">
+            <div style="display:flex;align-items:stretch;gap:12px;padding:10px 0;margin-bottom:10px;border-bottom:1px solid var(--border);">
                 <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;
                      width:68px;flex-shrink:0;background:${clsColor}0d;border-radius:8px;border:1px solid ${clsColor}25;padding:8px 4px;">
                     <div style="font-size:9px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.08em;text-align:center;">Score</div>
@@ -17866,8 +17896,6 @@ function renderACMGPanel(variant) {
                         <div style="height:100%;border-radius:2px;background:${clsColor};width:${Math.min(100,Math.abs(score)/12*100)}%;"></div>
                     </div>
                 </div>
-
-                <!-- Classification summary -->
                 <div style="flex:1;min-width:0;">
                     <div style="font-size:13px;font-weight:600;color:${clsColor};margin-bottom:4px;">${escapeHTML(classification)}</div>
                     <div style="font-size:11px;color:var(--text-secondary);line-height:1.6;">
@@ -17885,7 +17913,6 @@ function renderACMGPanel(variant) {
                             : 'Current evidence supports a benign or likely benign interpretation.'}
                     </div>
                 </div>
-
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 16px;">
                 <div>
@@ -17905,6 +17932,7 @@ function renderACMGPanel(variant) {
     </div>`;
     } finally { window._acmgRendering = false; }
 }
+
 
 
 // - Sweat chloride ranges per class
@@ -37424,7 +37452,7 @@ function _updateSectionIndicator(section, icon, label) {
         if (iconEl) { iconEl.className = 'fas ' + (icon || 'fa-dna'); iconEl.style.fontSize = '10px'; }
         if (labelEl) labelEl.textContent = label || section;
     } else {
-        pill.style.display = 'none';    
+        pill.style.display = 'none';
     }
 }
 </script>
