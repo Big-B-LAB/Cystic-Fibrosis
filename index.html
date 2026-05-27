@@ -7812,7 +7812,7 @@ async function fetchGnomADFrequency(variant) {
 
     try {
         const query = `{
-            variant(variantId: "${searchTerm.replace(/"/g,'')}", dataset: gnomad_r4) {
+            variant(variant_id: "${searchTerm.replace(/"/g,'')}", dataset: gnomad_r4) {
                 genome { af }
                 exome { af }
             }
@@ -7920,7 +7920,7 @@ async function fetchGnomADPopulationFrequencies(variant) {
     if (!searchTerm) return null;
 
     const query = `{
-        variant(variantId: "${searchTerm}", dataset: gnomad_r4) {
+        variant(variant_id: "${searchTerm}", dataset: gnomad_r4) {
             genome {
                 af
                 populations {
@@ -34199,14 +34199,13 @@ function saveToSearchHistory(query, variantId, variantName) {
     // devices for the same institution. Fire-and-forget — never blocks UI.
     const institutionId = STATE.searchIntelligence.hospitalObj?.id;
     if (institutionId && variantId) {
-        fetch(`${CONFIG.SUPABASE.URL}/rest/v1/search_history_log`, {
+        fetch(`${CONFIG.SUPABASE.URL}/rest/v1/search_history_log?on_conflict=institution_id,variant_id`, {
             method: 'POST',
             headers: {
                 'apikey': CONFIG.SUPABASE.KEY,
                 'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}`,
                 'Content-Type': 'application/json',
-                'Prefer': 'resolution=merge-duplicates,return=minimal',
-                'on-conflict': 'institution_id,variant_id'
+                'Prefer': 'resolution=merge-duplicates,return=minimal'
             },
             body: JSON.stringify({
                 institution_id: institutionId,
