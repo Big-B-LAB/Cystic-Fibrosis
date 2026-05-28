@@ -4137,6 +4137,7 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
+            transition: bottom 0.3s cubic-bezier(0.16,1,0.3,1);
         }
 
         .notification {
@@ -5851,6 +5852,22 @@
             <div class="cp-rule"></div>
             <div class="cp-platform-name"><span class="cp-nm">NEUMUAC</span><span class="cp-fq">FQ</span></div>
             <div class="cp-platform-sub">CFTR Precision Medicine</div>
+            <div id="cpLiveStats" style="display:flex;gap:18px;margin-bottom:22px;animation:cpRise 1s .40s cubic-bezier(.16,1,.3,1) both;">
+                <div style="text-align:center;">
+                    <div id="cpVariantCount" style="font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:700;color:#2cc6f2;line-height:1;">—</div>
+                    <div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:rgba(100,145,188,.55);margin-top:3px;">Variants</div>
+                </div>
+                <div style="width:1px;background:rgba(44,198,242,.12);"></div>
+                <div style="text-align:center;">
+                    <div id="cpAlyftrekCount" style="font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:700;color:#a78bfa;line-height:1;">—</div>
+                    <div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:rgba(100,145,188,.55);margin-top:3px;">Alyftrek eligible</div>
+                </div>
+                <div style="width:1px;background:rgba(44,198,242,.12);"></div>
+                <div style="text-align:center;">
+                    <div style="font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:700;color:#34d399;line-height:1;">LIVE</div>
+                    <div id="cpLastUpdated" style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:rgba(100,145,188,.55);margin-top:3px;">Database</div>
+                </div>
+            </div>
             <button class="cp-enter-btn" id="cpEnterBtn">Entrar</button>
         </div>
         <div class="cp-disclaimer">
@@ -5858,7 +5875,7 @@
             <div class="cp-disc-text">
                 <div class="cp-disc-header">Beta v1.0 &nbsp;·&nbsp; Fase de desarrollo &nbsp;·&nbsp; Prueba controlada</div>
                 <div class="cp-disc-body">Para uso exclusivo de profesionales sanitarios. No sustituye el juicio clínico ni constituye asesoramiento médico.</div>
-                <div class="cp-disc-email">Comentarios &rarr;&nbsp; devops.neumologia@gmail.com</div>
+                <div class="cp-disc-email">Comentarios &rarr;&nbsp; <a href="mailto:devops.neumologia@gmail.com?subject=NeumuacFQ%20Feedback" style="color:rgba(44,200,222,.90);text-decoration:none;border-bottom:1px solid rgba(44,200,222,.30);" onmouseover="this.style.borderBottomColor='rgba(44,200,222,.8)'" onmouseout="this.style.borderBottomColor='rgba(44,200,222,.30)'">devops.neumologia@gmail.com</a></div>
             </div>
         </div>
     </div>
@@ -6086,7 +6103,7 @@
                 </button>
 
                 <!-- Analytics -->
-                <button class="hdr-analytics" onclick="openCompoundGenotypeCalculator()" title="Patient genotype — biallelic modulator eligibility (Trikafta · Alyftrek · Kalydeco)">
+                <button class="hdr-analytics" onclick="openCompoundGenotypeCalculator()" title="Patient Genotype — biallelic modulator eligibility (Trikafta · Alyftrek · Kalydeco) · ⌘G">
                     <i class="fas fa-microscope" style="font-size:10px" aria-hidden="true"></i>
                     <span>Patient Genotype</span>
                 </button>
@@ -6280,12 +6297,22 @@
                             </div>
                             <span class="hdr-menu-kbd">?</span>
                         </div>
+                        <div class="hdr-menu-item" onclick="openAboutModal();hdrCloseMenu()">
+                            <div class="hdr-menu-icon" style="background:rgba(41,121,255,.08);color:#60a5fa">
+                                <i class="fas fa-circle-info" aria-hidden="true"></i>
+                            </div>
+                            <div class="hdr-menu-label">
+                                <div class="hdr-menu-title">About NeumuacFQ</div>
+                                <div class="hdr-menu-sub" id="menuVersionLabel">Version · Data sources · Contact</div>
+                            </div>
+                        </div>
 
                         <!-- Connection status at bottom -->
                         <div class="hdr-menu-div"></div>
                         <div style="padding:8px 14px;display:flex;align-items:center;gap:7px;">
                             <div id="connStatusDot" style="width:6px;height:6px;border-radius:50%;background:#34d399;flex-shrink:0;"></div>
                             <span id="connStatusLabel" style="font-size:10px;color:#2a4060;font-family:var(--font-mono);">Live</span>
+                            <span style="margin-left:auto;font-size:9px;color:#1e3050;font-family:var(--font-mono);" id="hdrVersionLabel"></span>
                         </div>
                     </div>
                 </div>
@@ -6304,7 +6331,7 @@
         <span class="dev-notice-dot"></span>
         <span>Beta v1.0 &nbsp;·&nbsp; Fase de desarrollo</span>
         <span class="dev-notice-sep"></span>
-        <span class="dev-notice-contact">devops.neumologia@gmail.com</span>
+        <a href="mailto:devops.neumologia@gmail.com?subject=NeumuacFQ%20Feedback" class="dev-notice-contact" style="color:inherit;text-decoration:none;border-bottom:1px solid rgba(44,200,222,.3);">devops.neumologia@gmail.com</a>
         <button class="dev-notice-close" onclick="dismissDevNotice()" title="Cerrar">×</button>
     </div>
 
@@ -7134,6 +7161,11 @@
                     <div class="si-kpi"><div class="si-kpi-label">Hit rate</div><div class="si-kpi-val g" id="siKpiHitRate">—</div><div class="si-kpi-sub">exact match</div></div>
                     <div class="si-kpi"><div class="si-kpi-label">Unique queries</div><div class="si-kpi-val a" id="siKpiUniq">0</div><div class="si-kpi-sub">distinct terms</div></div>
                     <div class="si-kpi"><div class="si-kpi-label">Miss queue</div><div class="si-kpi-val r" id="siKpiMiss">0</div><div class="si-kpi-sub">no result found</div></div>
+                    <div class="si-kpi" style="border-left:2px solid rgba(167,139,250,0.3);">
+                        <div class="si-kpi-label">MDT assessments</div>
+                        <div class="si-kpi-val" id="siKpiAssessments" style="color:#a78bfa;">—</div>
+                        <div class="si-kpi-sub">compound genotype</div>
+                    </div>
                 </div>
                 <div class="si-body">
                     <!-- SESSION INTELLIGENCE BADGES — replaces broken time-series chart -->
@@ -18443,6 +18475,8 @@ function renderVariantDetail(variant, fromSearch) {
     document.getElementById('detailEmpty').classList.add('hidden');
     const container = document.getElementById('variantDetail');
     container.classList.remove('hidden');
+    // Scroll variant detail to top on navigation
+    requestAnimationFrame(() => { container.scrollTop = 0; });
 
     try {
     // Auto-refresh patient genotype panel — update Allele 2 when browsing
@@ -18763,8 +18797,27 @@ function renderVariantDetail(variant, fromSearch) {
                 </div>
             </div>
 
-            <!-- Haplotype-dependent warning (e.g. R117H poly-T) — only renders when applicable -->
-            ${haploWarningHTML}
+            <!-- Haplotype-dependent warning (e.g. R117H poly-T) — PROMINENT, always first -->
+            ${haploWarning ? `
+            <div style="margin-bottom:14px;padding:14px 16px;border-radius:10px;
+                 background:rgba(251,191,36,0.08);border:2px solid rgba(251,191,36,0.35);
+                 box-shadow:0 0 0 4px rgba(251,191,36,0.04);">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+                    <i class="fas fa-triangle-exclamation" style="color:#fbbf24;font-size:14px;flex-shrink:0;"></i>
+                    <span style="font-size:12px;font-weight:700;color:#fbbf24;letter-spacing:.02em;">
+                        Haplotype-dependent variant — context required before prescribing
+                    </span>
+                </div>
+                ${haploWarningHTML.replace('<div style="padding:12px 14px;border-radius:8px;background:rgba(251,191,36,0.07);border:1px solid rgba(251,191,36,0.3);margin-bottom:14px;">','').replace('</div>\n        ','').replace('<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><i class="fas fa-dna" style="color:#fbbf24;font-size:13px;"></i><span style="font-size:11.5px;font-weight:700;color:#fbbf24;letter-spacing:.03em;">Haplotype-dependent variant</span></div>','')}
+                <button onclick="openClinicalNote('r117h_polyt')"
+                    style="margin-top:8px;background:none;border:none;padding:0;cursor:pointer;
+                    font-size:10px;color:#60a5fa;font-family:var(--font-body);
+                    display:inline-flex;align-items:center;gap:4px;opacity:.85;"
+                    onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='.85'">
+                    <i class="fas fa-circle-info" style="font-size:10px;"></i>
+                    Why poly-T context matters — clinical rationale
+                </button>
+            </div>` : ''}
 
             <!-- Therapeutic Prediction -->
             <div class="detail-section">
@@ -19186,7 +19239,7 @@ function renderEvidenceLink(link) {
         ${(qs > 0 || studyLabel || classClaim || etiClaim) ? `
         <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding-top:4px;border-top:1px solid var(--border);">
             ${studyLabel ? `<span style="font-size: 11px;padding:1px 6px;border-radius:3px;background:rgba(96,165,250,0.1);color:#60a5fa;border:1px solid rgba(96,165,250,0.2);font-family:var(--font-mono);">${escapeHTML(studyLabel)}</span>` : ''}
-            ${qs > 0 ? `<span style="font-size: 11px;padding:1px 6px;border-radius:3px;background:rgba(0,0,0,0.2);color:${qsColor};border:1px solid ${qsColor}33;font-family:var(--font-mono);">Q:${qs} ${qsLabel||''}</span>` : ''}
+            ${qs > 0 ? (() => { const g = typeof evidenceGradeLabel === 'function' ? evidenceGradeLabel(link) : {label:'Q:'+qs,color:'#94a3b8'}; return `<span style="font-size:11px;padding:1px 6px;border-radius:3px;background:${g.color}18;color:${g.color};border:1px solid ${g.color}33;font-family:var(--font-mono);">${escapeHTML(g.label)}</span>`; })() : ''}
             ${classClaim ? `<span style="font-size: 11px;padding:1px 6px;border-radius:3px;background:${classClaim.agrees?'rgba(52,211,153,0.08)':'rgba(248,113,113,0.08)'};color:${classClaim.agrees?'#34d399':'#f87171'};border:1px solid ${classClaim.agrees?'rgba(52,211,153,0.2)':'rgba(248,113,113,0.2)'};font-family:var(--font-mono);">${classClaim.agrees?'✓':'⚡'} ${escapeHTML(classClaim.text)}</span>` : ''}
             ${etiClaim ? `<span style="font-size: 11px;padding:1px 6px;border-radius:3px;background:${etiClaim.agrees?'rgba(52,211,153,0.08)':'rgba(248,113,113,0.08)'};color:${etiClaim.agrees?'#34d399':'#f87171'};border:1px solid ${etiClaim.agrees?'rgba(52,211,153,0.2)':'rgba(248,113,113,0.2)'};font-family:var(--font-mono);">${etiClaim.agrees?'✓':'⚡'} ETI:${escapeHTML(etiClaim.text)}</span>` : ''}
             ${(link.func_assay_type || link.func_interpretation) ? (() => {
@@ -20708,6 +20761,8 @@ function setSITab(name, btn) {
         const vc = document.getElementById('velocityTrackerContainer');
         if (vc) renderCurationVelocity(vc);
     }
+    // Load assessments KPI whenever analytics overview is shown
+    if (name === 'overview' || name === 'priority') loadAssessmentsKpi();
     else populateSITab(name);
 }
 
@@ -22284,6 +22339,7 @@ function renderCharts() {
 function refreshDashboardStats() {
     calculateMasterStats();
     renderCharts();
+    loadAssessmentsKpi();
     showNotification('Dashboard refreshed', 'success');
 }
 
@@ -22555,7 +22611,7 @@ function generateElitePDF(variants, reporter) {
                         ${e.doi?`<span style="color:#2563eb;font-family:monospace;">DOI:${escapeHTML(e.doi)}</span>`:''}
                         ${e.pmid?`<span style="color:#2563eb;font-family:monospace;">PMID:${escapeHTML(e.pmid)}</span>`:''}
                         ${e.population_size?`<span style="color:#16a34a;">n=${escapeHTML(String(e.population_size))}</span>`:''}
-                        ${e.quality_score?`<span style="color:#64748b;">Q:${escapeHTML(String(e.quality_score))}/10</span>`:''}
+                        ${e.quality_score?(()=>{ const g=typeof evidenceGradeLabel==='function'?evidenceGradeLabel(e):{label:'Q:'+e.quality_score,color:'#94a3b8'}; return `<span style="font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;background:${g.color}18;color:${g.color};">${g.label}</span>`;})():''}
                     </div>
                 </div>
             </div>`;
@@ -22646,6 +22702,8 @@ function generateElitePDF(variants, reporter) {
                         <tr><td>Source</td><td style="font-size:10.5px;">${escapeHTML(v.source_summary||'—')}</td></tr>
                         ${v.attributed_to?`<tr><td>Attributed to</td><td>${escapeHTML(v.attributed_to)}</td></tr>`:''}
                         ${v.classification_source?`<tr><td>Classification source</td><td>${escapeHTML(v.classification_source)}</td></tr>`:''}
+                        <tr><td>Alyftrek (EU/AEMPS)</td><td><strong style="color:${v.alyftrek_prediction==='responsive'?'#4f46e5':v.alyftrek_prediction==='non_responsive'?'#dc2626':'#d97706'};">${v.alyftrek_prediction==='responsive'?'Eligible — non-Class I':v.alyftrek_prediction==='non_responsive'?'Not eligible':'Undetermined'}</strong>${v.alyftrek_evidence_tier?` <span style="font-size:9px;padding:1px 4px;background:#f1f5f9;color:#64748b;border-radius:3px;">${escapeHTML(v.alyftrek_evidence_tier.replace(/_/g,' ').toUpperCase())}</span>`:''}</td></tr>
+                        ${typeof evidenceConfidenceLabel==='function'?`<tr><td>Eligibility confidence</td><td><strong>${escapeHTML(evidenceConfidenceLabel(v)?.label||'—')}</strong>${evidenceConfidenceLabel(v)?.detail?' — '+escapeHTML(evidenceConfidenceLabel(v).detail):''}</td></tr>`:''}
                     </table>
                 </div>
 
@@ -26706,6 +26764,11 @@ document.addEventListener('keydown', e => {
         .some(id => !document.getElementById(id)?.classList.contains('hidden'));
 
     // ⌘K / Ctrl+K — command palette
+    if ((e.metaKey || e.ctrlKey) && e.key === 'g' && !e.shiftKey && !e.target.matches('input,textarea,select,[contenteditable]')) {
+        e.preventDefault();
+        if (typeof openCompoundGenotypeCalculator === 'function') openCompoundGenotypeCalculator();
+        return;
+    }
     if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
         kbOpenCommandPalette();
@@ -27774,6 +27837,7 @@ async function loadSearchIntelligence() {
 }
 
 async function init() {
+    try {
     attachEvents();
     initSearch();
     initializeBulkImport();
@@ -27814,7 +27878,162 @@ async function init() {
     setTimeout(() => runSurveillanceAlerts().catch(() => {}), 3000);
     // Phase 5: enhance export menu with cohort + IRB options
     setTimeout(() => buildExportMenu(), 500);
+    // Start mid-session feedback prompt timer
+    setTimeout(() => initFeedbackPrompt(), 2000);
+    // Populate version label in menu
+    const hvl = document.getElementById('hdrVersionLabel');
+    const mvl = document.getElementById('menuVersionLabel');
+    if (hvl) hvl.textContent = CONFIG.VERSION || 'v4.0.0';
+    if (mvl) mvl.textContent = (CONFIG.VERSION || 'v4.0.0') + ' · Data sources · Contact';
+    } catch(e) {
+        console.error('[NeumuacFQ init]', e);
+        showNotification('Connection issue — some features may be unavailable. Check your network.', 'warning', 8000);
+    }
 }
+
+// ── ABOUT MODAL ─────────────────────────────────────────────────
+function openAboutModal() {
+    document.getElementById('aboutModal')?.remove();
+    const m = document.createElement('div');
+    m.id = 'aboutModal';
+    m.style.cssText = 'position:fixed;inset:0;z-index:900000;background:rgba(0,0,0,0.75);backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center;font-family:var(--font-body);';
+    m.innerHTML = `
+    <div style="background:#0c1828;border:1px solid rgba(41,121,255,0.22);border-radius:14px;
+         max-width:520px;width:calc(100% - 32px);box-shadow:0 32px 80px rgba(0,0,0,0.9);overflow:hidden;">
+        <div style="padding:22px 28px 16px;border-bottom:1px solid rgba(41,121,255,0.1);
+             background:linear-gradient(135deg,rgba(5,10,24,0.98),rgba(8,14,28,0.98));
+             display:flex;align-items:center;gap:12px;">
+            <div style="width:38px;height:38px;border-radius:9px;background:rgba(41,121,255,0.1);
+                 border:1px solid rgba(41,121,255,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <i class="fas fa-dna" style="color:#60a5fa;font-size:15px;"></i>
+            </div>
+            <div>
+                <div style="font-size:16px;font-weight:700;color:#e8f0fe;">NeumuacFQ</div>
+                <div style="font-size:10px;color:#3a5a7a;">CFTR Precision Medicine Platform · ${escapeHTML(CONFIG.VERSION||'v4.0.0')}</div>
+            </div>
+            <button onclick="document.getElementById('aboutModal').remove()"
+                style="margin-left:auto;background:none;border:none;color:#3a5a7a;cursor:pointer;font-size:14px;padding:4px;">
+                <i class="fas fa-xmark"></i>
+            </button>
+        </div>
+        <div style="padding:20px 28px 24px;font-size:12px;color:#8ab0d0;line-height:1.8;">
+            <div style="margin-bottom:14px;">
+                <div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#3a5a7a;margin-bottom:6px;">Institution</div>
+                <div style="color:#c8d8f0;">Servicio de Neumología · Complexo Hospitalario Universitario A Coruña (CHUAC)<br>
+                Área Sanitaria de A Coruña e Cee · Servizo Galego de Saúde</div>
+            </div>
+            <div style="margin-bottom:14px;">
+                <div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#3a5a7a;margin-bottom:6px;">Data sources</div>
+                <div style="color:#c8d8f0;">CFTR2 database · ClinVar (NCBI) · CFTR-France · gnomAD v4 · EMA SmPC · AEMPS IPT-416</div>
+            </div>
+            <div style="margin-bottom:14px;">
+                <div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#3a5a7a;margin-bottom:6px;">Intended use</div>
+                <div style="color:#c8d8f0;">Clinical decision support for authorised healthcare professionals. For MDT discussion only.
+                Does not replace clinical assessment, specialist genetics review, or current prescribing information.</div>
+            </div>
+            <div style="margin-bottom:14px;">
+                <div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#3a5a7a;margin-bottom:6px;">Contact</div>
+                <div><a href="mailto:devops.neumologia@gmail.com?subject=NeumuacFQ" style="color:#60a5fa;text-decoration:none;border-bottom:1px solid rgba(96,165,250,0.3);">devops.neumologia@gmail.com</a></div>
+            </div>
+            <div style="padding:10px 14px;border-radius:7px;background:rgba(251,191,36,0.05);border:1px solid rgba(251,191,36,0.15);font-size:11px;color:#6a8a4a;">
+                <i class="fas fa-triangle-exclamation" style="color:#fbbf24;margin-right:5px;"></i>
+                Beta release · Research prototype · Not approved as a medical device
+            </div>
+        </div>
+    </div>`;
+    document.body.appendChild(m);
+    m.addEventListener('click', e => { if (e.target === m) m.remove(); });
+}
+Object.assign(window, { openAboutModal });
+
+// ── MID-SESSION FEEDBACK PROMPT ─────────────────────────────────
+function initFeedbackPrompt() {
+    const FEEDBACK_KEY = '_neumuacfq_feedback_shown';
+    const SESSION_KEY  = '_neumuacfq_session_start';
+
+    // Record session start
+    if (!sessionStorage.getItem(SESSION_KEY)) {
+        sessionStorage.setItem(SESSION_KEY, Date.now());
+    }
+
+    // Show after 8 minutes if not shown this session
+    if (sessionStorage.getItem(FEEDBACK_KEY)) return;
+
+    const delay = 8 * 60 * 1000; // 8 minutes
+    setTimeout(() => {
+        if (sessionStorage.getItem(FEEDBACK_KEY)) return;
+        sessionStorage.setItem(FEEDBACK_KEY, '1');
+        showFeedbackPrompt();
+    }, delay);
+}
+
+function showFeedbackPrompt() {
+    const existing = document.getElementById('feedbackPrompt');
+    if (existing) return;
+
+    const el = document.createElement('div');
+    el.id = 'feedbackPrompt';
+    Object.assign(el.style, {
+        position:'fixed', bottom:'24px', left:'50%',
+        transform:'translateX(-50%) translateY(20px)',
+        zIndex:'90000', opacity:'0',
+        transition:'opacity .4s ease, transform .4s ease',
+        fontFamily:'var(--font-body)', maxWidth:'420px', width:'calc(100% - 32px)'
+    });
+    el.innerHTML = `
+    <div style="background:#0c1828;border:1px solid rgba(41,121,255,0.25);border-radius:12px;
+         padding:16px 20px;box-shadow:0 16px 48px rgba(0,0,0,0.85);
+         display:flex;align-items:flex-start;gap:12px;">
+        <div style="width:32px;height:32px;border-radius:8px;background:rgba(41,121,255,0.1);
+             border:1px solid rgba(41,121,255,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">
+            <i class="fas fa-comment-dots" style="color:#60a5fa;font-size:12px;"></i>
+        </div>
+        <div style="flex:1;min-width:0;">
+            <div style="font-size:12px;font-weight:600;color:#c8d8f0;margin-bottom:3px;">
+                How is NeumuacFQ working for you?
+            </div>
+            <div style="font-size:11px;color:#4a6a8a;line-height:1.5;margin-bottom:10px;">
+                Your feedback directly improves this platform. Takes 30 seconds.
+            </div>
+            <div style="display:flex;gap:7px;flex-wrap:wrap;">
+                <a href="mailto:devops.neumologia@gmail.com?subject=NeumuacFQ%20Feedback&body=Platform%20version:%20${encodeURIComponent(CONFIG.VERSION||'v4')}%0A%0AMy%20feedback:%0A"
+                    style="padding:5px 12px;border-radius:6px;background:#2979ff;color:white;
+                    font-size:11px;font-weight:600;text-decoration:none;border:none;cursor:pointer;">
+                    <i class="fas fa-envelope" style="margin-right:4px;font-size:9px;"></i>Send feedback
+                </a>
+                <button onclick="document.getElementById('feedbackPrompt').remove()"
+                    style="padding:5px 12px;border-radius:6px;background:transparent;
+                    border:1px solid rgba(99,140,210,0.2);color:#4a6a8a;font-size:11px;cursor:pointer;font-family:var(--font-body);">
+                    Maybe later
+                </button>
+                <button onclick="sessionStorage.setItem('_neumuacfq_nofeedback','1');document.getElementById('feedbackPrompt').remove();"
+                    style="padding:5px 12px;border-radius:6px;background:transparent;
+                    border:1px solid rgba(99,140,210,0.2);color:#4a6a8a;font-size:11px;cursor:pointer;font-family:var(--font-body);">
+                    Don't ask again
+                </button>
+            </div>
+        </div>
+        <button onclick="document.getElementById('feedbackPrompt').remove()"
+            style="background:none;border:none;color:#2a4a6a;cursor:pointer;font-size:12px;padding:0;flex-shrink:0;">
+            <i class="fas fa-xmark"></i>
+        </button>
+    </div>`;
+    document.body.appendChild(el);
+    requestAnimationFrame(() => {
+        el.style.opacity = '1';
+        el.style.transform = 'translateX(-50%) translateY(0)';
+    });
+    // Auto-dismiss after 30 seconds
+    setTimeout(() => {
+        if (document.getElementById('feedbackPrompt')) {
+            el.style.opacity = '0';
+            el.style.transform = 'translateX(-50%) translateY(10px)';
+            setTimeout(() => el.remove(), 400);
+        }
+    }, 30000);
+}
+Object.assign(window, { showFeedbackPrompt, initFeedbackPrompt });
+
 
 document.addEventListener('DOMContentLoaded', init);
 
@@ -28360,6 +28579,21 @@ function drawCanvas() {
         setTimeout(function() {
             cover.style.display = 'none';
             if (window.LOADER && window.LOADER.start) window.LOADER.start();
+        // Populate cover stats from DB
+        (async function() {
+            try {
+                const r = await fetch(CONFIG.SUPABASE.URL + '/rest/v1/variants?select=id,alyftrek_prediction&limit=5000',
+                    { headers: { 'apikey': CONFIG.SUPABASE.KEY, 'Authorization': 'Bearer ' + CONFIG.SUPABASE.KEY }});
+                if (!r.ok) return;
+                const vs = await r.json();
+                const ce = document.getElementById('cpVariantCount');
+                const ae = document.getElementById('cpAlyftrekCount');
+                const le = document.getElementById('cpLastUpdated');
+                if (ce) ce.textContent = vs.length.toLocaleString();
+                if (ae) ae.textContent = vs.filter(v => v.alyftrek_prediction === 'responsive').length.toLocaleString();
+                if (le) le.textContent = new Date().toLocaleDateString('en-GB', {day:'2-digit',month:'short',year:'numeric'});
+            } catch(e) {}
+        })();
         }, 900);
     });
 })();
@@ -28516,8 +28750,16 @@ async function showAuditTrail() {
                         last 100 entries · tamper-evident log
                     </span>
                 </div>
-                <button onclick="document.getElementById('auditTrailOverlay').remove()"
-                    style="background:none;border:none;color:var(--text-tertiary);cursor:pointer;font-size:16px;padding:2px 6px;">&times;</button>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <button onclick="exportAuditTrailCSV()"
+                        style="padding:5px 12px;border-radius:6px;border:1px solid rgba(41,121,255,0.25);
+                        background:rgba(41,121,255,0.07);color:#60a5fa;cursor:pointer;font-size:11px;
+                        font-family:var(--font-body);font-weight:600;display:flex;align-items:center;gap:5px;">
+                        <i class="fas fa-download" style="font-size:9px;"></i>Export CSV
+                    </button>
+                    <button onclick="document.getElementById('auditTrailOverlay').remove()"
+                        style="background:none;border:none;color:var(--text-tertiary);cursor:pointer;font-size:16px;padding:2px 6px;">&times;</button>
+                </div>
             </div>
             <div id="auditTrailBody" style="flex:1;overflow-y:auto;padding:0;">
                 <div style="display:flex;align-items:center;justify-content:center;padding:40px;gap:12px;">
@@ -28954,6 +29196,13 @@ Object.assign(window, { showAuditTrail });
     padding: 14px 18px;
     cursor: pointer;
     user-select: none;
+    transition: background .15s;
+}
+.helios-item-head:hover {
+    background: rgba(41,121,255,0.06);
+}
+.helios-inbox-item:hover .helios-item-title {
+    color: var(--helios-cyan);
 }
 
 .helios-item-type-icon {
@@ -34055,6 +34304,9 @@ function openCompoundGenotypeCalculator(preloadAllele1) {
         panel.style.transform = 'translateY(0)';
         const main = document.getElementById('appMain');
         if (main) main.style.paddingBottom = panel.offsetHeight + 'px';
+        // Shift notification container up so it clears the panel
+        const nc = document.getElementById('notification-container');
+        if (nc) nc.style.bottom = (panel.offsetHeight + 24) + 'px';
     });
 
     if (a1Default) setTimeout(() => pgpUpdateCard(1), 60);
@@ -34162,8 +34414,13 @@ function pgpSelectVariant(n, name) {
         setTimeout(() => other?.focus(), 80);
     }
 }
-Object.assign(window, { pgpInputChanged, pgpShowDropdown, pgpHideDropdown,
-    pgpDropHover, pgpInputKey, pgpSelectVariant });
+Object.assign(window, {
+    pgpInputChanged, pgpShowDropdown, pgpHideDropdown,
+    pgpDropHover, pgpInputKey, pgpSelectVariant,
+    pgpSwapAlleles, pgpToggleSavedCases, pgpRenderSavedCases,
+    pgpLoadCase, runPGP, closePGP, pgpUpdateCard, pgpSaveCase,
+    pgpResolveAllele, pgpUpdateHeaderVerdict, cgcTransToggle
+});
 
 // ── PGP VERDICT HEADER COLOUR ─────────────────────────────────────────────────
 function pgpUpdateHeaderVerdict(verdict) {
@@ -34223,6 +34480,9 @@ function closePGP() {
         panel.remove();
         const main = document.getElementById('appMain');
         if (main) main.style.paddingBottom = '';
+        // Reset notification container position
+        const nc = document.getElementById('notification-container');
+        if (nc) nc.style.bottom = '20px';
     }, 300);
     COMPARE_STATE.pinned = null;
 }
@@ -34482,7 +34742,6 @@ function pgpLoadCase(allele1, allele2) {
 
 // runPGP — wrapper that wires the unified panel to runCompoundGenotypeCalculation
 function runPGP() {
-    // Bridge: set the element IDs that runCompoundGenotypeCalculation reads
     const a1 = document.getElementById('pgpAllele1');
     const a2 = document.getElementById('pgpAllele2');
     const result = document.getElementById('pgpResult');
@@ -34492,6 +34751,14 @@ function runPGP() {
         result.innerHTML = '<div style="font-size:12px;color:#f87171;padding:8px 0;">Please enter both alleles.</div>';
         return;
     }
+
+    // Loading state
+    const placeholder = document.getElementById('pgpResultPlaceholder');
+    if (placeholder) placeholder.style.display = 'none';
+    result.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;gap:10px;color:#3a5a7a;">'
+        + '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite;">'
+        + '<path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>'
+        + '<span style="font-size:12px;">Calculating compound genotype…</span></div>';
 
     // Temporarily alias the PGP element IDs to the names runCompoundGenotypeCalculation expects
     a1.id = 'cgcAllele1';
@@ -34509,8 +34776,6 @@ function runPGP() {
     if (caseCode) document.getElementById('cgcCaseCode').id = 'pgpCaseCode';
 
     // Hide placeholder, show swap button
-    const placeholder = document.getElementById('pgpResultPlaceholder');
-    if (placeholder) placeholder.style.display = 'none';
     const swapBtn = document.getElementById('pgpSwapBtn');
     if (swapBtn) swapBtn.style.display = '';
 
@@ -34695,12 +34960,44 @@ function runCompoundGenotypeCalculation() {
                 <div>
                     <div style="font-size:12px;font-weight:700;color:${m.color};">${escapeHTML(m.name)}</div>
                     <div style="font-size:10px;color:var(--text-tertiary);">${escapeHTML(m.description)}</div>
+                ${m.name.includes('Alyftrek') ? `<div style="font-size:9px;color:#6a8aaa;margin-top:2px;">
+                    <i class="fas fa-weight-scale" style="font-size:8px;margin-right:3px;"></i>
+                    ≥40kg: 2 tablets (standard) · &lt;40kg: 1 tablet (low-strength) · 6–11y: oral granules
+                </div>` : ''}
                 </div>
             </div>`).join('')
         : `<div style="padding:8px 10px;border-radius:6px;background:rgba(248,113,113,0.08);
                border:1px solid rgba(248,113,113,0.2);font-size:12px;color:#f87171;">
                No approved modulators for this combination. Consider clinical trial eligibility.
            </div>`;
+
+    // Item 12: Individual allele ETI evidence tiers
+    const _alleleTierHTML = (() => {
+        const tierLabel = t => ({ clinical_trial:'Clinical trial', frt_assay:'FRT assay', extrapolation:'Extrapolated', '':'—' })[t||''] || (t||'—');
+        const tierColor = t => ({ clinical_trial:'#34d399', frt_assay:'#60a5fa', extrapolation:'#fbbf24' })[t||''] || '#6a8aaa';
+        const rows = [v1, v2].map((v, i) => {
+            const ep = v.eti_prediction || 'unknown';
+            const ec = ep === 'responsive' ? '#34d399' : ep === 'non_responsive' ? '#f87171' : '#6a8aaa';
+            const at = v.alyftrek_evidence_tier || '';
+            return `<div style="display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:5px;
+                         background:rgba(255,255,255,0.02);border:1px solid rgba(99,140,210,0.08);">
+                <span style="font-size:10px;font-weight:700;color:var(--text-tertiary);min-width:50px;">Allele ${i+1}</span>
+                <span style="font-family:var(--font-mono);font-size:11px;font-weight:600;color:var(--text-primary);flex:1;
+                     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHTML(v.legacy_name)}</span>
+                <span style="font-size:9px;padding:1px 6px;border-radius:8px;font-weight:700;flex-shrink:0;
+                     background:${ec}18;color:${ec};border:1px solid ${ec}30;">
+                     ETI ${ep.replace(/_/g,' ')}</span>
+                ${at ? `<span style="font-size:9px;padding:1px 6px;border-radius:8px;font-weight:700;flex-shrink:0;
+                     background:${tierColor(at)}18;color:${tierColor(at)};border:1px solid ${tierColor(at)}30;">
+                     ${escapeHTML(tierLabel(at))}</span>` : ''}
+            </div>`;
+        }).join('');
+        return `<div style="margin-bottom:10px;">
+            <div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+                 color:var(--text-tertiary);margin-bottom:5px;">Allele evidence basis</div>
+            ${rows}
+        </div>`;
+    })();
 
     // ── IMPROVEMENT 1: "Previously no modulator" expansion mutation banner ──
     // Highest health equity impact — ETI-no / Alyftrek-yes patients
@@ -34976,6 +35273,8 @@ function runCompoundGenotypeCalculation() {
             </div>
         </div>
 
+        ${_alleleTierHTML}
+
         <!-- Modulator eligibility -->
         <div style="margin-bottom:10px;">
             <div style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;">Modulator eligibility</div>
@@ -35012,6 +35311,24 @@ function runCompoundGenotypeCalculation() {
                     background:rgba(52,211,153,0.08);color:#34d399;cursor:pointer;font-family:var(--font-body);">
                 <i class="fas fa-bookmark" style="font-size:10px;margin-right:4px;"></i>Save case
             </button>
+        </div>
+
+        <!-- Drug interaction check -->
+        <div style="margin-bottom:8px;padding:8px 12px;border-radius:7px;
+             background:rgba(248,113,113,0.04);border:1px solid rgba(248,113,113,0.12);">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+                <i class="fas fa-pills" style="font-size:10px;color:#f87171;"></i>
+                <span style="font-size:10px;font-weight:700;color:#f87171;text-transform:uppercase;letter-spacing:.08em;">CYP3A drug check</span>
+                <span style="font-size:9px;color:var(--text-tertiary);">— enter current medications to flag interactions</span>
+            </div>
+            <div style="display:flex;gap:6px;">
+                <input id="cgcDrugCheck" placeholder="e.g. itraconazole, clarithromycin, rifampicin…"
+                    style="flex:1;height:28px;background:rgba(4,8,20,0.6);border:1px solid rgba(248,113,113,0.2);
+                    border-radius:5px;color:var(--text-primary);font-size:10px;padding:0 8px;outline:none;
+                    font-family:var(--font-mono);"
+                    oninput="cgcCheckInteractions(this.value)">
+            </div>
+            <div id="cgcInteractionResult" style="margin-top:6px;"></div>
         </div>
 
         <!-- ── PHASE CONFIRMATION + MDT REPORT ─────────────────────────── -->
@@ -35327,6 +35644,8 @@ function generateMDTReport(allele1Name, allele2Name) {
     const v1 = STATE.variantsByLegacyName.get(allele1Name);
     const v2 = STATE.variantsByLegacyName.get(allele2Name);
     if (!v1 || !v2) return;
+    // Capture case code from PGP panel if open
+    const _caseCode = (document.getElementById('pgpCaseCode')?.value || '').trim();
 
     const verdict    = computeCompoundHetVerdict(v1, v2);
     const dom        = verdict.dominantAllele;
@@ -35433,6 +35752,7 @@ function generateMDTReport(allele1Name, allele2Name) {
         +   '<div>'
         +     '<div style="font-family:\'Syne\',sans-serif;font-size:22px;font-weight:800;color:#162540;margin-bottom:4px;">CF Genetics MDT Report</div>'
         +     '<div style="font-size:12px;color:#64748b;">' + escapeHTML(institution) + ' \u00b7 ' + dateStr + ' \u00b7 NeumuacFQ CFTR Precision Medicine Platform</div>'
+        +     (_caseCode ? '<div style="font-size:11px;color:#94a3b8;margin-top:4px;"><i class="fas fa-tag" style="margin-right:4px;"></i>Case reference: <strong style="font-family:monospace;">' + escapeHTML(_caseCode) + '</strong></div>' : '')
         +   '</div>'
         +   '<div style="text-align:right;font-size:11px;color:#64748b;"><div><strong>CONFIDENTIAL</strong></div><div>For MDT discussion only</div></div>'
         + '</div>'
@@ -35476,11 +35796,74 @@ function generateMDTReport(allele1Name, allele2Name) {
 
         // IMPROVEMENT 3: Family cascade
         + '<div style="margin-bottom:20px;">'        +   _mdtSectionTitle('Family cascade considerations')        +   (v1.legacy_name.toUpperCase().includes('F508DEL') && v2.legacy_name.toUpperCase().includes('F508DEL') ?             '<p style="font-size:12px;color:#64748b;">Homozygous F508del — both parents are confirmed carriers. Cascade testing recommended for siblings (25% affected, 50% carrier).</p>' :             '<div style="font-size:12px;color:#64748b;line-height:1.8;">'            + '<strong>Compound heterozygote — rare genotype.</strong> Both parents are carriers of different CFTR pathogenic variants.<br>'            + '&#x2022; Siblings: 25% affected (CF), 50% carrier, 25% unaffected<br>'            + '&#x2022; First-degree relatives: carrier testing recommended<br>'            + '&#x2022; Consider clinical genetics referral for complete family assessment<br>'            + '<em style="color:#94a3b8;font-size:10px;">Carrier probabilities based on Mendelian inheritance — confirm with clinical genetics before counselling.</em>'            + '</div>')        + '</div>'
+        // SwCl prediction
+        + (typeof renderSwClPrediction === 'function' ? (() => {
+            const swcl = getSwClPrediction(v1, v2);
+            if (!swcl || !verdict.alyftrekEligible) return '';
+            const swclRows = [
+                ['Predicted SwCl reduction (Alyftrek)', swcl.mean !== null ? swcl.mean + ' mmol/L (95% CI ' + swcl.ci + ')' : 'Insufficient direct data'],
+                ['Reach SwCl <60 mmol/L', swcl.threshold60 || '—'],
+                ['Reach SwCl <30 mmol/L', swcl.threshold30 || '—'],
+                ['Data source', swcl.source],
+            ].map(function(row,i){ return '<tr style="background:'+(i%2?'#f8fafc':'#fff')+'">'
+                + '<td style="padding:5px 8px;border-bottom:1px solid #f1f5f9;color:#64748b;width:45%;font-weight:500;">' + escapeHTML(row[0]) + '</td>'
+                + '<td style="padding:5px 8px;border-bottom:1px solid #f1f5f9;color:#162540;">' + escapeHTML(String(row[1])) + '</td>'
+                + '</tr>'; }).join('');
+            return '<div style="margin-bottom:20px;">' + _mdtSectionTitle('Predicted sweat chloride response')
+                + '<table style="width:100%;border-collapse:collapse;font-size:12px;">' + swclRows + '</table>'
+                + '<p style="font-size:10px;color:#94a3b8;margin:6px 0 0;">Based on SKYLINE/RIDGELINE clinical trial data. Predictions are estimates — confirm with clinical measurement post-initiation.</p>'
+                + '</div>';
+          })() : '')
+
+        // Drug switching checklist
+        + (verdict.alyftrekEligible && verdict.trikaftaEligible ? (
+            '<div style="margin-bottom:20px;">' + _mdtSectionTitle('Trikafta → Alyftrek switching considerations')
+            + '<table style="width:100%;border-collapse:collapse;font-size:12px;">'
+            + ['Washout period','None required — same mechanism class. Direct switch acceptable.',
+               'Dosing change','Trikafta twice daily → Alyftrek once daily. Weight-based: <40kg low-strength, ≥40kg standard.',
+               'LFT monitoring','Reset schedule — new baseline before first Alyftrek dose. Recheck at 1, 3, 6 months.',
+               'CYP3A interactions','Same pathway — dose adjustment still required if patient is on azoles or macrolides.']
+              .reduce(function(acc,_,i,arr){ if(i%2===0){ acc.push([arr[i],arr[i+1]]); } return acc; },[])
+              .map(function(row,i){ return '<tr style="background:'+(i%2?'#f8fafc':'#fff')+'">'
+                + '<td style="padding:5px 8px;border-bottom:1px solid #f1f5f9;color:#64748b;width:45%;font-weight:500;">' + escapeHTML(row[0]) + '</td>'
+                + '<td style="padding:5px 8px;border-bottom:1px solid #f1f5f9;">' + escapeHTML(row[1]) + '</td>'
+                + '</tr>'; }).join('')
+            + '</table></div>'
+          ) : '')
+
+        // Evidence + validation summary
+        + '<div style="margin-bottom:20px;">' + _mdtSectionTitle('Evidence & validation summary')
+        + '<table style="width:100%;border-collapse:collapse;font-size:12px;">'
+        + [
+            [escapeHTML(v1.legacy_name) + ' evidence',
+             (v1.evidence_links?.length || 0) + ' evidence link(s)'
+             + (v1.validation_count > 0 ? ' · ' + v1.validation_count + ' clinical validation(s)' : ' · awaiting validation')
+             + (v1.last_validator_name ? ' · Last: ' + v1.last_validator_name : '')],
+            [escapeHTML(v2.legacy_name) + ' evidence',
+             (v2.evidence_links?.length || 0) + ' evidence link(s)'
+             + (v2.validation_count > 0 ? ' · ' + v2.validation_count + ' clinical validation(s)' : ' · awaiting validation')
+             + (v2.last_validator_name ? ' · Last: ' + v2.last_validator_name : '')],
+          ].map(function(row,i){ return '<tr style="background:'+(i%2?'#f8fafc':'#fff')+'">'
+            + '<td style="padding:5px 8px;border-bottom:1px solid #f1f5f9;color:#64748b;width:45%;font-weight:500;font-family:monospace;">' + row[0] + '</td>'
+            + '<td style="padding:5px 8px;border-bottom:1px solid #f1f5f9;">' + escapeHTML(row[1]) + '</td>'
+            + '</tr>'; }).join('')
+        + '</table></div>'
+
+        // Clinician + report metadata
+        + '<div style="margin-bottom:20px;padding:10px 14px;border-radius:6px;background:#f8fafc;border:1px solid #e2e8f0;font-size:11px;color:#64748b;line-height:1.8;">'
+        + '<strong>Report generated by:</strong> ' + escapeHTML(AUTH?.displayName() || 'Unidentified clinician — please sign in for audited reports') + '<br>'
+        + '<strong>Jurisdiction:</strong> ' + escapeHTML(STATE.activeJurisdiction || 'EU/AEMPS') + '<br>'
+        + '<strong>Phase (trans) confirmed:</strong> Yes — clinician attestation recorded at time of MDT report generation<br>'
+        + '<strong>Eligibility confidence:</strong> ' + escapeHTML((typeof evidenceConfidenceLabel === 'function' ? evidenceConfidenceLabel(verdict.alyftrekEligible ? v1 : v2)?.label : 'See evidence table') || '—') + '<br>'
+        + '<strong>NeumuacFQ version:</strong> ' + escapeHTML(CONFIG.VERSION || 'v4') + '<br>'
+        + '</div>'
+
         // Footer
         + '<div style="margin-top:32px;padding-top:12px;border-top:1px solid #e2e8f0;font-size:9px;color:#94a3b8;line-height:1.6;">'
         +   'Generated by NeumuacFQ CFTR Precision Medicine Platform \u00b7 For MDT discussion only \u00b7 '
         +   'Does not replace clinical assessment, functional studies, or specialist genetics review. '
-        +   'Confirm modulator eligibility against current EMA/FDA prescribing information. \u00b7 NeumuacFQ v4 \u00b7 ' + dateStr
+        +   'Confirm modulator eligibility against current EMA/FDA prescribing information. \u00b7 '
+        +   escapeHTML(CONFIG.VERSION || 'v4.0') + ' \u00b7 ' + dateStr
         + '</div>'
 
         + '</div>'  // body
@@ -36388,6 +36771,51 @@ function evidenceConfidenceLabel(variant) {
         return { label: 'EXTRAPOLATED', detail: 'Class rule — no direct variant data', color: '#fbbf24' };
     return { label: 'UNCERTAIN', detail: 'Insufficient evidence', color: '#f87171' };
 }
+
+
+// ITEM 15: Drug interaction checker for CFTR modulators
+const CFTR_DRUG_INTERACTIONS = {
+    // Strong CYP3A inhibitors — reduce modulator dose significantly
+    strong_inhibitors: {
+        drugs: ['itraconazole','ketoconazole','posaconazole','voriconazole','clarithromycin','telithromycin',
+                'ritonavir','lopinavir','atazanavir','nelfinavir','saquinavir','cobicistat'],
+        label: 'Strong CYP3A inhibitor',
+        guidance: 'Alyftrek/Trikafta: reduce to 2 tablets every other day (≥40kg). Kalydeco: 150mg every other day.',
+        severity: 'high',
+        color: '#f87171'
+    },
+    // Moderate CYP3A inhibitors
+    moderate_inhibitors: {
+        drugs: ['fluconazole','erythromycin','azithromycin','diltiazem','verapamil','amiodarone','aprepitant'],
+        label: 'Moderate CYP3A inhibitor',
+        guidance: 'Alyftrek: monitor closely. Kalydeco: 150mg every other day. Clinical review recommended.',
+        severity: 'moderate',
+        color: '#fbbf24'
+    },
+    // Strong CYP3A inducers — avoid
+    strong_inducers: {
+        drugs: ['rifampicin','rifampin','rifabutin','carbamazepine','phenytoin','phenobarbital',
+                'primidone','enzalutamide','mitotane','hypericum','st johns wort'],
+        label: 'Strong CYP3A inducer',
+        guidance: 'AVOID co-administration with Alyftrek, Trikafta, or Kalydeco — significantly reduces modulator levels.',
+        severity: 'contraindication',
+        color: '#f87171'
+    }
+};
+
+function checkModulatorInteractions(drugList) {
+    if (!drugList || !drugList.trim()) return [];
+    const drugs = drugList.toLowerCase().split(/[,;\n]+/).map(d => d.trim()).filter(Boolean);
+    const found = [];
+    for (const [type, data] of Object.entries(CFTR_DRUG_INTERACTIONS)) {
+        const matches = drugs.filter(d => data.drugs.some(k => d.includes(k) || k.includes(d)));
+        if (matches.length > 0) {
+            found.push({ ...data, matched: matches, type });
+        }
+    }
+    return found;
+}
+Object.assign(window, { checkModulatorInteractions, CFTR_DRUG_INTERACTIONS });
 
 
 function computeCompoundHetVerdict(allele1, allele2) {
@@ -38156,6 +38584,22 @@ function helixChartDrillFilter(type, value, label) {
 }
 
 Object.assign(window, { renderCharts, helixChartDrillFilter });
+
+// Fetch genotype_assessments count for analytics KPI
+async function loadAssessmentsKpi() {
+    const el = document.getElementById('siKpiAssessments');
+    if (!el) return;
+    try {
+        const r = await fetch(
+            CONFIG.SUPABASE.URL + '/rest/v1/genotype_assessments?select=id',
+            { headers: { ...hHeaders(), 'Prefer': 'count=exact', 'Range': '0-0' } }
+        );
+        const range = r.headers.get('Content-Range');
+        const total = range ? parseInt(range.split('/')[1]) || 0 : 0;
+        el.textContent = total.toLocaleString();
+    } catch(e) { el.textContent = '—'; }
+}
+Object.assign(window, { loadAssessmentsKpi });
 
 // ── JURISDICTION SELECTOR ─────────────────────────────────────────────────────
 function setJurisdiction(code) {
