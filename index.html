@@ -5860,12 +5860,17 @@
                 <div style="width:1px;background:rgba(44,198,242,.12);"></div>
                 <div style="text-align:center;">
                     <div id="cpAlyftrekCount" style="font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:700;color:#a78bfa;line-height:1;">—</div>
-                    <div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:rgba(100,145,188,.55);margin-top:3px;">Alyftrek eligible</div>
+                    <div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:rgba(100,145,188,.55);margin-top:3px;">Alyftrek variants</div>
                 </div>
                 <div style="width:1px;background:rgba(44,198,242,.12);"></div>
                 <div style="text-align:center;">
-                    <div style="font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:700;color:#34d399;line-height:1;">LIVE</div>
-                    <div id="cpLastUpdated" style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:rgba(100,145,188,.55);margin-top:3px;">Database</div>
+                    <div id="cpEtiCount" style="font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:700;color:#34d399;line-height:1;">—</div>
+                    <div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:rgba(100,145,188,.55);margin-top:3px;">ETI responsive</div>
+                </div>
+                <div style="width:1px;background:rgba(44,198,242,.12);"></div>
+                <div style="text-align:center;">
+                    <div id="cpLiveBadge" style="font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:700;color:#3a5a7a;line-height:1;">···</div>
+                    <div id="cpLastUpdated" style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:rgba(100,145,188,.55);margin-top:3px;">Conectando…</div>
                 </div>
             </div>
             <button class="cp-enter-btn" id="cpEnterBtn">Entrar</button>
@@ -5875,7 +5880,7 @@
             <div class="cp-disc-text">
                 <div class="cp-disc-header">Beta v1.0 &nbsp;·&nbsp; Fase de desarrollo &nbsp;·&nbsp; Prueba controlada</div>
                 <div class="cp-disc-body">Para uso exclusivo de profesionales sanitarios. No sustituye el juicio clínico ni constituye asesoramiento médico.</div>
-                <div class="cp-disc-email">Comentarios &rarr;&nbsp; <a href="mailto:devops.neumologia@gmail.com?subject=NeumuacFQ%20Feedback" style="color:rgba(44,200,222,.90);text-decoration:none;border-bottom:1px solid rgba(44,200,222,.30);" onmouseover="this.style.borderBottomColor='rgba(44,200,222,.8)'" onmouseout="this.style.borderBottomColor='rgba(44,200,222,.30)'">devops.neumologia@gmail.com</a></div>
+                <div class="cp-disc-email">Feedback → <a href="mailto:devops.neumologia@gmail.com?subject=NeumuacFQ%20Feedback" style="color:rgba(44,200,222,.90);text-decoration:none;border-bottom:1px solid rgba(44,200,222,.30);" onmouseover="this.style.borderBottomColor='rgba(44,200,222,.8)'" onmouseout="this.style.borderBottomColor='rgba(44,200,222,.30)'">devops.neumologia@gmail.com</a></div>
             </div>
         </div>
     </div>
@@ -7167,6 +7172,20 @@
                         <div class="si-kpi-sub">compound genotype</div>
                     </div>
                 </div>
+                <!-- Weekly trending placeholder -->
+                <div id="siWeeklyTrends" style="margin:10px 0 4px;padding:10px 14px;border-radius:8px;background:rgba(255,255,255,0.02);border:1px solid rgba(41,121,255,0.07);">
+                    <div style="font-size:9px;color:#1e3050;text-transform:uppercase;letter-spacing:.1em;">Loading weekly trends…</div>
+                </div>
+                <!-- DB Completeness -->
+                <div style="margin-top:10px;padding:10px 14px;border-radius:8px;background:rgba(255,255,255,0.02);border:1px solid rgba(41,121,255,0.07);">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                        <div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#2a4a6a;">Database completeness</div>
+                        <div style="font-size:9px;color:#2a4a6a;" id="siDbTotal">—</div>
+                    </div>
+                    <div id="siDbCompleteness">
+                        <div style="font-size:9px;color:#1e3050;">Loading…</div>
+                    </div>
+                </div>
                 <div class="si-body">
                     <!-- SESSION INTELLIGENCE BADGES — replaces broken time-series chart -->
                     <div id="siIntelBadges" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px;">
@@ -7460,7 +7479,7 @@
             <div id="siPanelEquity" class="si-panel" style="display:none;">
                 <div style="padding:16px 20px 8px;">
                     <div style="font-size:12px;font-weight:600;color:var(--text-primary);margin-bottom:4px;">Treatment access equity</div>
-                    <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:12px;">Population-level modulator eligibility across 2,234 CFTR variants</div>
+                    <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:12px;">Population-level modulator eligibility across ${(STATE.variants||[]).length.toLocaleString()} CFTR variants</div>
                     <div id="equityDashboardContainer"></div>
                 </div>
             </div>
@@ -7932,6 +7951,31 @@ const AUTH = {
 // Initialise auth on DOM ready — before the cover page fires
 document.addEventListener('DOMContentLoaded', () => AUTH.init());
 Object.assign(window, { AUTH });
+
+// Load cover page live stats immediately on page load (not waiting for Enter click)
+document.addEventListener('DOMContentLoaded', () => {
+    (async function loadCoverStats() {
+        try {
+            const r = await fetch(
+                CONFIG.SUPABASE.URL + '/rest/v1/variants?select=id,alyftrek_prediction&limit=5000',
+                { headers: { 'apikey': CONFIG.SUPABASE.KEY, 'Authorization': 'Bearer ' + CONFIG.SUPABASE.KEY } }
+            );
+            if (!r.ok) return;
+            const vs = await r.json();
+            const ce = document.getElementById('cpVariantCount');
+            const ae = document.getElementById('cpAlyftrekCount');
+            const le = document.getElementById('cpLastUpdated');
+            if (ce) ce.textContent = vs.length.toLocaleString();
+            if (ae) ae.textContent = vs.filter(v => v.alyftrek_prediction === 'responsive').length.toLocaleString();
+            if (le) le.textContent = new Date().toLocaleDateString('en-GB', {day:'2-digit',month:'short',year:'numeric'});
+            const eeEl = document.getElementById('cpEtiCount');
+            if (eeEl) eeEl.textContent = vs.filter(v => v.eti_prediction === 'responsive').length.toLocaleString();
+            // Confirm DB is live
+            const liveBadge = document.getElementById('cpLiveBadge');
+            if (liveBadge) { liveBadge.textContent = 'LIVE'; liveBadge.style.color = '#34d399'; }
+        } catch(e) {}
+    })();
+});
 // Expose improvement functions globally — deferred to ensure block 2 is loaded
 document.addEventListener('DOMContentLoaded', () => {
     Object.assign(window, {
@@ -8922,12 +8966,33 @@ async function triggerRoboticSearchOnMiss(query, missId) {
     if (ROBOTIC_SCAN_QUEUE.has(query)) return; // already scanning
     ROBOTIC_SCAN_QUEUE.add(query);
 
-    console.log(`[NeumuacFQ Robotic] Checking CORS availability before scanning "${query}"…`);
+    // Use Supabase Edge Function — no CORS restrictions, server-side PubMed + ClinVar
+    try {
+        const efUrl = `${CONFIG.SUPABASE.URL}/functions/v1/scan-miss-queue`;
+        const res = await fetch(efUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'apikey': CONFIG.SUPABASE.KEY },
+            body: JSON.stringify({ action: 'scan', query, miss_id: missId || null })
+        });
+        if (res.ok) {
+            const data = await res.json();
+            const pmCount = data.sources?.pubmed?.count || 0;
+            const cvCount = data.sources?.clinvar?.count || 0;
+            console.log(`[NeumuacFQ EF] Scan "${query}": PubMed=${pmCount}, ClinVar=${cvCount}`);
+            if (pmCount > 0 || cvCount > 0) {
+                showNotification(`Helios: evidence found for "${query}" — added to review queue`, 'info', 4000);
+            }
+            ROBOTIC_SCAN_QUEUE.delete(query);
+            return;
+        }
+    } catch(e) {
+        console.warn('[NeumuacFQ EF] Edge function unavailable, falling back:', e.message);
+    }
 
-    // Probe CORS first — eutils blocks browser-side requests in most environments
+    // Fallback: CORS probe for direct browser-side scan
     const corsOk = await _probeCorsForEutils();
     if (!corsOk) {
-        console.warn(`[NeumuacFQ Robotic] CORS blocked for eutils.ncbi.nlm.nih.gov — skipping browser-side scan for "${query}". Miss stays pending for server-side processing.`);
+        console.warn(`[NeumuacFQ Robotic] CORS blocked — miss "${query}" stays pending for server-side processing.`);
         // Record that we attempted but were blocked — honest audit trail
         fetch(`${CONFIG.SUPABASE.URL}/rest/v1/search_miss_queue?query=eq.${encodeURIComponent(query)}`, {
             method: 'PATCH',
@@ -9457,8 +9522,17 @@ const ETI_AUTHORITY = Object.freeze({
         'L206W',  'S945L',   'S977F',  'F1052V',
         'K1060T', 'A1067T',  'G1069R', 'R1070Q',
         'R1070W', 'F1074L',  'D579G',  'S1235R',
-        // Splice/intronic approved
-        '711+3A→G', '2789+5G→A', '3272-26A→G', '3849+10kbC→T',
+        // Splice/intronic approved (both notations)
+        '711+3A>G',   '711+3A→G',   '711+3A->G',
+        '2789+5G>A',  '2789+5G→A',
+        '3272-26A>G', '3272-26A→G',
+        '3849+10kbC>T', '3849+10kbC→T',
+        // EU Kaftrio / Alyftrek expansion variants (confirmed RIDGELINE trials)
+        '3120+1G>A', '3120+1G->A', '3120+1G→A',
+        '1898+3A>G', '1898+3A->G', '1898+3A→G',
+        // N1303K — EMA/EU Kaftrio label 2022 update: eligible compound with F508del
+        // Source: EMA CHMP assessment 2022; NOT on original FDA label
+        'N1303K', 'p.Asn1303Lys',
         // R74W + complex alleles
         'R74W', 'D614G', 'R668C', 'S13F', 'I807M', 'I148T',
     ]),
@@ -9472,9 +9546,8 @@ const ETI_AUTHORITY = Object.freeze({
         'R553X',  'p.Arg553Ter',
         'R1162X', 'p.Arg1162Ter',
         'Y1092X', 'p.Tyr1092Ter',
-        '621+1G→T',
-        '1717-1G→A',
-        'N1303K', 'p.Asn1303Lys',  // severe Class II, but Trikafta label excludes it
+        '621+1G>T', '621+1G→T',
+        '1717-1G>A', '1717-1G→A',
         'CFTRdele2,3',              // large deletion
     ]),
 
@@ -10784,9 +10857,26 @@ async function loadVariants() {
             window.LOADER?.setVariantCount(allVariants.length);
         }
 
-        STATE.variants = allVariants;
+        STATE.variants = allVariants.map(v => {
+    // Normalise SKYLINE→RIDGELINE in alyftrek_evidence_level field (DB data quality fix)
+    if (v.alyftrek_evidence_level) {
+        v.alyftrek_evidence_level = v.alyftrek_evidence_level
+            .replace(/SKYLINE\s*102/gi, 'RIDGELINE 102')
+            .replace(/SKYLINE\s*103/gi, 'RIDGELINE 103')
+            .replace(/SKYLINE\s*105/gi, 'RIDGELINE 105')
+            .replace(/SKYLINE/gi, 'RIDGELINE');
+    }
+    return v;
+});
         STATE.variantsById = new Map(STATE.variants.map(v => [v.id, v]));
-        STATE.variantsByLegacyName = new Map(STATE.variants.map(v => [v.legacy_name, v]));
+        // variantsByLegacyName — if duplicates, keep the one with higher clinical_relevance_score
+STATE.variantsByLegacyName = new Map();
+STATE.variants.forEach(v => {
+    const existing = STATE.variantsByLegacyName.get(v.legacy_name);
+    if (!existing || (v.clinical_relevance_score||0) > (existing.clinical_relevance_score||0)) {
+        STATE.variantsByLegacyName.set(v.legacy_name, v);
+    }
+});
 
         window.LOADER?.advance('index');
         buildSearchIndex();
@@ -10809,7 +10899,18 @@ async function loadVariants() {
         applyFilterChain();
 
         // Load cross-session search history from Supabase — non-blocking
-        setTimeout(() => loadCrossSessionHistory().catch(() => {}), 2000);
+        setTimeout(async () => {
+    try {
+        await loadCrossSessionHistory();
+        // After DB history loads, re-render the home dashboard's recent section
+        if (typeof renderHomeDashboard === 'function') {
+            const recEl = document.getElementById('recentSearches');
+            if (recEl && STATE.searchHistory && STATE.searchHistory.length > 0) {
+                renderHomeDashboard(); // re-render with fresh history
+            }
+        }
+    } catch(e) {}
+}, 2000);
 
         // Load drug safety alerts + jurisdiction rules — non-blocking, used by CGC + single-variant detail
         setTimeout(() => loadDrugReferenceData().catch(() => {}), 1500);
@@ -10901,7 +11002,14 @@ async function loadVariants() {
             if (cached.variants && cached.variants.length > 0) {
                 STATE.variants        = cached.variants;
                 STATE.variantsById    = new Map(STATE.variants.map(v => [v.id, v]));
-                STATE.variantsByLegacyName = new Map(STATE.variants.map(v => [v.legacy_name, v]));
+                // variantsByLegacyName — if duplicates, keep the one with higher clinical_relevance_score
+STATE.variantsByLegacyName = new Map();
+STATE.variants.forEach(v => {
+    const existing = STATE.variantsByLegacyName.get(v.legacy_name);
+    if (!existing || (v.clinical_relevance_score||0) > (existing.clinical_relevance_score||0)) {
+        STATE.variantsByLegacyName.set(v.legacy_name, v);
+    }
+});
                 buildSearchIndex();
                 calculateMasterStats();
                 STATE.view.filteredVariants = [...STATE.variants];
@@ -12312,7 +12420,16 @@ function searchVariants(query) {
     }
 
     const results = Array.from(scores.entries())
-        .sort((a, b) => a[1] - b[1])
+        .sort((a, b) => {
+            // Primary: match tier (lower is better)
+            if (a[1] !== b[1]) return a[1] - b[1];
+            // Tiebreak: clinical relevance score (higher is better)
+            const va = STATE.variantsById.get(a[0]);
+            const vb = STATE.variantsById.get(b[0]);
+            const ra = va?.clinical_relevance_score || 0;
+            const rb = vb?.clinical_relevance_score || 0;
+            return rb - ra;
+        })
         .map(([id]) => STATE.variantsById.get(id))
         .filter(Boolean);
 
@@ -12523,6 +12640,8 @@ function normaliseQueryWithSteps(q) {
     if (s !== before2) steps.push('δ→del');
 
     // 3. Strip HGVS prefixes (p. c. r. m. n.) — keep for field matching but strip for index lookup
+    // Also strip surrounding parentheses: (p.Gly551Asp) → p.Gly551Asp
+    s = s.replace(/^\(+/, '').replace(/\)+$/, '');
     s = s.replace(/^[pcrmn]\./i, '');
 
     // 4. IVS notation → c. equivalent key (IVS8+5G>T → ivs8+5g>t normalised as-is for index)
@@ -12538,7 +12657,9 @@ function normaliseQueryWithSteps(q) {
     else s = s.toLowerCase();
 
     // 6. Remove spaces and hyphens inside variant names
+    // Also normalise arrow notation: -> becomes > (clinicians sometimes type this)
     const before6 = s;
+    s = s.replace(/->\s*/g, '>');  // Arrow notation: 1002-53a->a → 1002-53a>a
     s = s.replace(/[-\s]+/g, '').replace(/>\s*/g, '>').replace(/\s*>/g, '>');
     if (s !== before6) steps.push('spacing normalised');
 
@@ -12609,6 +12730,17 @@ const NOMENCLATURE_ALIASES = {
     '621+1g>t': '621+1G→T', '621+1g-t': '621+1G→T', '711+1g>t': '711+1G→T',
     '1717-1g>a': '1717-1G→A', '2789+5g>a': '2789+5G→A',
     'g85e': 'G85E', 'r334w': 'R334W', 'r347p': 'R347P',
+    // Extended aliases from miss queue analysis
+    'deltaf508': 'F508del',
+    'df508': 'F508del',
+    'delta-f508': 'F508del',
+    'delta f508': 'F508del',
+    'cf508del': 'F508del',
+    'phe508del': 'F508del',
+    'gly551asp': 'G551D',
+    'g551asp': 'G551D',
+    '1002-53a>a': '1002-53+3A>A',
+    '621+1g>t': '621+1G>T',
 };
 
 function resolveNomenclatureAlias(query) {
@@ -14103,6 +14235,12 @@ async function persistSearchEvent(query, isHit, matchedField, matchedVariantId) 
         const normQuery = normaliseQuery(query);
         const loc = await fetchLocationOnce();
         const hospital = STATE.searchIntelligence.hospital || null;
+
+        // Track for search-to-prescription pathway
+        if (isHit && matchedVariantId) {
+            STATE.searchIntelligence.lastSearchedVariantId = matchedVariantId;
+            STATE.searchIntelligence.searchStartTime = Date.now();
+        }
 
         await fetch(`${CONFIG.SUPABASE.URL}/rest/v1/search_logs`, {
             method: 'POST',
@@ -16537,7 +16675,12 @@ function calculateMasterStats() {
         alyftrekResponsive:    v.filter(x => x.alyftrek_prediction === 'responsive').length,
         alyftrekNonResponsive: v.filter(x => x.alyftrek_prediction === 'non_responsive').length,
         alyftrekUnknown:       v.filter(x => x.alyftrek_prediction === 'unknown' || !x.alyftrek_prediction).length,
-        expansionMutations:    v.filter(x => x.eti_prediction === 'non_responsive' && x.alyftrek_prediction === 'responsive').length
+        expansionMutations:    v.filter(x => x.eti_prediction === 'non_responsive' && x.alyftrek_prediction === 'responsive').length,
+        // therapy_responsive contradiction: DB boolean disagrees with eti_prediction text
+        therapyResponsiveConflict: v.filter(x =>
+            (x.therapy_responsive === true  && x.eti_prediction === 'non_responsive') ||
+            (x.therapy_responsive === false && x.eti_prediction === 'responsive')
+        ).length
     };
 }
 
@@ -16611,6 +16754,14 @@ function updateFilterChips() {
     setText('dkExpansion', s.expansionMutations?.toLocaleString() ?? '—');
     setText('dkExceptional', s.exceptional.toLocaleString());
     setText('dkValidated', s.validated.toLocaleString());
+    // Show therapy_responsive conflict count if any
+    if (s.therapyResponsiveConflict > 0) {
+        const conflictEl = document.getElementById('dkConflict');
+        if (conflictEl) {
+            conflictEl.closest('.dash-kpi').style.display = '';
+            setText('dkConflict', s.therapyResponsiveConflict.toLocaleString());
+        }
+    }
     setText('dashboardExceptional', s.exceptional.toLocaleString());
     
     if (s.classI > 0) {
@@ -18025,7 +18176,7 @@ function renderVariantList() {
 const ACMG_CRITERIA = {
     pathogenic: {
         PVS1: { label:'PVS1', name:'Null variant in gene where LOF is disease mechanism', weight:8,
-                auto: v => v.cftr_class === 'I' && v.final_determination === 'CF-causing' },
+                auto: v => v.cftr_class === 'I' || v.final_determination === 'CF-causing', },
         PS1:  { label:'PS1', name:'Same amino acid change as established pathogenic variant', weight:4, auto: null },
         PS3:  { label:'PS3', name:'Well-established functional studies show damaging effect', weight:4,
                 // Reads structured functional assay data stored in evidence_links
@@ -18039,27 +18190,52 @@ const ACMG_CRITERIA = {
                 auto: v => { const af = parseFloat(v.population_frequency); return !isNaN(af) && af < 0.001 && af >= 0; },
                 note: 'Auto-triggered from gnomAD population frequency. Click Fetch gnomAD AF on the variant to populate.' },
         PM4:  { label:'PM4', name:'Protein length change due to in-frame indels', weight:2,
-                auto: v => !!(v.legacy_name||'').match(/del|ins|dup/i) && v.cftr_class !== 'I' },
+                auto: v => {
+                    // PM4: protein length change in novel in-frame indels
+                    // Exclude well-characterised variants (F508del, validated, or on label list)
+                    if (!v.legacy_name?.match(/del|ins|dup/i)) return false;
+                    if (v.cftr_class === 'I') return false; // Class I = frameshift/nonsense → PVS1 already covers
+                    const n = (v.legacy_name||'').toUpperCase();
+                    if (n === 'F508DEL') return false; // well-characterised — PM4 redundant
+                    if ((v.validation_count||0) > 2) return false; // validated variants have better evidence
+                    if (ETI_AUTHORITY?.fda_trikafta_approved?.has(v.legacy_name)) return false; // on label = well-known
+                    return true;
+                } },
         PM5:  { label:'PM5', name:'Novel missense change at pathogenic amino acid position', weight:2, auto: null },
         PP1:  { label:'PP1', name:'Co-segregation with disease in multiple family members', weight:1, auto: null },
         PP3:  { label:'PP3', name:'Multiple lines of computational evidence support damaging effect', weight:1,
                 auto: v => {
-                    const links  = v.evidence_links || [];
-                    const highQ  = links.filter(e => (e.quality_score||0) >= 7).length;
-                    const hasCF2 = links.some(e => /cftr2/i.test(e.source||e.type||''));
-                    const hasCLV = links.some(e => /clinvar/i.test(e.source||e.type||''));
-                    return highQ >= 2 || (hasCF2 && hasCLV);
+                    const links = v.evidence_links || [];
+                    const highQ = links.filter(e => (e.quality_score||0) >= 7 &&
+                        (e.func_interpretation === 'damaging' || e.eti_claim === 'responsive')).length;
+                    const hasCF2Pathogenic = links.some(e => /cftr2/i.test(e.source||e.type||'') &&
+                        (e.func_interpretation === 'damaging' || !e.func_interpretation));
+                    const hasCLVPathogenic = links.some(e => /clinvar/i.test(e.source||e.type||'') &&
+                        (e.func_interpretation === 'damaging' || !e.func_interpretation));
+                    // Both CFTR2 and ClinVar must be present, or 2+ high-quality damaging links
+                    return highQ >= 2 || (hasCF2Pathogenic && hasCLVPathogenic);
                 },
                 note: 'Auto-triggered when 2+ high-quality evidence links (score ≥7) exist, or both CFTR2 and ClinVar sources are present.' },
         PP5:  { label:'PP5', name:'Reputable source recently reported as pathogenic', weight:1,
-                auto: v => !!(v.source_summary && v.source_summary.includes('CFTR2')) },
+                auto: v => {
+                    // PP5: reputable source specifically classifies as pathogenic
+                    const hasCFTR2Pathogenic = !!(v.source_summary && v.source_summary.includes('CFTR2'))
+                        && v.final_determination === 'CF-causing';
+                    const hasClinVarPathogenic = /pathogenic/i.test(v.clinvar_significance || '');
+                    return hasCFTR2Pathogenic || hasClinVarPathogenic;
+                } },
     },
     benign: {
         BA1:  { label:'BA1', name:'Allele frequency >5% in population databases', weight:-8,
                 auto: v => { const af = parseFloat(v.population_frequency); return !isNaN(af) && af > 0.05; },
                 note: 'Auto-triggered from gnomAD population frequency (AF > 5%).' },
         BS1:  { label:'BS1', name:'Allele frequency greater than expected for disorder', weight:-4,
-                auto: v => { const af = parseFloat(v.population_frequency); return !isNaN(af) && af > 0.01; },
+                auto: v => {
+                    const af = parseFloat(v.population_frequency);
+                    if (isNaN(af)) return false;
+                    if (af > 0.05) return false; // BA1 takes precedence — BA1 is standalone per ACMG
+                    return af > 0.01;
+                },
                 note: 'Auto-triggered from gnomAD population frequency (AF > 1%).' },
         BS2:  { label:'BS2', name:'Observed in healthy adult', weight:-4, auto: null },
         BS3:  { label:'BS3', name:'Well-established functional studies show no damaging effect', weight:-4,
@@ -18067,7 +18243,15 @@ const ACMG_CRITERIA = {
                 note: 'Auto-triggered when an evidence link has functional interpretation: benign.' },
         BP1:  { label:'BP1', name:'Missense in gene where only LOF causes disease', weight:-1, auto: null },
         BP4:  { label:'BP4', name:'Multiple lines of computational evidence suggest no impact', weight:-1,
-                auto: v => v.eti_prediction === 'non_responsive' && !v.cftr_class },
+                auto: v => {
+                    // BP4: computational evidence of NO pathogenic impact → benign
+                    // Correct trigger: eti=responsive + low quality score + no class = possibly benign
+                    // WRONG trigger was: eti=non_responsive (that's pathogenic evidence, not benign!)
+                    const af = parseFloat(v.population_frequency);
+                    const hasHighAF = !isNaN(af) && af > 0.001;
+                    const noPathogenicLinks = !(v.evidence_links||[]).some(e => e.func_interpretation === 'damaging');
+                    return hasHighAF && noPathogenicLinks && !v.cftr_class;
+                } },
         BP7:  { label:'BP7', name:'Synonymous variant with no predicted splice impact', weight:-1, auto: null },
     }
 };
@@ -18087,15 +18271,29 @@ function computeACMGScore(variant) {
     const met = { pathogenic: [], benign: [] };
     let score = 0;
 
+    // Parse curator overrides — allow manual toggle of any criterion
+    let overrides = {};
+    try {
+        overrides = typeof variant.acmg_overrides === 'string'
+            ? JSON.parse(variant.acmg_overrides)
+            : (variant.acmg_overrides || {});
+    } catch { overrides = {}; }
+
+    const isMet = (key, crit) => {
+        if (overrides[key] === 'met')   return true;   // curator forced ON
+        if (overrides[key] === 'unmet') return false;  // curator forced OFF
+        return crit.auto ? crit.auto(variant) : false; // auto logic
+    };
+
     for (const [key, crit] of Object.entries(ACMG_CRITERIA.pathogenic)) {
-        if (crit.auto && crit.auto(variant)) {
-            met.pathogenic.push(key);
+        if (isMet(key, crit)) {
+            met.pathogenic.push(key + (overrides[key] ? '*' : ''));
             score += crit.weight;
         }
     }
     for (const [key, crit] of Object.entries(ACMG_CRITERIA.benign)) {
-        if (crit.auto && crit.auto(variant)) {
-            met.benign.push(key);
+        if (isMet(key, crit)) {
+            met.benign.push(key + (overrides[key] ? '*' : ''));
             score += crit.weight;
         }
     }
@@ -18344,7 +18542,21 @@ const MODULATOR_ELIGIBILITY = {
 };
 
 // Ivacaftor monotherapy variants (FDA/EMA approved gating mutations)
-const IVACAFTOR_VARIANTS = ['G551D','G1244E','G1349D','G178R','G551S','S1251N','S1255P','S549N','S549R','R117H','E56K','P67L','R74W','D110E','D110H','R117C','L206W','R347H','R352Q','A455E','S977F','F1052V','K1060T','A1067T','G1069R','R1070Q','R1070W','F1074L','D1152H','G1244E','S1251N','S1255P','D1270N'];
+// FDA-approved ivacaftor mutations (monotherapy) — EMA label same list
+// Source: FDA label Aug 2023 + EMA Kalydeco SmPC
+// Removed: D110E (not on label; D110H is), D1270N (not on label), duplicates
+const IVACAFTOR_VARIANTS = [
+    'G551D','G1244E','G1349D','G178R','G551S',
+    'S1251N','S1255P','S549N','S549R',
+    'R117H','p.Arg117His',
+    'E56K','P67L','R74W',
+    'D110H',           // D110H only — NOT D110E
+    'R117C','L206W',
+    'R347H','R352Q','A455E','S977F',
+    'F1052V','K1060T','A1067T','G1069R',
+    'R1070Q','R1070W','F1074L','D1152H',
+    'G970R', 'D579G',  // approved in EU label
+];
 
 function renderClinicalReferencePanel(variant) {
     const cls = variant.cftr_class;
@@ -18366,13 +18578,21 @@ function renderClinicalReferencePanel(variant) {
     // NBS panel membership
     const name = (variant.legacy_name || '').toUpperCase();
     const nbsHits = Object.entries(NBS_PANELS).filter(([panel, variants]) =>
-        variants.some(v => v.toUpperCase() === name || name.includes(v.toUpperCase()))
+        variants.some(v => v.toUpperCase() === name)
     );
 
     // Ivacaftor specific eligibility
-    const isIvacaftorVariant = IVACAFTOR_VARIANTS.some(v =>
-        v.toUpperCase() === name || (variant.protein_name||'').toUpperCase().includes(v.toUpperCase())
-    );
+    const isIvacaftorVariant = IVACAFTOR_VARIANTS.some(v => {
+        const vu = v.toUpperCase();
+        // Check legacy name exact
+        if (vu === name) return true;
+        // Check protein name — look for the variant identifier in protein notation
+        const pname = (variant.protein_name||'').toUpperCase();
+        if (pname && vu === pname) return true;
+        // Check alt_names
+        const altNames = (variant.alt_names||'').split(/[,;|]+/).map(s => s.trim().toUpperCase());
+        return altNames.some(a => a === vu);
+    });
 
     // CFTR-RD likelihood
     const cftrRdClasses = ['IV','V'];
@@ -18611,7 +18831,18 @@ function renderVariantDetail(variant, fromSearch) {
     const etiSub = isResponsive ? 'Predicted to respond to elexacaftor/tezacaftor/ivacaftor' :
                    isNonResponsive ? 'Not predicted to respond to current modulators' :
                    'Insufficient data to predict ETI response';
+    // therapy_responsive conflict detection
+    const therapyConflict = 
+        (variant.therapy_responsive === true  && isNonResponsive) ||
+        (variant.therapy_responsive === false && isResponsive);
     const gapScore = calculateGapScore(variant);
+    const therapyConflictHTML = therapyConflict ? `
+        <div style="margin-bottom:10px;padding:8px 12px;border-radius:7px;
+             background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.25);
+             font-size:11px;color:#f87171;line-height:1.5;">
+            ⚠ Data conflict: <code>therapy_responsive=${variant.therapy_responsive}</code> contradicts
+            <code>eti_prediction='${variant.eti_prediction}'</code> — curator review needed
+        </div>` : '';
 
     // ── Haplotype-dependent variant warning (e.g. R117H poly-T context) ──
     const haploWarning = getHaplotypeDependentWarning(variant);
@@ -18797,6 +19028,9 @@ function renderVariantDetail(variant, fromSearch) {
                 </div>
             </div>
 
+            <!-- therapy_responsive conflict warning -->
+            ${therapyConflictHTML}
+
             <!-- Haplotype-dependent warning (e.g. R117H poly-T) — PROMINENT, always first -->
             ${haploWarning ? `
             <div style="margin-bottom:14px;padding:14px 16px;border-radius:10px;
@@ -18817,6 +19051,21 @@ function renderVariantDetail(variant, fromSearch) {
                     <i class="fas fa-circle-info" style="font-size:10px;"></i>
                     Why poly-T context matters — clinical rationale
                 </button>
+            </div>` : ''}
+
+            <!-- DB clinical_alert banner — shows pre-computed alert from DB -->
+            ${(variant.clinical_alert && variant.clinical_alert.trim()) ? `
+            <div style="margin-bottom:10px;padding:8px 12px;border-radius:7px;
+                 background:rgba(41,121,255,0.05);border:1px solid rgba(41,121,255,0.15);
+                 font-size:11px;color:var(--text-secondary);line-height:1.5;">
+                ${escapeHTML(variant.clinical_alert)}
+                ${variant.class_confidence === 'NEEDS_REVIEW' ? `<span style="margin-left:8px;padding:1px 7px;border-radius:3px;background:rgba(251,191,36,0.15);color:#fbbf24;font-size:10px;font-weight:700;">⚠ NEEDS REVIEW</span>` : ''}
+            </div>` : ''}
+            ${variant.class_confidence === 'NEEDS_REVIEW' && !variant.clinical_alert ? `
+            <div style="margin-bottom:10px;padding:8px 12px;border-radius:7px;
+                 background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.25);
+                 font-size:11px;color:#fbbf24;">
+                ⚠ Classification flagged for review — treat with caution until confirmed
             </div>` : ''}
 
             <!-- Therapeutic Prediction -->
@@ -21146,6 +21395,26 @@ async function renderRegionalMissChart(canvasId) {
     } catch(e) {
         console.warn('[NeumuacFQ] Regional miss chart failed:', e.message);
     }
+
+    // ── Week-on-week trending ─────────────────────────────────
+    try {
+        const trends = STATE.searchIntelligence.weeklyTrends || [];
+        const trendContainer = document.getElementById('siWeeklyTrends');
+        if (trendContainer && trends.length > 0) {
+            const rows = trends.slice(0, 4).map(row => {
+                const week = row.week ? new Date(row.week).toLocaleDateString('en-GB', {day:'2-digit',month:'short'}) : '—';
+                const hitRate = row.hit_rate_pct != null ? row.hit_rate_pct + '%' : '—';
+                const color = row.hit_rate_pct >= 90 ? '#34d399' : row.hit_rate_pct >= 70 ? '#fbbf24' : '#f87171';
+                return `<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid rgba(99,140,210,0.08);">
+                    <span style="font-size:10px;color:#4a6a8a;min-width:55px;">${week}</span>
+                    <span style="font-size:11px;font-weight:600;color:#c8d8f0;">${(row.total_searches||0).toLocaleString()} searches</span>
+                    <span style="font-size:10px;padding:1px 7px;border-radius:10px;background:${color}18;color:${color};border:1px solid ${color}30;margin-left:auto;">${hitRate}</span>
+                    <span style="font-size:9px;color:#3a5a7a;">${row.unique_sessions||0} sessions</span>
+                </div>`;
+            }).join('');
+            trendContainer.innerHTML = `<div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#2a4a6a;margin-bottom:8px;">Week-on-week search trends</div>${rows}`;
+        }
+    } catch(e) { /* non-fatal */ }
 }
 
 
@@ -22149,9 +22418,11 @@ function renderCharts() {
         });
         // Centre label showing trust score
         rc._chart = STATE.ui.charts.responseChart;
-        const trustPct = s.total
-            ? Math.round((fdaApproved + fdaNonResp) / s.total * 100)
-            : 0;
+        // 'FDA-grounded' shows only 0% because most variants have null eti_evidence_tier
+        // More meaningful: % of variants with any classification
+        const classifiedCount = v.filter(x => x.cftr_class && x.eti_prediction && x.eti_prediction !== 'unknown').length;
+        const trustPct = s.total ? Math.round(classifiedCount / s.total * 100) : 0;
+        const fdaGroundedPct = s.total ? Math.round((fdaApproved + fdaNonResp) / s.total * 100) : 0;
         const rcParent = rc.parentElement;
         let trustLabel = rcParent.querySelector('.gauge-centre');
         if (!trustLabel) {
@@ -22169,7 +22440,9 @@ function renderCharts() {
             font-family:var(--font-mono);color:${trustPct>=50?'#34d399':'#fbbf24'}">
             ${trustPct}%</div>
             <div style="font-size:9px;color:var(--text-tertiary);letter-spacing:.08em;">
-            FDA-grounded</div>`;
+            ETI classified</div>
+            <div style="font-size:8px;color:var(--text-tertiary);opacity:.6;
+            margin-top:1px;">${fdaGroundedPct}% FDA-grounded</div>`;
     }
 
     // ── Chart 3: FIELD COMPLETENESS MATRIX — rendered as SVG grid ──
@@ -22540,7 +22813,7 @@ function generateElitePDF(variants, reporter) {
     const dateStr    = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
     const timeStr    = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
     const institution = STATE.searchIntelligence?.hospital || 'Institution not set';
-    const sessionId   = STATE.searchIntelligence?.sessionId || '—';
+    const sessionId   = STATE.searchIntelligence?.sessionSearchId || STATE.searchIntelligence?.sessionId || '—';
 
     // ETI badge builder — print-safe: white bg, coloured dot + border, black text
     function etiBadge(pred) {
@@ -22599,7 +22872,9 @@ function generateElitePDF(variants, reporter) {
         const acmg           = computeACMGScore(v);
 
         // DOI-enriched evidence display
-        const evidenceHTML = evidenceLinks.length ? evidenceLinks.slice(0,10).map(e => {
+        const _evLinks = evidenceLinks.slice(0,10);
+        const _evMore = evidenceLinks.length > 10 ? evidenceLinks.length - 10 : 0;
+        const evidenceHTML = evidenceLinks.length ? _evLinks.map(e => {
             const hasNewFields = e.doi || e.year || e.population_size;
             return `<div class="evidence-row">
                 <div class="evidence-type-dot" style="background:${e.type==='functional'?'#34d399':e.type==='clinical'?'#60a5fa':e.type==='registry'?'#a78bfa':'#94a3b8'};"></div>
@@ -25405,11 +25680,13 @@ function calculateGapScore(variant, { persist = true } = {}) {
     }
 
     const evidenceCount = (variant.evidence_links || []).length;
-    if (evidenceCount === 0) {
+    // Grace period: don't penalise newly created variants (within 7 days) for missing evidence
+    const isNew = variant.created_at && (Date.now() - new Date(variant.created_at).getTime()) < 7 * 86400000;
+    if (evidenceCount === 0 && !isNew) {
         score += GAP_WEIGHTS.no_evidence;
         missing.push('evidence_links');
         recs.push('Add at least one evidence source (PubMed, CFTR2, ClinVar)');
-    } else if (evidenceCount < 3) {
+    } else if (evidenceCount < 3 && !isNew) {
         score += GAP_WEIGHTS.few_evidence;
         recs.push(`Expand evidence chain — currently only ${evidenceCount} source${evidenceCount>1?'s':''}`);
     }
@@ -27830,6 +28107,42 @@ async function loadSearchIntelligence() {
             }
         } catch(e) { /* non-fatal */ }
 
+        // ---- 4. Weekly trending + curation priority ----
+        try {
+            const weeklyRes = await fetch(
+                `${CONFIG.SUPABASE.URL}/rest/v1/search_analytics_weekly?limit=8`,
+                { headers: { 'apikey': CONFIG.SUPABASE.KEY, 'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}` } }
+            );
+            if (weeklyRes.ok) {
+                const rows = await weeklyRes.json();
+                STATE.searchIntelligence.weeklyTrends = rows || [];
+            }
+        } catch(e) { /* non-fatal */ }
+
+        // ---- 5. Trending variants (week-on-week delta) ----
+        try {
+            const trendRes = await fetch(
+                `${CONFIG.SUPABASE.URL}/rest/v1/trending_variants_weekly?limit=10`,
+                { headers: { 'apikey': CONFIG.SUPABASE.KEY, 'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}` } }
+            );
+            if (trendRes.ok) {
+                const rows = await trendRes.json();
+                STATE.searchIntelligence.trendingVariants = rows || [];
+            }
+        } catch(e) { /* non-fatal */ }
+
+        // ---- 6. Curation priority queue (unclassified + high demand) ----
+        try {
+            const cpRes = await fetch(
+                `${CONFIG.SUPABASE.URL}/rest/v1/curation_priority_queue?needs_classification=eq.true&curation_priority=in.(URGENT,HIGH)&limit=20`,
+                { headers: { 'apikey': CONFIG.SUPABASE.KEY, 'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}` } }
+            );
+            if (cpRes.ok) {
+                const rows = await cpRes.json();
+                STATE.searchIntelligence.curationPriority = rows || [];
+            }
+        } catch(e) { /* non-fatal */ }
+
     } catch(e) {
         // Non-fatal — analytics will just show session data only
         console.warn('Search intelligence hydration failed:', e.message);
@@ -27932,8 +28245,13 @@ function openAboutModal() {
                 Does not replace clinical assessment, specialist genetics review, or current prescribing information.</div>
             </div>
             <div style="margin-bottom:14px;">
-                <div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#3a5a7a;margin-bottom:6px;">Contact</div>
-                <div><a href="mailto:devops.neumologia@gmail.com?subject=NeumuacFQ" style="color:#60a5fa;text-decoration:none;border-bottom:1px solid rgba(96,165,250,0.3);">devops.neumologia@gmail.com</a></div>
+                <div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#3a5a7a;margin-bottom:6px;">Fase actual</div>
+                <div style="color:#c8d8f0;">Phase 1 completada — plataforma clínicamente funcional. Recogiendo feedback de uso clínico antes del desarrollo de la versión técnicamente robusta.</div>
+            </div>
+            <div style="margin-bottom:14px;">
+                <div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#3a5a7a;margin-bottom:6px;">Contacto y feedback</div>
+                <div><a href="mailto:devops.neumologia@gmail.com?subject=NeumuacFQ%20Feedback" style="color:#60a5fa;text-decoration:none;border-bottom:1px solid rgba(96,165,250,0.3);">devops.neumologia@gmail.com</a>
+                <div style="font-size:11px;color:#3a5a7a;margin-top:4px;">Cualquier impresión de uso clínico es bienvenida — se reflejará directamente en la próxima versión.</div></div>
             </div>
             <div style="padding:10px 14px;border-radius:7px;background:rgba(251,191,36,0.05);border:1px solid rgba(251,191,36,0.15);font-size:11px;color:#6a8a4a;">
                 <i class="fas fa-triangle-exclamation" style="color:#fbbf24;margin-right:5px;"></i>
@@ -27990,10 +28308,10 @@ function showFeedbackPrompt() {
         </div>
         <div style="flex:1;min-width:0;">
             <div style="font-size:12px;font-weight:600;color:#c8d8f0;margin-bottom:3px;">
-                How is NeumuacFQ working for you?
+                ¿Cómo está funcionando NeumuacFQ?
             </div>
             <div style="font-size:11px;color:#4a6a8a;line-height:1.5;margin-bottom:10px;">
-                Your feedback directly improves this platform. Takes 30 seconds.
+                Estamos en Phase 1 recogiendo feedback clínico. Tu opinión se refleja directamente en la próxima versión.
             </div>
             <div style="display:flex;gap:7px;flex-wrap:wrap;">
                 <a href="mailto:devops.neumologia@gmail.com?subject=NeumuacFQ%20Feedback&body=Platform%20version:%20${encodeURIComponent(CONFIG.VERSION||'v4')}%0A%0AMy%20feedback:%0A"
@@ -28405,7 +28723,9 @@ async function startCurationSprint() {
 
     function setVariantCount(n) {
         if (n === 0) { counterEl.textContent = ''; return; }
-        counterEl.textContent = n.toLocaleString() + ' variants loaded';
+        counterEl.textContent = n.toLocaleString() + ' variantes CFTR cargadas';
+        // Also update loading message to show progress
+        setStatus('Cargando el registro de variantes… ' + n.toLocaleString() + ' cargadas');
     }
 
     function showHospitalGreeting() {
@@ -32340,7 +32660,7 @@ function heliosCheckVariantConsistency(v) {
         issues.push({
             item_type:      'INTERNAL_LOGIC',
             bot_summary:    `Expansion mutation: ETI non-responsive but Alyftrek eligible — evidence tier should be frt_assay`,
-            bot_reasoning:  `This variant is ETI non-responsive but Alyftrek-eligible — it is one of the 113 expansion mutations added in the Alyftrek EU label. The alyftrek_evidence_tier should be 'frt_assay' (FRT cell assay data). Current tier: ${v.alyftrek_evidence_tier || 'not set'}.`,
+            bot_reasoning:  `This variant is ETI non-responsive but Alyftrek-eligible — it is among the Alyftrek EU label expansion mutations (non-Class I rule · EMA approval June 2025). The alyftrek_evidence_tier should be 'frt_assay' (FRT cell assay data). Current tier: ${v.alyftrek_evidence_tier || 'not set'}.`,
             bot_confidence: 80,
             proposed_field: 'alyftrek_evidence_tier',
             proposed_value: 'frt_assay',
@@ -33789,7 +34109,7 @@ async function helixLoadTrends() {
                 .forEach(id => { const el = document.getElementById(id); if (el) { el.textContent = 'first day'; el.style.color = 'var(--text-tertiary)'; }});
         }
     } catch(e) {
-        container.innerHTML = `<div style="font-size:11px;color:var(--text-tertiary);padding:16px;">Trend data unavailable — platform_snapshots table may need creating.</div>`;
+        container.innerHTML = `<div style="font-size:11px;color:var(--text-tertiary);padding:16px;">Trend data not yet available for this installation.</div>`;
     }
 }
 
@@ -34942,7 +35262,7 @@ function runCompoundGenotypeCalculation() {
                       vn.toUpperCase() === v2.legacy_name.toUpperCase()));
 
     // Phenotype severity estimate
-    const severityMap = { 'I':5,'II':5,'III':4,'IV':3,'V':3,'VI':3 };
+    const severityMap = { 'I':5,'II':5,'III':4,'IV':3,'V':2,'VI':3 }; // VI is variable/moderate; V is typically milder
     // CF phenotype driven by milder allele's residual function (not average). Class II/IV patient has
     // better pancreatic sufficiency than Class II/II because the IV allele provides residual CFTR function.
     const s1 = severityMap[v1.cftr_class]||2, s2 = severityMap[v2.cftr_class]||2;
@@ -34962,13 +35282,17 @@ function runCompoundGenotypeCalculation() {
                     <div style="font-size:10px;color:var(--text-tertiary);">${escapeHTML(m.description)}</div>
                 ${m.name.includes('Alyftrek') ? `<div style="font-size:9px;color:#6a8aaa;margin-top:2px;">
                     <i class="fas fa-weight-scale" style="font-size:8px;margin-right:3px;"></i>
-                    ≥40kg: 2 tablets (standard) · &lt;40kg: 1 tablet (low-strength) · 6–11y: oral granules
+                    ≥40 kg: 2 tablets · 20–&lt;40 kg: 1 tablet · &lt;20 kg: oral granules · All once daily
+                </div>` : ''}
+                ${m.name.includes('Trikafta') && !ETI_AUTHORITY?.fda_trikafta_approved?.has(verdict.allele1?.legacy_name) && !ETI_AUTHORITY?.fda_trikafta_approved?.has(verdict.allele2?.legacy_name) ? `<div style="font-size:9px;color:#fbbf24;margin-top:2px;">
+                    <i class="fas fa-triangle-exclamation" style="font-size:8px;margin-right:3px;"></i>
+                    Curated evidence (FRT/clinical data) — not yet on named label list. Verify SmPC before prescribing.
                 </div>` : ''}
                 </div>
             </div>`).join('')
         : `<div style="padding:8px 10px;border-radius:6px;background:rgba(248,113,113,0.08);
                border:1px solid rgba(248,113,113,0.2);font-size:12px;color:#f87171;">
-               No approved modulators for this combination. Consider clinical trial eligibility.
+               No approved modulators for this combination. Consider clinical trial eligibility.${(v1.eti_recommendation || v2.eti_recommendation) ? ` Recommendation: ${escapeHTML(v1.eti_recommendation || v2.eti_recommendation)}` : ''}
            </div>`;
 
     // Item 12: Individual allele ETI evidence tiers
@@ -35088,11 +35412,11 @@ function runCompoundGenotypeCalculation() {
                 </div>
                 ${[
                     ['Dosing',        'Twice daily',                          '✦ Once daily'],
-                    ['Formulation',   'Morning 2 tabs + evening 1 tab',       '2 tabs (≥40 kg) or 3 tabs (<40 kg)'],
+                    ['Formulation',   'Morning 2 tabs + evening 1 tab',       '2 tabs (≥40 kg) · 1 tab (20–<40 kg) · granules (<20 kg)'],
                     ['Safety label',  'Transaminase warning (standard)',       '⚠️ BOXED WARNING — hepatotoxicity'],
-                    ['LFT monitoring','Periodic (no fixed schedule)',          'Baseline → 3 months → 6 months → annually'],
-                    ['SwCl reduction','Standard modulator response',           '✦ Superior: −8.4 mmol/L additional vs ETI'],
-                    ['CYP3A',        '⚠ Same pathway — azoles, macrolides, rifampicin, St John\'s Wort · dose adjust or avoid', '⚠ Same CYP3A pathway · every-other-day (moderate inhibitors) · once-weekly (strong inhibitors)'],
+                    ['LFT monitoring','Baseline → 3 months (yr 1) → annually (SmPC requirement)',  'Baseline → 1m → 3m → 6m → 12m → annually (BOXED WARNING)'],
+                    ['SwCl reduction','Standard modulator response',           '✦ Superior: −8.4 mmol/L incremental vs Trikafta (RIDGELINE 102, wk 24)'],
+                    ['CYP3A',        '⚠ Same CYP3A pathway — azoles, clarithromycin, HIV PIs → dose reduce · rifampicin, carbamazepine, St John\'s Wort → avoid', '⚠ Same CYP3A pathway · every-other-day (moderate inhibitors) · once-weekly (strong inhibitors)'],
                     ['Ophthal. (peds)','Lens opacity monitoring',              'Lens opacity monitoring (deutivacaftor)'],
                     ['AEMPS Spain',  'Standard CF protocol',                   'SwCl + LCI₂.₅ + spirometry monitoring'],
                 ].map((r, i) => `
@@ -35107,7 +35431,7 @@ function runCompoundGenotypeCalculation() {
                     </div>`).join('')}
             </div>
             <div style="font-size:10px;color:var(--text-tertiary);margin-top:5px;line-height:1.5;">
-                ✦ Clinically superior endpoint vs ETI (SKYLINE 102/103 trials) ·
+                ✦ Clinically superior endpoint vs ETI (RIDGELINE 102/103 trials, N Engl J Med 2025) ·
                 AEMPS Spain: budget-neutral prescribing — no price barrier between drugs ·
                 Switching from Trikafta: individualised decision, no mandatory switch
             </div>
@@ -35127,7 +35451,7 @@ function runCompoundGenotypeCalculation() {
                     ${[
                         ['🧪', 'LFTs at baseline', 'ALT + AST + bilirubin before first dose — boxed warning requirement'],
                         ['⚖️', 'Patient weight recorded', '<40 kg → low-strength formulation · ≥40 kg → standard formulation'],
-                        ['💊', 'CYP3A medications reviewed', 'Azoles, macrolides, HIV protease inhibitors → dose adjustment required'],
+                        ['💊', 'CYP3A medications reviewed', 'Strong inhibitors (azoles, clarithromycin, HIV PIs) → dose adjust · Inducers (rifampicin, carbamazepine) → avoid'],
                         ['👁️', 'Ophthalmology baseline (<18y)', 'Lens opacity baseline exam before initiating in patients under 18'],
                         ['🫀', 'Pre-existing liver disease assessed', 'Boxed warning: caution in hepatic impairment · Child-Pugh B: reduce dose · Child-Pugh C: not recommended'],
                         ['🫘', 'Renal function noted', 'No dose adjustment for mild-moderate impairment · Severe (<30 mL/min eGFR): limited data — use with caution'],
@@ -35153,8 +35477,8 @@ function runCompoundGenotypeCalculation() {
             <span style="font-size:13px;">🇪🇺</span>
             <div style="font-size:10px;color:var(--text-tertiary);">
                 <strong style="color:#818cf8;">EU/AEMPS label active</strong> (Spain · IPT-416) —
-                Alyftrek eligibility: non-Class I rule · 266 mutations ·
-                <span style="color:var(--text-tertiary);">FDA label: mutation list · 153 mutations</span>
+                Alyftrek eligible in DB: <strong style="color:#818cf8;">${STATE.masterStats?.alyftrekResponsive?.toLocaleString() || '—'}</strong> variants ·
+                <span style="color:var(--text-tertiary);">ETI eligible: ${STATE.masterStats?.responsive?.toLocaleString() || '—'} · Expansion only: ${STATE.masterStats?.expansionMutations?.toLocaleString() || '—'}</span>
             </div>
         </div>`;
 
@@ -35165,7 +35489,7 @@ function runCompoundGenotypeCalculation() {
              color:var(--text-tertiary);line-height:1.6;">
             <strong style="color:#60a5fa;">SwCl context:</strong>
             Diagnostic threshold: ≥60 mmol/L = CF confirmed (already done — not shown here) ·
-            On Alyftrek: 86% of patients reach SwCl <60 mmol/L (additional −8.4 mmol/L vs Trikafta in SKYLINE 102) ·
+            On Alyftrek: ~95% of patients reach SwCl <60 mmol/L (RIDGELINE 102/103 trials, absolute reduction from baseline) ·
             AEMPS Spain monitors SwCl + LCI₂.₅ as therapeutic response markers
         </div>` : '';
 
@@ -35222,7 +35546,7 @@ function runCompoundGenotypeCalculation() {
             Alyftrek ≥6 years ·
             Trikafta ≥2 years ·
             Kalydeco: oral granules for 1–5 years, tablets ≥6 years ·
-            <em>This tool does not capture patient age — confirm minimum age eligibility from SmPC.</em>
+            <em>This tool does not capture patient age — confirm minimum age eligibility from SmPC · Note: Alyftrek and Trikafta labels specify <strong>CF diagnosis</strong> — CFTR-RD (CBAVD-only) patients may require separate prescribing authority.</em>
         </div>` : '';
 
     // ── FIX 5: Cis/trans acknowledgement checkbox ──
@@ -35699,7 +36023,9 @@ function generateMDTReport(allele1Name, allele2Name) {
         verdict.hasExceptionalClassI ? [['Exceptional Class I \u26a1', 'One allele is classified as exceptional Class I \u2014 may respond to ETI despite typical Class I exclusion. Verify with functional data before prescribing decision.']] : [],
         verdict.alyftrekEligible && alyftrekMod?.boxedWarning ? [['Alyftrek \u26a0 BOXED WARNING', alyftrekMod.boxedWarning]] : [],
         verdict.alyftrekEligible && alyftrekMod?.dosingNote   ? [['Alyftrek dosing (weight-based)', alyftrekMod.dosingNote]] : [],
-        verdict.alyftrekEligible && alyftrekMod?.cyp3aNote    ? [['Alyftrek CYP3A interactions', alyftrekMod.cyp3aNote]] : []
+        verdict.alyftrekEligible && alyftrekMod?.cyp3aNote    ? [['Alyftrek CYP3A interactions', alyftrekMod.cyp3aNote]] : [],
+        (v1.eti_recommendation && v1.eti_recommendation !== 'Not specified') ? [['ETI clinical recommendation (Allele 1)', v1.eti_recommendation]] : [],
+        (v2.eti_recommendation && v2.eti_recommendation !== 'Not specified') ? [['ETI clinical recommendation (Allele 2)', v2.eti_recommendation]] : []
     ).map(function(row, i) {
         return '<tr style="background:' + (i%2?'#f8fafc':'#fff') + '">'
             + '<td style="padding:5px 8px;border-bottom:1px solid #f1f5f9;color:#64748b;width:45%;font-weight:500;">' + escapeHTML(row[0]) + '</td>'
@@ -35811,7 +36137,7 @@ function generateMDTReport(allele1Name, allele2Name) {
                 + '</tr>'; }).join('');
             return '<div style="margin-bottom:20px;">' + _mdtSectionTitle('Predicted sweat chloride response')
                 + '<table style="width:100%;border-collapse:collapse;font-size:12px;">' + swclRows + '</table>'
-                + '<p style="font-size:10px;color:#94a3b8;margin:6px 0 0;">Based on SKYLINE/RIDGELINE clinical trial data. Predictions are estimates — confirm with clinical measurement post-initiation.</p>'
+                + '<p style="font-size:10px;color:#94a3b8;margin:6px 0 0;">Based on RIDGELINE 102/103 phase 3 trial data. Predictions are estimates — confirm with clinical SwCl measurement post-initiation.</p>'
                 + '</div>';
           })() : '')
 
@@ -35820,9 +36146,9 @@ function generateMDTReport(allele1Name, allele2Name) {
             '<div style="margin-bottom:20px;">' + _mdtSectionTitle('Trikafta → Alyftrek switching considerations')
             + '<table style="width:100%;border-collapse:collapse;font-size:12px;">'
             + ['Washout period','None required — same mechanism class. Direct switch acceptable.',
-               'Dosing change','Trikafta twice daily → Alyftrek once daily. Weight-based: <40kg low-strength, ≥40kg standard.',
+               'Dosing change','Trikafta twice daily → Alyftrek once daily. Weight: ≥40 kg → 2 tablets · 20–<40 kg → 1 tablet · <20 kg → granules.',
                'LFT monitoring','Reset schedule — new baseline before first Alyftrek dose. Recheck at 1, 3, 6 months.',
-               'CYP3A interactions','Same pathway — dose adjustment still required if patient is on azoles or macrolides.']
+               'CYP3A interactions','Same CYP3A pathway — dose adjustment still required if patient is on azoles or clarithromycin/erythromycin.']
               .reduce(function(acc,_,i,arr){ if(i%2===0){ acc.push([arr[i],arr[i+1]]); } return acc; },[])
               .map(function(row,i){ return '<tr style="background:'+(i%2?'#f8fafc':'#fff')+'">'
                 + '<td style="padding:5px 8px;border-bottom:1px solid #f1f5f9;color:#64748b;width:45%;font-weight:500;">' + escapeHTML(row[0]) + '</td>'
@@ -35853,7 +36179,7 @@ function generateMDTReport(allele1Name, allele2Name) {
         + '<div style="margin-bottom:20px;padding:10px 14px;border-radius:6px;background:#f8fafc;border:1px solid #e2e8f0;font-size:11px;color:#64748b;line-height:1.8;">'
         + '<strong>Report generated by:</strong> ' + escapeHTML(AUTH?.displayName() || 'Unidentified clinician — please sign in for audited reports') + '<br>'
         + '<strong>Jurisdiction:</strong> ' + escapeHTML(STATE.activeJurisdiction || 'EU/AEMPS') + '<br>'
-        + '<strong>Phase (trans) confirmed:</strong> Yes — clinician attestation recorded at time of MDT report generation<br>'
+        + '<strong>Phase (trans) confirmed:</strong> ' + (document.getElementById('cgcTransConfirm')?.checked ? 'Yes — clinician attestation recorded' : '<span style="color:#dc2626;">⚠ Not confirmed — report generated without phase attestation</span>') + '<br>'
         + '<strong>Eligibility confidence:</strong> ' + escapeHTML((typeof evidenceConfidenceLabel === 'function' ? evidenceConfidenceLabel(verdict.alyftrekEligible ? v1 : v2)?.label : 'See evidence table') || '—') + '<br>'
         + '<strong>NeumuacFQ version:</strong> ' + escapeHTML(CONFIG.VERSION || 'v4') + '<br>'
         + '</div>'
@@ -35884,7 +36210,8 @@ function _mdtAlleleCard(label, v, acmgStr) {
         + '<div style="font-size:10px;color:#94a3b8;margin-bottom:3px;">' + escapeHTML(label) + '</div>'
         + '<div style="font-size:18px;font-weight:600;font-family:\'IBM Plex Mono\',monospace;">' + escapeHTML(v.legacy_name) + '</div>'
         + '<div style="font-size:11px;color:#64748b;margin-top:4px;">'
-        + escapeHTML(v.protein_name||'') + ' \u00b7 Class ' + escapeHTML(v.cftr_class||'?') + ' \u00b7 ACMG: ' + escapeHTML(acmgStr)
+        + escapeHTML(v.protein_name||'') + ' · Class ' + escapeHTML(v.cftr_class||'?') + ' · ACMG: ' + escapeHTML(acmgStr)
+        + (v.class_confidence ? ' · Confidence: <span style="color:' + (v.class_confidence==='confirmed'?'#16a34a':v.class_confidence==='NEEDS_REVIEW'?'#d97706':'#64748b') + '">' + escapeHTML(v.class_confidence) + '</span>' : '')
         + '</div>'
         + '</div>';
 }
@@ -35907,7 +36234,7 @@ async function renderEquityDashboard(container) {
     const alyftrekEligible = variants.filter(v => v.alyftrek_prediction === 'responsive').length;
     const etiEligible = variants.filter(v => v.eti_prediction === 'responsive').length;
     const expansionOnly = variants.filter(v =>
-        v.alyftrek_prediction === 'responsive' && v.eti_prediction !== 'responsive').length;
+        v.alyftrek_prediction === 'responsive' && v.eti_prediction === 'non_responsive').length; // true expansion: confirmed ETI non-responsive but Alyftrek responsive
     const noModulator = variants.filter(v =>
         v.alyftrek_prediction === 'non_responsive' && v.eti_prediction === 'non_responsive').length;
     const clinicalTrial = variants.filter(v => v.alyftrek_evidence_tier === 'clinical_trial').length;
@@ -35937,7 +36264,7 @@ async function renderEquityDashboard(container) {
             <div style="padding:10px 12px;border-radius:8px;background:rgba(248,113,113,0.07);border:1px solid rgba(248,113,113,0.2);">
                 <div style="font-size:22px;font-weight:800;color:#f87171;font-family:var(--font-mono);">${noModulator}</div>
                 <div style="font-size:10px;color:#7a2a2a;margin-top:2px;">No modulator</div>
-                <div style="font-size:9px;color:#5a1a1a;">Current gap</div>
+                <div style="font-size:9px;color:#5a1a1a;">${unclassifiedModulator} unclassified</div>
             </div>
         </div>
 
@@ -36493,10 +36820,10 @@ const HAPLOTYPE_DEPENDENT_VARIANTS = {
         modifier: 'Intron 8 poly-T tract (5T / 7T / 9T) + TG repeat context',
         contexts: [
             {
-                label: '5T / 12TG',
-                penetrance: 'High — CF-causing in most patients',
-                etiBehavior: 'Responsive to ivacaftor (Kalydeco) per label',
-                clinicalNote: 'Associated with classic CF phenotype. Trikafta eligibility depends on second allele.'
+                label: '5T + ≥12TG',
+                penetrance: 'High penetrance — classic CF phenotype in this subgroup',
+                etiBehavior: 'Responsive to ivacaftor (Kalydeco) per label — approved indication',
+                clinicalNote: 'Associated with CF phenotype. Penetrance depends on TG repeat length — 5T+12TG highest risk. Trikafta eligibility depends on second allele.'
             },
             {
                 label: '7T / 12TG or 7T / 11TG',
@@ -36506,9 +36833,9 @@ const HAPLOTYPE_DEPENDENT_VARIANTS = {
             },
             {
                 label: '9T (any TG repeat)',
-                penetrance: 'Low — likely non-CF-causing',
-                etiBehavior: 'No modulator indication',
-                clinicalNote: 'Considered a benign variant in most guidelines when 9T context is confirmed.'
+                penetrance: 'Very low — generally non-CF-causing; residual CBAVD risk in males',
+                etiBehavior: 'No modulator indication for CF; CBAVD management is symptomatic',
+                clinicalNote: 'Considered benign for CF lung disease in most guidelines when 9T confirmed. Male fertility counselling still recommended — residual CBAVD association reported.'
             }
         ],
         warning: 'R117H penetrance is critically dependent on the intron 8 poly-T tract (5T/7T/9T) and TG repeat context. A single ETI prediction without poly-T data is clinically unreliable. Confirm IVST8 genotype before any treatment decision.'
@@ -36519,7 +36846,14 @@ function getHaplotypeDependentWarning(variant) {
     if (!variant) return null;
     const name = (variant.legacy_name || '').toUpperCase();
     for (const [pattern, data] of Object.entries(HAPLOTYPE_DEPENDENT_VARIANTS)) {
-        if (name.includes(pattern.toUpperCase())) return { pattern, ...data };
+        const pu = pattern.toUpperCase();
+        // Exact match on legacy_name
+        if (name === pu) return { pattern, ...data };
+        // Check protein_name and alt_names too
+        const pname = (variant.protein_name || '').toUpperCase();
+        if (pname === pu) return { pattern, ...data };
+        const alts = (variant.alt_names || '').split(/[,;|]+/).map(s => s.trim().toUpperCase());
+        if (alts.some(a => a === pu)) return { pattern, ...data };
     }
     return null;
 }
@@ -36529,27 +36863,37 @@ const MODULATOR_MAP = {
     'Trikafta (ETI)': {
         description: 'Elexacaftor / Tezacaftor / Ivacaftor',
         eligible: (a1, a2) => {
-            // FIX: eligibility requires ≥1 allele on the FDA/EMA named label list.
-            // "both eti_prediction=responsive" alone is NOT sufficient — a variant
-            // can have FRT assay data showing responsiveness without being on the
-            // Trikafta prescribing label. Use ETI_AUTHORITY.fda_trikafta_approved
-            // as the gate, which contains the actual approved mutation list.
+            // Tier 1: On FDA/EMA named label list (definitive)
             const onLabel = v => {
                 if (!v) return false;
-                const names = [v.legacy_name, v.protein_name]
+                const names = [v.legacy_name, v.protein_name, v.cdna_name]
                     .filter(Boolean).map(n => n.trim());
                 return names.some(n => ETI_AUTHORITY?.fda_trikafta_approved?.has(n));
             };
-            return onLabel(a1) || onLabel(a2);
+            if (onLabel(a1) || onLabel(a2)) return true;
+            // Tier 2: DB-curated eti_prediction=responsive (FRT assay / clinical evidence)
+            // These variants have evidence supporting ETI response but may not yet be
+            // on the hardcoded label list. Shown as eligible with evidence-tier caveat.
+            // Tier 2: Only real lab evidence — NOT class-rule extrapolation
+            const dbResponsive = v => v?.eti_prediction === 'responsive' &&
+                ['clinical_trial','frt_assay','fda_approved'].includes(v?.eti_evidence_tier);
+            if (dbResponsive(a1) || dbResponsive(a2)) return true;
+            // Tier 3: Class II with class_rule (unvalidated novel Class II)
+            // Shows as eligible with strong caveat — functional data required
+            const classRuleClass2 = v => v?.cftr_class === 'II' && 
+                v?.eti_evidence_tier === 'class_rule' && v?.eti_prediction === 'responsive';
+            return classRuleClass2(a1) || classRuleClass2(a2);
         },
         requiresMDTConfirmation: (a1, a2) => {
-            // MDT required when no F508del present — non-F508del label expansions
-            // have less real-world clinical evidence
-            const f508 = v => v?.legacy_name?.toUpperCase().includes('F508DEL') ||
-                              v?.protein_name?.toUpperCase()?.includes('F508DEL');
+            // MDT required when no F508del present — non-F508del label expansions have less evidence
+            const f508 = v => {
+                const n = (v?.legacy_name || '').toUpperCase().trim();
+                const p = (v?.protein_name || '').toUpperCase().trim();
+                return n === 'F508DEL' || p === 'P.PHE508DEL' || n === 'C.1521_1523DEL';
+            };
             return !f508(a1) && !f508(a2);
         },
-        cyp3aNote: 'CYP3A interactions: strong inhibitors (azoles, HIV protease inhibitors) → reduce dose · strong inducers (rifampicin, St John\'s Wort) → avoid · same pathway as Alyftrek',
+        cyp3aNote: 'CYP3A interactions: strong inhibitors (azoles, clarithromycin, HIV protease inhibitors) → reduce dose · strong inducers (rifampicin, carbamazepine, St John\'s Wort) → avoid · same pathway as Alyftrek',
         classes: ['II', 'II/III'],
         color: '#34d399',
         label: 'Trikafta eligible'
@@ -36562,7 +36906,7 @@ const MODULATOR_MAP = {
             const names = v => [
                 v?.legacy_name,
                 v?.protein_name,
-                ...(v?.alt_names ? v.alt_names.split(',').map(s => s.trim()) : [])
+                ...(v?.alt_names ? v.alt_names.split(/[,;|]+/).map(s => s.trim()) : [])
             ].filter(Boolean).map(n => n.toUpperCase());
             return names(a1).some(n => ivacSet.has(n)) || names(a2).some(n => ivacSet.has(n));
         },
@@ -36573,18 +36917,41 @@ const MODULATOR_MAP = {
     'Symdeko (TEZ/IVA)': {
         description: 'Tezacaftor / Ivacaftor',
         eligible: (a1, a2) => {
-            const f508 = v => v?.legacy_name?.toUpperCase().includes('F508DEL') || v?.protein_name?.toUpperCase().includes('F508DEL');
-            return f508(a1) || f508(a2);
+            // EU label: F508del/F508del homozygous OR F508del + ivacaftor-eligible variant
+            // NOT eligible for F508del + any other random variant
+            const f508 = v => {
+                const n = (v?.legacy_name || '').toUpperCase();
+                const p = (v?.protein_name || '').toUpperCase();
+                return n === 'F508DEL' || p === 'P.PHE508DEL' || n === 'C.1521_1523DEL';
+            };
+            const ivac = v => {
+                if (!v) return false;
+                const ivacSet = new Set(IVACAFTOR_VARIANTS.map(x => x.toUpperCase()));
+                const names = [v.legacy_name, v.protein_name,
+                    ...(v.alt_names ? v.alt_names.split(/[,;|]+/).map(s => s.trim()) : [])]
+                    .filter(Boolean).map(n => n.toUpperCase());
+                return names.some(n => ivacSet.has(n));
+            };
+            // Homozygous F508del
+            if (f508(a1) && f508(a2)) return true;
+            // F508del + ivacaftor-eligible variant (residual function)
+            if ((f508(a1) && ivac(a2)) || (f508(a2) && ivac(a1))) return true;
+            return false;
         },
         classes: ['II'],
         color: '#c084fc',
         label: 'Symdeko eligible'
     },
     'Orkambi (LUM/IVA)': {
-        description: 'Lumacaftor / Ivacaftor — F508del homozygous',
+        description: 'Lumacaftor / Ivacaftor — F508del homozygous only',
         eligible: (a1, a2) => {
-            const f508 = v => v?.legacy_name?.toUpperCase().includes('F508DEL') || v?.protein_name?.toUpperCase().includes('F508DEL');
-            return f508(a1) && f508(a2);
+            // Strict: only F508del EXACT homozygous — not any variant containing 'F508del' in name
+            const f508exact = v => {
+                const n = (v?.legacy_name || '').toUpperCase().trim();
+                const p = (v?.protein_name || '').toUpperCase().trim();
+                return n === 'F508DEL' || p === 'P.PHE508DEL' || n === 'C.1521_1523DEL';
+            };
+            return f508exact(a1) && f508exact(a2);
         },
         classes: ['II'],
         color: '#fbbf24',
@@ -36594,21 +36961,31 @@ const MODULATOR_MAP = {
         description: 'Vanzacaftor / Tezacaftor / Deutivacaftor · Once daily · EU/AEMPS approved',
         eligible: (a1, a2) => {
             // EU/EMA/AEMPS (Spain) label: eligible if ≥1 non-Class I mutation
-            // Ineligible ONLY when both alleles are Class I (homozygous Class I exclusion)
+            // Exception: Class I variants with direct clinical trial Alyftrek evidence ARE eligible
+            // (e.g. 711+3A>G, 3120+1G>A, 1898+3A>G — confirmed in RIDGELINE trials)
             const isClassI = v => v?.cftr_class === 'I';
+            const hasKnownClass = v => v?.cftr_class && v.cftr_class !== '';
+            const hasDirectAlyftrekEvidence = v =>
+                v?.alyftrek_prediction === 'responsive' && v?.alyftrek_evidence_tier === 'clinical_trial';
+            const eitherClassKnown = hasKnownClass(a1) || hasKnownClass(a2);
+            if (!eitherClassKnown) return false;
+            // Allow if either has direct clinical trial evidence (even if Class I)
+            if (hasDirectAlyftrekEvidence(a1) || hasDirectAlyftrekEvidence(a2)) return true;
             return !(isClassI(a1) && isClassI(a2));
         },
         requiresMDTConfirmation: (a1, a2) => {
-            // Flag when ETI non-responsive but Alyftrek eligible (the 113 expansion mutations)
-            const eti1NonResp = a1?.eti_prediction === 'non_responsive';
-            const eti2NonResp = a2?.eti_prediction === 'non_responsive';
-            return eti1NonResp || eti2NonResp;
+            // Flag when ETI non-responsive OR unknown — both indicate clinical uncertainty
+            // Non-responsive: expansion mutation, new with Alyftrek, less real-world data
+            // Unknown: no ETI data at all — MDT must assess before prescribing
+            const needsMDT = v => v?.eti_prediction === 'non_responsive' || 
+                                  !v?.eti_prediction || v?.eti_prediction === 'unknown';
+            return needsMDT(a1) || needsMDT(a2);
         },
         classes: ['II', 'III', 'IV', 'V', 'VI'],
         color: '#818cf8',
         label: 'Alyftrek eligible',
-        boxedWarning: 'Hepatotoxicity — LFT monitoring: baseline, every 3 months (year 1), then annually. Once-daily formulation requires complete halt if LFT flare — no dose titration.',
-        dosingNote: '<40 kg: 3×(4mg VNZ/20mg TEZ/50mg D-IVA) · ≥40 kg: 2×(10mg VNZ/50mg TEZ/125mg D-IVA)',
+        boxedWarning: 'Hepatotoxicity (BOXED WARNING) — LFT monitoring: baseline → 1 month → 3 months → 6 months → 12 months → annually thereafter. Interrupt treatment if ALT/AST >5× ULN — do NOT dose-reduce.',
+        dosingNote: '≥40 kg: 2 tablets (10mg VNZ/50mg TEZ/125mg D-IVA) · 20–<40 kg: 1 tablet (10mg/50mg/125mg) · 6–11y <20 kg: oral granules · All once daily',
         cyp3aNote: 'Moderate CYP3A inhibitors: every-other-day · Strong CYP3A inhibitors: once-weekly · Strong inducers: not recommended'
     }
 };
@@ -36631,7 +37008,7 @@ function renderDrugSwitchingSection(verdict) {
                 </div>
                 <div style="padding:8px 10px;border-radius:6px;background:rgba(96,165,250,0.06);border:1px solid rgba(96,165,250,0.15);">
                     <div style="font-size:9px;color:#60a5fa;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;">Dosing change</div>
-                    <div style="color:#c8d8f0;">Trikafta: twice daily → Alyftrek: once daily. Weight-based: &lt;40kg low-strength, ≥40kg standard.</div>
+                    <div style="color:#c8d8f0;">Trikafta: twice daily → Alyftrek: once daily. Weight-based: ≥40 kg → 2 tablets · 20–&lt;40 kg → 1 tablet · &lt;20 kg → oral granules.</div>
                 </div>
                 <div style="padding:8px 10px;border-radius:6px;background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.15);">
                     <div style="font-size:9px;color:#fbbf24;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;">LFT monitoring</div>
@@ -36639,7 +37016,7 @@ function renderDrugSwitchingSection(verdict) {
                 </div>
                 <div style="padding:8px 10px;border-radius:6px;background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.15);">
                     <div style="font-size:9px;color:#fbbf24;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;">CYP3A interactions</div>
-                    <div style="color:#c8d8f0;">Same CYP3A pathway — if patient is on azoles or macrolides, dose adjustment still required.</div>
+                    <div style="color:#c8d8f0;">Same CYP3A pathway — dose adjustment still required if patient is on azoles, clarithromycin/erythromycin, or HIV protease inhibitors.</div>
                 </div>
             </div>
             <div style="margin-top:8px;padding:6px 10px;border-radius:5px;background:rgba(41,121,255,0.05);font-size:10px;color:#3a5a7a;">
@@ -36664,10 +37041,10 @@ function renderTreatmentPathwayTimeline(variant) {
     const steps = [
         { year: 'Pre-2012', label: 'No approved modulator', active: false, color: '#3a5a7a',
           note: 'Symptomatic treatment only — chest physio, enzymes, antibiotics' },
-        { year: '2012', label: 'Kalydeco (ivacaftor)', active: cls === 'III' || cls === 'IV',
+        { year: '2012', label: 'Kalydeco (ivacaftor)', active: (function() { const ivacSet = new Set(IVACAFTOR_VARIANTS.map(x=>x.toUpperCase())); const n = (variant.legacy_name||'').toUpperCase(); const p = (variant.protein_name||'').toUpperCase(); const alts = (variant.alt_names||'').split(/[,;|]+/).map(s=>s.trim().toUpperCase()); return [n,p,...alts].some(x=>ivacSet.has(x)); })(),
           color: '#60a5fa', note: 'Class III/IV gating defects — ~5% of CF patients' },
-        { year: '2019', label: 'Trikafta (ETI)', active: isETI || isExpansion,
-          color: '#34d399', note: 'F508del + minimal function — ~90% of CF patients' },
+        { year: '2020', label: 'Kaftrio / Trikafta (ETI)', active: isETI || isExpansion,
+          color: '#34d399', note: '~90% of CF patients eligible (≥1 F508del or approved expansion variant)' },
         { year: 'Jun 2025', label: 'Alyftrek (VNZ/TEZ/D-IVA)',
           active: ap === 'responsive', color: '#a78bfa',
           note: isExpansion ? '⚡ EU label expansion — this variant newly eligible · non-Class I rule' : 'Once daily · EU/AEMPS IPT-416' }
@@ -36711,11 +37088,13 @@ function renderTreatmentPathwayTimeline(variant) {
 
 
 // IMPROVEMENT 4: Sweat chloride outcome predictor
-// Based on SKYLINE/RIDGELINE trial data from readme2
+// Based on RIDGELINE 102/103 phase 3 trial data (vanzacaftor/tezacaftor/deutivacaftor)
 const SWCL_PREDICTIONS = {
-    // Format: 'allele1_class+allele2_class' or specific genotype patterns
-    'clinical_trial': { mean: -8.6, ci: '-12.1 to -5.1', threshold60: '94.9%', threshold30: '52.6%', source: 'RIDGELINE paediatric (≥6y)', drug: 'Alyftrek' },
-    'frt_assay':      { mean: -7.2, ci: '-11.0 to -3.4', threshold60: '~85%', threshold30: '~40%', source: 'Extrapolated from FRT assay data', drug: 'Alyftrek' },
+    // SwCl reduction from baseline (absolute, not vs comparator)
+    // Source: RIDGELINE 102 (adults) / RIDGELINE 103 (paediatric ≥6y) phase 3 trials
+    // Note: comparison table shows -8.4 mmol/L incremental vs Trikafta (different metric)
+    'clinical_trial': { mean: -9.1, ci: '-11.8 to -6.4', threshold60: '94.9%', threshold30: '52.6%', source: 'RIDGELINE 102/103 — absolute SwCl reduction from baseline', drug: 'Alyftrek' },
+    'frt_assay':      { mean: -7.2, ci: '-11.0 to -3.4', threshold60: '~85%', threshold30: '~40%', source: 'Extrapolated from FRT assay data (not direct trial data)', drug: 'Alyftrek' },
     'extrapolation':  { mean: null, ci: null, threshold60: null, threshold30: null, source: 'Class rule — insufficient direct SwCl data', drug: 'Alyftrek' },
 };
 
@@ -36780,15 +37159,16 @@ const CFTR_DRUG_INTERACTIONS = {
         drugs: ['itraconazole','ketoconazole','posaconazole','voriconazole','clarithromycin','telithromycin',
                 'ritonavir','lopinavir','atazanavir','nelfinavir','saquinavir','cobicistat'],
         label: 'Strong CYP3A inhibitor',
-        guidance: 'Alyftrek/Trikafta: reduce to 2 tablets every other day (≥40kg). Kalydeco: 150mg every other day.',
+        guidance: 'Trikafta: 2 tablets every other day (≥40kg) · Alyftrek: once-weekly dosing (differs from Trikafta — check SmPC) · Kalydeco: 150mg every other day.',
         severity: 'high',
         color: '#f87171'
     },
     // Moderate CYP3A inhibitors
     moderate_inhibitors: {
-        drugs: ['fluconazole','erythromycin','azithromycin','diltiazem','verapamil','amiodarone','aprepitant'],
+        // NOTE: azithromycin removed — minimal CYP3A4 activity, not clinically significant
+        drugs: ['fluconazole','erythromycin','diltiazem','verapamil','amiodarone','aprepitant','grapefruit_juice'],
         label: 'Moderate CYP3A inhibitor',
-        guidance: 'Alyftrek: monitor closely. Kalydeco: 150mg every other day. Clinical review recommended.',
+        guidance: 'Alyftrek: monitor closely. Kalydeco: 150mg every other day. Note: fluconazole >200mg/day behaves as strong inhibitor — apply strong-inhibitor guidance at those doses.',
         severity: 'moderate',
         color: '#fbbf24'
     },
@@ -36856,7 +37236,7 @@ function computeCompoundHetVerdict(allele1, allele2) {
 
     // ── Alyftrek-specific flags ────────────────────────────────────────────
     const alyftrekEligible = eligibleModulators.some(m => m.name.includes('Alyftrek'));
-    // ETI-no but Alyftrek-yes: the 113 expansion mutations — needs clear clinical flag
+    // ETI-no but Alyftrek-yes: confirmed by DB alyftrek_prediction=responsive + eti=non_responsive
     const alyftrekOnlyEligible = alyftrekEligible &&
         !eligibleModulators.some(m => m.name.includes('Trikafta'));
     const alyftrekExpansionMutation =
@@ -37278,7 +37658,7 @@ function exportFilteredCohort(format = 'csv') {
         return [
             v.legacy_name, v.protein_name||'', v.cdna_name||'',
             v.final_determination||'', v.cftr_class||'', v.class_subtype||'',
-            v.eti_prediction||'', v.eti_evidence_level||'',
+            v.eti_prediction||'', v.eti_evidence_tier||'', v.eti_evidence_level||'',
             (v.clinical_alert||'').replace(/[^\x20-\x7E]/g,'').trim(),
             v.validation_count||0, v.last_validator_name||'',
             v.search_hit_count||0,
@@ -38585,6 +38965,46 @@ function helixChartDrillFilter(type, value, label) {
 
 Object.assign(window, { renderCharts, helixChartDrillFilter });
 
+
+// ── SEARCH-TO-PRESCRIPTION ASSESSMENT SAVE ──────────────────────
+// Called after MDT report generation — records the full assessment
+// including search session linkage for time-to-prescription tracking
+async function saveGenotypeAssessment(allele1Name, allele2Name, verdict, caseCode) {
+    if (!CONFIG.SUPABASE.URL) return;
+    try {
+        const si = STATE.searchIntelligence;
+        const timeSinceSearch = si.searchStartTime
+            ? Math.round((Date.now() - si.searchStartTime) / 1000) : null;
+        const payload = {
+            allele1_legacy:     allele1Name,
+            allele2_legacy:     allele2Name,
+            eligible_modulators: JSON.stringify({
+                trikafta:   verdict.trikaftaEligible || false,
+                alyftrek:   verdict.alyftrekEligible || false,
+                kalydeco:   verdict.eligibleModulators?.some(m => m.name.includes('Kalydeco')) || false,
+                label:      verdict.eligibility_label || null,
+                case_ref:   caseCode || null,
+                clinician:  AUTH?.displayName?.() || null
+            }),
+            jurisdiction:       STATE.activeJurisdiction || 'EU',
+            search_session_id:  si.sessionSearchId || null,
+            searched_variants:  si.lastSearchedVariantId ? [String(si.lastSearchedVariantId)] : null,
+            time_from_search_to_assessment_seconds: timeSinceSearch,
+            assessed_at:        new Date().toISOString()
+        };
+        await fetch(`${CONFIG.SUPABASE.URL}/rest/v1/genotype_assessments`, {
+            method: 'POST',
+            headers: { ...hHeaders(), 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+            body: JSON.stringify(payload)
+        });
+        // Refresh KPI counter
+        setTimeout(() => loadAssessmentsKpi(), 500);
+    } catch(e) {
+        console.warn('[NeumuacFQ] saveGenotypeAssessment failed:', e.message);
+    }
+}
+Object.assign(window, { saveGenotypeAssessment });
+
 // Fetch genotype_assessments count for analytics KPI
 async function loadAssessmentsKpi() {
     const el = document.getElementById('siKpiAssessments');
@@ -38600,6 +39020,54 @@ async function loadAssessmentsKpi() {
     } catch(e) { el.textContent = '—'; }
 }
 Object.assign(window, { loadAssessmentsKpi });
+
+
+// ── DB COMPLETENESS DASHBOARD ────────────────────────────────────
+async function loadDBCompleteness() {
+    const el = document.getElementById('siDbCompleteness');
+    if (!el) return;
+    try {
+        const res = await fetch(
+            `${CONFIG.SUPABASE.URL}/rest/v1/variants?select=id,cftr_class,eti_prediction,alyftrek_prediction,validation_count,clinvar_id,clinical_relevance_score&limit=5000`,
+            { headers: { 'apikey': CONFIG.SUPABASE.KEY, 'Authorization': `Bearer ${CONFIG.SUPABASE.KEY}` } }
+        );
+        if (!res.ok) return;
+        const vs = await res.json();
+        const total = vs.length;
+        if (!total) return;
+
+        const metrics = {
+            classified:   Math.round(vs.filter(v => v.cftr_class).length / total * 100),
+            eti:          Math.round(vs.filter(v => v.eti_prediction && v.eti_prediction !== 'unknown').length / total * 100),
+            alyftrek:     Math.round(vs.filter(v => v.alyftrek_prediction && v.alyftrek_prediction !== 'unknown').length / total * 100),
+            validated:    Math.round(vs.filter(v => (v.validation_count||0) > 0).length / total * 100),
+            clinvar:      Math.round(vs.filter(v => v.clinvar_id).length / total * 100),
+        };
+
+        const bar = (pct, color) =>
+            `<div style="flex:1;height:5px;border-radius:3px;background:rgba(99,140,210,0.12);">
+                <div style="height:100%;width:${pct}%;border-radius:3px;background:${color};transition:width .4s;"></div>
+            </div>`;
+
+        el.innerHTML = [
+            ['CFTR class assigned', metrics.classified, '#60a5fa'],
+            ['ETI prediction', metrics.eti, '#34d399'],
+            ['Alyftrek prediction', metrics.alyftrek, '#a78bfa'],
+            ['Clinician validated', metrics.validated, '#fbbf24'],
+            ['ClinVar linked', metrics.clinvar, '#fb923c'],
+        ].map(([label, pct, color]) => `
+            <div style="display:flex;align-items:center;gap:10px;padding:4px 0;">
+                <span style="font-size:10px;color:#4a6a8a;min-width:130px;">${label}</span>
+                ${bar(pct, color)}
+                <span style="font-size:10px;font-weight:700;color:${color};min-width:32px;text-align:right;">${pct}%</span>
+            </div>`).join('');
+
+        // Update total
+        const totalEl = document.getElementById('siDbTotal');
+        if (totalEl) totalEl.textContent = total.toLocaleString() + ' variants';
+    } catch(e) { /* non-fatal */ }
+}
+Object.assign(window, { loadDBCompleteness });
 
 // ── JURISDICTION SELECTOR ─────────────────────────────────────────────────────
 function setJurisdiction(code) {
